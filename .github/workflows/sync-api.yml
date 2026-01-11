@@ -1,0 +1,219 @@
+name: Sync John Deere API
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: 'Force a release even if no API changes detected'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch latest API specs
+        run: pnpm fetch-specs
+
+      - name: Fix specs
+        run: pnpm fix-specs
+
+      - name: Generate types
+        run: pnpm generate-types
+
+      - name: Generate SDK
+        run: pnpm generate-sdk
+
+      - name: Build
+        run: pnpm build
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in generated code"
+            git status --porcelain
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          fi
+
+      - name: Determine version bump
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        id: version
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # Bump patch version
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          npm version ${{ steps.version.outputs.new_version }} --no-git-tag-version
+
+      - name: Update CHANGELOG.md
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          VERSION="${{ steps.version.outputs.new_version }}"
+
+          # Create new changelog entry
+          ENTRY="## [$VERSION] - $DATE
+
+          ### Changed
+          - Synced with latest John Deere API specifications
+          "
+
+          # Insert after the first line (title) and any existing header content
+          if grep -q "^## \[" CHANGELOG.md; then
+            # There are existing version entries, insert before the first one using awk
+            awk -v entry="$ENTRY" '/^## \[/ && !done {print entry; done=1} {print}' CHANGELOG.md > CHANGELOG.tmp
+            mv CHANGELOG.tmp CHANGELOG.md
+          else
+            # No version entries yet, append to end
+            echo "" >> CHANGELOG.md
+            echo "$ENTRY" >> CHANGELOG.md
+          fi
+
+      - name: Generate change summary
+        if: steps.changes.outputs.has_changes == 'true'
+        id: summary
+        run: |
+          # Get list of changed spec files
+          CHANGED_SPECS=$(git diff --name-only -- 'specs/' | grep -E '\.yaml$' | sed 's/specs\/fixed\///' | sed 's/specs\/raw\///' | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+          # Get list of changed generated files
+          CHANGED_GENERATED=$(git diff --name-only -- 'src/types/generated/' 'src/api/' | wc -l)
+
+          echo "changed_specs=$CHANGED_SPECS" >> $GITHUB_OUTPUT
+          echo "changed_generated_count=$CHANGED_GENERATED" >> $GITHUB_OUTPUT
+
+          # Create detailed summary
+          {
+            echo "summary<<EOF"
+            echo "### API Sync Summary"
+            echo ""
+            echo "**Changed Specs:** $CHANGED_SPECS"
+            echo "**Generated Files Updated:** $CHANGED_GENERATED"
+            echo ""
+            echo "#### Detailed Changes:"
+            echo "\`\`\`"
+            git diff --stat -- 'specs/' 'src/types/generated/' 'src/api/' 'src/deere.ts' | head -50
+            echo "\`\`\`"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          CHANGED_APIS="${{ steps.summary.outputs.changed_specs }}"
+          if [ -n "$CHANGED_APIS" ]; then
+            CHANGE_NOTE="Changed APIs: $CHANGED_APIS"
+          else
+            CHANGE_NOTE="Forced release with no spec changes"
+          fi
+
+          git add .
+          git commit -m "chore: sync with John Deere API specs v${{ steps.version.outputs.new_version }}" \
+            -m "Automated sync of OpenAPI specifications from John Deere developer portal." \
+            -m "$CHANGE_NOTE"
+
+      - name: Push changes
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          git push origin main
+
+      - name: Create git tag
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          git tag v${{ steps.version.outputs.new_version }}
+          git push origin v${{ steps.version.outputs.new_version }}
+
+      - name: Create release
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          name: v${{ steps.version.outputs.new_version }}
+          body: |
+            ## Automated API Sync
+
+            This release was automatically generated by syncing with the latest John Deere API specifications.
+
+            ${{ steps.summary.outputs.summary || '### Changes\nForced release - no API changes detected.' }}
+
+            ---
+            *This release was created automatically by the [Sync John Deere API](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow.*
+          draft: false
+          prerelease: false
+
+      - name: Trigger publish workflow
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        run: |
+          gh workflow run publish.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
+            echo "### ✅ API Sync Complete" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Released version: **v${{ steps.version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "${{ steps.summary.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ github.event.inputs.force_release }}" == "true" ]]; then
+            echo "### ✅ Forced Release Complete" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Released version: **v${{ steps.version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ℹ️ No Changes Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The John Deere API specifications have not changed since the last sync." >> $GITHUB_STEP_SUMMARY
+          fi
