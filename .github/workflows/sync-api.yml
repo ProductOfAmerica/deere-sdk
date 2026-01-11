@@ -62,13 +62,22 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          if [[ -n $(git status --porcelain) ]]; then
+          # Only count actual spec yaml changes, not summary.json or formatting
+          SPEC_CHANGES=$(git diff --name-only -- 'specs/raw/*.yaml' 'specs/fixed/*.yaml' | wc -l)
+          API_CHANGES=$(git diff --name-only -- 'src/api/*.ts' | wc -l)
+          TYPE_CHANGES=$(git diff --name-only -- 'src/types/generated/*.ts' | grep -v 'index.ts' | wc -l)
+
+          TOTAL=$((SPEC_CHANGES + API_CHANGES + TYPE_CHANGES))
+
+          echo "Spec changes: $SPEC_CHANGES, API changes: $API_CHANGES, Type changes: $TYPE_CHANGES"
+          git status --porcelain
+
+          if [[ $TOTAL -gt 0 ]]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Changes detected in generated code"
-            git status --porcelain
+            echo "Substantive changes detected"
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No changes detected"
+            echo "No substantive changes (only metadata/formatting)"
           fi
 
       - name: Determine version bump
