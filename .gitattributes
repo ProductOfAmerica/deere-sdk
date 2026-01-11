@@ -1,0 +1,19 @@
+# Force LF line endings for all text files
+* text=auto eol=lf
+
+# Ensure these are always LF (generated files)
+specs/**/*.yaml text eol=lf
+specs/**/*.json text eol=lf
+src/types/generated/*.ts text eol=lf
+src/api/*.ts text eol=lf
+
+# Scripts
+scripts/*.ts text eol=lf
+
+# Config files
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.md text eol=lf
