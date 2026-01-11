@@ -166,6 +166,29 @@ paths:
                             uri: "https://sandboxapi.deere.com/platform/organizations/4321"
                           - rel: "connections"
                             uri: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations"
+  /organizations/{orgId}/users:
+    get:
+      summary: "List Organization Users"
+      description: "Returns a list of users belonging to the specified organization."
+      parameters:
+        - $ref: "#/components/parameters/OrgIdGet"
+      responses:
+        "200":
+          description: "Organization Users List"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/OrganizationLink"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/OrganizationUser"
+        "403":
+          description: "Not authorized"
+        "404":
+          description: "Not found"
 components:
   parameters:
     UserName:
@@ -306,3 +329,21 @@ components:
           type: "boolean"
           example: "true"
           description: "Indicates whether the user is a member of the organization."
+    OrganizationUser:
+      properties:
+        accountName:
+          type: "string"
+          description: "User's account name."
+          example: "JohnDoe"
+        givenName:
+          type: "string"
+          description: "User's first name."
+          example: "John"
+        familyName:
+          type: "string"
+          description: "User's last name."
+          example: "Doe"
+        userType:
+          type: "string"
+          description: "User's type. Examples are customer, dealer, internal."
+          example: "Customer"

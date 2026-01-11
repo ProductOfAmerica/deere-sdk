@@ -39,17 +39,9 @@ import { WebhookApi } from './api/webhook.js';
  *   environment: 'sandbox',
  * });
  *
- * // List organizations
  * const orgs = await deere.organizations.listAll();
- *
- * // Get fields for an organization
- * const fields = await deere.fields.listAll(orgs[0].id);
- *
- * // Get farms
  * const farms = await deere.farms.listAll(orgs[0].id);
- *
- * // Get harvest data
- * const harvests = await deere.fieldOperationsApi.listAll(orgId);
+ * const fields = await deere.fields.listAll(orgs[0].id);
  * ```
  */
 export class Deere {

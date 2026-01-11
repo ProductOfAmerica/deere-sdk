@@ -163,6 +163,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizations/{orgId}/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Organization Users
+         * @description Returns a list of users belonging to the specified organization.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Organization */
+                    orgId: components["parameters"]["OrgIdGet"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Organization Users List */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/vnd.deere.axiom.v3+json": {
+                            links?: unknown;
+                            values?: unknown;
+                        };
+                    };
+                };
+                /** @description Not authorized */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -281,6 +340,28 @@ export interface components {
              * @example true
              */
             member?: boolean;
+        };
+        OrganizationUser: {
+            /**
+             * @description User's account name.
+             * @example JohnDoe
+             */
+            accountName?: string;
+            /**
+             * @description User's first name.
+             * @example John
+             */
+            givenName?: string;
+            /**
+             * @description User's last name.
+             * @example Doe
+             */
+            familyName?: string;
+            /**
+             * @description User's type. Examples are customer, dealer, internal.
+             * @example Customer
+             */
+            userType?: string;
         };
     };
     responses: never;

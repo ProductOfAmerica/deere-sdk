@@ -268,6 +268,85 @@ function addMissingSchemas(spec: Record<string, unknown>, missingRefs: Set<strin
   }
 }
 
+// ============================================================================
+// Undocumented but working endpoints to inject
+// These endpoints exist in the API but aren't in the public OpenAPI specs
+// ============================================================================
+
+function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: string): void {
+  const paths = spec.paths as Record<string, unknown> | undefined;
+  if (!paths) return;
+
+  // Inject GET /organizations/{orgId}/users into organizations spec
+  if (filename === 'organizations.yaml') {
+    if (!paths['/organizations/{orgId}/users']) {
+      console.log('  Injecting undocumented endpoint: GET /organizations/{orgId}/users');
+      paths['/organizations/{orgId}/users'] = {
+        get: {
+          summary: 'List Organization Users',
+          description: 'Returns a list of users belonging to the specified organization.',
+          parameters: [
+            { $ref: '#/components/parameters/OrgIdGet' },
+          ],
+          responses: {
+            '200': {
+              description: 'Organization Users List',
+              content: {
+                'application/vnd.deere.axiom.v3+json': {
+                  schema: {
+                    properties: {
+                      links: {
+                        items: { $ref: '#/components/schemas/OrganizationLink' },
+                      },
+                      values: {
+                        items: { $ref: '#/components/schemas/OrganizationUser' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '403': { description: 'Not authorized' },
+            '404': { description: 'Not found' },
+          },
+        },
+      };
+
+      // Add OrganizationUser schema if not present
+      const components = spec.components as Record<string, unknown> | undefined;
+      if (components) {
+        const schemas = components.schemas as Record<string, unknown> | undefined;
+        if (schemas && !schemas['OrganizationUser']) {
+          schemas['OrganizationUser'] = {
+            properties: {
+              accountName: {
+                type: 'string',
+                description: "User's account name.",
+                example: 'JohnDoe',
+              },
+              givenName: {
+                type: 'string',
+                description: "User's first name.",
+                example: 'John',
+              },
+              familyName: {
+                type: 'string',
+                description: "User's last name.",
+                example: 'Doe',
+              },
+              userType: {
+                type: 'string',
+                description: "User's type. Examples are customer, dealer, internal.",
+                example: 'Customer',
+              },
+            },
+          };
+        }
+      }
+    }
+  }
+}
+
 function fixSpec(content: string, filename: string): string {
   console.log(`\nProcessing: ${filename}`);
 
@@ -304,6 +383,7 @@ function fixSpec(content: string, filename: string): string {
   removeInvalidFields(spec);
   spec = fixTypes(spec) as Record<string, unknown>;
   addMissingSchemas(spec, missingRefs);
+  injectUndocumentedEndpoints(spec, filename);
 
   return yaml.stringify(spec, {
     lineWidth: 0,

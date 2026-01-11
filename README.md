@@ -96,6 +96,12 @@ const org = await deere.organizations.get('org-id');
 
 // Search organizations
 const filtered = await deere.organizations.list({ orgName: 'Farm' });
+
+// List users in an organization
+const users = await deere.organizations.listUsers('org-id');
+for (const user of users.values) {
+  console.log(`${user.givenName} ${user.familyName} (${user.userType})`);
+}
 ```
 
 ### Fields
