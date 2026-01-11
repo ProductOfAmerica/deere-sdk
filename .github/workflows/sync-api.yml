@@ -209,7 +209,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Released version: **v${{ steps.version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "${{ steps.summary.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
+            cat << 'SUMMARY_EOF' >> $GITHUB_STEP_SUMMARY
+          ${{ steps.summary.outputs.summary }}
+          SUMMARY_EOF
           elif [[ "${{ github.event.inputs.force_release }}" == "true" ]]; then
             echo "### ✅ Forced Release Complete" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

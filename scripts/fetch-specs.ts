@@ -86,10 +86,11 @@ async function main() {
 
   console.log(`\nResults: ${foundSpecs.length} found, ${notFound.length} not found`);
 
-  // Save individual specs
+  // Save individual specs (normalize line endings to LF)
   for (const spec of foundSpecs) {
     const filename = `${spec.name}.yaml`;
-    writeFileSync(join(OUTPUT_DIR, filename), spec.yml_content);
+    const normalized = spec.yml_content.replace(/\r\n/g, '\n');
+    writeFileSync(join(OUTPUT_DIR, filename), normalized);
   }
 
   // Create summary file
