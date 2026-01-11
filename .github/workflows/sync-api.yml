@@ -168,6 +168,7 @@ jobs:
       - name: Push changes
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
         run: |
+          git pull --rebase origin main
           git push origin main
 
       - name: Create git tag
