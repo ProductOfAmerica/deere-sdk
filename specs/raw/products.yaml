@@ -1,0 +1,1332 @@
+openapi: "3.0.0"
+info:
+  title: Inputs API
+  description: Provides a reference list for crop varieties
+  version: "3.0"
+  contact:
+    name: Andrew Senner & Monte Miller
+    email: ISG_THIRST_MUTILATOR@JohnDeere.com
+  license:
+    name: INPUTS
+tags:
+  - name: Reference Data
+  - name: Products
+    description: Chemical/Fertilizer and Variety master data for an organization
+  - name: Tank Mixes
+    description: Tank Mix master data for an organization
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - partnerapi
+          - sandboxapi
+          - api
+          - apicert
+          - apiqa.tal
+          - apidev.tal
+paths:
+  /organizations/{organizationId}/varieties:
+    get:
+      tags:
+        - Varieties
+      summary: View varieties for an org
+      description: This endpoint will retrieve a collection of varieties for the specified org.
+      parameters:
+        - $ref: '#/components/parameters/OrganizationID'
+        - $ref: '#/components/parameters/ArchiveStatus'
+        - $ref: '#/components/parameters/VarietyEmbed'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        200:
+          description: A collection of your org varieties. If any of the supported embeds are used, the associated data will be present as a field in the variety.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/VarietyCollection'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: https://sandboxapi.deere.com/platform/organizations/654321/varieties?itemLimit=10&pageOffset=0
+                      - '@type': Link
+                        rel: nextPage
+                        uri: https://sandboxapi.deere.com/platform/organizations/654321/varieties?itemLimit=10&pageOffset=10
+                    total: 20
+                    values:
+                      - '@type': Variety
+                        id: 8e1e0920-1265-4066-8067-8ce2ce5012b2
+                        name: '1299'
+                        category: VARIETY
+                        cropName: Cornell
+                        companyName: Curry Seed
+                        createdTime: "2024-12-04T07:52:51.267Z"
+                        modifiedTime : "2024-12-06T07:52:51.267Z"
+                        referenceGuid: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                        referenceId: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                        archived: false
+                        countryCode: USA
+                        documentsList:
+                          - '@type': 'Document'
+                            erid: '08e930ee-4c31-41b6-b57e-8c0a8e1284a4'
+                            docType: '24(c) Registration'
+                            productErid: '388ab719-277d-4032-a2c3-40a297d8f482'
+                            description: 'CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed'
+                            fileName: 'ld7OD026.pdf'
+                            expirationDate: '2017-03-22'
+                        childProducts:
+                          - '@type': Variety
+                            id: 18b7bad8-2f0a-4036-b3f6-5abbe6b2f5dc
+                            name: 'corn123'
+                            companyName: 1.4GROUP
+                            cropName: SOYBEANS
+                            archived: false
+                            category: VARIETY
+                            createdTime: '2025-03-21T21:12:53.865Z'
+                            modifiedTime: '2025-04-06T15:12:52.910Z'
+                            countryCode: USA
+                            cleanupStatus: MERGED
+                            parentErid: b0241592-c95a-4a8b-a2f9-3e58168ac291
+                            cleanupActionDate: 2025-09-22T11:24:43.855Z
+                            documentsList: [ ]
+                            childProducts: [ ]
+
+                        links:
+                          - '@type': Link
+                            rel: self
+                            uri: https://sandboxapi.deere.com/platform/organizations/356823/varieties/cf09acfc-9196-4dbb-9b38-1be02673c5ff
+
+                      - '@type': Variety
+                        id: 1a63a1fe-b00f-403f-81f7-c157e0234cc4
+                        name: 2C788A SXRA COR
+                        category: VARIETY
+                        cropName: CORN_WET
+                        companyName: MYCOGEN SEEDS
+                        createdTime: "2024-12-04T07:52:51.267Z"
+                        referenceGuid: '1a63a1fe-b00f-403f-81f7-c157e0234cc4'
+                        referenceId: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                        archived: false
+                        countryCode: USA
+                        documentsList:
+                          - '@type': 'Document'
+                            erid: '4cb1e8c0-e801-4f19-b674-6362246be920'
+                            docType: '24(c) Registration'
+                            productErid: '388ab719-277d-4032-a2c3-40a297d8f482'
+                            description: 'CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed'
+                            fileName: 'ld7OD026.pdf'
+                            expirationDate: '2017-03-22'
+
+                        links:
+                          - '@type': Link
+                            rel: self
+                            uri: https://sandboxapi.deere.com/platform/organizations/356823/varieties/c3a58145-acfc-4b73-bc1d-0d442697e053
+
+                      - '@type': Variety
+                        id: bd489040-c98b-403e-ac6e-ab2d7d4ac3fa
+                        name: 33H83
+                        category: VARIETY
+                        cropName: CORN_WET
+                        companyName: Pioneer
+                        createdTime: "2024-12-04T07:52:51.267Z"
+                        referenceGuid: 'bd489040-c98b-403e-ac6e-ab2d7d4ac3fa'
+                        referenceId: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                        archived: false
+                        countryCode: USA
+                        documentsList:
+                          - '@type': 'Document'
+                            erid: 'cf09acfc-9196-4dbb-9b38-1be02673c5ff'
+                            docType: '24(c) Registration'
+                            productErid: '388ab719-277d-4032-a2c3-40a297d8f482'
+                            description: 'CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed'
+                            fileName: 'ld7OD026.pdf'
+                            expirationDate: '2017-03-22'
+                        links:
+                          - '@type': Link
+                            rel: self
+                            uri: https://sandboxapi.deere.com/platform/organizations/356823/varieties/b006726b-38a0-44a6-b723-a966c68170b6
+        403:
+          description: The user has not been provided access to the varieties for this org
+        404:
+          description: The specified organization does not exist
+
+    post:
+      tags:
+        - Varieties
+      summary: Add a variety
+      description: This endpoint will add a custom variety into the organization. Its name+cropName must be unique within your organization. Its crop name must be a supported crop name (see /cropTypes).
+        There are a number of crop names that are deprecated in the system. If the crop name is set to one of these, then it will be mapped to its corresponding valid crop name. </br>
+        </br>
+        Additionally, POST can be used for supporting offline creation of varieties from e.g. a mobile app,
+        by sending a payload  with an `id` generated by the client. If an `id` is present in the payload,
+        the service checks the database for that `id`.</br>
+        </br>
+        In case no record is found, a new one is created with that `id` and the request is responded with 201.</br>
+        Otherwise no creation happens and the request is responded with 409 and error message that a resource with that `id` already exists.
+      parameters:
+        - $ref: '#/components/parameters/OrganizationID'
+      security:
+        - OAuth2: [ eq2 ]
+      requestBody:
+        description: The product to add.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/PostVariety'
+            examples:
+              No Header:
+                value:
+                  name: 2C788A SXRA COR
+                  companyName: MYCOGEN SEEDS
+                  cropName: CORN_WET
+                  category: VARIETY
+                  archived: false
+                  createdTime: '2017-03-21T21:12:53.865Z'
+                  modifiedTime: '2018-04-06T15:12:52.910Z'
+      responses:
+        201:
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/responses/Created'
+              examples:
+                Headers:
+                  description: '201 Created<br/>Location: https://sandboxapi.deere.com/platform/organizations/654321/varieties/8e1e0920-1265-4066-8067-8ce2ce5012b2'
+        403:
+          description: The user has not been provided write access to the variety list for the org
+        404:
+          description: The specified organization does not exist
+        400:
+          description: Schema validation error. Missing one or more of the required fields (name, companyName, cropName), name exceeds length limitation, or crop type is invalid.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        409:
+          description: A product already exists in this org with the specified reference Erid
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+
+  /organizations/{organizationId}/varieties/{erid}:
+    get:
+      summary: View a specific variety
+      description: This endpoint will return the variety with the specified erid.
+      parameters:
+        - $ref: '#/components/parameters/OrganizationID'
+        - $ref: '#/components/parameters/ERID'
+        - $ref: '#/components/parameters/VarietyEmbed'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        200:
+          description: A variety object
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/Variety'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    '@type': Variety
+                    id: 8e1e0920-1265-4066-8067-8ce2ce5012b2
+                    name: '1299'
+                    cropName: Cornell
+                    companyName: Curry Seed
+                    archived: false
+                    category: VARIETY
+                    referenceGuid: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                    referenceId: '8e1e0920-1265-4066-8067-8ce2ce5012b2'
+                    createdTime: '2017-03-21T21:12:53.865Z'
+                    modifiedTime: '2017-03-22T21:12:53.870Z'
+                    countryCode: USA
+                    documentsList:
+                      - '@type': 'Document'
+                        erid: 'cf09acfc-9196-4dbb-9b38-1be02673c5ff'
+                        docType: '24(c) Registration'
+                        productErid: '388ab719-277d-4032-a2c3-40a297d8f482'
+                        description: 'CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed'
+                        fileName: 'ld7OD026.pdf'
+                        expirationDate: '2017-03-22'
+                    childProducts:
+                        -   '@type': Variety
+                            id: 18b7bad8-2f0a-4036-b3f6-5abbe6b2f5dc
+                            name: 'corn123'
+                            companyName: 1.4GROUP
+                            cropName: SOYBEANS
+                            archived: false
+                            category: VARIETY
+                            createdTime: '2025-03-21T21:12:53.865Z'
+                            modifiedTime: '2025-04-06T15:12:52.910Z'
+                            countryCode: USA
+                            cleanupStatus: MERGED
+                            parentErid: b0241592-c95a-4a8b-a2f9-3e58168ac291
+                            cleanupActionDate: 2025-09-22T11:24:43.855Z
+                            documentsList: []
+                            childProducts: []
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: https://sandboxapi.deere.com/platform/organizations/356823/varieties/cf09acfc-9196-4dbb-9b38-1be02673c5ff
+        403:
+          description: The user does not have sufficient privileges to access varieties in this org
+        404:
+          description: There is no variety matching the specified Erid
+
+    put:
+      summary: Update a single variety
+      description: This endpoint allows the custom variety to be renamed, made active/archived, or associated to a different manufacturer or crop type.
+      parameters:
+        - $ref: '#/components/parameters/OrganizationID'
+        - $ref: '#/components/parameters/ERID'
+      security:
+        - OAuth2: [ eq2 ]
+      requestBody:
+        description: The updated variety object.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/PutVariety'
+            examples:
+              No Header:
+                value:
+                  name: '1299'
+                  companyName: Curry Seed
+                  cropName: SOYBEANS
+                  archived: true
+                  createdTime: '2019-03-28T14:59:57.000Z'
+                  modifiedTime: '2019-03-27T14:59:57.000Z'
+      responses:
+        204:
+          description: The update was completed successfully
+          content:
+            application/vnd.deere.axiom.v3+json:
+              examples:
+                Headers:
+                  description: '204 No Content <br/>The update was completed successfully.'
+        400:
+          description: Schema validation error. Missing one or more of the required fields (name, companyName, cropName), name exceeds length limitation, or crop type is invalid
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        403:
+          description: The user does not have sufficient privileges to update varieties in this org
+        404:
+          description: There is no variety matching the specified Erid
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+
+  /varieties/{erid}/associateToOrg/{organizationId}:
+    post:
+      tags:
+        - Reference Varieties
+      summary: Adds a single reference variety to organization
+      security:
+        - OAuth2: [ eq2 ]
+      description: |
+        This endpoint will associate a reference variety to your organization from the global reference list.
+        The reference varieties are immutable, however, they can still be archived or made available.
+        The response headers from the GET endpoints will include the attributes that can be overridden.
+      parameters:
+        - $ref: '#/components/parameters/ERID'
+        - $ref: '#/components/parameters/OrganizationID'
+      requestBody:
+        description: The product to add.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/ReferenceProductPointerRequest'
+            examples:
+              No Header:
+                value:
+                  countryCode: USA
+                  overrides:
+                    - key: archived
+                      value: true
+      responses:
+        200:
+          description: Successful association of reference variety to org.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferenceProductOverrideStatus'
+              examples:
+                Headers:
+                  description: '201 Created <br/>Created successfully.'
+                  value:
+                    - key: archived
+                      success: true
+                      errors: [ ]
+        400:
+          description: 'Unresolvable name conflict or other error occurred.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    format: int64
+                    example: 1
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        403:
+          description: 'Invalid access to products for organization'
+        404:
+          description: Organization does not exist.
+        409:
+          description: A product already exists in this org with the specified erid.
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+
+  /varieties:
+    get:
+      tags:
+        - Reference Varieties
+      summary: Search reference catalog varieties
+      security:
+        - OAuth2: [ eq1 ]
+      description: This endpoint searches the reference catalog for varieties that match the given search criteria. This data can be used in a subsequent request to create a variety in an organization. Results are limited to 100 items.
+      note: "<b>Note</b>: Either searchString, productName, or brandName is required as a parameter in the query to get returned results. If searchString AND productName and/or brandName is added to the query, searchString will be ignored. When using searchString, results will contain items with search value from name or companyName. When using productName, value must be exact match to companyName string. When using brandName, value must be exact match to companyName string, and is case sensitive. All results will be limited to 100 values."
+      parameters:
+        - name: searchString
+          in: query
+          description: Performs a fuzzy search on variety and manufacturer name. The search string must be at least 3 characters long.
+          schema:
+            type: string
+            example: venture
+          required: true
+        - name: cropName
+          in: query
+          description: Filters the results by crop id (see the /cropTypes API).
+          schema:
+            type: string
+            example: SOYBEANS
+        - name: productName
+          in: query
+          description: Specifies the name of the variety from the global reference list.
+          schema:
+            type: string
+            example: 'SH 5614 LL/STS'
+          required: true
+        - name: brandName
+          in: query
+          description: Specifies the product manufacturer name of the variety based on the region being used.
+          schema:
+            type: string
+            example: 'Southern Harvest'
+          required: true
+        - name: sourceSystemProductId
+          in: query
+          description: Specifies the source system product id of the variety based on the country of use.
+          schema:
+            type: string
+            example: '79186'
+        - name: countryCode
+          in: query
+          description: Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+          schema:
+            type: string
+            example: 'USA'
+      responses:
+        200:
+          description: A collection of reference varieties matching the specified search criteria.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/ReferenceVarietyCollection'
+              examples:
+                Headers:
+                  description: '200 OK'
+                  value:
+                    links:
+                      - "@type": Link
+                        rel: self
+                        uri: https://sandboxapi.deere.com/platform/varieties?searchString=corn&itemLimit=10&pageOffset=0
+                      - "@type": Link
+                        rel: nextPage
+                        uri: https://sandboxapi.deere.com/platform/varieties?searchString=corn&itemLimit=10&pageOffset=10
+                    total: 100
+                    values:
+                      - "@type": ReferenceVariety
+                        id: 1f8c12b4-126f-11ec-82a8-0242ac130003
+                        referenceId: 1f8c12b4-126f-11ec-82a8-0242ac130003
+                        category: VARIETY
+                        name: S73-Z5 - 50lb bag
+                        companyName: NK
+                        cropName: SOYBEANS
+                        countryCode: USA
+                        sourceSystem: '3'
+                        sourceSystemProductId: 905P24925
+                        createdTime: '2017-03-21T21:12:53.865Z'
+                        modifiedTime: '2018-04-06T15:12:52.910Z'
+                      - "@type": ReferenceVariety
+                        id: 75138754-6381-49c7-be9e-9e08a847075a
+                        referenceId: 75138754-6381-49c7-be9e-9e08a847075a
+                        category: VARIETY
+                        name: Cornelius 155A
+                        companyName: Cornelius Seed
+                        cropName: ALFALFA
+                        countryCode: USA
+                        sourceSystem: '3'
+                        sourceSystemProductId: 105332
+                        createdTime: '2023-09-02T05:10:33.415Z'
+                        modifiedTime: '2024-11-20T02:04:39.994Z'
+
+        403:
+          description: The user does not have access to manage products.
+        404:
+          description: No variety found with this country code.
+
+  /varieties/{erid}:
+    get:
+      tags:
+        - Reference Varieties
+      summary: Get a single reference variety.
+      security:
+        - OAuth2: [ eq1 ]
+      description: Single variety from industry data sources, such as CDMS.
+      parameters:
+        - $ref: '#/components/parameters/ERID'
+      responses:
+        200:
+          description: A single variety matching the specified erid.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/ReferenceVariety'
+              examples:
+                Headers:
+                  description: '200 OK'
+                  value:
+                    "@type": ReferenceVariety
+                    id: 1f8c12b4-126f-11ec-82a8-0242ac130003
+                    referenceId: 1f8c12b4-126f-11ec-82a8-0242ac130003
+                    category: VARIETY
+                    name: S73-Z5 - 50lb bag
+                    companyName: NK
+                    cropName: SOYBEANS
+                    countryCode: USA
+                    sourceSystem: '3'
+                    sourceSystemProductId: 905P24925
+                    createdTime: '2017-03-21T21:12:53.865Z'
+                    modifiedTime: '2018-04-06T15:12:52.910Z'
+        403:
+          description: The user does not have access to manage products.
+        404:
+          description: No variety found matching this erid.
+
+  '/varieties/{erid}/documents':
+    get:
+      tags:
+        - Reference Varieties
+      summary: Reference list of documents for an associated seed variety.
+      security:
+        - OAuth2: [ eq1 ]
+      description: List of all the documents for a variety from industry data sources, such as CDMS.
+      parameters:
+        - $ref: '#/components/parameters/ERID'
+      responses:
+        200:
+          description: A collection of documents for the specified seed variety.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: '#/components/schemas/DocumentCollection'
+              examples:
+                Headers:
+                  description: '200 OK'
+                  value:
+                    links:
+                      - "@type": Link
+                        rel: self
+                        uri: https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=0
+                      - "@type": Link
+                        rel: nextPage
+                        uri: https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=10
+                    total: 100
+                    values:
+                      - "@type": Document
+                        erid: 1f8c12b4-126f-11ec-82a8-0242ac130003
+                        productErid: 388ab719-277d-4032-a2c3-40a297d8f482
+                        docType: 24(c) Registration
+                        description: CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed
+                        fileName: ld7OD026.pdf
+                        expirationDate: '2017-03-22'
+        403:
+          description: The user does not have access to manage products.
+
+  '/varieties/{erid}/setOverridesForOrg/{organizationId}':
+
+    patch:
+      tags:
+        - Reference Varieties
+      summary: Sets organizational attributes such as isCarrier, archived, registration, etc.
+      security:
+        - OAuth2: [ eq2 ]
+      description:
+        This endpoint will set attribute overrides while importing a reference variety to your organization.
+        The reference varieties are immutable, however, they can still be archived or made available.
+        The response headers from the GET endpoints will include the attributes that can be overridden.
+      parameters:
+        - $ref: '#/components/parameters/ERID'
+        - $ref: '#/components/parameters/OrganizationID'
+      requestBody:
+        description: The product to add.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/CommonProductPointerRequest'
+            examples:
+              No Header:
+                value:
+                  overrides:
+                    - key: archived
+                      value: true
+      responses:
+        200:
+          description: Successful update of overrides of reference variety associated to your org.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferenceProductOverrideStatus'
+              examples:
+                Headers:
+                  description: '200 OK'
+                  value:
+                    - key: archived
+                      success: true
+                      errors: [ ]
+        400:
+          description: 'Unresolvable name conflict or other error occurred.'
+          content:
+            application/json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    format: int64
+                    example: 1
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Errors'
+        403:
+          description: 'Invalid access to reference product associated to organization'
+        404:
+          description: 'Organization does not exist'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+components:
+  parameters:
+    VarietyEmbed:
+      in: query
+      name: embed
+      description: An embeddable list of properties which are optional by default.
+      schema:
+        type: array
+        items:
+          type: string
+        enum:
+          - documents
+          - showMergedProducts
+    ArchiveStatus:
+      in: query
+      name: status
+      description: Filters the list based on archive status. Accepted values are ARCHIVED, AVAILABLE, and ALL. The default behavior is to return only available (non-archived) varieties.
+      required: false
+      schema:
+        type: string
+        enum:
+          - AVAILABLE
+          - ARCHIVED
+          - ALL
+        example: AVAILABLE
+    OrganizationID:
+      in: path
+      name: organizationId
+      description: The identifier of the Organization.
+      required: true
+      schema:
+        type: integer
+        example: 6781
+        format: int64
+    OrgId:
+      name: orgId
+      in: path
+      description: The organization owning the varieties.
+      required: true
+      schema:
+        type: number
+        example: 654321
+    RecordFilter:
+      name: recordFilter
+      in: query
+      description: Filter results based on status
+      schema:
+        type: string
+        example: active, archived, all
+    Embed:
+      name: embed
+      in: query
+      description: Embeds extra information in the org varieties response
+      schema:
+        type: string
+        example: documents
+    Embed2:
+      name: embed
+      in: query
+      description: Embeds extra information in the variety response
+      schema:
+        type: string
+        example: documents
+    X-deere-signature:
+      name: x-deere-signature
+      in: header
+      description: x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time.
+      schema:
+        type: string
+        example: 9r8392615e4b4e1c92018026f47109bb
+    VarietyId:
+      name: varietyId
+      in: path
+      description: The variety Id to find.
+      required: true
+      schema:
+        type: string
+        example: 8e1e0920-1265-4066-8067-8ce2ce5012b2
+    VarietyId2:
+      name: varietyId
+      in: path
+      description: The variety Id
+      required: true
+      schema:
+        type: string
+        example: 8e1e0920-1265-4066-8067-8ce2ce5012b2
+    ERID:
+      in: path
+      name: erid
+      description: A unique identifier for an entity formatted as a uuid.
+      required: true
+      example: cf09acfc-9196-4dbb-9b38-1be02673c5ff
+      schema:
+        type: string
+        format: uuid
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            ag2: 'ag2'
+            ag3: 'ag3'
+  schemas:
+    BaseResourceWithoutLink:
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: BaseResource
+        id:
+          description: Primary identifier for resource.
+          type: string
+          format: uuid
+          example: 1f8c12b4-126f-11ec-82a8-0242ac130003
+    Document:
+      type: object
+      allOf:
+        - properties:
+            '@type':
+              example: 'Document'
+              required: true
+            erid:
+              type: string
+              description: Unique id of the document
+              example: '08e930ee-4c31-41b6-b57e-8c0a8e1284a4'
+            docType:
+              type: string
+              example: '24(c) Registration'
+              description: Type of document for this product.
+              required: true
+            productErid:
+              type: string
+              example: 388ab719-277d-4032-a2c3-40a297d8f482
+              description: The Unique id of the product.
+              required: true
+            description:
+              type: string
+              example: 'CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed'
+              description: Information about the document.
+              required: true
+            fileName:
+              type: string
+              example: 'ld7OD026.pdf'
+              description: The filename of the document.
+              required: true
+            expirationDate:
+              type: string
+              format: date
+              example: '2017-03-22'
+              readOnly: true
+              nullable: true
+      required:
+        - '@type'
+        - productErid
+        - docType
+        - description
+        - fileName
+    DocumentCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Document'
+    BaseResource:
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: BaseResource
+        id:
+          description: Primary identifier for resource.
+          type: string
+          format: uuid
+          example: 1f8c12b4-126f-11ec-82a8-0242ac130003
+        links:
+          type: array
+          description: Provides a reference to an associated object or list.
+          items:
+            $ref: '#/components/schemas/Link'
+    ReferenceVariety:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseResource'
+        - properties:
+            '@type':
+              example: 'ReferenceVariety'
+            id:
+              description: Primary identifier for reference variety.
+              type: string
+              format: uuid
+              example: 1f8c12b4-126f-11ec-82a8-0242ac130003
+              nullable: false
+            referenceId<sup>DEPRECATED</sup>:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              description: product id of the reference variety
+            category:
+              type: string
+              enum:
+                - VARIETY
+              example: VARIETY
+            name:
+              type: string
+              example: S73-Z5 - 50lb bag
+              description: The common name of the reference variety.
+              nullable: false
+            referenceGuid:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              description: Optional. Denotes whether this product is from the global reference list.
+            companyName:
+              type: string
+              description: The name of the input manufacturer.
+              example: NK
+              nullable: false
+            cropName:
+              type: string
+              example: SOYBEANS
+              description: The identifier of the crop type that this reference variety is associated with (see the Crop Types API).
+              nullable: false
+            countryCode:
+              type: string
+              example: USA
+              description: Specifies the region the reference  variety data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+            sourceSystem:
+              type: string
+              format: integer
+              description: The source system for the reference variety.
+              example: 3
+              nullable: false
+            sourceSystemProductId:
+              type: string
+              description: The source system identifier for the reference variety.
+              example: 905P24925
+              nullable: false
+            createdTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2019-03-27T14:59:57.000Z"
+              description: product created time
+            modifiedTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2019-03-27T14:59:57.000Z"
+              description: product modified time
+    Link:
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: 'Link'
+          description: 'The type of the link.'
+        rel:
+          type: string
+          example: self
+          description: The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
+        uri:
+          type: string
+          format: uri
+          example: api_route
+          description: The location of the resource
+    CollectionBase:
+      type: object
+      properties:
+        links:
+          type: array
+          description: Provides a reference to an associated object or list.
+          items:
+            $ref: '#/components/schemas/Link'
+        total:
+          type: integer
+          format: int32
+          example: 100
+    ReferenceVarietyCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReferenceVariety'
+    OverrideKeyValuePair:
+      type: object
+      properties:
+        key:
+          nullable: false
+          type: string
+          description: 'Key for override parameter when setting overrides for a reference product'
+          example: archived
+          enum:
+            - archived
+        value:
+          nullable: false
+          type: object
+          description: 'Value for override parameter, can be string, number or boolean'
+          example: true
+      required:
+        - key
+        - value
+    CommonProductPointerRequest:
+      type: object
+      properties:
+        overrides:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/OverrideKeyValuePair'
+    ReferenceProductPointerRequest:
+      allOf:
+        - properties:
+              countryCode:
+                type: string
+                example: USA
+                description: Country of the product to which it belongs.
+                required: true
+        - $ref: '#/components/schemas/CommonProductPointerRequest'
+
+    VarietyCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Variety'
+    ReferenceProductOverrideStatus:
+      type: object
+      properties:
+        key:
+          nullable: false
+          type: string
+          description: 'Key for override parameter when setting overrides for a reference product'
+          example: archived
+          enum:
+            - archived
+        success:
+          nullable: false
+          type: boolean
+          description: 'Whether or not the override was successfully applied'
+          example: true
+        errors:
+          $ref: '#/components/schemas/Errors'
+    PutVariety:
+      type: object
+      allOf:
+        - properties:
+            '@type':
+              example: 'Variety'
+            name:
+              type: string
+              example: S73-Z5 - 50lb bag
+              description: The common name of the variety.
+              required: true
+            cropName:
+              type: string
+              example: SOYBEANS
+              required: true
+              description: 'The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported.'
+            companyName:
+              type: string
+              description: The brand of the variety.
+              example: NK
+              required: true
+            category:
+              type: string
+              enum:
+                - VARIETY
+              example: VARIETY
+            archived:
+              type: boolean
+              description: Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+              example: false
+            createdTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2019-03-27T14:59:57.000Z"
+              description: product created time
+            modifiedTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2019-03-27T14:59:57.000Z"
+              description: product modified time
+      required:
+        - name
+        - cropName
+        - companyName
+    VarietyIdUpdate:
+      properties:
+        name:
+          type: string
+          example: RL8288HB
+          description: The common name of the variety.
+        companyName:
+          type: string
+          example: AgVenture
+          description: The name of the input manufacturer.
+        cropName:
+          type: string
+          example: CORN_WET
+          description: The identifier of the crop type that this variety is associated with.
+        archived:
+          type: boolean
+          example: false
+          description: Whether or not this product is actively used. Defaults to false.
+    ChildVariety:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseResource'
+        - properties:
+            '@type':
+              example: 'Variety'
+            id:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              nullable: false
+              description: The primary identifier for the variety that is unique to your organization.
+            name:
+              type: string
+              example: S73-Z5 - 50lb bag
+              description: The common name of the variety.
+              nullable: false
+            category:
+              type: string
+              enum:
+                - VARIETY
+              example: VARIETY
+            cropName:
+              type: string
+              example: SOYBEANS
+              description: The identifier of the crop type that this variety is associated with (see the Crop Types API).
+              nullable: false
+            companyName:
+              type: string
+              description: The brand of the variety.
+              example: NK
+              nullable: false
+            archived:
+              type: boolean
+              description: Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+              example: false
+              nullable: false
+            createdTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2017-03-21T21:12:53.865Z"
+              description: product created time
+            modifiedTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2018-04-06T15:12:52.910Z"
+              description: product modified time
+              readOnly: true
+            countryCode:
+              type: string
+              example: USA
+              description: Country of the product to which it belongs
+            parentErid:
+              type: string
+              example: b0241592-c95a-4a8b-a2f9-3e58168ac291
+              description: 'Parent id of the child in which the product is merged'
+            cleanupStatus:
+              type: string
+              example: MERGED
+              description: 'Showing the status of cleanup.'
+            cleanupActionDate:
+              type: string
+              example: 2025-09-22T11:24:43.855Z
+              description: 'Clean up action time'
+            documentsList:
+              type: array
+              items:
+                $ref: '#/components/schemas/Document'
+              description: List of documents for the variety. For example, Tech Sheet, SDS Label.
+    Variety:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseResource'
+        - properties:
+            '@type':
+              example: 'Variety'
+            id:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              nullable: false
+              description: The primary identifier for the variety that is unique to your organization.
+            name:
+              type: string
+              example: S73-Z5 - 50lb bag
+              description: The common name of the variety.
+              nullable: false
+            category:
+              type: string
+              enum:
+                - VARIETY
+              example: VARIETY
+            cropName:
+              type: string
+              example: SOYBEANS
+              description: The identifier of the crop type that this variety is associated with (see the Crop Types API).
+              nullable: false
+            companyName:
+              type: string
+              description: The brand of the variety.
+              example: NK
+              nullable: false
+            archived:
+              type: boolean
+              description: Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+              example: false
+              nullable: false
+            referenceGuid:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              description: 'Optional. Denotes whether this product is from the global reference list.'
+            referenceId<sup>DEPRECATED</sup>:
+              type: string
+              example: 87b4a1e7-210b-482c-8a7a-19e9f644e914
+              format: uuid
+              description: product id of the reference variety
+            createdTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2017-03-21T21:12:53.865Z"
+              description: product created time
+            modifiedTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2018-04-06T15:12:52.910Z"
+              description: product modified time
+              readOnly: true
+            countryCode:
+              type: string
+              example: USA
+              description: Country of the product to which it belongs
+            parentErid:
+              type: string
+              example: b0241592-c95a-4a8b-a2f9-3e58168ac291
+              description: 'Parent id of the child in which the product is merged'
+            cleanupStatus:
+              type: string
+              example: MERGED
+              description: 'Showing the status of cleanup.'
+            cleanupActionDate:
+              type: string
+              example: 2025-09-22T11:24:43.855Z
+              description: 'Clean up action time'
+            documentsList:
+              type: array
+              items:
+                $ref: '#/components/schemas/Document'
+              description: List of documents for the variety. For example, Tech Sheet, SDS Label.
+            childProducts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChildVariety'
+              description: List of child products.
+    Errors:
+      type: object
+      format: Errors/DataValidationException
+      properties:
+        '@type':
+          type: string
+          example: Errors
+        errors:
+          type: array
+          items:
+            type: object
+            format: Error/ConstraintViolation
+            properties:
+              '@type':
+                type: string
+                example: Error
+              guid:
+                type: string
+                format: uuid
+                example: 9b331708-10e8-4e15-8097-a9aed7455d6d
+              message:
+                type: string
+                description: An english description of the error.
+                example: The given crop type does not exist
+              code:
+                type: string
+                example: validation_constraint_crop_type_does_not_exist
+                description: A string constant representing the type of error.
+              field:
+                type: string
+                example: targetCrops
+                description: The name of the property or parameter deemed invalid.
+              invalidValue:
+                type: string
+                example: CORN_WET
+                description: The value that was supplied for this field in the request.
+        otherAttributes:
+          example: { }
+          type: object
+    PostVariety:
+      type: object
+      allOf:
+        - properties:
+            '@type':
+              example: 'Variety'
+            name:
+              type: string
+              example: S73-Z5 - 50lb bag
+              description: The common name of the variety.
+              required: true
+            cropName:
+              type: string
+              example: SOYBEANS
+              description: The identifier of the crop type that this variety is associated with (see the Crop Types API).
+              required: true
+            companyName:
+              type: string
+              description: The brand of the variety.
+              example: NK
+              required: true
+            category:
+              type: string
+              enum:
+                - VARIETY
+              example: VARIETY
+            archived:
+              type: boolean
+              description: Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+              example: false
+            createdTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2017-03-21T21:12:53.865Z"
+              description: product created time
+            modifiedTime<sup>DEPRECATED</sup>:
+              type: string
+              format: date-time
+              example: "2018-04-06T15:12:52.910Z"
+              description: product modified time
+          required:
+            - name
+            - cropName
+            - companyName
+    VarietyCreate:
+      properties:
+        name:
+          type: string
+          example: 2C788A SXRA COR
+          description: The common name of the variety.
+        companyName:
+          type: string
+          example: MYCOGEN SEEDS
+          description: The name of the input manufacturer.
+        cropName:
+          type: string
+          example: CORN_WET
+          description: The identifier of the crop type that this variety is associated with.
+        archived:
+          type: boolean
+          example: false
+          description: Whether or not this product is actively used.
+        referenceId:
+          type: string
+          description: The identifier of the associated reference variety, if applicable. This is optional, but helps to capture product lineage and improve consistency across organizations.
+          example: 1a63a1fe-b00f-403f-81f7-c157e0234cc4
+
+  responses:
+    Created:
+      description: Created
+      # FIXME: why does schema validator not like this?
+      # headers:
+      #   Location:
+      #     description: The uri of the newly created resource.
+      #     schema:
+      #       type: string
+      #       format: uri

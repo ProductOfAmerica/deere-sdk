@@ -1,0 +1,650 @@
+openapi: "3.0.0"
+info:
+  description: "This set of endpoints is dealing with flags, which are pointers to a geographical location in a field or around a field which are marked for attention or treatment in a specific way.
+
+    Flag resource is uniquely identified by its id, the endpoint /flags/{id} will be used to work with individual flag instances.
+
+
+    The following flag types are supported by this API:
+
+    - FLAG - Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data which can be exported to machine displays. Flags created on machine displays are represented as FLAG-type flags.
+
+    - SCOUT - Scouting note which is a geo-referenced observation of certain facts within a field or outside of it. Scouting notes are essentially documentation, just as Gen4 log data is documentation. It is the what happened, and what was observed.
+
+
+    Flags do support three geometry types encoded in GeoJson format (all other geometry types will be rejected by the API):
+
+
+    - Point
+
+    - LineString
+
+    - Polygon
+
+
+    Code of conduct for the API:
+
+    1. All flags are equal and can be routed from any app to all apps supporting flags API.
+
+    2. Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data in its own right, and not intended to model any more concrete thing than a digital marker.
+
+    3. Because of 1) and 2), flags are NOT intended to be a mechanism for easily adding new entity types into our system.
+
+    4. Flag categories are meaningless to the system.
+
+    5. The system shall not do any automatic decisions based on flag data besides considering:
+
+    \  - flag type (FLAG vs SCOUT)
+
+    \  - geometry type (e.g., points only).
+
+    \  - creation date/last modification date
+
+    \  - global vs field-related
+
+    6. User makes decision what flag categories to show in each app based on manually filtering flag categories.
+
+    7. Clients SHALL not rely on the certain metadata key-values are present in the flags object or not.
+
+    8. Clients SHOULD not display any metadata they cannot interpret.
+
+    9. Clients SHALL not delete, update any metadata they cannot interpret.
+
+    10. Metadata array is updated/patched as a whole. I.e., if client needs to update/delete a certain key, all other key-values SHALL be contained unchanged in the PUT or PATCH request.
+
+    11. Clients SHALL ignore geometries they cannot interpret/process/display or use request parameters to exclude those.\n"
+  version: "1.0.0"
+  contact:
+    name: "Oleg Rostanin"
+    email: "RostaninOleg@JohnDeere.com"
+  title: "Axiom Public Flags API"
+servers:
+  - url: "https://partnerapi.deere.com/platform"
+paths:
+  /organizations/{orgId}/flags/{flagId}:
+    get:
+      summary: "List a flag by org id and Flag id"
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FlagId"
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/StartTime"
+        - $ref: "#/components/parameters/EndTime"
+        - $ref: "#/components/parameters/CategoryIds"
+        - $ref: "#/components/parameters/CategoryNames"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/FlagScopes"
+        - $ref: "#/components/parameters/ShapeTypes"
+        - $ref: "#/components/parameters/Simple"
+        - $ref: "#/components/parameters/MetadataOnly"
+      operationId: "getFlagForOrganizationByFlagId"
+      tags:
+        - "Flags APIs"
+      description: "This endpoint will return a flag for a given org and Flag id."
+      responses:
+        "200":
+          $ref: "#/components/responses/FlagIdGet"
+        "403":
+          description: "Access forbidden. The user does not have permission to access the given organization."
+        "404":
+          description: "Entity Not found. No organization present for given orgId or no flag id present in the given org id"
+    put:
+      operationId: "updateFlagByIdOrgId"
+      summary: "Update flag by id"
+      tags:
+        - "Flags APIs"
+      description: "This resource will update flag by Organization and Flag Id."
+      security:
+        - OAuth2:
+            - "ag3"
+      parameters:
+        - $ref: "#/components/parameters/OrgId2"
+        - $ref: "#/components/parameters/FlagId"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/ValuesFlagIdPut"
+            examples:
+              No Header:
+                value:
+                  "@type": "Flag"
+                  id: "FlagId"
+                  notes: "SomeRandomString"
+                  geometry:
+                    type: "Point"
+                    coordinates:
+                      - -95.14959274063109
+                      - 42.668815484
+                  archived: false
+                  proximityAlertEnabled: false
+                  links:
+                    - "@type": "Link"
+                      rel: "owningOrganization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+                    - "@type": "Link"
+                      rel: "flagCategory"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/flagCategories/CATEGORYID"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELDS_ID"
+      responses:
+        "200":
+          description: "Update response by Flag Id"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              examples:
+                Headers:
+                  description: "204 No Content"
+        "400":
+          description: "- No contributionDefinition link specified
+
+            - No category link specified\n"
+        "403":
+          description: "Forbidden Access"
+        "404":
+          description: "Entity Not found. Missing or incorrect flag id, or contributionDefinition is invalid Or incorrect org"
+    delete:
+      operationId: "deleteFlagByIdOrgId"
+      summary: "Delete a flag for a given org"
+      tags:
+        - "Flags APIs"
+      description: "This resource will delete a single flag based on its Id and org id"
+      security:
+        - OAuth2:
+            - "ag3"
+      parameters:
+        - $ref: "#/components/parameters/FlagId"
+        - $ref: "#/components/parameters/OrgId"
+      responses:
+        "200":
+          description: "No Content. Flag deleted successfully."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "204 No Content"
+        "403":
+          description: "Forbidden.
+
+            - The user has no permission to delete the flag.\n"
+        "404":
+          description: "Entity Not found. Given flag id does not exist or given orgId does not present."
+  /organizations/{orgId}/flags:
+    post:
+      operationId: "createFlag"
+      tags:
+        - "Flags APIs"
+      description: "This resource will create a flag in the given organization."
+      summary: "Create a flag"
+      security:
+        - OAuth2:
+            - "ag3"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+      requestBody:
+        description: "The flag data to add. The new uuid will be assigned as ID of the newly created flag.\n"
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/ValuesFlagIdPut"
+            examples:
+              No Headers:
+                value:
+                  "@type": "Flag"
+                  geometry:
+                    type: "Point"
+                    coordinates:
+                      - -93.14959274063109
+                      - 41.66881548411553
+                  notes: "SomeUnique123"
+                  archived: false
+                  proximityAlertEnabled: false
+                  links:
+                    - "@type": "Link"
+                      rel: "flagCategory"
+                      uri: "https://sandboxapi.deere.com/platform/flagCategories/CATEGORY_ID"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/FIELDS_ID"
+      responses:
+        "200":
+          $ref: "#/components/responses/PostFlags"
+        "400":
+          description: "- Not all data specified\n"
+        "403":
+          description: "Access forbidden. The user has no access to the org or is not allowed to create flags in the org."
+        "404":
+          description: "Entity Not found.
+
+            - No contributon definition ID is found
+
+            - Field link cannot be resolved (field not found)\n"
+    get:
+      summary: "View flags list"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/StartTime"
+        - $ref: "#/components/parameters/EndTime"
+        - $ref: "#/components/parameters/CategoryIds"
+        - $ref: "#/components/parameters/CategoryNames"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/FlagScopes"
+        - $ref: "#/components/parameters/ShapeTypes"
+        - $ref: "#/components/parameters/Simple"
+        - $ref: "#/components/parameters/MetadataOnly"
+      operationId: "getFlagsForOrganization"
+      security:
+        - OAuth2:
+            - "ag1"
+      tags:
+        - "Flags APIs"
+      description: "This resource will return a Flags list for Organization."
+      responses:
+        "200":
+          $ref: "#/components/responses/FlagsGet"
+        "403":
+          description: "Access forbidden. The user does not have permission to access the given organization, or the organization does not exist."
+  /organizations/{orgId}/fields/{fieldId}/flags:
+    get:
+      operationId: "getOrgFieldFlags"
+      summary: "List flags for the field"
+      tags:
+        - "Flags APIs"
+      description: "This resource will return a list of flag objects associated with the field."
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/StartTime"
+        - $ref: "#/components/parameters/EndTime"
+        - $ref: "#/components/parameters/CategoryIds"
+        - $ref: "#/components/parameters/CategoryNames"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/ShapeTypes"
+        - $ref: "#/components/parameters/Simple"
+        - $ref: "#/components/parameters/MetadataOnly"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetOrgId"
+        "403":
+          description: "Forbidden. The user has no access to the given flag"
+        "404":
+          description: "Entity Not found. No organization and/or field with these ids."
+components:
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: "ag1"
+            ag3: "ag3"
+  parameters:
+    FieldId:
+      name: "fieldId"
+      in: "path"
+      description: "Fields guid of the field."
+      schema:
+        type: "string"
+        format: "uuid"
+        default: "N/A"
+        example: "c634597d-3d1a-4975-93e9-acc6696658d2"
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Org Id to query for Flag"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 2101
+    OrgId2:
+      name: "orgId"
+      in: "path"
+      description: "Organization Id"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 123456
+    OrgId3:
+      name: "orgId"
+      in: "path"
+      description: "Organization Id where the Flag belongs to"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 123456
+    FlagId:
+      name: "flagId"
+      in: "path"
+      description: "flagId to query for flag"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "688c20bb-9609-4590-95c9-649ba65c06df"
+    Accept-Language:
+      name: "Accept-Language"
+      in: "header"
+      description: "If embedding flag category, language that category name shall be returned within a flag, e.g., \"de-DE\""
+      schema:
+        type: "string"
+        default: "en"
+        example: "de-DE"
+    Embed:
+      name: "embed"
+      in: "query"
+      description: "Embed additional attributes if required to reduce the number of requests"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "flagCategory, flagCategoryWithPreferences, field, showRecordMetadata"
+    StartTime:
+      name: "startTime"
+      in: "query"
+      description: "Flags created after start time (in UTC) will be returned"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "2018-08-01T00:00:00Z"
+    EndTime:
+      name: "endTime"
+      in: "query"
+      description: "Flags created before end time (in UTC) will be returned"
+      schema:
+        type: "string"
+        default: "now"
+        example: "2018-08-01T00:00:00Z"
+    CategoryIds:
+      name: "categoryIDs"
+      in: "query"
+      description: "Specify a comma-separated list of category GUIDs to retrieve"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "688c20bb-9609-4590-95c9-649ba65c06df,0aed8e88-c27c-424b-8b66-babfe7fcf5ee"
+    CategoryNames:
+      name: "categoryNames"
+      in: "query"
+      description: "Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "ROCKS,WEEDS"
+    RecordFilter:
+      name: "recordFilter"
+      in: "query"
+      description: "Request flags by archived status"
+      schema:
+        type: "string"
+        default: "active"
+        example: "active, archived, all"
+    FlagScopes:
+      name: "flagScopes"
+      in: "query"
+      description: "Specify whether to request global flags, field-related flags or both"
+      schema:
+        type: "string"
+        default: "all"
+        example: "global, field, all"
+    ShapeTypes:
+      name: "shapeTypes"
+      in: "query"
+      description: "Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type"
+      schema:
+        type: "string"
+        default: "Point, LineString, Polygon"
+        example: "Point"
+    Simple:
+      name: "simple"
+      in: "query"
+      description: "Populates simplified geometry"
+      schema:
+        type: "boolean"
+        default: "false"
+        example: "false"
+    MetadataOnly:
+      name: "metadataOnly"
+      in: "query"
+      description: "Does not populate geometry, overrides simple if both are true"
+      schema:
+        type: "boolean"
+        default: "false"
+        example: "false"
+  responses:
+    FlagIdGet:
+      description: "Get response by Flag Id"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkFlagId"
+              values:
+                items:
+                  $ref: "#/components/schemas/ValuesFlagId"
+          examples:
+            No Header:
+              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb"
+              value:
+                "@type": "Flag"
+                geometry: "{\"type\": \"Point\", \"coordinates\": [-93.14959274063109, 41.66881548411553] }"
+                notes: "A big rock on the left after entering the field"
+                archived: false
+                proximityAlertEnabled: false
+                links:
+                  - rel: "owningOrganization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                  - rel: "flagCategoryWithPrefrences"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/1234/flagCategories/47a229fc-aa09-4618-956c-1c29ae884326?embed=preferences"
+                  - rel: "createdBy"
+                    uri: "https://sandboxapi.deere.com/platform/users/johndeeresystem"
+                  - rel: "lastModifiedBy"
+                    uri: "https://sandboxapi.deere.com/platform/users/john"
+                  - rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/7b387eaa-187f-4bd8-acbc-c81748b6ad3b"
+                id: "688c20bb-9609-4590-95c9-649ba65c06df"
+                createdTime: "2018-07-01T21:00:11Z"
+                lastModifiedTime: "2018-07-01T21:10:10Z"
+    FlagsGet:
+      description: "Get response for flags by org id"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkFlagId"
+              values:
+                items:
+                  $ref: "#/components/schemas/ValuesFlagId"
+          examples:
+            No Header:
+              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/1234/flags?status=available&flagScope=all"
+                total: 1
+                values:
+                  - "@type": "Flag"
+                    geometry: "{\"type\": \"Point\", \"coordinates\": [-93.14959274063109, 41.66881548411553]}"
+                    notes: "A big rock on the left after entering the field"
+                    archived: false
+                    proximityAlertEnabled: false
+                    links:
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                      - rel: "flagCategoryWithPrefrences"
+                        uri: "https://sandboxapi.deere.com/platform/flagCategories/47a229fc-aa09-4618-956c-1c29ae884326?embed=preferences"
+                      - rel: "createdBy"
+                        uri: "https://sandboxapi.deere.com/platform/users/johndeeresystem"
+                      - rel: "lastModifiedBy"
+                        uri: "https://sandboxapi.deere.com/platform/users/john"
+                      - rel: "field"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/7b387eaa-187f-4bd8-acbc-c81748b6ad3b"
+                    id: "688c20bb-9609-4590-95c9-649ba65c06df"
+                    createdTime: "2018-07-01T21:00:11Z"
+                    lastModifiedTime: "2018-07-01T21:10:10Z"
+    GetOrgId:
+      description: "Returns a list of flags associated with the field."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkFlagId"
+              values:
+                items:
+                  $ref: "#/components/schemas/ValuesFlagId"
+          examples:
+            No Header:
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/c634597d-3d1a-4975-93e9-acc6696658d2/flags?status=available"
+                total: 1
+                values:
+                  - "@type": "Flag"
+                    geometry: "{\"type\": \"Point\", \"coordinates\": [-93.14959274063109, 41.66881548411553] }"
+                    notes: "A big rock on the left after entering the field"
+                    archived: false
+                    proximityAlertEnabled: false
+                    links:
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                      - rel: "flagCategoryWithPrefrences"
+                        uri: "https://sandboxapi.deere.com/platform/flagCategories/47a229fc-aa09-4618-956c-1c29ae884326?embed=preferences"
+                      - rel: "createdBy"
+                        uri: "https://sandboxapi.deere.com/platform/users/johndeeresystem"
+                      - rel: "lastModifiedBy"
+                        uri: "https://sandboxapi.deere.com/platform/users/john"
+                      - rel: "field"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/c634597d-3d1a-4975-93e9-acc6696658d2"
+                    id: "688c20bb-9609-4590-95c9-649ba65c06df"
+                    createdTime: "2018-07-01T21:00:11Z"
+                    lastModifiedTime: "2018-07-01T21:10:10Z"
+    PostFlags:
+      description: "Post the details by Flag Id"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkFlagIdPost"
+          examples:
+            Headers:
+              description: "201 Created<br/>Location: https://sandboxapi.deere.com/platform/flags/3e4f37a4-5667-49ae-9f6b-5a13e446dee6"
+  schemas:
+    LinkFlagId:
+      properties:
+        flagCategoryWithPrefrences:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/flagCategories/47a229fc-aa09-4618-956c-1c29ae884326?embed=preferences"
+          description: "Flag Category Preferences Link."
+        createdBy:
+          example: "https://sandboxapi.deere.com/platform/users/johndeeresystem"
+          description: "Users Link."
+        lastModifiedBy:
+          example: "https://sandboxapi.deere.com/platform/users/john"
+          description: "Users Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/7b387eaa-187f-4bd8-acbc-c81748b6ad3b"
+          description: "Fields Link."
+    LinkFlagIdPost:
+      properties:
+        flagCategory:
+          example: "https://sandboxapi.deere.com/platform/flagCategories/CATEGORY_ID"
+          description: "Flag Category Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/FIELDS_ID"
+          description: "Fields Link."
+    LinkFlagIdPut:
+      type: "Link"
+      properties:
+        flagCategory:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/flagCategories/CATEGORYID"
+          description: "Flag Category Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+          description: "Organization Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELDS_ID"
+          description: "Field Link."
+    ContentType:
+      properties:
+        Content-Type:
+          type: "string"
+          enum:
+            - "application/vnd.deere.axiom.v3+json"
+          description: "Fixed from invalid string value: application/vnd.deere.axiom.v3+json"
+    ValuesFlagId:
+      properties:
+        geometry:
+          example: "See sample response below"
+          description: "Currently only three geometries types (Point, LineString and Polygon) are supported."
+        notes:
+          example: "A big rock on the left after entering the field"
+          type: "string"
+          description: "Free text notes."
+        archived:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the flag is archived (true) or not (false). Archived flags SHALL not be returned by endpoints if not requested explicitely by clients."
+        proximityAlertEnabled:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the proximity alert is enabled (true) or not (false) for the Flag."
+        id:
+          type: "string"
+          example: "688c20bb-9609-4590-95c9-649ba65c06df"
+          description: "GUID of a flag."
+        createdTime:
+          type: "string"
+          format: "date-time"
+          description: "Date and time of flag creation in UTC."
+          example: "2018-07-01T21:00:11Z"
+        lastModifiedTime:
+          type: "string"
+          format: "date-time"
+          description: "Date and time of last flag modification in UTC."
+          example: "2018-07-01T21:10:10Z"
+    ValuesFlagIdPut:
+      properties:
+        geometry:
+          description: "Currently only three geometries types (Point, LineString and Polygon) are supported."
+          type: "object"
+          example: "See sample request below"
+        notes:
+          type: "string"
+          description: "Free text notes."
+          example: "A big rock on the left after entering the field"
+        archived:
+          description: "Indicates whether the flag is archived (true) or not (false). Archived flags SHALL not be returned by endpoints if not requested explicitely by clients."
+          type: "boolean"
+          example: "false"
+        proximityAlertEnabled:
+          description: "Indicates whether the proximity alert is enabled (true) or not (false) for the Flag."
+          type: "boolean"
+          example: "false"
+        links:
+          items:
+            $ref: "#/components/schemas/LinkFlagIdPut"

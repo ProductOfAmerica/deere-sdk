@@ -1,0 +1,1459 @@
+openapi: "3.0.0"
+info:
+  title: "Fields API"
+  version: "3.0"
+  contact:
+    name: "Land"
+    email: "ISGLand@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /organizations/{orgId}/fields:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+    get:
+      summary: "Retrieve all of the Fields for an Organization"
+      description: "Retrieve all of the Fields for an Organization"
+      parameters:
+        - $ref: "#/components/parameters/ClientName"
+        - $ref: "#/components/parameters/FarmName"
+        - $ref: "#/components/parameters/FieldName"
+        - $ref: "#/components/parameters/FieldsEmbed"
+        - $ref: "#/components/parameters/recordFilter"
+        - $ref: "#/components/parameters/UnitOfMeasureHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldsReturned"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgNotFound"
+    post:
+      summary: "Create field for an Organization"
+      description: "This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
+
+        This is to support the following scenarios:
+
+        \  * adding a new field to an existing client/farm
+
+        \  * adding a new farm and field to an existing client
+
+        \  * adding a brand new client/farm/field
+
+
+        Client-specified identifiers:
+
+        \  * An identifier may be specified for the new field
+
+        \  * An identifier may be specified for new clients/farms
+
+        \  * If associating to an existing client/farm, the existing guids may be specified in place of the name
+
+
+        Note: All fields are created with an 'available' status.\n"
+      requestBody:
+        $ref: "#/components/requestBodies/ASingleField"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/ValidationErrorForCreate"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgNotFound"
+  /organizations/{orgId}/fields/{fieldId}:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+      - $ref: "#/components/parameters/FieldId"
+    get:
+      summary: "Get field by organization and fieldId"
+      description: "Get field by organization and fieldId"
+      parameters:
+        - $ref: "#/components/parameters/FieldEmbed"
+        - $ref: "#/components/parameters/UnitOfMeasureHeader"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldReturned"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgOrFieldNotFound"
+    put:
+      summary: "Update field"
+      description: "Update the field name, the archived status, or the associated client or farm. If the client and/or farm does not exist, it will be created."
+      requestBody:
+        $ref: "#/components/requestBodies/ASingleField"
+      responses:
+        "204":
+          $ref: "#/components/responses/Updated"
+        "400":
+          $ref: "#/components/responses/ValidationErrorForUpdate"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgOrFieldNotFound"
+    delete:
+      summary: "Delete Field by organization and fieldId"
+      description: "Delete Field by organization and fieldId"
+      responses:
+        "204":
+          $ref: "#/components/responses/Deleted"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgOrFieldNotFound"
+  /organizations/{orgId}/fields/{fieldId}/farms:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+      - $ref: "#/components/parameters/FieldId"
+    get:
+      summary: "Get Farm by organization and fieldId"
+      description: "This api is designed to get farms within an organization and for provided fieldId\n"
+      parameters:
+        - $ref: "#/components/parameters/FieldEmbed"
+      responses:
+        "200":
+          $ref: "#/components/responses/FarmsReturned"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgOrFieldNotFound"
+  /organizations/{orgID}/fields/{id}/clients:
+    get:
+      description: "View details about the client that owns the field. The response will link to the following resources:<br/> <ul><li><b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farms belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the field.</li></ul>"
+      summary: "View Clients that Own a Field"
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/X-deere-signature"
+      responses:
+        "200":
+          $ref: "#/components/responses/getFieldResponse"
+components:
+  parameters:
+    OrgId:
+      in: "path"
+      name: "orgId"
+      description: "The ID of the organization"
+      schema:
+        type: "integer"
+        format: "int64"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "9r8392615e4b4e1c92018026f47109bb"
+    ClientName:
+      in: "query"
+      name: "clientName"
+      description: "client name"
+      schema:
+        type: "string"
+    FarmName:
+      in: "query"
+      name: "farmName"
+      description: "farm name"
+      schema:
+        type: "string"
+    FieldName:
+      in: "query"
+      name: "fieldName"
+      description: "field name"
+      schema:
+        type: "string"
+    recordFilter:
+      in: "query"
+      name: "recordFilter"
+      description: "Filters by resource state (whether or not the resource is archived)"
+      schema:
+        type: "string"
+        enum:
+          - "AVAILABLE"
+          - "ARCHIVED"
+          - "ALL"
+        default: "AVAILABLE"
+    FieldsEmbed:
+      in: "query"
+      name: "embed"
+      description: "list of objects to include"
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "farms"
+            - "clients"
+            - "boundaries"
+            - "activeBoundary"
+            - "simplifiedBoundaries"
+            - "guidanceLines"
+            - "accessPoints"
+            - "notes"
+    FieldEmbed:
+      in: "query"
+      name: "embed"
+      description: "list of objects to include"
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "farms"
+            - "clients"
+            - "guidanceLines"
+            - "accessPoints"
+    ContextOrganizationId:
+      in: "query"
+      name: "contextOrganizationId"
+      description: "Context Organization ID"
+      schema:
+        type: "string"
+    FieldId:
+      in: "path"
+      name: "fieldId"
+      description: "field guid"
+      schema:
+        type: "string"
+    UnitOfMeasureHeader:
+      in: "header"
+      name: "Accept-UOM-System"
+      description: "Indicates a preference for returned measurements to be in English vs Metric"
+      schema:
+        type: "string"
+        enum:
+          - "METRIC"
+          - "ENGLISH"
+        default: "METRIC"
+  requestBodies:
+    ASingleField:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/CreateUpdateField"
+          examples:
+            Create new field (Existing farm and client):
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - id: "ExistingFarmId"
+                clients:
+                  clients:
+                    - id: "ExistingClientId"
+            Create new field and farm (Existing client):
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - name: "UniqueFarmName"
+                clients:
+                  clients:
+                    - id: "ExistingClientId"
+            Create new field, farm and client:
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - name: "UniqueFarmName"
+                clients:
+                  clients:
+                    - name: "UniqueClientName"
+    FieldGuidSearches:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldGuidSearches"
+  responses:
+    FarmsReturned:
+      description: "Array of farms"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GetFarms"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/fields/c36a7ed3-3b96-4112-986d-a5760e871d2e/farms"
+                total: 1
+                values:
+                  - type: "Farm"
+                    name: "farmName"
+                    archived: false
+                    clientUri: "https://sandboxapi.deere.com/platform/organizations/592711/clients/061c0fb9-533-4537-9eaa-a4ed0bc13500"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+    FieldsReturned:
+      description: "Array of fields containing links related to fields"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldsResponse"
+          examples:
+            No Header:
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields"
+                total: 1
+                values:
+                  - "@type": "Field"
+                    name: "01"
+                    archived: false
+                    id: "d61b83f4-3a12-431e-8010-596f2466dc27"
+                    lastModifiedTime: "2020-09-21T15:41:15.205Z"
+                    links:
+                      - "@type": "Link"
+                        rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                      - "@type": "Link"
+                        rel: "clients"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/clients"
+                      - "@type": "Link"
+                        rel: "notes"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/notes"
+                      - "@type": "Link"
+                        rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/farms"
+                      - "@type": "Link"
+                        rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                      - "@type": "Link"
+                        rel: "boundaries"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries"
+                      - "@type": "Link"
+                        rel: "simplifiedBoundaries"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries?simple=true"
+                      - "@type": "Link"
+                        rel: "activeBoundary"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27 /boundaries/e7ab3a06-06ca-4d34-8cb7-6fd2a3640a3d"
+                      - "@type": "Link"
+                        rel: "fieldOperation"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27 /fieldOperations"
+                      - "@type": "Link"
+                        rel: "mapLayerSummaries"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/mapLayerSummaries"
+                      - "@type": "Link"
+                        rel: "contributionDefinition"
+                        uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
+    getFieldResponse:
+      description: "Get Field by client Id"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/GroupLink"
+              total:
+                type: "integer"
+                example: 1
+                format: "int32"
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldResponse"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
+                total: 1
+                values:
+                  - name: "Aslan"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+    FieldsReturnedWithPartialSuccessHeader:
+      description: "Array of fields with header for partial success."
+      headers:
+        FIELDS-NOT-FOUND:
+          schema:
+            type: "string"
+            format: "array"
+            example:
+              - "9369f3f6-2428-492a-bf64-0a19cdaf007d"
+              - "8759f3f6-2428-434a-bf64-0a19cdaf0236"
+          description: "A string list of fieldIds requested which were not returned"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldsResponse"
+    FieldReturned:
+      description: "Success"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldResponse"
+          examples:
+            No Header:
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                "@type": "Field"
+                name: "01"
+                archived: false
+                id: "d61b83f4-3a12-431e-8010-596f2466dc27"
+                lastModifiedTime: "2020-09-21T15:41:15.205Z"
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                  - "@type": "Link"
+                    rel: "clients"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/clients"
+                  - "@type": "Link"
+                    rel: "notes"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/notes"
+                  - "@type": "Link"
+                    rel: "farms"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc2/farms"
+                  - "@type": "Link"
+                    rel: "owningOrganization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                  - "@type": "Link"
+                    rel: "boundaries"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries"
+                  - "@type": "Link"
+                    rel: "simplifiedBoundaries"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries?simple=true"
+                  - "@type": "Link"
+                    rel: "activeBoundary"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries/e7ab3a06-06ca-4d34-8cb7-6fd2a3640a3d"
+                  - "@type": "Link"
+                    rel: "fieldOperation"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/fieldOperations"
+                  - "@type": "Link"
+                    rel: "mapLayerSummaries"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/mapLayerSummaries"
+                  - "@type": "Link"
+                    rel: "contributionDefinition"
+                    uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
+    DoesNotHaveAccessToOrg:
+      description: "Invalid access to organization"
+    OrgNotFound:
+      description: "Organization not found"
+    OrgOrFieldNotFound:
+      description: "Organization or Field not found"
+    Created:
+      description: "Field successfully created"
+      headers:
+        Location:
+          schema:
+            type: "string"
+            format: "uri"
+          description: "The uri of the newly created resource"
+    Updated:
+      description: "Field successfully updated"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldsPost"
+          examples:
+            Update field (Existing farm and client):
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - id: "ExistingFarmId"
+                clients:
+                  clients:
+                    - id: "ExistingClientId"
+            Update field and create farm (Existing client):
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - name: "UniqueFarmName"
+                clients:
+                  clients:
+                    - id: "ExistingClientId"
+            Update field, create new farm and client:
+              value:
+                name: "UniqueFieldName"
+                archived: false
+                farms:
+                  farms:
+                    - name: "UniqueFarmName"
+                clients:
+                  clients:
+                    - name: "UniqueClientName"
+    Deleted:
+      description: "Field deleted.  If the client and farm has only this field the client and farm will be deleted"
+      content:
+        application/vnd:deere:axiom:v3+json:
+          examples:
+            Headers:
+              description: "204 No Content"
+    ValidationErrorForUpdate:
+      description: "The possible errors are:
+
+        \  * CFF_CLIENT_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_CLIENT_ID
+
+        \  * CFF_CLIENT_ID_NAME_CONFLICT
+
+        \  * CFF_CLIENT_ID_NOT_FOUND
+
+        \  * CFF_CLIENT_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_CLIENT_NAME
+
+        \  * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
+
+        \  * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
+
+        \  * CFF_FARM_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_FARM_ID
+
+        \  * CFF_FARM_ID_NAME_CONFLICT
+
+        \  * CFF_FARM_ID_NOT_FOUND
+
+        \  * CFF_FARM_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_FARM_NAME
+
+        \  * CFF_FARM_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_ALREADY_EXISTS_ACTIVE
+
+        \  * CFF_ALREADY_EXISTS_ARCHIVED
+
+        \  * CFF_ALREADY_EXISTS_MERGED
+
+        \  * CFF_FIELD_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_FIELD_ID
+
+        \  * CFF_FIELD_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_FIELD_NAME
+
+        \  * CFF_FIELD_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_MISSING_REQUEST_BODY
+
+        \  * CFF_OUTDATED_REQUEST
+
+        \  * CFF_USER_LAST_MODIFIED_CLIPPED\n"
+    ValidationErrorForCreate:
+      description: "The possible errors are:
+
+        \  * CFF_CLIENT_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_CLIENT_ID
+
+        \  * CFF_CLIENT_ID_NAME_CONFLICT
+
+        \  * CFF_CLIENT_ID_NOT_FOUND
+
+        \  * CFF_CLIENT_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_CLIENT_NAME
+
+        \  * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
+
+        \  * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
+
+        \  * CFF_FARM_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_FARM_ID
+
+        \  * CFF_FARM_ID_NAME_CONFLICT
+
+        \  * CFF_FARM_ID_NOT_FOUND
+
+        \  * CFF_FARM_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_FARM_NAME
+
+        \  * CFF_FARM_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_ALREADY_EXISTS_ACTIVE
+
+        \  * CFF_ALREADY_EXISTS_ARCHIVED
+
+        \  * CFF_ALREADY_EXISTS_MERGED
+
+        \  * CFF_FIELD_ID_ALREADY_EXISTS
+
+        \  * CFF_BAD_FIELD_ID
+
+        \  * CFF_FIELD_NAME_ALREADY_EXISTS
+
+        \  * CFF_EMPTY_FIELD_NAME
+
+        \  * CFF_FIELD_NAME_EXCEEDS_255_CHARS
+
+        \  * CFF_MISSING_REQUEST_BODY
+
+        \  * CFF_OUTDATED_REQUEST
+
+        \  * CFF_USER_LAST_MODIFIED_CLIPPED\n"
+  schemas:
+    FieldsResponse:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+        totals:
+          type: "integer"
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FieldResponse"
+    FieldResponse:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Field"
+        name:
+          type: "string"
+          example: "---"
+        farms:
+          $ref: "#/components/schemas/Farms"
+        clients:
+          $ref: "#/components/schemas/Clients"
+        boundaries:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Boundary"
+        accessPoints:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AccessPoint"
+          minItems: 0
+        guidanceLines:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GuidanceLines"
+          minItems: 0
+        archived:
+          type: "boolean"
+          example: true
+        flags:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Flag"
+          minItems: 0
+        id:
+          type: "string"
+          format: "uuid"
+          example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    Farms:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Farms"
+        farms:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Farm"
+    Farm:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Farm"
+        name:
+          type: "string"
+          example: "---"
+        id:
+          type: "string"
+          format: "uri"
+          example: "1efb4de1-fe41-42bc-bbb3-d128a432cafd"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    CreateUpdateFarm:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Farm"
+        name:
+          type: "string"
+          example: "SouthEast End"
+    Clients:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Clients"
+        clients:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Client"
+    Client:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Client"
+        name:
+          type: "string"
+          example: "---"
+        id:
+          type: "string"
+          format: "uri"
+          example: "68b887c7-1ac2-40a4-b70b-117a8ec34abf"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    GroupLink:
+      description: "Link to another resource"
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+      properties:
+        boundaries:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/boundaries"
+          description: "Boundaries Link."
+        clients:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/clients"
+          description: "Clients Link."
+        farms:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/farms"
+          description: "Farms Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+        notes:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/notes"
+          description: "Notes Link."
+        simplifiedBoundaries:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries?simple=true"
+          description: "Boundaries Link."
+        fieldOperation:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/fieldOperations"
+          description: "Field Operations Link."
+        mapLayerSummaries:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/mapLayerSummaries"
+          description: "Map Layer Summaries Link."
+        contributionDefinition:
+          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
+          description: "Contribution Definition Link"
+    FieldsPost:
+      properties:
+        name:
+          example: "UniqueFieldName"
+          type: "string"
+          description: "New Field Name"
+        archived:
+          example: "false"
+          type: "string"
+          description: "Archived status (false = active)"
+        farms.name:
+          example: "FarmName"
+          type: "string"
+          description: "Existing or Unique (new) farm name"
+        farms.id:
+          example: "e61b83f4-3a12-431e-8010-596f2466dc27"
+          type: "string"
+          format: "uuid"
+          description: "Farm ID"
+        clients.name:
+          example: "ClientName"
+          type: "string"
+          description: "Existing or Unique (new) client name"
+        clients.id:
+          example: "e61b83f4-3a12-431e-8010-596f2466dc27"
+          type: "string"
+          format: "uuid"
+          description: "Client ID"
+    GetFarms:
+      type: "object"
+      properties:
+        total:
+          type: "integer"
+          example: 1
+          format: "int32"
+        links:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              rel:
+                type: "string"
+                example: "self"
+              uri:
+                type: "string"
+                description: "Platform uri to fetch farm details"
+                example: "https://sandboxapi.deere.com/platform/organizations/5555/fields/222/farms"
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GetFarm"
+    CreateUpdateClient:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Client"
+        name:
+          type: "string"
+          example: "SouthEast End_Client"
+    Boundary:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Boundary"
+        name:
+          type: "string"
+          example: "Auto-Generated 2014 Harvest"
+        sourceType:
+          type: "string"
+          example: "Auto"
+        modifiedTime:
+          type: "string"
+          format: "date-time"
+          example: "2016-11-17T11:53:00.000Z"
+        area:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        workableArea:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        multipolygons:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Polygon"
+        extent:
+          $ref: "#/components/schemas/Extent"
+        id:
+          type: "string"
+          format: "uuid"
+          example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+        active:
+          type: "boolean"
+          description: "Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries."
+        irrigated:
+          type: "boolean"
+          description: "Indicates whether the contained area is irrigated"
+    AccessPoint:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uri"
+        description:
+          type: "string"
+        direction:
+          type: "string"
+        isEntry:
+          type: "boolean"
+        isExit:
+          type: "boolean"
+        location:
+          $ref: "#/components/schemas/Point"
+        name:
+          type: "string"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    GuidanceLines:
+      allOf:
+        - $ref: "#/components/schemas/ABLine"
+        - type: "object"
+          properties:
+            bPoint:
+              $ref: "#/components/schemas/Point"
+            eastShift:
+              $ref: "#/components/schemas/MeasurementAsDouble"
+            northShift:
+              $ref: "#/components/schemas/MeasurementAsDouble"
+            tramOffset:
+              type: "integer"
+              example: 0
+            tramSpacing:
+              type: "integer"
+              example: 0
+            savedMethod:
+              type: "string"
+              example: "dtiABLineMethodBPoint"
+            id:
+              type: "string"
+              format: "uri"
+              example: "5a62177b33df3c0e2cc85dc2"
+            guid:
+              type: "string"
+              format: "uri"
+              example: "c2878a14-f9f4-4eaf-b7ef-24f3da95d337"
+            name:
+              type: "string"
+              example: "Fleece"
+            lastModifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2018-03-05T14:56:57.295Z"
+            status:
+              type: "string"
+              example: "ACTIVE"
+            locked:
+              type: "boolean"
+            links:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Link"
+    Flag:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "GenericNote"
+        createdDate:
+          type: "string"
+          format: "date-time"
+          example: "2016-08-19T18:48:48.886Z"
+        lastModifiedDate:
+          type: "string"
+          format: "date-time"
+          example: "2016-08-19T18:48:48.886Z"
+        text:
+          type: "string"
+          example: "some text"
+        metadata:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MetaData"
+        author:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Author"
+        geometry:
+          $ref: "#/components/schemas/Geometry"
+        noteType:
+          type: "string"
+          example: "SCOUT"
+        id:
+          type: "string"
+          format: "uri"
+          example: "4e7a1fa7-9db9-45ea-94d3-e45b2fa43c2a"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    MetaData:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Metadata"
+        name:
+          type: "string"
+          example: "EARLY_GROWTH_EMERGENCE"
+        value:
+          type: "integer"
+          example: 9
+    Author:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "User"
+        accountName:
+          type: "string"
+          example: "scoutcarla1"
+        givenName:
+          type: "string"
+          example: "scoutcarla1"
+        familyName:
+          type: "string"
+          example: "scoutcarla1"
+    Geometry:
+      type: "object"
+      properties:
+        coordinates:
+          type: "array"
+          items:
+            type: "string"
+            example: "-93.76592004432253, 41.643866385621365"
+        type:
+          type: "string"
+          example: "Point"
+    ABLine:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "AbLine"
+        heading:
+          type: "number"
+          example: 356.5847091769351
+        aPoint:
+          $ref: "#/components/schemas/Point"
+    Polygon:
+      properties:
+        "@Type":
+          type: "string"
+          example: "Polygon"
+        rings:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Ring"
+    Ring:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Ring"
+        points:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Point"
+        type:
+          type: "string"
+          example: "exterior"
+        passable:
+          type: "boolean"
+    Point:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Point"
+        lat:
+          type: "number"
+          format: "double"
+          description: "The latitude of the point"
+          example: 43.6187
+        lon:
+          type: "number"
+          format: "double"
+          description: "The longitude of the point"
+          example: 116.2146
+    Extent:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Extent"
+        topLeft:
+          $ref: "#/components/schemas/Point"
+        bottomRight:
+          $ref: "#/components/schemas/Point"
+    MeasurementAsDouble:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "MeasurementAsDouble"
+        valueAsDouble:
+          type: "number"
+          format: "double"
+          example: 7.502938
+        vrDomainId:
+          type: "string"
+          example: "vrEastShiftComponent"
+        unit:
+          type: "string"
+          description: "The unit of measure for this value"
+          example: "ha"
+    Link:
+      description: "Link to another resource"
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+      properties:
+        rel:
+          type: "string"
+          example: "self"
+        uri:
+          type: "string"
+          example: "https://apiqa.tal.deere.com/platform/users/grumpybear"
+    FieldGuidSearches:
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "FieldGuidSearches"
+        fieldIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+            example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+        clientName:
+          type: "string"
+          example: "client"
+        farmName:
+          type: "string"
+          example: "farm"
+        fieldName:
+          type: "string"
+          example: "field"
+        embeds:
+          type: "array"
+          items:
+            type: "string"
+            enum:
+              - "farms"
+              - "clients"
+              - "boundaries"
+              - "activeBoundary"
+              - "simplifiedBoundaries"
+              - "metadataOnlyBoundaries"
+              - "guidanceLines"
+              - "shapes"
+              - "accessPoints"
+              - "notes"
+        status:
+          type: "string"
+          enum:
+            - "AVAILABLE"
+            - "ARCHIVED"
+            - "ALL"
+    GetFarm:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Farm"
+        name:
+          type: "string"
+          example: "John Doe"
+        id:
+          type: "string"
+          format: "uuid"
+          example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+          readOnly: true
+        archived:
+          type: "boolean"
+          example: false
+        clientUri:
+          type: "string"
+          example: "https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c"
+        links:
+          type: "array"
+          readOnly: true
+          items:
+            type: "object"
+            properties:
+              "@type":
+                type: "string"
+                example: "Link"
+              rel:
+                type: "string"
+                example: "self"
+              uri:
+                type: "string"
+                example: "https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+    CreateUpdateField:
+      description: "Place holder for Matt to create the field object to be created or updated."
+      type: "object"
+      properties:
+        "@Type":
+          type: "string"
+          example: "Field"
+        name:
+          type: "string"
+          example: "Land_Demo_1"
+        archived:
+          type: "boolean"
+          example: true
+        Farms:
+          type: "object"
+          properties:
+            "@Type":
+              type: "string"
+              example: "Farms"
+            farms:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CreateUpdateFarm"
+        Clients:
+          type: "object"
+          properties:
+            "@Type":
+              type: "string"
+              example: "Clients"
+            clients:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CreateUpdateClient"
+  examples:
+    getFieldsNoEmbed:
+      value: "{
+
+        \ \"links\":[
+
+        \  {
+
+        \   \"rel\":\"self\",
+
+        \   \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields\"
+
+        \  },
+
+        \  {
+
+        \   \"rel\":\"nextPage\",
+
+        \   \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields;start=10;count=10\"
+
+        \  }
+
+        \ ],
+
+        \ \"total\":1,
+
+        \ \"values\":[
+
+        \  {
+
+        \   \"@type\":\"Field\",
+
+        \   \"name\":\"---\",
+
+        \   \"id\":\"9369f3f6-2428-4bba-bf64-0a19cdaf007d\",
+
+        \   \"links\":[
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"self\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"clients\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/clients\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"notes\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/notes\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"farms\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/farms\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"owningOrganization\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"boundaries\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"simplifiedBoundaries\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries?simple=true\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"addBoundary\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"fieldOperation\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/fieldOperations\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"guidanceLines\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"addGuidanceTrack\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"deleteField\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
+
+        \    },
+
+        \    {
+
+        \     \"@type\":\"Link\",
+
+        \     \"rel\":\"editField\",
+
+        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
+
+        \    }
+
+        \   ]
+
+        \  }
+
+        \ ]
+
+        }\n"
+    getFieldNoEmbed:
+      value:
+        "@type": "Field"
+        name: "---"
+        id: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+        links:
+          - "@type": "Link"
+            rel: "self"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+          - "@type": "Link"
+            rel: "clients"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/clients"
+          - "@type": "Link"
+            rel: "notes"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/notes"
+          - "@type": "Link"
+            rel: "farms"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/farms"
+          - "@type": "Link"
+            rel: "owningOrganization"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457"
+          - "@type": "Link"
+            rel: "boundaries"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries"
+          - "@type": "Link"
+            rel: "simplifiedBoundaries"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries?simple=true"
+          - "@type": "Link"
+            rel: "addBoundary"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries"
+          - "@type": "Link"
+            rel: "activeBoundary"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries/a34bfb73-7a36-4d93-9a24-9814a86f0f5d"
+          - "@type": "Link"
+            rel: "fieldOperation"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/fieldOperations"
+          - "@type": "Link"
+            rel: "guidanceLines"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines"
+          - "@type": "Link"
+            rel: "addGuidanceTrack"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines"
+          - "@type": "Link"
+            rel: "deleteField"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+          - "@type": "Link"
+            rel: "editField"
+            uri: "https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d"

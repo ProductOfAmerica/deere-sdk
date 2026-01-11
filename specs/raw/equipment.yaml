@@ -1,0 +1,3061 @@
+openapi: 3.0.3
+info:
+  title: Operations Center - Equipment
+  description: This API has all the operations for equipment resource.
+  version: '2.0'
+servers:
+  - url: 'https://equipmentapi.deere.com/isg'
+paths:
+  /equipment:
+    get:
+      tags:
+        - Equipment
+      description:  "This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation
+                    <a  href='#oAuth2' target='_blank'>here</a> for more details on obtaining a user token and connecting the user’s organizations to your application.."
+      summary: Get equipment
+      parameters:
+        - $ref: '#/components/parameters/OrganizationEquipmentIds'
+        - $ref: '#/components/parameters/EquipmentSerialNumbers'
+        - $ref: '#/components/parameters/OrganizationIds'
+        - $ref: '#/components/parameters/PrincipalIds'
+        - $ref: '#/components/parameters/CapableOf'
+        - $ref: '#/components/parameters/Categories'
+        - $ref: '#/components/parameters/Role'
+        - $ref: '#/components/parameters/Archived'
+        - $ref: '#/components/parameters/EmbedForList'
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/ItemLimit'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        '200':
+          description: Equipment(s) found based on the query parameters and filters.
+          $ref: '#/components/responses/GetEquipment'
+        '400':
+          description: Bad Request - No query parameters provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        '403':
+          description: |
+            Authorization Error
+            - user/applications does not have access to api or resource
+            or
+            - user does not have required permissions/BusinessActivities for the org.
+  /organizations/{organizationId}/equipment:
+    post:
+      tags:
+        - Equipment
+      description: "This resource allows the client to create a piece of equipment within a user’s organization.
+                   <br><br> <b>Getting Started</b><br>The process of contributing equipment to John Deere can be broken down into three primary steps.
+                   <ol>
+                      <li> Determine the Equipment’s model IDs</li>
+                      <li> Create the Equipment</li>
+                      <li> Contribute Measurements. Please see the
+                   <a  href='/dev-docs/equipment-measurement' target='_blank'>Equipment Measurements (POST) API</a> for more information on uploading measurements for the created equipment.</li>
+                    </ol>
+                    <b>Determining the Equipment’s model</b>
+                    <ol>
+                      <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li>
+                      <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require.</li>
+                      <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li>
+                      <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”.</li>
+                    </ol>
+                    <b>Creating the Equipment</b><br/>
+                    Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org.
+                      <ul>
+                      <li>In this request you will provide the type of the equipment, a serialNumber  (optional), name (displayed to the user in Operations Center), and the equipment model IDs.</li>
+                        <ul>
+                          <li><b>type:</b> Machine or Implement</li>
+                          <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li>
+                          <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li>
+                          <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li>
+                        </ul>
+                      <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345).</li>
+                      <li>If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li>
+                      </ul>"
+      summary: Create equipment
+      operationId: createEquipment
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+      security:
+        - OAuth2: [ eq2 ]
+      requestBody:
+        description: Asset to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createEquipment'
+            examples:
+              No Header:
+                value:
+                  '@type': Machine
+                  name: 'Equipment Name'
+                  serialNumber: 'must_be_unique_string'
+                  model:
+                    '@type': EquipmentModel
+                    id: 66280
+      responses:
+        '201':
+          description: Created
+          $ref: '#/components/responses/CreateEquip'
+        '202':
+          description: Accepted
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        '403':
+          description: User is not authorized for this request.
+  /equipment/{id}:
+    get:
+      tags:
+        - Equipment
+      description: This resource allows the client to view the details of one piece of equipment.
+      summary: View equipment details by Id
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/Embed'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        '200':
+          description: Equipment found by Id or Serial Number
+          $ref: '#/components/responses/GetEquipmentById'
+        '403':
+          description: |
+            Authorization Error
+            - user/applications does not have access to api or resource
+            or
+            - user does not have required permissions/BusinessActivities for the org.
+        '404':
+          description: Equipment not found
+    put:
+      tags:
+        - Equipment
+      description: This resource allows the client to update a piece of equipment within a user’s organization. Clients will only be able to update a piece of equipment that was contributed via the POST /equipment API. John Deere controlled equipment can only be managed via the Equipment application in Operations Center.
+      summary: Update equipment
+      operationId: putEquipment
+      parameters:
+        - $ref: '#/components/parameters/id'
+      security:
+        - OAuth2: [ eq2 ]
+      requestBody:
+        $ref: '#/components/responses/UpdateEquipment'
+      responses:
+        200:
+          description: Patch Successful Updated Equipment
+          $ref: '#/components/responses/UpdatedEquip'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        403:
+          description: User is not authorized for this request.
+    delete:
+      tags:
+        - Equipment
+      description: This resource allows the client to delete a piece of equipment within a user’s organization. Clients will only be able to delete a piece of equipment that was contributed via the POST /equipment API. John Deere controlled equipment can only be managed via the Equipment application in Operations Center.
+      summary:  Delete equipment
+      operationId: deleteEquipment
+      parameters:
+        - $ref: '#/components/parameters/id'
+      security:
+        - OAuth2: [ eq2 ]
+      responses:
+        '200':
+          description: Deleted
+          $ref: '#/components/responses/UpdatedEquip'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        '403':
+          description: User is not authorized for this request.
+  /equipmentMakes:
+    get:
+      tags:
+        - Equipment Makes
+      description: This resource allows the client to view equipment makes and their associated IDs and names.
+      summary: Get equipment makes
+      parameters:
+        - $ref: '#/components/parameters/Deprecated'
+      security:
+        - OAuth2: [ eq1 ]
+      operationId: getEquipmentMakes
+      responses:
+        '200':
+          description: OK
+          $ref: '#/components/responses/GetEquipmentMake'
+        '403':
+          description: User is not authorized
+  /equipmentMakes/{equipmentMakeId}:
+    get:
+      tags:
+        - Equipment Makes
+      description: This resource allows the client to view equipment makes by an equipment make ID.
+      summary: View equipment by make Id
+      operationId: getEquipmentMakesById
+      parameters:
+        - $ref: '#/components/parameters/EquipmentMakeId'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/link'
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/equipment-make'
+              examples:
+                No Header:
+                  value:
+                    '@type': EquipmentMake
+                    name: JOHN DEERE
+                    certified: false
+                    deereOrSubsidiary: true
+                    id: 1
+                    ERID: 0e8031fe-fe81-11ea-bec7-124fe3772e59
+        '403':
+          description: User is not authorized
+        '404':
+          description: Resource Not foundapi-makes
+  /equipmentMakes/{equipmentMakeId}/equipmentTypes:
+    get:
+      tags:
+        - Equipment Types
+      deprecated: true
+      description: This resource allows the client to view equipment types by providing an equipment make ID.
+      summary: Get equipment types by make id
+      note: ' <b> Note: </b> This endpoint is <b style="color: red;"> deprecated </b> and should no longer be used.'
+      operationId: getEquipmentTypesByMakeId
+      parameters:
+        - $ref: '#/components/parameters/EquipmentMakeId'
+        - $ref: '#/components/parameters/Deprecated'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/link'
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/equipment-type'
+              examples:
+                No Header:
+                  value:
+                    links: [ ]
+                    values:
+                      - '@type': EquipmentType
+                        name: "Scraper"
+                        ERID: "15e10ade-33ae-40a1-9b06-7800c7581a17"
+                        category: "Implement"
+                        marketSegment: "Construction"
+                        allowsCustomModel: true
+                        id: "121"
+                        icon:
+                          '@type': EquipmentIcon
+                          name: "generic-fuel-trailer"
+                          iconStyle:
+                            primaryColor: "#7E7E7E"
+                            secondaryColor: "#D3D3D3"
+  /equipmentTypes:
+    get:
+      tags:
+        - Equipment Types
+      deprecated: true
+      description: This resource allows the client to view equipment types and their associated IDs and names.
+      note: ' <b> Note: </b> This endpoint is <b style="color: red;"> deprecated </b> and should no longer be used.'
+      summary: Get equipment types
+      operationId: getEquipmentTypes
+      parameters:
+        - $ref: '#/components/parameters/Deprecated'
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/link'
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/equipment-type'
+              examples:
+                No Header:
+                  value:
+                    links: [ ]
+                    values:
+                      - '@type': EquipmentType
+                        name: "Scraper"
+                        ERID: "15e10ade-33ae-40a1-9b06-7800c7581a17"
+                        category: "Implement"
+                        marketSegment: "Construction"
+                        allowsCustomModel: true
+                        id: "121"
+                        icon:
+                          '@type': EquipmentIcon
+                          name: "generic-fuel-trailer"
+                          iconStyle:
+                            primaryColor: "#7E7E7E"
+                            secondaryColor: "#D3D3D3"
+  /equipmentModels:
+    parameters:
+      - $ref: '#/components/parameters/Deprecated'
+      - $ref: '#/components/parameters/EmbedV1'
+      - $ref: '#/components/parameters/EquipmentModelName'
+    get:
+      tags:
+        - Equipment Models
+      description: This resource allows the client to view equipment models in our reference database and their associated IDs and names.
+      summary: Get equipment models
+      operationId: getEquipmentModels
+      responses:
+        '200':
+          description: OK
+          $ref: '#/components/responses/GetEquipmentModelName'
+  /equipmentISGTypes:
+    get:
+      tags:
+        - Equipment ISG Type Resource
+      description: This operation retrieves a list of Equipment ISG Types based on the supplied query parameters.
+      operationId: getEquipmentISGTypes
+      summary: Get equipment ISG types
+      parameters:
+        - $ref: "#/components/parameters/originator"
+        - $ref: "#/components/parameters/category"
+        - $ref: "#/components/parameters/deprecated"
+        - $ref: "#/components/parameters/embed"
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/link"
+                  values:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/equipment-isg-type"
+              examples:
+                No Header:
+                  value:
+                    links: [ ]
+                    values:
+                      - '@type': EquipmentISGType
+                        name: "Scraper"
+                        ERID: "5a734a92-a5a3-4e79-8bba-60c54428690e"
+                        category: "Machine"
+                        isgmarketSegment: "Construction"
+                        allowsCustomModel: true
+                        id: "121"
+                        deprecated: false
+  /equipmentMakes/{equipmentMakeId}/equipmentISGTypes:
+    get:
+      tags:
+        - Equipment ISG Type Resource
+      description: This operation retrieves a list of Equipment ISG Types for given makeId. <br/>
+      operationId: getEquipmentISGTypesByMakeId
+      parameters:
+        - $ref: "#/components/parameters/EquipmentMakeId"
+        - $ref: "#/components/parameters/deprecated"
+        - $ref: "#/components/parameters/embed"
+      summary: Get equipment ISG types by make id
+      security:
+        - OAuth2: [ eq1 ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/link"
+                  values:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/equipment-isg-type"
+              examples:
+                No Header:
+                  value:
+                    links: [ ]
+                    values:
+                      - '@type': EquipmentISGType
+                        name: "Scraper"
+                        ERID: "5a734a92-a5a3-4e79-8bba-60c54428690e"
+                        category: "Machine"
+                        isgmarketSegment: "Construction"
+                        deprecated: false
+                        allowsCustomModel: true
+                        id: "121"
+
+  /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}:
+    get:
+      tags:
+        - Equipment ISG Type Resource
+      description: This operation retrieves a single Equipment ISG Type for given makeId and isgTypeId.. <br/>
+      operationId: getEquipmentISGTypeByMakeIdAndISGTypeId
+      parameters:
+        - $ref: "#/components/parameters/EquipmentMakeId"
+        - $ref: "#/components/parameters/EquipmentISGTypeId"
+        - $ref: "#/components/parameters/embed"
+      security:
+        - OAuth2: [ eq1 ]
+      summary: Get equipment ISG type by make id and ISG type id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/equipment-isg-type"
+              examples:
+                No Header:
+                  value:
+                    '@type': EquipmentISGType
+                    name: "Scraper"
+                    ERID: "5a734a92-a5a3-4e79-8bba-60c54428690e"
+                    category: "Machine"
+                    isgmarketSegment: "Construction"
+                    deprecated: false
+                    allowsCustomModel: true
+                    id: "121"
+
+        404:
+          description: Resource Not Found.
+  /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels:
+    parameters:
+      - $ref: "#/components/parameters/EquipmentMakeId"
+      - $ref: "#/components/parameters/EquipmentISGTypeId"
+      - $ref: "#/components/parameters/deprecated"
+      - $ref: "#/components/parameters/organizationIds"
+    get:
+      tags:
+        - Equipment Model Resource
+      description: This operation retrieves a list of Equipment Models based on given makeId and ISGtypeId.
+      operationId: getEquipmentModelsByMakeIdAndISGTypeId
+      security:
+        - OAuth2: [ eq1 ]
+      summary: Get equipment models by make id and ISG type id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  links:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/link"
+                  values:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/equipment-model"
+              examples:
+                No Header:
+                  value:
+                    links: [ ]
+                    values:
+                      - '@type': EquipmentModel
+                        name: "Model"
+                        ERID: "5a734a92-a5a3-4e79-8bba-60c54428690e"
+                        category: "Machine"
+                        certified: true
+                        deprecated: false
+                        id: "121"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        403:
+          description: User/applications does not have the license assigned
+  /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels/{equipmentModelId}:
+    parameters:
+      - $ref: "#/components/parameters/EquipmentMakeId"
+      - $ref: "#/components/parameters/EquipmentISGTypeId"
+      - $ref: "#/components/parameters/EquipmentModelId"
+    get:
+      tags:
+        - Equipment Model Resource
+      description: This operation retrieves a single Equipment Model based on given makeId, isgTypeId and modelId.
+      operationId: getEquipmentModelsByMakeIdAndISGTypeIdAndModelId
+      security:
+        - OAuth2: [ eq1 ]
+      summary: Get equipment model by make id, ISG type id and model id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/equipment-model"
+              examples:
+                No Header:
+                  value:
+                    '@type': EquipmentModel
+                    name: "Model"
+                    ERID: "5a734a92-a5a3-4e79-8bba-60c54428690e"
+                    category: "Machine"
+                    certified: true
+                    deprecated: false
+                    id: "121"
+        403:
+          description: User is not two-legged authorized
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: An english description of the error
+          example: <parameter> was invalid because <reason>
+        code:
+          type: string
+          description: A string constant representing the type of error
+          example: 400
+        field:
+          type: string
+          description: The name of the property or parameter deemed invalid
+          example: Machine.serialNumber
+        gud:
+          type: string
+          format: uuid
+          description: A reference to this encounter of the error, for traceability and troubleshooting
+          example: 9b331708-10e8-4e15-8097-a9aed7455d6d
+        invalidValue:
+          type: string
+          description: The value that was supplied for this field in the request
+          example: null
+      readOnly: true
+    Errors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Error'
+      readOnly: true
+    link:
+      type: object
+      title: Link
+      properties:
+        rel:
+          type: string
+          example: nextPage
+        uri:
+          type: string
+          description: This will be the relative URL. Users will prefix the base url as per their requirements.
+          example: /equipment?pageOffset=10&itemSize=10
+    equipment-isg-type:
+      type: object
+      title: EquipmentIsgType
+      description: Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
+      example:
+        name: Tractor
+        ERID: 82115264-9385-460c-bfbe-177a59445fd9
+        category: Machine
+        allowsCustomModel: true
+        isgMarketSegment: Agriculture
+        deprecated: false
+        recordMetaData:
+          createdBy: user123
+          createdAt: "2023-10-01T12:00:00Z"
+          updatedBy: user456
+          updatedAt: "2023-10-02T12:00:00Z"
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the ISG equipment type.
+              example: Tractor
+            ERID:
+              type: string
+              description: Unique identifier for the ISG equipment type.
+              example: 82115264-9385-460c-bfbe-177a59445fd9
+            category:
+              type: string
+              description: The category of the ISG equipment type.
+              enum: [ Machine, Implement, Unknown ]
+              example: Machine
+            allowsCustomModel:
+              type: boolean
+              description: Indicates if the equipment ISG type allows custom models.
+              example: true
+            isgMarketSegment:
+              type: string
+              description: The ISG market segment of the equipment ISG type.
+              enum: [ Unknown, Agriculture, Construction, Engines & Components, Forestry, Turf ]
+              example: Agriculture
+            deprecated:
+              type: boolean
+              description: Indicates if the ISG equipment type is deprecated.
+              example: false
+#            recordMetaData:
+#              $ref: '#/components/schemas/RecordMetadata'
+    
+    RecordMetadata:
+      type: object
+      description: |
+        Data structure for record metadata capturing information about the creation and last update of an entity.
+        For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg).
+        NOTES
+        * Some attributes are only visible if the API Client has the required license.
+        * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.)
+      properties:
+        '@type':
+          type: string
+          default: RecordMetadata
+          example: RecordMetadata
+        createdByUser:
+          type: string
+          description: |
+            User involved in creating the entity.  Only viewable with the RECORD_METADATA license
+          example: XYZ_USER
+        lastModifiedByUser:
+          type: string
+          description: |
+            User involved in modifying the entity.  Only viewable with the RECORD_METADATA license
+          example: XYZ_USER
+        userCreationTimestamp:
+          type: string
+          description: Timestamp of entity creation
+          readOnly: true
+          example: "2018-04-30T10:23:50.000Z"
+        userLastModifiedTimestamp:
+          type: string
+          description: Timestamp of entity modification
+          readOnly: true
+          example: "2018-05-01T08:11:23.000Z"
+        createdBySourceNode:
+          type: string
+          format: uuid
+          description: |
+            This is the specific instance of an application that created the entity.  At this time, it only applies
+            to Displays.  Only viewable with the RECORD_METADATA license.
+          readOnly: true
+          example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+        lastModifiedSourceNode:
+          type: string
+          format: uuid
+          description: |
+            This is the specific instance of an application that modified the entity.  At this time, it only applies
+            to Displays.  Only viewable with the RECORD_METADATA license
+          readOnly: true
+          example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+        createdBySourceSystemUri:
+          type: string
+          description: |
+            Derived off of a client key (application that created) via Application Registry lookup. The
+            Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
+            will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+          readOnly: true
+          example: 'https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5'
+        lastModifiedBySourceSystemUri:
+          type: string
+          description: |
+            Derived off of a client key (application that did last modification) via Application Registry lookup. The
+            Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
+            will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+          readOnly: true
+          example: 'https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5'
+    resourcewithoutLinks:
+      type: object
+      title: Resource
+      properties:
+        id:
+          type: string
+          description: Unique id
+          example: 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+        '@type':
+          type: string
+          required: true
+          description: Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+          example: Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+      discriminator:
+        propertyName: '@type'
+    resource:
+      type: object
+      title: Resource
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        id:
+          type: string
+          description: Unique id
+          example: 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+        '@type':
+          type: string
+          description: Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+          example: Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+          required: true
+#        recordMetaData:
+#          $ref: '#/components/schemas/RecordMetadata'
+      discriminator:
+        propertyName: '@type'
+    resource-embed:
+      type: object
+      title: Resource
+      properties:
+        id:
+          type: string
+          description: Unique id
+          example: 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+        '@type':
+          type: string
+          required: true
+          description: Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+          example: Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+      discriminator:
+        propertyName: '@type'
+    organization-embed:
+      type: object
+      title: Resource
+      properties:
+        id:
+          type: string
+          description: Unique id
+          example: 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+        '@type':
+          type: string
+          required: true
+          description: Resource
+          example: Resource
+      discriminator:
+        propertyName: '@type'
+    equipment-make-embed:
+      type: object
+      title: EquipmentMake
+      description: Represents the make of the equipment, including its name, unique identifier, and metadata.
+      properties:
+        '@type':
+          type: string
+          description: EquipmentMake
+          example: EquipmentMake
+        id:
+          type: string
+          description: Unique identifier for the equipment make.
+          example: "1"
+        name:
+          type: string
+          description: The name of the equipment make.
+          example: JOHN DEERE
+        ERID:
+          type: string
+          description: Unique identifier for the equipment make.
+          example: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+        certified:
+          type: boolean
+          description: Indicates if the equipment make is certified.
+          example: true
+        deereOrSubsidiary:
+          type: boolean
+          description: Indicates if the equipment make is deereOrSubsidiary.
+          example: true
+    equipment-make:
+      type: object
+      title: EquipmentMake
+      description: Represents the make of the equipment, including its name, unique identifier, and metadata.
+      example:
+        id: 1
+        name: JOHN DEERE
+        ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+        certified: true
+        deereOrSubsidiary: true
+        deprecated: false
+        recordMetaData:
+          createdBy: user123
+          createdAt: "2023-10-01T12:00:00Z"
+          updatedBy: user456
+          updatedAt: "2023-10-02T12:00:00Z"
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the equipment make.
+              example: JOHN DEERE
+            ERID:
+              type: string
+              description: Unique identifier for the equipment make.
+              example: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+            certified:
+              type: boolean
+              description: Indicates if the equipment make is certified.
+              example: true
+            deereOrSubsidiary:
+              type: boolean
+              description: Indicates if the equipment make is deereOrSubsidiary.
+              example: true
+            deprecated:
+              type: boolean
+              description: Indicates if the equipment make is deprecated.
+              example: false
+#            recordMetaData:
+#              $ref: '#/components/schemas/RecordMetadata'
+
+    equipment-type:
+      type: object
+      title: EquipmentType
+      deprecated: true
+      description: Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
+      example:
+        id: 217
+        name: Two-wheel Drive Tractors - 140 Hp And Above
+        ERID: 82115264-9385-460c-bfbe-177a59445fd9
+        category: Machine
+        certified: true
+        marketSegment: Agriculture
+        icon:
+          url: https://example.com/icon.png
+          description: Icon representing the equipment type
+        deprecated: false
+        allowsCustomModel: true
+        recordMetaData:
+          createdBy: user123
+          createdAt: "2023-10-01T12:00:00Z"
+          updatedBy: user456
+          updatedAt: "2023-10-02T12:00:00Z"
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the equipment type.
+              example: Two-wheel Drive Tractors - 140 Hp And Above
+            ERID:
+              type: string
+              description: Unique identifier for the equipment type.
+              example: 82115264-9385-460c-bfbe-177a59445fd9
+            category:
+              type: string
+              description: The category of the equipment type.
+              enum: [ Machine, Implement, Unknown ]
+              example: Machine
+            certified:
+              type: boolean
+              description: Indicates if the equipment type is certified.
+              example: true
+            allowsCustomModel:
+              type: boolean
+              description: Indicates if the equipment type allows custom models.
+              example: true
+            marketSegment:
+              type: string
+              description: The market segment of the equipment type.
+              enum: [ Unknown, Agriculture, Commercial Worksite Products, Construction, Engines & Components, Forestry, Mining, Turf ]
+              example: Agriculture
+            icon:
+              $ref: '#/components/schemas/equipment-icon'
+            deprecated:
+              type: boolean
+              description: Indicates if the equipment type is deprecated.
+              example: false
+#            recordMetaData:
+#              $ref: '#/components/schemas/RecordMetadata'
+
+    equipment-type-embed:
+      type: object
+      title: EquipmentType
+      description: Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
+      properties:
+        '@type':
+          type: string
+          description: EquipmentType
+          example: EquipmentType
+        id:
+          type: string
+          description: Unique identifier for the equipment type.
+          example: "222"
+        name:
+          type: string
+          description: The name of the equipment type.
+          example: Combine
+        ERID:
+          type: string
+          description: Unique identifier for the equipment type.
+          example: 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
+    icon-style:
+      type: object
+      title: IconStyle
+      description: icon style
+      properties:
+        primaryColor:
+          type: string
+          description: primary color of the icon style
+        secondaryColor:
+          type: string
+          description: secondary color of the icon style
+    equipment-icon:
+      type: object
+      title: EquipmentIcon
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the equipment icon.
+              example: JOHN DEERE
+            iconStyle:
+              $ref: '#/components/schemas/icon-style'
+    equipment-model-details:
+      type: object
+      title: EquipmentModel
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+              example: 8360R
+            ERID:
+              type: string
+              example: 158df9ff-334a-4e0d-86cc-3adca17a9686
+            category:
+              type: string
+              enum:
+                - Machine
+                - Implement
+                - Unknown
+            # deprecated:
+            #   type: boolean
+            #   example: false
+            make:
+              $ref: '#/components/schemas/equipment-make-embed'
+            type:
+              $ref: '#/components/schemas/equipment-type-embed'
+            icon:
+              $ref: '#/components/schemas/equipment-icon'
+    equipment-isg-type-embed:
+      type: object
+      title: EquipmentISGType
+      description: Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
+      properties:
+        '@type':
+          type: string
+          description: EquipmentISGType
+          example: EquipmentISGType
+        id:
+          type: string
+          description: Unique identifier for the ISG equipment type.
+          example: "2"
+        name:
+          type: string
+          description: The name of the ISG equipment type.
+          example: Combine
+        ERID:
+          type: string
+          description: Unique identifier for the ISG equipment type.
+          example: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+    equipment-model:
+      type: object
+      title: EquipmentModel
+      description: Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+      example:
+        name: 8360R
+        ERID: 158df9ff-334a-4e0d-86cc-3adca17a9686
+        category: Machine
+        deprecated: false
+        certified: false
+        make:
+          name: JOHN DEERE
+          ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+          deprecated: false
+          recordMetaData:
+            createdBy: user123
+            createdAt: "2023-10-01T12:00:00Z"
+            updatedBy: user456
+            updatedAt: "2023-10-02T12:00:00Z"
+        type:
+          name: Two-wheel Drive Tractors - 140 Hp And Above
+          ERID: 82115264-9385-460c-bfbe-177a59445fd9
+          category: Machine
+          certified: true
+          marketSegment: Agriculture
+          icon:
+            url: https://example.com/icon.png
+            description: Icon representing the equipment type
+          deprecated: false
+          recordMetaData:
+            createdBy: user123
+            createdAt: "2023-10-01T12:00:00Z"
+            updatedBy: user456
+            updatedAt: "2023-10-02T12:00:00Z"
+        isgType:
+          name: Tractor
+          ERID: 82115264-9385-460c-bfbe-177a59445fd9
+          category: Machine
+          deprecated: false
+          recordMetaData:
+            createdBy: user123
+            createdAt: "2023-10-01T12:00:00Z"
+            updatedBy: user456
+            updatedAt: "2023-10-02T12:00:00Z"
+        icon:
+          url: https://example.com/icon.png
+          description: Icon representing the equipment model
+        recordMetaData:
+          createdBy: user123
+          createdAt: "2023-10-01T12:00:00Z"
+          updatedBy: user456
+          updatedAt: "2023-10-02T12:00:00Z"
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the equipment model.
+              example: 8360R
+            ERID:
+              type: string
+              description: Unique identifier for the equipment model.
+              example: 158df9ff-334a-4e0d-86cc-3adca17a9686
+            category:
+              type: string
+              description: The category of the equipment model.
+              enum: [ Machine, Implement, Unknown ]
+              example: Machine
+            deprecated:
+              type: boolean
+              description: Indicates if the equipment model is deprecated.
+              example: false
+            certified:
+              type: boolean
+              description: Indicates if the equipment model is certified.
+              example: false
+            make:
+              $ref: '#/components/schemas/equipment-make'
+            type:
+              $ref: '#/components/schemas/equipment-type'
+            isgType:
+              $ref: '#/components/schemas/equipment-isg-type'
+            # icon:
+            #   $ref: '#/components/schemas/equipment-icon'
+#            recordMetaData:
+#              $ref: '#/components/schemas/RecordMetadata'
+
+    equipment-model-embed:
+      type: object
+      title: EquipmentModel
+      description: Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+      properties:
+        '@type':
+          type: string
+          description: EquipmentModel
+          example: EquipmentModel
+        id:
+          type: string
+          description: Unique identifier for the equipment model.
+          example: "65985"
+        name:
+          type: string
+          description: The name of the equipment model.
+          example: S680
+        ERID:
+          type: string
+          description: Unique identifier for the equipment model.
+          example: f2e7d596-35c6-11e7-af34-123e49453e98
+        certified:
+          type: boolean
+          description: Indicates if the equipment model is certified.
+          example: true
+    equipment-model-no-embed:
+      type: object
+      title: EquipmentModel
+      description: Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+      example:
+        name: 8360R
+        ERID: 158df9ff-334a-4e0d-86cc-3adca17a9686
+        category: Machine
+        certified: false
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            name:
+              type: string
+              description: The name of the equipment model.
+              example: 8360R
+            ERID:
+              type: string
+              description: Unique identifier for the equipment model.
+              example: 158df9ff-334a-4e0d-86cc-3adca17a9686
+            category:
+              type: string
+              description: The category of the equipment model.
+              enum: [ Machine, Implement, Unknown ]
+              example: Machine
+            certified:
+              type: boolean
+              description: Indicates if the equipment model is certified.
+              example: false
+    identifier:
+      type: object
+      title: Identifier of Equipment
+      description: Identifier of the Equipment like DE-13, DE-17, ERID...
+      allOf:
+        - type: object
+        - required:
+            - type
+            - value
+          properties:
+            type:
+              type: string
+              description: Type of identifier.
+              enum:
+                - serialNumber
+                - ERID
+            value:
+              type: string
+              description: Value of identifier.
+              example: RW8360R055358
+    organization-role:
+      type: object
+      title: OrganizationRole
+      description: Represents the role of an organization, including its type, effective timestamp, and event.
+      example:
+        type: Controlling
+        effectiveTS: "2023-10-01T12:00:00Z"
+        event: CREATION
+      properties:
+        type:
+          type: string
+          description: The type of the organization role.
+          enum:
+            - Controlling
+            - NonControlling
+          example: Controlling
+        effectiveTS:
+          type: string
+          format: date-time
+          description: The timestamp when the role becomes effective.
+          example: "2023-10-01T12:00:00Z"
+        event:
+          type: string
+          description: The event associated with the organization role.
+          enum:
+            - CREATION
+            - TRANSFER
+            - SUBSCRIPTION
+            - PAIRING
+            - ORDER
+            - COMMANDED
+            - DECOMMISSION
+          example: CREATION
+        inPossession:
+          type: boolean
+          example: true
+    abstractMeasurement:
+      type: object
+      title: AbstractMeasurement
+      properties:
+        type:
+          type: string
+        unit:
+          type: string
+    measurementAsDouble:
+      type: object
+      title: MeasurementAsDouble
+      description: measurement as double
+      allOf:
+        - $ref: '#/components/schemas/abstractMeasurement'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: type of measurement
+            unit:
+              type: string
+              description: unit of measurement
+            valueAsDouble:
+              type: number
+              format: double
+              description: measurement value as double
+    variableRepresentationValue:
+      type: object
+      title: VariableRepresentationValue
+      properties:
+        variable:
+          $ref: '#/components/schemas/measurementAsDouble'
+    measurementAsString:
+      type: object
+      title: MeasurementAsString
+      description: measurement as string
+      allOf:
+        - $ref: '#/components/schemas/abstractMeasurement'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: type of measurement
+            unit:
+              type: string
+              description: unit of measurement
+            valueAsString:
+              type: string
+              description: measurement value as string
+    definedTypeRepresentationValue:
+      type: object
+      title: DefinedTypeRepresentationValue
+      properties:
+        value:
+          $ref: '#/components/schemas/measurementAsString'
+    offsets:
+      type: object
+      title: Offsets
+      description: Represents the offsets of a device, including its variable and defined type representation values.
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Offsets
+              description: Offsets
+              example: Offsets
+            variableRepresentationValues:
+              type: array
+              items:
+                $ref: '#/components/schemas/variableRepresentationValue'
+            definedTypeRepresentationValues:
+              type: array
+              items:
+                $ref: '#/components/schemas/definedTypeRepresentationValue'
+    device-make:
+      type: object
+      title: DeviceMake
+      description: Represents the make of a device, including its name and unique identifier (ERID).
+      example:
+        name: JOHN DEERE
+        ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - DeviceMake
+              description: DeviceMake
+              example: DeviceMake
+            name:
+              type: string
+              description: The name of the device make.
+              example: JOHN DEERE
+            ERID:
+              type: string
+              description: Unique identifier of the device make.
+              example: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+    device-type:
+      type: object
+      title: DeviceType
+      description: Represents the type of a device, including its name, common name, and unique identifier (ERID).
+      example:
+        name: Modem
+        commonName: TelematicsGateway
+        ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - DeviceType
+              description: DeviceType
+              example: DeviceType
+            name:
+              type: string
+              description: The name of the device type.
+              example: Modem
+            commonName:
+              type: string
+              description: The common name of the device type.
+              example: TelematicsGateway
+            ERID:
+              type: string
+              description: Unique identifier of the device type.
+              example: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+    device-model:
+      type: object
+      title: DeviceModel
+      description: Represents the model of a device, including its name, unique identifier (ERID), make, and type.
+      example:
+        name: JDLink Modem-4G
+        ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+        make:
+          name: JOHN DEERE
+          ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+        type:
+          name: Modem
+          commonName: TelematicsGateway
+          ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - DeviceModel
+              description: DeviceModel
+              example: DeviceModel
+            name:
+              type: string
+              description: The name of the device model.
+              example: JDLink Modem-4G
+            ERID:
+              type: string
+              description: Unique identifier of the device model.
+              example: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+            make:
+              $ref: '#/components/schemas/device-make'
+            type:
+              $ref: '#/components/schemas/device-type'
+    version:
+      type: object
+      title: Version
+      description: Represents the version of a device or software, including its name.
+      example:
+        name: 3.16.1171
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Version
+              description: Version
+              example: Version
+            name:
+              type: string
+              description: The name of the version.
+              example: 3.16.1171
+    inability-detail:
+      type: object
+      title: InabilityDetail
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            code:
+              type: string
+              example: RC14.8.1
+            type:
+              type: string
+              example: REGISTRATION
+            description:
+              type: string
+              example: SIM registration is required
+    capability:
+      type: object
+      title: Capability
+      description: List of capabilities of the equipment.
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Capability
+              description: Capability
+              example: Capability
+            capable:
+              type: boolean
+            type:
+              type: string
+              enum:
+                - JDLINK_CONNECTIVITY
+                - RDA
+                - WDT
+                - WIFI_CONNECTIVITY
+                - CUSTOMER_SIM_CONNECTIVITY
+                - LEGACY_CONNECTIVITY
+                - PLANNED_WORK
+                - DATA_SYNC_SETUP
+                - CH_REMOTE_ADJUST
+                - BASE_STATION
+                - MY_MACHINE
+                - RDC
+                - REMOTE_START
+            inabilityDetails:
+              type: array
+              items:
+                $ref: '#/components/schemas/inability-detail'
+    equipmentForList:
+      type: object
+      title: Equipment
+      description: Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Equipment
+                - Machine
+                - Implement
+              description: Equipment | Machine | Implement
+              example: Equipment
+            name:
+              type: string
+              description: Equipment Name.
+              example: Cates 8360R 055358
+            isoName:
+              type: string
+              description: Unique 64-bit ISO NAME used to identify the controller during address claim.
+              example: b00082000422ed1d
+            serialNumber:
+              type: string
+              description: Serial Number of the Equipment and passed on the query parameter
+              example: 1RW8360RLCD055358
+            engineSerialNumber:
+              type: string
+              description: VIN or PIN, more than Serial Number, of the Engine.
+              example: RG6090L839275
+            isSerialNumberCertified:
+              type: boolean
+              description: True if this is an official equipment (we have PI information about it).
+              example: true
+            modelYear:
+              type: string
+              description: Year of model.
+              example: 2019
+            make:
+              $ref: '#/components/schemas/equipment-make-embed'
+            type:
+              $ref: '#/components/schemas/equipment-type-embed'
+            isgType:
+              $ref: '#/components/schemas/equipment-isg-type-embed'
+            model:
+              $ref: '#/components/schemas/equipment-model-embed'
+            organization:
+              $ref: '#/components/schemas/organization-embed'
+            telematicsCapable:
+              type: boolean
+              description: Indicates if the equipment is capable of telematics.
+              example: true
+            archived:
+              type: boolean
+              description: Indicates if the equipment is archived.
+              example: true
+            principalId:
+              type: string
+              description: Unique id for principal equipment
+              example: 12345
+            organizationRole:
+              $ref: '#/components/schemas/organization-role'
+            ERID:
+              type: string
+              description: Unique identifier of the Equipment.
+              example: fcdc83cb-8840-4215-84b5-1769889db932
+            alternateIdentifiers:
+              type: array
+              description: List of alternate identifiers of the Equipment like DE-13, DE-17, ERID...
+              items:
+                $ref: '#/components/schemas/identifier'
+            icon:
+              $ref: '#/components/schemas/equipment-icon'
+            devices:
+              type : array
+              description: List of devices paired with the equipment.
+              items:
+                $ref: '#/components/schemas/device'
+            pairingDetails:
+              $ref: '#/components/schemas/pairing-details'
+            archivedTimestamp:
+              type: string
+              format: date-time
+              description: Timestamp when the equipment was archived.
+              example: "2021-03-10T19:19:46.420Z"
+            mergedEquipment:
+              type: array
+              description: List of equipment that was merged.
+              items:
+                $ref: '#/components/schemas/machine'
+            isCsc:
+              type: boolean
+              description: Indicates if the equipment is CSC equipment or not.
+              example: true
+    equipment:
+      type: object
+      title: Equipment
+      description: Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
+      allOf:
+        - $ref: '#/components/schemas/resource'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Equipment
+                - Machine
+                - Implement
+              description: Equipment | Machine | Implement
+              example: Equipment
+            name:
+              type: string
+              description: Equipment Name.
+              example: Cates 8360R 055358
+            isoName:
+              type: string
+              description: Unique 64-bit ISO NAME used to identify the controller during address claim.
+              example: b00082000422ed1d
+            serialNumber:
+              type: string
+              description: Serial Number of the Equipment and passed on the query parameter
+              example: 1RW8360RLCD055358
+            engineSerialNumber:
+              type: string
+              description: VIN or PIN, more than Serial Number, of the Engine.
+              example: RG6090L839275
+            isSerialNumberCertified:
+              type: boolean
+              description: True if this is an official equipment (we have PI information about it).
+              example: true
+            modelYear:
+              type: string
+              description: Year of model.
+              example: 2019
+            make:
+              $ref: '#/components/schemas/equipment-make-embed'
+            type:
+              $ref: '#/components/schemas/equipment-type-embed'
+            isgType:
+              $ref: '#/components/schemas/equipment-isg-type-embed'
+            model:
+              $ref: '#/components/schemas/equipment-model-embed'
+            organization:
+              $ref: '#/components/schemas/organization-embed'
+            telematicsCapable:
+              type: boolean
+              description: Indicates if the equipment is capable of telematics.
+              example: true
+            archived:
+              type: boolean
+              description: Indicates if the equipment is archived.
+              example: true
+            principalId:
+              type: string
+              description: Unique id for principal equipment
+              example: 12345
+            organizationRole:
+              $ref: '#/components/schemas/organization-role'
+            ERID:
+              type: string
+              description: Unique identifier of the Equipment.
+              example: fcdc83cb-8840-4215-84b5-1769889db932
+            alternateIdentifiers:
+              type: array
+              description: List of alternate identifiers of the Equipment like DE-13, DE-17, ERID...
+              items:
+                $ref: '#/components/schemas/identifier'
+            icon:
+              $ref: '#/components/schemas/equipment-icon'
+            offsets:
+              $ref: '#/components/schemas/offsets'
+            devices:
+              type : array
+              description: List of devices paired with the equipment.
+              items:
+                $ref: '#/components/schemas/device'
+            capabilities:
+              type: array
+              description: List of capabilities of the equipment.
+              items:
+                $ref: '#/components/schemas/capability'
+            pairingDetails:
+              $ref: '#/components/schemas/pairing-details'
+            archivedTimestamp:
+              type: string
+              format: date-time
+              description: Timestamp when the equipment was archived.
+              example: "2021-03-10T19:19:46.420Z"
+            mergedEquipment:
+              type: array
+              description: List of equipment that was merged.
+              items:
+                $ref: '#/components/schemas/machine'
+            isCsc:
+              type: boolean
+              description: Indicates if the equipment is CSC equipment or not.
+              example: true
+    point:
+      type: object
+      title: Point
+      properties:
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+        slope:
+          type: number
+          format: double
+    pairing-details:
+      type: object
+      title: PairingDetails
+      description: Represents the details of the pairing process, including timestamps and location.
+      example:
+        paired: true
+        associationTimestamp: "2023-10-01T12:00:00Z"
+        disassociationTimestamp: "2023-10-02T12:00:00Z"
+        confirmationTimestamp: "2023-10-01T12:30:00Z"
+        location:
+          latitude: 40.712776
+          longitude: -74.005974
+      properties:
+        paired:
+          type: boolean
+          description: Indicates if the equipment is paired.
+          example: true
+        associationTimestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the equipment was paired.
+          example: "2023-10-01T12:00:00Z"
+        disassociationTimestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the equipment was un-paired.
+          example: "2023-10-02T12:00:00Z"
+        confirmationTimestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the pairing was confirmed.
+          example: "2023-10-01T12:30:00Z"
+        location:
+          $ref: '#/components/schemas/point'
+    device:
+      type: object
+      title: Device
+      description: Represents a device, including its serial number, certification status, make, type, model, organization, and other attributes.
+      example:
+        '@type': Device
+        serialNumber: PCMA4GF511111
+        make:
+          name: JOHN DEERE
+          id: "1"
+          ERID: f8b43e74-3088-4a38-9d66-30aae1ed1111
+        type:
+          name: Modem
+          commonName: TelematicsGateway
+          id: "1"
+          ERID: d469a324-2036-11ee-bb58-0e5cd6a91111
+        model:
+          name: JDLink Modem-4G
+          id: "3"
+          ERID: f413bba6-9f39-410c-866f-c800bf701111
+        firmwareVersion:
+          name: 40.02.049
+        organization:
+          id: "21111"
+        organizationRole:
+          type: Controlling
+          effectiveTS: 2024-04-30T17:53:57Z
+          event: PAIRING
+        archived: false
+        decommissioned: false
+        stolen: false
+        principalId: "911111"
+        equipment:
+          name: Cattle 9700 SPFH
+          serialNumber: 1Z09700YAKU621111
+          isSerialNumberCertified: true
+          modelYear: "2019"
+          make:
+            name: JOHN DEERE
+            certified: true
+            deereOrSubsidiary: true
+            id: "1"
+            ERID: db18bdc4-025a-11eb-97e4-0e8d658c1111
+          type:
+            name: Forage Harvester
+            id: "162"
+            ERID: 34b07db5-11fb-11ee-8580-0ed5f7261111
+          isgType:
+            name: Forage Harvester
+            id: "6"
+            ERID: 99edf0e0-4abb-42d3-9798-327439a31111
+          model:
+            name: 9700
+            certified: true
+            id: "581111"
+            ERID: 2c8c951e-070a-4e1c-824d-72cca6e71111
+          principalId: "661111"
+          archived: false
+          organization:
+            id: "22967"
+          organizationRole:
+            type: Controlling
+            effectiveTS: 2024-04-30T17:53:56.695Z
+            event: PAIRING
+          isCsc: false
+          id: "661111"
+          ERID: 23fe3ea0-1f95-4ae6-8e12-968729cd1111
+        capabilities:
+          - type: JDLINK_CONNECTIVITY
+            capable: true
+          - type: WIFI_CONNECTIVITY
+            capable: true
+        pairingDetails:
+          paired: true
+          associationTimestamp: 2024-09-28T17:30:24Z
+          disassociationTimestamp: null
+          confirmationTimestamp: 2024-10-23T22:17:22Z
+          location:
+            lat: 52.780639
+            lon: -122.453222
+            slope: null
+        messagesRestricted: false
+        pairingStatus: PAIRED
+        orderNumber: "961111"
+        highFidelityConfigurationVersion:
+          name: 1Hz_L3X40FT4JDPS0x00_ISG_X8X9SPFH_63978_2024.008.001
+        genericConfigurationVersion:
+          name: 1623F1EF-62C2-4B8B-B5EA-A0FFD6EA76F8
+        communicationModules:
+          - imei: "014642005101111"
+            imsi: "310170835961111"
+            iccid: "89011704278359691111"
+            type: GSM
+            serviceProvider: Jasper
+            state: Active
+            id: "632111"
+        id: "915111"
+        ERID: fb537c94-14f1-11ef-871b-1287bcef1111
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Device
+                - Display
+                - PositionReceiver
+                - TelematicsGateway
+              description: Device | Display | PositionReceiver | TelematicsGateway
+              example: Device
+            serialNumber:
+              type: string
+              description: Serial number of the device and passed on the query parameter
+              example: PCS171B372381
+            isSerialNumberCertified:
+              type: boolean
+              description: True if this is an official device (we have PI information about it).
+              example: true
+            make:
+              $ref: '#/components/schemas/device-make'
+            type:
+              $ref: '#/components/schemas/device-type'
+            model:
+              $ref: '#/components/schemas/device-model'
+            organization:
+              $ref: '#/components/schemas/organization-embed'
+            ERID:
+              type: string
+              description: Unique identifier of the Device.
+              example: fcdc83cb-8840-4215-84b5-1769889db932
+            firmwareVersion:
+              $ref: '#/components/schemas/version'
+            capabilities:
+              type: array
+              items:
+                $ref: '#/components/schemas/capability'
+            equipment:
+              $ref: '#/components/schemas/equipment'
+            archived:
+              type: boolean
+              description: Indicates if the device is archived.
+              example: true
+            decommissioned:
+              type: boolean
+              description: Indicates if the device is decommissioned.
+              example: false
+            stolen:
+              type: boolean
+              description: Indicates if the device is stolen.
+              example: false
+            principalId:
+              type: string
+              description: Unique id for principal device
+              example: 12345
+            organizationRole:
+              $ref: '#/components/schemas/organization-role'
+            orderNumber:
+              type: string
+              description: Order number associated with the device.
+              example: 987654321
+            pairingDetails:
+              $ref: '#/components/schemas/pairing-details'
+            archivedTimestamp:
+              type: string
+              format: date-time
+              description: Timestamp when the device was archived.
+              example: "2021-03-10T19:19:46.420Z"
+    display:
+      type: object
+      title: Display
+      allOf:
+        - $ref: '#/components/schemas/device'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Display
+              description: Display
+              example: Display
+            monitors:
+              uniqueItems: true
+              type: array
+              items:
+                $ref: '#/components/schemas/display-monitors'
+    display-monitors:
+      type: object
+      title: Monitor
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - Monitor
+              description: Monitor
+              example: Monitor
+            type:
+              type: string
+              example: Monitor_0
+            serialNumber:
+              type: string
+              example: PCG410A015392
+            resolutionWidth:
+              type: integer
+              example: 800
+            resolutionHeight:
+              type: integer
+              example: 600
+    position-receiver:
+      type: object
+      title: PositionReceiver
+      allOf:
+        - $ref: '#/components/schemas/device'
+        - type: object
+    communication-module:
+      type: object
+      title: CommunicationModule
+      description: Represents a communication module, including its serial number, IMEI, IMSI, ICCID, MSISDN, EID, type, service provider, state, and country calling code.
+      example:
+        serialNumber: PCS171B372381
+        imei: 123456789012345
+        imsi: 310150123456789
+        iccid: 89014103211118510720
+        msisdn: 15555551234
+        eid: 89014103211118510720
+        type: GSM
+        serviceProvider: ATT
+        state: ACTIVE
+        countryCallingCode: 1
+      allOf:
+        - $ref: '#/components/schemas/resource-embed'
+        - type: object
+          properties:
+            '@type':
+              type: string
+              enum:
+                - CommunicationModule
+              description: CommunicationModule
+              example: CommunicationModule
+            serialNumber:
+              type: string
+              description: Serial number of the communication gateway
+              example: PCS171B372381
+            imei:
+              type: string
+              description: International Mobile Equipment Identity of the communication module.
+              example: 123456789012345
+            imsi:
+              type: string
+              description: International Mobile Subscriber Identity of the communication module.
+              example: 310150123456789
+            iccid:
+              type: string
+              description: Integrated Circuit Card Identifier of the communication module.
+              example: 89014103211118510720
+            msisdn:
+              type: string
+              description: Mobile Station International Subscriber Directory Number of the communication module.
+              example: 15555551234
+            eid:
+              type: string
+              description: Embedded Identity Document of the communication module.
+              example: 89014103211118510720
+            type:
+              type: string
+              description: Type of the communication module.
+              enum:
+                - GSM
+                - SATELLITE
+                - CDMA
+                - COS
+              example: GSM
+            serviceProvider:
+              type: string
+              enum:
+                - IRIDIUM
+                - ATT
+                - JASPER
+                - VERIZON
+                - COS
+                - COST
+                - CUBIC
+                - ATTIOT
+              example: ATT
+            state:
+              type: string
+              description: Subscription state of the communication gateway
+              enum:
+                - NEW
+                - ACTIVE
+                - INACTIVE
+                - EXPIRED
+                - PENDING_ACTIVE
+                - PENDING_INACTIVE
+                - PENDING_EXPIRED
+                - PENDING_VERIFICATION
+                - PENDING_WDT
+                - TERMINATED
+              example: ACTIVE
+            countryCallingCode:
+              type: string
+              description: Country calling code of the communication module.
+              example: 1
+    telematics-gateway:
+      type: object
+      title: TelematicsGateway
+      allOf:
+        - $ref: '#/components/schemas/device'
+        - type: object
+          properties:
+            pairingStatus:
+              type: string
+              enum:
+                - PAIRED
+                - PENDING_PAIRING
+            orderNumber:
+              type: string
+            highFidelityConfigurationVersion:
+              $ref: '#/components/schemas/version'
+            genericConfigurationVersion:
+              $ref: '#/components/schemas/version'
+            messagesRestricted:
+              type: boolean
+            communicationModules:
+              type: array
+              items:
+                $ref: '#/components/schemas/communication-module'
+    implement:
+      type: object
+      title: Implement
+      allOf:
+        - $ref: '#/components/schemas/equipment'
+        - type: object
+          properties:
+            machine:
+              $ref: '#/components/schemas/machine'
+    machine:
+      type: object
+      title: Machine
+      allOf:
+        - $ref: '#/components/schemas/equipment'
+        - type: object
+          properties:
+            implements:
+              uniqueItems: true
+              type: array
+              items:
+                $ref: '#/components/schemas/implement'
+    equipment-patch:
+      type: object
+      title: PatchDTO
+      properties:
+        operation:
+          type: string
+          enum:
+            - UPDATE
+        path:
+          type: string
+          enum:
+            - /organization
+            - /archived
+            - /organizationRole/type
+            - /name
+        value:
+          type: string
+          description: |
+            - For transfer request : value={organizationId}
+            - For archive/unarchive request : value=true/false
+            - For role update request : value={Controlling}
+            - For name update request : value={name}
+    createEquipment:
+      type: object
+      title: Equipment Creation
+      properties:
+        name:
+          type: string
+          description: Equipment Name.
+          example: Cates 8360R 055358
+        serialNumber:
+          type: string
+          description: Serial Number of the Equipment and passed on the query parameter
+          example: Must be unique string. Max character count is 30.
+          required: true
+        model:
+          required: true
+          type: object
+          title: Model of the equipment.
+          description: Model of the equipment.
+          properties:
+            id:
+              type: string
+              description: Unique id
+              example: 3 | 158df9ff-334a-4e0d-86cc-3adca17a9686
+              required: true
+            '@type':
+              type: string
+              description: EquipmentModel
+              example: EquipmentModel
+              required: true
+  parameters:
+    embed:
+      name: embed
+      in: query
+      required: false
+      description: List of embed data for the Equipment ISG Type
+      schema:
+        type: array
+        items:
+          type: string
+        example: [ "equipmentModels", "recordMetadata" ]
+        enum:
+          - equipmentModels
+          - recordMetadata
+    deprecatedForEquipmentModels:
+      name: deprecated
+      in: query
+      required: false
+      description: |
+        Optional query parameter that controls which records are returned based on the record's deprecated flag:
+        parameter set to false:  Return only non-deprecated records
+        query parameter not present: both deprecated and non-deprecated records returned.
+      schema:
+        type: boolean
+        example: false
+    deprecated:
+      name: deprecated
+      in: query
+      required: false
+      description: Whether to filter isg types by the deprecated flag
+      schema:
+        type: string
+        enum:
+          - false
+          - true
+          - all
+        example: false
+        default: all
+    originator:
+      name: X-Deere-Originator
+      in: header
+      required: false
+      description: Originating system of the request
+      schema:
+        type: string
+        example: "DataSync"
+    OrganizationEquipmentIds:
+      name: ids
+      in: query
+      required: false
+      description: List of OrganizationEquipment Ids (these ids are unique across all orgs)
+      schema:
+        type: array
+        items:
+          type: integer
+        example:
+          - 1
+          - 2
+          - 3
+    EquipmentSerialNumbers:
+      name: serialNumbers
+      in: query
+      required: false
+      description: List of serial numbers of the equipment
+      schema:
+        type: array
+        items:
+          type: string
+        example:
+          - A01775E760247
+          - 1DW410ETHFF669067
+    OrganizationIds:
+      name: organizationIds
+      in: query
+      required: false
+      description: List of OrganizationIds
+      schema:
+        type: array
+        items:
+          type: integer
+        example:
+          - 1
+          - 2
+          - 3
+    PrincipalIds:
+      name: principalIds
+      in: query
+      required: false
+      description: List of PrincipalIds
+      schema:
+        type: array
+        items:
+          type: integer
+        example:
+          - 1
+          - 2
+          - 3
+    PageOffset:
+      name: pageOffset
+      in: query
+      required: false
+      description: Refers to starting record value
+      schema:
+        type: integer
+        format: int32
+        default: 0
+      example: 200
+    ItemLimit:
+      name: itemLimit
+      in: query
+      required: false
+      description: Refers to number of items per page(default 100 max 5000)
+      schema:
+        type: integer
+        format: int32
+        default: 100
+        maximum: 5000
+      example: 200
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+      example: 1111
+    organizationId:
+      name: organizationId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+      example: 1234,
+    organizationIds:
+      name: organizationIds
+      in: query
+      required: false
+      description: |
+        The organization ids to get Equipment Models for.
+        If provided, then only non-certified models will be returned.
+        If not provided, then only certified models will be returned.
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int32
+        example: [ 1, 2, 3 ]
+    EmbedForList:
+      name: embed
+      in: query
+      required: false
+      description: embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds
+      schema:
+        type: string
+        enum:
+          - devices
+          - equipment
+          - icon
+          - pairingDetails
+    Embed:
+      name: embed
+      in: query
+      required: false
+      description: embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds
+      schema:
+        type: string
+        enum:
+          - devices
+          - equipment
+          - pairingDetails
+          - icon
+          - offsets
+          - capabilities
+    Categories:
+      name: categories
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+        enum:
+          - Machine
+          - Implement
+        example:
+          - Machine
+          - Implement | Machine | Implement
+    CapableOf:
+      name: capableOf
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - Connectivity
+          - '!Connectivity'
+    Role:
+      name: organizationRole.type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - Controlling
+          - NonControlling
+    Archived:
+      name: archived
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: true or false
+    SerialNumber:
+      name: serialNumber
+      in: path
+      required: true
+      schema:
+        type: string
+      example: VIN1234
+    EquipmentMakeId:
+      name: equipmentMakeId
+      in: path
+      required: true
+      description: ID for Equipment Make
+      schema:
+        type: integer
+        format: int32
+        example: 1111
+    EquipmentISGTypeId:
+      name: equipmentISGTypeId
+      in: path
+      required: true
+      description: ID for Equipment ISG Type
+      schema:
+        type: integer
+        format: int32
+        example: 1111
+    Deprecated:
+      name: deprecated
+      in: path
+      required: true
+      description: Deprecated value should be false
+      schema:
+        type: boolean
+        example: false
+    EmbedV1:
+      name: embed
+      in: query
+      required: false
+      description: Embed additional attributes if required.
+      schema:
+        type: string
+        enum:
+          - make
+          - type
+          - isgType
+      example:
+        - make
+        - type
+    EquipmentModelName:
+      name: equipmentModelName
+      in: query
+      required: false
+      description: It should be equipment model name
+      schema:
+        type: string
+        enum:
+          - string or partial string with * wildcard search
+      example:
+        - 9RX420
+        - 9RX*
+    EquipmentTypeId:
+      name: equipmentTypeId
+      in: path
+      required: true
+      description: ID for Equipment Type
+      schema:
+        type: integer
+        format: int32
+        example: 2222
+    EquipmentModelId:
+      name: equipmentModelId
+      in: path
+      required: true
+      description: ID for Equipment Model
+      schema:
+        type: integer
+        format: int32
+        example: 3333
+    category:
+      name: category
+      in: query
+      required: false
+      description: List of type categories for the Equipment Model
+      schema:
+        type: array
+        items:
+          type: string
+        example:
+          - machine
+          - implement
+        enum:
+          - machine
+          - implement
+    EquipmentTypeName:
+      name: equipmentTypeName
+      in: query
+      required: false
+      description: Name for Equipment Type
+      schema:
+        type: string
+        example: 8285R
+    EquipmentMakeName:
+      name: equipmentTypeId
+      in: query
+      required: false
+      description: Name for Equipment Make
+      schema:
+        type: string
+        example: JOHN DEERE
+  responses:
+    GetEquipment:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipmentForList'
+          examples:
+            No Header:
+              value:
+                links:
+                  - rel: nextPage
+                    uri: https://equipmentapi.deere.com/isg/equipment?organizationIds=1234&categories=machine&embed=equipment,devices,pairingDetails,icon&pageOffset=200&itemLimit=100
+                values:
+                  name: 1H0S680SCE0766303
+                  isoName: Cates 8360R 055358
+                  serialNumber: 1H0S680SCE0766303
+                  engineSerialNumber: RG6135U000500
+                  isSerialNumberCertified: true
+                  modelYear: '2014'
+                  make:
+                    name: JOHN DEERE
+                    certified: true
+                    deereOrSubsidiary: true
+                    id: "1111"
+                    ERID: db18bdc4-025a-11eb-97e4-0e8d658c1111
+                  type:
+                    name: Combine
+                    id: 222
+                    ERID: 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
+                  isgType:
+                    name: Combine
+                    id: 2
+                    ERID: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                  model:
+                    name: S680
+                    certified: true
+                    id: 65985
+                    ERID: f2e7d596-35c6-11e7-af34-123e49453e98
+                  icon:
+                    name: combine-header-bean
+                    iconStyle:
+                      primaryColor: "#367C2B"
+                      secondaryColor: "#FFDE00"
+                  organization:
+                    - '@type': Resource
+                      id: 1234
+                  telematicsCapable: true
+                  archived: false
+                  principalId: 217373
+                  organizationRole:
+                    type: Controlling
+                    effectiveTS: "2024-03-15T09:00:29.101Z"
+                    event: TRANSFER
+                    inPossession: true
+                  ERID: "d3d0bd20-e09f-11ee-92e2-0e5cd6a962d7"
+                  alternateIdentifiers:
+                    - type: serialNumber
+                      value: P05415X041850
+                    - type: serialNumber
+                      value: 1P05415XAN4041850
+                  pairingDetails:
+                    paired: false
+                    associationTimestamp: null
+                    disassociationTimestamp: 2024-10-23T22:23:54Z
+                    confirmationTimestamp: null
+                    location:
+                      lat: 37.904531
+                      lon: -89.334754
+                      slope: null
+                  devices:
+                    - '@type': TelematicsGateway
+                      serialNumber: PCMAMGA772527,
+                      make:
+                        - '@type': DeviceMake
+                          name: John Deere
+                          id: 1
+                          ERID: f8b43e74-3088-4a38-9d66-30aae1ed1a11
+                      type:
+                        - '@type': DeviceType
+                          name: Modem
+                          commonName: TelematicsGateway
+                          id: 1
+                          ERID: d469a324-2036-11ee-bb58-0e5cd6a962d7
+                      model:
+                        - '@type': DeviceModel
+                          name: JDLink Modem-2G
+                          id: 1
+                          ERID: 7698ea15-e634-493d-8d55-1749563b3d22
+                      organization:
+                        - '@type': Resource,
+                          id: 1234
+                      organizationRole:
+                        type: NonControlling
+                        effectiveTS: 2024-06-19T13:07:46.119Z
+                        event: TRANSFER
+                        inPossession: false
+                      archived: true
+                      decommissioned: false
+                      stolen: false
+                      principalId: 82044
+                      archivedTimestamp: 2024-06-19T13:07:46Z
+                      messagesRestricted: false
+                      pairingStatus: PENDING
+                      orderNumber: 371859
+                      id: 82044
+                      ERID: fe1b7f0d-f901-11ee-8d6e-0ee07103fef
+                  mergedEquipment:
+                    - '@type': Machine
+                      name: Tyyui5677
+                      make:
+                        - '@type': EquipmentMake
+                          name: BOBCAT
+                          certified: false
+                          deereOrSubsidiary: false
+                          id: 232
+                          ERID: db1a64f3-025a-11eb-97e4-0e8d658c7ba3
+                      type:
+                        - '@type': EquipmentType
+                          name: Rotary Cutter
+                          id: 518
+                          ERID: cc304214-4ba5-48c2-a04a-485970232d7f
+                      isgType:
+                        - '@type': EquipmentISGType
+                          name: Other
+                          id: 29
+                          ERID: bcb321b9-521d-4761-9e64-f59816a2ab6b
+                      model:
+                        - '@type': EquipmentModel
+                          name: RC-80-H
+                          certified: true
+                          id: 586875
+                          ERID: f6694870-c322-4000-8f5f-a701ed6eb144
+                      icon:
+                        - '@type': EquipmentIcon
+                          name: cutters-and-shredders-rotary-cutters
+                          iconStyle:
+                            primaryColor: #7E7E7E
+                            secondaryColor: #D3D3D3
+                      archived: false
+                      mergedBy: userABC
+                      mergedTimeStamp: 2025-02-14T19:13:08.911Z
+                      isCsc: false
+                      id: 7836613
+                  archivedTimestamp: 2021-03-10T19:19:46.420Z
+                  isCsc: false
+    GetEquipmentById:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipment'
+          examples:
+            No Header:
+              value:
+                links:
+                  - rel: nextPage
+                    uri: https://equipmentapi.deere.com/isg/equipment?organizationIds=1234&categories=machine&embed=equipment,devices,pairingDetails,icon&pageOffset=200&itemLimit=100
+                values:
+                  name: 1H0S680SCE0766303
+                  isoName: Cates 8360R 055358
+                  serialNumber: 1H0S680SCE0766303
+                  engineSerialNumber: RG6135U000500
+                  isSerialNumberCertified: true
+                  modelYear: '2014'
+                  make:
+                    name: JOHN DEERE
+                    certified: true
+                    deereOrSubsidiary: true
+                    id: "1111"
+                    ERID: db18bdc4-025a-11eb-97e4-0e8d658c1111
+                  type:
+                    name: Combine
+                    id: 222
+                    ERID: 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
+                  isgType:
+                    name: Combine
+                    id: 2
+                    ERID: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                  model:
+                    name: S680
+                    certified: true
+                    id: 65985
+                    ERID: f2e7d596-35c6-11e7-af34-123e49453e98
+                  icon:
+                    name: combine-header-bean
+                    iconStyle:
+                      primaryColor: "#367C2B"
+                      secondaryColor: "#FFDE00"
+                  organization:
+                    - '@type': Resource
+                      id: 1234
+                  telematicsCapable: true
+                  archived: false
+                  principalId: 217373
+                  organizationRole:
+                    type: Controlling
+                    effectiveTS: "2024-03-15T09:00:29.101Z"
+                    event: TRANSFER
+                    inPossession: true
+                  ERID: "d3d0bd20-e09f-11ee-92e2-0e5cd6a962d7"
+                  alternateIdentifiers:
+                    - type: serialNumber
+                      value: P05415X041850
+                    - type: serialNumber
+                      value: 1P05415XAN4041850
+                  offsets:
+                    variableRepresentationValues:
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrLateralControlPointToConnectionOffset
+                          unit: m
+                          valueAsDouble: 0.0
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrPhysicalImplementWidth
+                          unit: m
+                          valueAsDouble: 9.14
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrInlineControlPointToConnectionOffset
+                          unit: m
+                          valueAsDouble: 0.0
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrLateralRearConnectionPointToConnectionPointOffset
+                          unit: m
+                          valueAsDouble: 0.0
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrImplementFrontOffset
+                          unit: m
+                          valueAsDouble: 0.0
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrTrackSpacing
+                          unit: m
+                          valueAsDouble: 9.144
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrImplementLength
+                          unit: m
+                          valueAsDouble: 0.0
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrImplementTurnRadius
+                          unit: m
+                          valueAsDouble: 9.1
+                      - variable:
+                          type: https://api.deere.com/platform/variableRepresentations/vrEquipmentWidth
+                          unit: m
+                          valueAsDouble: 9.14
+                    definedTypeRepresentationValues:
+                      - value:
+                          type: https://api.deere.com/platform/definedTypeRepresentations/dtCoverageSetting
+                          valueAsString: dtiCoverageMinimizeSkips
+                      - value:
+                          type: https://api.deere.com/platform/definedTypeRepresentations/dtImplementLateralOffsetType
+                          valueAsString: dtiLateralRight
+                  capabilities:
+                    - type: JDLINK_CONNECTIVITY
+                      capable: false
+                      inabilityDetails:
+                        - code: RC10.1.3
+                          type: ACTIVATION
+                          description: Activation required
+                    - type: WIFI_CONNECTIVITY
+                      capable: false
+                      inabilityDetails:
+                        - code: RC13.7.1
+                          type: DATA
+                          description: Missing data
+                    - type: CUSTOMER_SIM_CONNECTIVITY
+                      capable: false
+                      inabilityDetails:
+                        - code: RC14.1.1
+                          type: ACTIVATION
+                          description: Activation required
+                  pairingDetails:
+                    paired: false
+                    associationTimestamp: null
+                    disassociationTimestamp: 2024-10-23T22:23:54Z
+                    confirmationTimestamp: null
+                    location:
+                      lat: 37.904531
+                      lon: -89.334754
+                      slope: null
+                  devices:
+                    - '@type': TelematicsGateway
+                      serialNumber: PCMAMGA772527,
+                      make:
+                        - '@type': DeviceMake
+                          name: John Deere
+                          id: 1
+                          ERID: f8b43e74-3088-4a38-9d66-30aae1ed1a11
+                      type:
+                        - '@type': DeviceType
+                          name: Modem
+                          commonName: TelematicsGateway
+                          id: 1
+                          ERID: d469a324-2036-11ee-bb58-0e5cd6a962d7
+                      model:
+                        - '@type': DeviceModel
+                          name: JDLink Modem-2G
+                          id: 1
+                          ERID: 7698ea15-e634-493d-8d55-1749563b3d22
+                      organization:
+                        - '@type': Resource,
+                          id: 1234
+                      organizationRole:
+                        type: NonControlling
+                        effectiveTS: 2024-06-19T13:07:46.119Z
+                        event: TRANSFER
+                        inPossession: false
+                      archived: true
+                      decommissioned: false
+                      stolen: false
+                      principalId: 82044
+                      archivedTimestamp: 2024-06-19T13:07:46Z
+                      messagesRestricted: false
+                      pairingStatus: PENDING
+                      orderNumber: 371859
+                      id: 82044
+                      ERID: fe1b7f0d-f901-11ee-8d6e-0ee07103fef
+                  mergedEquipment:
+                    - '@type': Machine
+                      name: Tyyui5677
+                      make:
+                        - '@type': EquipmentMake
+                          name: BOBCAT
+                          certified: false
+                          deereOrSubsidiary: false
+                          id: 232
+                          ERID: db1a64f3-025a-11eb-97e4-0e8d658c7ba3
+                      type:
+                        - '@type': EquipmentType
+                          name: Rotary Cutter
+                          id: 518
+                          ERID: cc304214-4ba5-48c2-a04a-485970232d7f
+                      isgType:
+                        - '@type': EquipmentISGType
+                          name: Other
+                          id: 29
+                          ERID: bcb321b9-521d-4761-9e64-f59816a2ab6b
+                      model:
+                        - '@type': EquipmentModel
+                          name: RC-80-H
+                          certified: true
+                          id: 586875
+                          ERID: f6694870-c322-4000-8f5f-a701ed6eb144
+                      icon:
+                        - '@type': EquipmentIcon
+                          name: cutters-and-shredders-rotary-cutters
+                          iconStyle:
+                            primaryColor: #7E7E7E
+                            secondaryColor: #D3D3D3
+                      archived: false
+                      mergedBy: userABC
+                      mergedTimeStamp: 2025-02-14T19:13:08.911Z
+                      isCsc: false
+                      id: 7836613
+                  archivedTimestamp: 2021-03-10T19:19:46.420Z
+                  isCsc: false
+    GetEquipmentModelByMakeIdAndTypeIdAndModelId:
+      description: Equipment Model Details by Equipment Make ID, Equipment Type ID and Equipment Model ID
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipment-model-no-embed'
+          examples:
+            No Header:
+              value:
+                '@type': EquipmentModel
+                name: '3812 GOOSENECK'
+                category: Implement
+                certified: true
+                ERID: "0c4e2f8b-b1d2-4ecd-98a0-8b5495b5c946"
+                id: 744542
+    GetEquipmentModelName:
+      description: Equipment Models
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipment-model'
+          examples:
+            No Header:
+              value:
+                links: []
+                values:
+                  - '@type': "EquipmentModel"
+                    name: "9RX420"
+                    category: "Machine"
+                    certified: true
+                    id: "217373"
+                    ERID: "d3d0bd20-e09f-11ee-92e2-0e5cd6a962d7"
+                    make:
+                      - '@type': EquipmentMake
+                        name: JOHN DEERE
+                        certified: true
+                        deereOrSubsidiary: true
+                        id: 1
+                        ERID: 0e8031fe-fe81-11ea-bec7-124fe3772e59
+                    type:
+                      - '@type': EquipmentType
+                        name: Combine
+                        id: 222
+                        ERID: 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
+                    isgType:
+                      - '@type': EquipmentISGType
+                        name: Combine
+                        id: 2
+                        ERID: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                  - '@type': "EquipmentModel"
+                    name: "9RX -870"
+                    category: "Machine"
+                    certified: false
+                    id: "787077"
+                    ERID: "f3d97337-e566-439a-8f6b-4a1c76be055d"
+                    make:
+                      - '@type': EquipmentMake
+                        name: JOHN DEERE
+                        certified: false
+                        deereOrSubsidiary: true
+                        id: 1
+                        ERID: db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+                    type:
+                      - '@type': EquipmentType
+                        name: Four-wheel Drive Tractor
+                        id: 145
+                        ERID: 6e816bfb-955f-4687-a362-1133ab26cef9
+                    isgType:
+                      - '@type': EquipmentISGType
+                        name: Tractor
+                        id: 1
+                        ERID: 82115264-9385-460c-bfbe-177a59445fd9
+    UpdateEquipment:
+      description: Update Equipment
+      content:
+        application/json:
+          schema:
+            required:
+              - '@type'
+              - 'id'
+            type: object
+            title: Equipment Creation
+            properties:
+              id:
+                type: string
+                description: Unique id
+                example: 1 | fcdc83cb-8840-4215-84b5-1769889db932
+                required: true
+              name:
+                type: string
+                description: Equipment Name.
+                example: Cates 8360R 055358
+              serialNumber:
+                type: string
+                description: Serial Number of the Equipment and passed on the query parameter
+                example: Must be unique string. Max character count is 30.
+                required: true
+              make:
+                type: object
+                title: Make of the equipment.
+                description: Make of the equipment.
+                properties:
+                  id:
+                    type: string
+                    description: Unique id
+                    example: 1 | fcdc83cb-8840-4215-84b5-1769889db932
+                  '@type':
+                    type: string
+                    description: EquipmentMake
+                    example: EquipmentMake
+              type:
+                type: object
+                title: Type of the equipment.
+                description: Type of the equipment.
+                properties:
+                  id:
+                    type: string
+                    description: Unique id
+                    example: 2 | 82115264-9385-460c-bfbe-177a59445fd9
+                  '@type':
+                    type: string
+                    description: EquipmentType
+                    example: EquipmentType
+              model:
+                type: object
+                title: Model of the equipment.
+                description: Model of the equipment.
+                properties:
+                  id:
+                    type: string
+                    description: Unique id
+                    example: 3 | 158df9ff-334a-4e0d-86cc-3adca17a9686
+                  '@type':
+                    type: string
+                    description: EquipmentModel
+                    example: EquipmentModel
+              icon:
+                $ref: '#/components/schemas/equipment-icon'
+          examples:
+            No Header:
+              value:
+                '@type': Machine
+                id: 1
+                name: 'Equipment Name'
+                serialNumber: '1T0750LXCNF012345'
+                make:
+                  - '@type': EquipmentMake
+                    id: 1
+                type:
+                  - '@type': EquipmentType
+                    id: 414
+                model:
+                  - '@type': EquipmentModel
+                    id: 585917
+                icon:
+                  - '@type': EquipmentIcon
+                    name: "crawler-loader"
+                    iconStyle:
+                      primaryColor: "#F2A900"
+                      secondaryColor: "#808082"
+    GetEquipmentMake:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipment-make'
+          examples:
+            No Header:
+              value:
+                links: []
+                values:
+                  - '@type': EquipmentMake
+                    name: JOHN DEERE
+                    certified: false
+                    deereOrSubsidiary: true
+                    id: 1
+                    ERID: 0e8031fe-fe81-11ea-bec7-124fe3772e59
+    GetEquipmentByMakeId:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+          examples:
+            No Header:
+              value:
+                '@type': EquipmentMake
+                name: JOHN DEERE
+                certified: false
+                deereOrSubsidiary: true
+                id: 1
+                ERID: 0e8031fe-fe81-11ea-bec7-124fe3772e59
+    GetEquipmentTypesByMakeId:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+          examples:
+            No Header:
+              value:
+                links: [ ]
+                values:
+                  - '@type': EquipmentType
+                    name: "Scraper"
+                    ERID: "15e10ade-33ae-40a1-9b06-7800c7581a17"
+                    category: "Implement"
+                    marketSegment: "Construction"
+                    allowsCustomModel: true
+                    id: "121"
+                    icon:
+                      '@type': EquipmentIcon
+                      name: "generic-fuel-trailer"
+                      iconStyle:
+                        primaryColor: "#7E7E7E"
+                        secondaryColor: "#D3D3D3"
+    GetEquipmentTypes:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+          examples:
+            No Header:
+              value:
+                links: [ ]
+                values:
+                  - '@type': EquipmentType
+                    name: "Scraper"
+                    ERID: "15e10ade-33ae-40a1-9b06-7800c7581a17"
+                    category: "Implement"
+                    marketSegment: "Construction"
+                    allowsCustomModel: true
+                    id: "121"
+                    icon:
+                      '@type': EquipmentIcon
+                      name: "generic-fuel-trailer"
+                      iconStyle:
+                        primaryColor: "#7E7E7E"
+                        secondaryColor: "#D3D3D3"
+    GetEquipmentTypeByEquipmentMakeIdAndEquipmentTypeId:
+      description: A collection of Assets
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              values:
+                items:
+                  $ref: '#/components/schemas/equipment-type'
+          examples:
+            No Header:
+              value:
+                - '@type': EquipmentType
+                  name: "Scraper"
+                  ERID: "15e10ade-33ae-40a1-9b06-7800c7581a17"
+                  category: "Implement"
+                  marketSegment: "Construction"
+                  allowsCustomModel: true
+                  id: "121"
+                  icon:
+                    '@type': EquipmentIcon
+                    name: "generic-fuel-trailer"
+                    iconStyle:
+                      primaryColor: "#7E7E7E"
+                      secondaryColor: "#D3D3D3"
+    CreateEquip:
+      description: Create
+      content:
+        application/json:
+          schema:
+            type: object
+          examples:
+            Headers:
+              description: '201 Created'
+    UpdatedEquip:
+      description: Update
+      content:
+        application/json:
+          schema:
+            type: object
+          examples:
+            Headers:
+              description: '204 No Content'

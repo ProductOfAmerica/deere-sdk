@@ -1,0 +1,346 @@
+openapi: '3.0.3'
+x-zally-ignore: [D013]
+info:
+  description: |
+    These are the endpoints for managing equipment operators
+  version: 1.0.0
+  contact:
+    name: 'SOUP Team'
+    email: 'ISG_SOUPERFRIENDS@JohnDeere.com'
+  title: Operator API
+
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - api
+          - apicert
+          - apiqa.tal
+          - sandboxapi
+
+paths:
+  /organizations/{orgId}/operators:
+    get:
+      description: This endpoint will return list of operators in the system for the provided organization ID
+      summary: Retrieve all Operators for a given org
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/embed'
+        - $ref: '#/components/parameters/recordFilter'
+        - $ref: '#/components/parameters/lastModifiedTime'
+      security:
+        - OAuth2: [ ag1 ]
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: '#/components/schemas/GetResponseDetails'
+                  links:
+                    items:
+                      $ref: '#/components/schemas/GetAvailableLinks'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - rel: self
+                        uri: https://sandboxapi.deere.com/platform/organizations/12345/operators
+                    total: 1
+                    values:
+                      - '@type': Operator
+                        links:
+                          - '@type': Link
+                            rel: self
+                            uri: >-
+                              https://sandboxapi.deere.com/platform/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
+                        name: John Doe
+                        id: 0235d40e-02d0-44cb-a126-fff21173fc1f
+                        license: 12345_LICENSE
+                        dateModified: '2018-04-30T10:23:50.000Z'
+                        archived: false
+
+    post:
+      description: This endpoint will create a new Operator in the system for the provided organization ID
+      summary: Create an Operator
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+      security:
+        - OAuth2: [ ag2 ]
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/PostOperator'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/ContentType'
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: '201 Created<br/>Location: https://sandboxapi.deere.com/platform/operators/4r539261-5e4b-4e1c-9201-8026f47109bb'
+
+    delete:
+      description: This endpoint will delete every operator in the system for the provided organization ID
+      summary: Delete all Operators for a given org
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+      security:
+        - OAuth2: [ ag3 ]
+      responses:
+        204:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: '204 No Content'
+
+  /organizations/{orgId}/operators/{id}:
+    get:
+      description: This endpoint will return a specific operator in the system in an org for the provided Operator ID to the data of an operator in the request body
+      summary: Retrieve a specific Operator in an org by Operator ID
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/embed'
+      security:
+        - OAuth2: [ ag1 ]
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: '#/components/schemas/GetResponseOperatorDetails'
+                  links:
+                    items:
+                      $ref: '#/components/schemas/GetOperatorAvailableLinks'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - rel: self
+                        uri: https://sandboxapi.deere.com/platform/organizations/12345/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
+                    id: 0235d40e-02d0-44cb-a126-fff21173fc1f
+                    name: John Doe
+                    license: 12345_LICENSE
+                    dateModified: '2018-04-30T10:23:50.000Z'
+                    archived: false
+
+    put:
+      description: This endpoint will update a specific operator in the system in an org for the provided Operator ID to the data of an operator in the request body
+      summary: Update a specific Operator in an org by Operator ID
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/id'
+      security:
+        - OAuth2: [ ag2 ]
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/PutOperator'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/ContentType'
+      responses:
+        204:
+          description: Updated
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: '204 No Content'
+
+    delete:
+      description: This endpoint will delete a specific operator in the system in an org for the provided Operator ID
+      summary: Delete a specific Operator in an org by Operator ID
+      parameters:
+        - $ref: '#/components/parameters/orgID'
+        - $ref: '#/components/parameters/id'
+      security:
+        - OAuth2: [ ag3 ]
+      responses:
+        204:
+          description: Deleted
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: '204 No Content'
+
+components:
+  parameters:
+    orgId:
+      in: path
+      name: orgId
+      description: Organization ID
+      required: true
+      schema:
+        type: string
+        example: 123456
+        format: uuid
+    id:
+      in: path
+      name: id
+      description: Operator ID
+      required: true
+      schema:
+        type: string
+        example: '0235d40e-02d0-44cb-a126-fff21173fc1f'
+        format: uuid
+    embed:
+      in: query
+      name: embed
+      description: Include operator metadata in the response.
+      required: false
+      schema:
+        type: string
+        example: showRecordMetadata
+        format: uuid
+    recordFilter:
+      in: query
+      name: recordFilter
+      description: Filter operators by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark>
+      required: false
+      schema:
+        type: string
+        example: ACTIVE
+        format: uuid
+    lastModifiedTime:
+      in: query
+      name: lastModifiedTime
+      description: Start of the range for timestamp filtering
+      required: false
+      schema:
+        type: dateTime
+        example: '2019-01-01T00:00:00Z'
+        format: uuid
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            org1: 'org1'
+            org2: 'org2'
+  schemas:
+      GetResponseDetails:
+        properties:
+          id:
+            type: string
+            example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+            description: Operator ID
+          name:
+            type: string
+            example: John Doe
+            description: Operator Name
+          dateModified:
+            type: datetime
+            example: 2019-03-22T08:48:20Z
+            description: Datetime when the entity modified, it would be null on creation.
+          archived:
+            type: boolean
+            example: 'true'
+            description: Archived Status
+
+      GetResponseOperatorDetails:
+        properties:
+          id:
+            type: string
+            example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+            description: Operator ID
+          name:
+            type: string
+            example: John Doe
+            description: Operator Name
+          dateModified:
+            type: datetime
+            example: 2019-03-22T08:48:20Z
+            description: Datetime when the entity modified, it would be null on creation.
+          archived:
+            type: boolean
+            example: 'true'
+            description: Archived Status
+      PostOperator:
+        properties:
+          name:
+            example: John Doe
+            description: Operator Name
+            type: string
+      ContentType:
+        properties:
+          Content-Type: application/vnd.deere.axiom.v3+json
+      PutOperator:
+        properties:
+          name:
+            example: John Doe
+            description: Operator Name
+            type: string
+            required: true
+          archived:
+            example: 'false'
+            type: string
+            description: Archived Status
+
+      GetAvailableLinks:
+        properties:
+          self:
+            example: https://sandboxapi.deere.com/platform/organizations/123456/operators
+            description: Self Link
+
+      GetOperatorAvailableLinks:
+        properties:
+          self:
+            example: https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
+            description: Self Link
+
+
+
+
+

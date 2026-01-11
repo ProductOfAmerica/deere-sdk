@@ -1,0 +1,93 @@
+openapi: "3.0.1"
+info:
+  title: "Users API"
+  description: "This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information."
+  version: "1.0.0"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /users/{username}:
+    get:
+      summary: "View User Info"
+      description: "This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information.<br/> The response also contains links to the following resources: <ul><li><b>organizations:</b> View a list of organizations to which the user belongs.</li> <li><b>files:</b> View a list of files belonging to the user.</li></ul>"
+      parameters:
+        - name: "username"
+          in: "path"
+          description: "Filter by username."
+          schema:
+            type: "string"
+            default: "N/A"
+            example: "JohnDoe"
+        - name: "embed"
+          in: "query"
+          description: "Add user's staff organizations and available links to response."
+          schema:
+            type: "string"
+            default: "N/A"
+            example: "Organizations"
+      responses:
+        "200":
+          description: "The users."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/UsersLink"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/UsersValue"
+              examples:
+                No Header:
+                  description: "200 OK<br/> Content-Type:application/vnd.deere.axiom.v3+jso"
+                  value:
+                    "@type": "User"
+                    accountName: "johndoe"
+                    givenName: "John"
+                    familyName: "Doe"
+                    userType: "Customer"
+                    links:
+                      - "@type": "Link"
+                        rel: "self"
+                        uri: " https://sandboxapi.deere.com/platform/users/johndoe"
+                        followable: true
+                      - "@type": "Link"
+                        rel: "organizations"
+                        uri: " https://sandboxapi.deere.com/platform/users/johndoe/organizations"
+                        followable: true
+components:
+  schemas:
+    UsersLink:
+      properties:
+        organizations:
+          example: "https://sandboxapi.deere.com/platform/users/johndoe/organizations"
+          description: "Organizations Link."
+    UsersValue:
+      properties:
+        accountName:
+          type: "string"
+          example: "JohnDoe"
+          description: "User's account name."
+        givenName:
+          type: "string"
+          example: "John"
+          description: "User's first name."
+        familyName:
+          type: "string"
+          example: "Doe"
+          description: "User's last name."
+        userType:
+          type: "string"
+          example: "Customer"
+          description: "User's type. Examples are customer, dealer, internal"

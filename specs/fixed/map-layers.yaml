@@ -1,0 +1,1036 @@
+openapi: "3.0.1"
+info:
+  title: "Contributed Map Layers API"
+  description: "A collection of APIs used for interacting with Contributed Map Layers in MJD."
+  contact:
+    name: "Patrick O'Connell"
+    email: "O'ConnellPatrickD@JohnDeere.com"
+  version: "0.0.1"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /organizations/{orgId}/fields/{id}/mapLayerSummaries:
+    get:
+      description: "This resource will list all Map Layer Summaries for a specified field.<br/>"
+      summary: "List Map Layer Summaries"
+      parameters:
+        - $ref: "#/components/parameters/OrganizationId"
+        - $ref: "#/components/parameters/fieldId"
+        - $ref: "#/components/parameters/includePartialSummaries"
+        - $ref: "#/components/parameters/embed"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/schemas/MapLayerSummaryCollection"
+    post:
+      description: "Creates a new Map Layer Summary resource."
+      summary: "Create a map layer summary"
+      parameters:
+        - $ref: "#/components/parameters/OrganizationId"
+        - $ref: "#/components/parameters/fieldId"
+      security:
+        - OAuth2:
+            - "ag3"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/PostRequest"
+          Create Map Layer Summary:
+            examples:
+              No Header:
+                description: ""
+                value:
+                  links:
+                    - rel: "owningOrganization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+                  title: "some title"
+                  text: "description of map layer summary with [a link](https://www.example.com)"
+                  metadata:
+                    - name: "The Name"
+                      value: "The Value"
+                  dateCreated: "2016-01-02T16:14:23.421Z"
+      responses:
+        "200":
+          description: "Created"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              examples:
+                No Header:
+                  description: "201 CREATED <br/>Location: https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "406":
+          $ref: "#/components/responses/406"
+        "415":
+          $ref: "#/components/responses/415"
+        "429":
+          $ref: "#/components/responses/429"
+  /mapLayerSummaries/{id}:
+    get:
+      description: "Returns a specific Map Layer Summary resource."
+      summary: "View a Map Layer Summary"
+      parameters:
+        - $ref: "#/components/parameters/id"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          description: "View a specific Map Layer Summary"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: "#/components/schemas/PostContributedMapLayerSummary"
+                  links:
+                    items:
+                      $ref: "#/components/schemas/GetMapLayerSummaryAvailableLinks"
+              examples:
+                No Header:
+                  description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/ORD_ID"
+                      - rel: "targetResource"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID"
+                      - rel: "mapLayers"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+                      - rel: "createMapLayer"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+                    id: "MAP_LAYER_SUMMARY_ID"
+                    title: "some title"
+                    text: "description of the map layers"
+                    mapType: "PRESCRIPTION"
+                    metadata:
+                      - name: "The Name"
+                        value: "The Value"
+                    dateCreated: "2016-01-02T16:14:23.421Z"
+                    lastModifiedDate: "2016-01-02T16:14:23.421Z"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "406":
+          $ref: "#/components/responses/406"
+        "429":
+          $ref: "#/components/responses/429"
+    delete:
+      description: "Deletes a Map Layer Summary and its underlying Map Layer and File Resource resources."
+      summary: "Delete a Map Layer Summary"
+      parameters:
+        - $ref: "#/components/parameters/id"
+      security:
+        - OAuth2:
+            - "ag3"
+      responses:
+        "200":
+          description: "Deleted"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "204 No Content"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+        "406":
+          $ref: "#/components/responses/406"
+        "429":
+          $ref: "#/components/responses/429"
+components:
+  parameters:
+    OrganizationId:
+      in: "path"
+      name: "orgId"
+      description: "Organization ID"
+      schema:
+        type: "string"
+        example: 1234
+        format: "uuid"
+        default: "N/A"
+    fileId:
+      in: "path"
+      name: "fileId"
+      description: "Field ID"
+      schema:
+        type: "string"
+        format: "int64"
+        example: "d01111d6-1fa4-4659-943a-3df4a6b7933c"
+        default: "N/A"
+    includePartialSummaries:
+      name: "includePartialSummaries"
+      in: "query"
+      description: "Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources."
+      schema:
+        type: "boolean"
+        example: "true"
+        format: "uuid"
+        default: "false"
+    embed:
+      name: "embed"
+      in: "query"
+      description: "Takes these values mapLayers."
+      schema:
+        type: "string"
+        example: "mapLayers"
+        format: "uuid"
+        default: "N/A"
+    fieldId:
+      name: "fieldId"
+      in: "path"
+      description: "Field ID"
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "d01111d6-1fa4-4659-943a-3df4a6b7933c"
+        default: "N/A"
+    id:
+      name: "id"
+      in: "path"
+      description: "Map Layer Summary ID"
+      schema:
+        type: "string"
+        example: "y02111d6-1fa4-4659-943a-3df4a6b7933c"
+        format: "uuid"
+        default: "N/A"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag2: "ag2"
+            ag3: "ag3"
+  schemas:
+    CollectionBase:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            properties:
+              rel:
+                type: "string"
+                description: "Links relavent to exploring the collection."
+                example: "self"
+              uri:
+                type: "string"
+                description: "The URI to the related resource."
+                format: "uri"
+                example: "https://api.deere.com/platform/organizations/61265/fields/42849709-5d54-473a-9eba-adab6f4bc8a8/mapLayerSummaries"
+        total:
+          type: "number"
+          example: 1
+    MapLayerSummaryCollection:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ContributedMapLayerSummary"
+              links:
+                items:
+                  $ref: "#/components/schemas/AvailableLinks"
+          examples:
+            No Header:
+              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID/mapLayerSummaries"
+                total: 1
+                values:
+                  - links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+                      - rel: "targetResource"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FEILD_ID"
+                      - rel: "mapLayers"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+                      - rel: "createMapLayer"
+                        uri: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+                    id: "MAP_LAYER_SUMMARY_ID"
+                    title: "some title"
+                    text: "description of the map layers"
+                    mapType: "OTHER"
+                    metadata:
+                      - name: "The Name"
+                        value: "The Value"
+                    dateCreated: "2016-01-02T16:14:23.421Z"
+                    lastModifiedDate: "2016-01-02T16:14:23.421Z"
+    ContributedMapLayerSummary:
+      properties:
+        links:
+          type: "array"
+          description: "Links to other objects in the Deere ecosystem."
+          example: "See \"Available Links\" below"
+        total:
+          type: "number"
+          description: "Count of Map Layer Summaries in response."
+          example: 3
+        values:
+          type: "<a href='#map-layer-summary-details'>Map Layer Summary</a> array"
+          description: "The primary resource listing."
+        <span id='map-layer-summary-details'>Map Layer Summary Details</span>:
+          properties:
+            links:
+              type: "array"
+              description: "Links to other objects in the Deere ecosystem."
+              example: "See \"Available Links\" below"
+            id:
+              type: "string"
+              format: "uuid"
+              description: "Map Layer Summary ID"
+              example: "83ks9gh3-29fj-9302-837j-92jlsk92jd095kd"
+            title:
+              type: "string"
+              description: "Top level name of the Map Layer Summary"
+              example: "Summary of Map Layers"
+            text:
+              type: "string"
+              description: "Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href='#markdown'>Markdown</a>"
+              example: "My summary of agronomic image data"
+            mapType:
+              type: "string"
+              description: "The type of data represented by the summary<sup><a href='#map-layer-summaries-map-types'>1</a></sup>."
+              example: "PRESCRIPTION"
+            metadata:
+              type: "<a href=\"#map-layer-summaries-additional\">Metadata</a> array"
+              description: "An array of key value pair items about the Map Layer Summary."
+              example: "See sample response below"
+            dateCreated:
+              type: "string"
+              format: "date-time"
+              description: "ISO 8601 Date and time in UTC this resource was created."
+              example: "2016-01-02T16:14:23.421Z"
+            lastModifiedDate:
+              type: "string"
+              format: "date-time"
+              description: "ISO 8601 Date and time in UTC this resource was last modified."
+              example: "2016-01-02T16:14:23.421Z"
+    PostContributedMapLayerSummary:
+      properties:
+        links:
+          type: "array"
+          description: "Links to other objects in the Deere ecosystem."
+          example: "See \"Available Links\" below"
+        id:
+          type: "string"
+          format: "uuid"
+          description: "Map Layer Summary ID"
+          example: "83ks9gh3-29fj-9302-837j-92jlsk92jd095kd"
+        title:
+          type: "string"
+          description: "Top level name of the Map Layer Summary"
+          example: "Summary of Map Layers"
+        text:
+          type: "string"
+          description: "Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href=\"/dev-docs/map-layers#markdown\">Markdown</a>"
+          example: "My summary of agronomic image data"
+        mapType:
+          type: "string"
+          description: "The type of data represented by the summary.<sup><a href=\"#map-layer-summaries-map-types\">1</a></sup>"
+          example: "PRESCRIPTION"
+        metadata:
+          type: "<a href=\"#map-layer-summaries-additional\">Metadata </a>array"
+          description: "An array of key value pair items about the Map Layer Summary."
+          example: "See sample response below"
+        dateCreated:
+          type: "string"
+          format: "date-time"
+          description: "ISO 8601 Date and time in UTC this resource was created."
+          example: "2016-01-02T16:14:23.421Z"
+        lastModifiedDate:
+          type: "string"
+          format: "date-time"
+          description: "ISO 8601 Date and time in UTC this resource was last modified."
+          example: "2016-01-02T16:14:23.421Z"
+    AvailableLinks:
+      properties:
+        self (map layer summaries list):
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID/mapLayerSummaries"
+          description: "This Map Layer List Link."
+        self (map layer summary):
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID"
+          description: "This Map Layer Summary Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+          description: "Organizations Link."
+        targetResource:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID"
+          description: "Fields Link."
+        mapLayers:
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+          description: "Map Layers Link."
+        createMapLayer:
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+          description: "Create Map Layers Link."
+    PostRequest:
+      properties:
+        links:
+          example: "See \"Request Links\" below <br/>Readonly: No"
+          description: "Links to other objects in the Deere ecosystem."
+          type: "array"
+        title:
+          example: "Summary of Map Layers <br/>Readonly: No"
+          description: "Top level name of the Map Layer Summary"
+          type: "string"
+        text:
+          example: "My summary of agronomic image data <br/>Readonly: No"
+          description: "Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href=\"/dev-docs/map-layers#markdown\">Markdown</a>"
+          type: "string"
+        mapType:
+          example: "PRESCRIPTION <br/>Readonly: No"
+          description: "The type of data represented by the summary<sup><a href=\"#map-layer-summaries-map-types\">1</a></sup>"
+          type: "string"
+        metadata:
+          example: "See sample request below <br/>Readonly: No"
+          description: "An array of key value pair items about the Map Layer Summary."
+          type: "<a href=\"#map-layer-summaries-additional\">Metadata </a>array"
+        dateCreated:
+          example: "2016-01-02T16:14:23.421Z <br/>Readonly: No"
+          description: "ISO 8601 Date and time in UTC this resource was created."
+          type: "string"
+          format: "date-time"
+    PostResponse:
+      properties:
+        links:
+          example: "See \"Request Links\" below <br/>Readonly: No"
+          description: "Links to other objects in the Deere ecosystem."
+          type: "array"
+        title:
+          example: "Summary of Map Layers <br/>Readonly: No"
+          description: "Top level name of the Map Layer Summary"
+          type: "string"
+        text:
+          example: "My summary of agronomic image data <br/>Readonly: No"
+          description: "Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href=\"/dev-docs/map-layers#markdown\">Markdown</a>"
+          type: "string"
+        mapType:
+          example: "PRESCRIPTION <br/>Readonly: No"
+          description: "The type of data represented by the summary<sup><a href=\"#map-layer-summaries-map-types\">1</a></sup>"
+          type: "string"
+        metadata:
+          example: "See sample request below <br/>Readonly: No"
+          description: "An array of key value pair items about the Map Layer Summary."
+          type: "<a href=\"#map-layer-summaries-additional\">Metadata </a>array"
+        dateCreated:
+          example: "2016-01-02T16:14:23.421Z <br/>Readonly: No"
+          description: "ISO 8601 Date and time in UTC this resource was created."
+          type: "string"
+          format: "date-time"
+    PostAvailableLinks:
+      properties:
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+          description: "Organizations Link"
+        contributionDefinition:
+          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID"
+          description: "Contribution Definitions Link."
+    GetMapLayerSummaryAvailableLinks:
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID"
+          description: "This Map Layer Summary Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
+          description: "Organizations Link."
+        targetResource:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID"
+          description: "Fields Link."
+        mapLayers:
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+          description: "Map Layers Link."
+        createMapLayer:
+          example: "https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers"
+          description: "Create Map Layers Link."
+    Metadata:
+      required:
+        - "name"
+        - "value"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Metadata"
+        name:
+          type: "string"
+          example: "Location"
+        value:
+          type: "string"
+          example: "Moline, IL"
+    MapLayerCollection:
+      type: "object"
+      allOf:
+        - $ref: "#/components/schemas/CollectionBase"
+        - properties:
+            values:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/ContributedMapLayer"
+    ContributedMapLayer:
+      type: "object"
+      required:
+        - "title"
+        - "legends"
+      properties:
+        "@type":
+          type: "string"
+          example: "ContributedMapLayer"
+        title:
+          type: "string"
+          description: "The title on the map layer."
+          example: "Drone Flyover"
+        extent:
+          $ref: "#/components/schemas/MapExtent"
+        sortName:
+          type: "string"
+          description: "A value to sort the Map Layer by in Field Analyzer Beta. Defaults to `title` if not provided."
+          example: "1"
+        legends:
+          $ref: "#/components/schemas/MapLegend"
+        status:
+          type: "string"
+          description: "Map layer status."
+          readOnly: true
+          enum:
+            - "VALID"
+            - "INVALID"
+            - "QUEUED"
+            - "NO_FILE_RESOURCE"
+        text:
+          type: "string"
+          description: "Description of the map layer."
+          example: "An aerial view of the building."
+        metadata:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Metadata"
+        id:
+          type: "string"
+          description: "The primary identifier for the operation."
+          example: "8a0011f1-297e-48c2-a030-91a21287e721"
+          readOnly: true
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    MapExtent:
+      description: "Extents of the field. If not provided, the FileResource must be of type `image/tiff` or `application/zip` and contain the extents."
+      required:
+        - "minimumLatitude"
+        - "maximumLatitude"
+        - "minimumLongitude"
+        - "maximumLongitude"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapExtent"
+        minimumLatitude:
+          type: "number"
+          format: "double"
+          example: 41.47187948123269
+        maximumLatitude:
+          type: "number"
+          format: "double"
+          example: 41.48192734153501
+        minimumLongitude:
+          type: "number"
+          format: "double"
+          example: -90.43179946950056
+        maximumLongitude:
+          type: "number"
+          format: "double"
+          example: -90.4157062154112
+    MapLegend:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegend"
+        unitId:
+          type: "string"
+          description: "The unit of Legand"
+          example: "seeds1ha-1"
+        ranges:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MapLegendItem"
+    MapLegendItem:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegendItem"
+        label:
+          type: "string"
+          description: "A label for the color"
+          example: "Most profitable"
+        minimum:
+          type: "number"
+          format: "double"
+          example: 10.09
+        maximum:
+          type: "number"
+          format: "double"
+          example: 30.18
+        hexColor:
+          type: "string"
+          description: "The hex color code corresponding to a color in the map layer image"
+          example: "#0BA74A"
+        percent:
+          type: "number"
+          format: "double"
+          example: 3.5
+    FileResource:
+      required:
+        - "links"
+        - "metadata"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "FileResource"
+        mimeType:
+          type: "string"
+          description: "The mimeType of the FileResource."
+          enum:
+            - "image/png"
+            - "image/tif"
+            - "image/tiff"
+            - "application/zip"
+        metadata:
+          description: "The name of the file"
+          type: "array"
+          items:
+            properties:
+              name:
+                type: "string"
+                example: "filename"
+              value:
+                type: "string"
+                example: "a_green_tractor.png"
+        id:
+          type: "string"
+          description: "The primary identifier for the FileResource."
+          example: "888d97c6-cd87-48de-88d5-3c2721250a5e"
+          readOnly: true
+        links:
+          description: "Links for self, targetResource, and owningOrganization"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    400Errors:
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "ed292512-1f3c-4285-83c3-1fb084423f9b"
+              message:
+                type: "string"
+                example: "This field is required."
+              code:
+                type: "string"
+                example: "validation_constraint_required_field"
+              field:
+                type: "string"
+                example: "title"
+        otherAttributes:
+          type: "object"
+    GenericErrors:
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "ed292512-1f3c-4285-83c3-1fb084423f9b"
+              message:
+                type: "string"
+                example: "The requested resource was not found"
+        otherAttributes:
+          type: "object"
+    Link:
+      type: "object"
+      description: "Link schema for Link (auto-generated)"
+      properties:
+        "@type":
+          type: "string"
+        rel:
+          type: "string"
+        uri:
+          type: "string"
+          format: "uri"
+  responses:
+    "400":
+      description: "The request body was missing a required field or supplied a read-only value."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/400Errors"
+    "401":
+      description: "The user's OAuth credentials are not recognized by the server."
+    "403":
+      description: "The user does not have access to the requested resource."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GenericErrors"
+    "404":
+      description: "The specified resource was not found on the server."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GenericErrors"
+    "406":
+      description: "The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request."
+    "409":
+      description: "Indicates that the request could not be processed because of conflict in the request, such as an edit conflict."
+    "415":
+      description: "The server refuses to accept the request because the payload format is in an unsupported format."
+    "429":
+      description: "The user has sent too many requests in a given amount of time."
+  examples:
+    ContributedMapLayerSummary:
+      description: "{
+
+        \  \"links\": [
+
+        \    {
+
+        \      \"rel\": \"owningOrganization\",
+
+        \      \"uri\": \"https://apiqa.tal.deere.com/platform/organizations/61265\"
+
+        \    },
+
+        \    {
+
+        \      \"rel\": \"contributionDefinition\",
+
+        \      \"uri\": \"https://apiqa.tal.deere.com/platform/contributionDefinitions/85c1dfbb-4a9b-4cd2-b967-1e818b86fcb1\"
+
+        \    }
+
+        \  ],
+
+        \  \"title\": \"World Headquarters\",
+
+        \  \"text\": \"Deere & Company\",
+
+        \  \"metadata\": [
+
+        \    {
+
+        \      \"name\": \"Moline\",
+
+        \      \"value\": \"Illinois\"
+
+        \    }
+
+        \  ]
+
+        }\n"
+    ContributedMapLayer:
+      description: "{
+
+        \  \"title\": \"Image 1\",
+
+        \  \"extent\": {
+
+        \    \"minimumLatitude\": 41.47187948123269,
+
+        \    \"maximumLatitude\": 41.48192734153501,
+
+        \    \"minimumLongitude\": -90.43179946950056,
+
+        \    \"maximumLongitude\": -90.4157062154112
+
+        \  },
+
+        \  \"sortName\": \"1\",
+
+        \  \"legends\": {
+
+        \    \"unitId\": \"colors\",
+
+        \    \"ranges\": [
+
+        \      {
+
+        \        \"label\": \"Label\",
+
+        \        \"minimum\": 0,
+
+        \        \"maximum\": 100,
+
+        \        \"hexColor\": \"#367C2B\",
+
+        \        \"percent\": 50.0
+
+        \      },
+
+        \      {
+
+        \        \"label\": \"Label\",
+
+        \        \"minimum\": 0,
+
+        \        \"maximum\": 100,
+
+        \        \"hexColor\": \"#FFDE00\",
+
+        \        \"percent\": 50.0
+
+        \      }
+
+        \    ]
+
+        \  },
+
+        \  \"text\": \"The first image taken\",
+
+        \  \"metadata\": [
+
+        \    {
+
+        \      \"name\": \"subject\",
+
+        \      \"value\": \"the main building\"
+
+        \    }
+
+        \  ]
+
+        }\n"
+    FileResource:
+      description: "{
+
+        \  \"links\": [
+
+        \    {
+
+        \      \"rel\": \"owningOrganization\",
+
+        \      \"uri\": \"https://apiqa.tal.deere.com/platform/organizations/61265\"
+
+        \    }
+
+        \  ],
+
+        \  \"mimeType\": \"image/png\",
+
+        \  \"metadata\": [
+
+        \    {
+
+        \      \"name\": \"filename\",
+
+        \      \"value\": \"first_image.png\"
+
+        \    }
+
+        \  ]
+
+        }\n"
+    400Errors:
+      description: "{
+
+        \  \"@type\": \"Errors\",
+
+        \  \"errors\": [
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"53697217-9e70-492b-be04-179e253c3116\",
+
+        \      \"message\": \"Owning Organization Link is missing and is required.\",
+
+        \      \"code\": \"validation_constraint_owning_org_link_missing\",
+
+        \      \"field\": \"owningOrganization\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"39dc10f0-6e2c-4517-bfd6-713a7c4da768\",
+
+        \      \"message\": \"Contribution Definition Link is missing and is required.\",
+
+        \      \"code\": \"validation_constraint_contribution_definition_link_missing\",
+
+        \      \"field\": \"contributionDefinition\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"5cdee9be-4120-4d0e-9da3-15a1d4f0713a\",
+
+        \      \"message\": \"This field is required.\",
+
+        \      \"code\": \"validation_constraint_required_field\",
+
+        \      \"field\": \"title\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"1d5d178b-e037-4c76-927c-94ca19e74362\",
+
+        \      \"message\": \"This field is required.\",
+
+        \      \"code\": \"validation_constraint_required_field\",
+
+        \      \"field\": \"text\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"f5c78d7c-9eaa-45ef-86bb-c28391d9ee2c\",
+
+        \      \"message\": \"This field is required.\",
+
+        \      \"code\": \"validation_constraint_required_field\",
+
+        \      \"field\": \"legends\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"4a9d25f4-2f59-4900-91e9-766d78b8483c\",
+
+        \      \"message\": \"Required field.\",
+
+        \      \"code\": \"validation_constraint_notBlank\",
+
+        \      \"field\": \"metadata.value\",
+
+        \      \"invalidValue\": \"\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"eb364fd8-d6c0-41fd-84ff-72580407bbb2\",
+
+        \      \"message\": \"Required field.\",
+
+        \      \"code\": \"validation_constraint_notBlank\",
+
+        \      \"field\": \"owningOrganization\",
+
+        \      \"invalidValue\": \"\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"1a66a1a6-355f-44c9-83e3-11eb5cb641fa\",
+
+        \      \"message\": \"Map layer must have an extent for supplied mime-type\",
+
+        \      \"code\": \"validation_constraint_file_type_requires_extent\",
+
+        \      \"field\": \"mimeType\"
+
+        \    },
+
+        \    {
+
+        \      \"@type\": \"Error\",
+
+        \      \"guid\": \"9bb8fd7c-3b31-4f75-bd35-05256c35c92e\",
+
+        \      \"message\": \"Invalid Contribution Definition ID, please use another.\",
+
+        \      \"code\": \"validation_constraint_contribution_definition_id_invalid\",
+
+        \      \"field\": \"contributionDefinition\",
+
+        \      \"invalidValue\": \"7a6641a6-d6c0-4cc9-d3e3-766d78b8483c\"
+
+        \    }
+
+        \  ],
+
+        \  \"otherAttributes\": {}
+
+        }\n"

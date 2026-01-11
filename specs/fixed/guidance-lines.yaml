@@ -1,0 +1,527 @@
+openapi: "3.0.0"
+info:
+  title: "Guidance Lines API"
+  description: "Provides guidance line management within a field context. Management capabilities include creating, retrieving, editing, and archiving lines."
+  version: "3.0"
+  contact:
+    name: "ISG-Break-Point"
+    email: "ISG-BREAK-POINT@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "partnerapi"
+          - "sandboxapi"
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+paths:
+  /organizations/{orgId}/fields/{fieldId}/guidanceLines:
+    get:
+      summary: "View guidance lines for a field"
+      description: "This endpoint will retrieve a list of guidance lines for a field. By default, the call will return only active guidance lines."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/Embed"
+      security:
+        - OAuth2:
+            - "ag1"
+      responses:
+        "200":
+          $ref: "#/components/responses/GuidanceLinesResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      summary: "Create a guidance line"
+      description: "This endpoint will create a guidance line and associate it to a given field. This operation currently only supports the creation of AB Lines."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+      requestBody:
+        $ref: "#/components/requestBodies/PostRequest"
+      security:
+        - OAuth2:
+            - "ag3"
+      responses:
+        "200":
+          $ref: "#/components/responses/Created"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /organizations/{orgId}/fields/{fieldId}/guidanceLines/{guidanceLineId}:
+    get:
+      summary: "Retrieve a specific guidance line"
+      description: "This endpoint will return the subclass of guidance line represented by the specified ID."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/GuidanceLineId"
+        - $ref: "#/components/parameters/Embed"
+      security:
+        - OAuth2:
+            - "ag1"
+      responses:
+        "200":
+          $ref: "#/components/responses/GuidanceLinesRetrieve"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: "Update a GuidanceLine"
+      description: "This endpoint will update the GuidanceLines name."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/GuidanceLineId"
+      requestBody:
+        $ref: "#/components/requestBodies/PutRequest"
+      security:
+        - OAuth2:
+            - "ag3"
+      responses:
+        "200":
+          $ref: "#/components/responses/NoContent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  parameters:
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "The organization owning the guidance lines."
+      schema:
+        example: 127856
+        type: "string"
+        format: "int64"
+    FieldId:
+      name: "fieldId"
+      in: "path"
+      description: "The field that the guidance lines are associated with."
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "309b4c20-f33a-4c96-9a2c-913def198i0c"
+    GuidanceLineId:
+      name: "guidanceLineId"
+      in: "path"
+      description: "The identifier of this guidance line."
+      schema:
+        type: "string"
+        example: "2fda92b1-7517-4b2a-8166-7616eb20eb02"
+        format: "uuid"
+    Status:
+      name: "status"
+      in: "query"
+      description: "Whether to include archived guidance lines. Valid values are \"archived\", \"available\", or \"all\". Default is \"available\"."
+      schema:
+        type: "string"
+        example: "archived"
+    RecordFilter:
+      name: "recordFilter"
+      in: "query"
+      description: "Filter results based on status; Will default to active"
+      schema:
+        type: "string"
+        example: "active, archived, all"
+    Embed:
+      name: "embed"
+      in: "query"
+      description: "Whether to return the track geometry for AB and Adaptive Curves. See <a href=\"#shapes-array\">Shapes Array</a>"
+      schema:
+        type: "string"
+        example: "shapes"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: "ag1"
+            ag3: "ag3"
+  requestBodies:
+    PostRequest:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GuidanceLine"
+          examples:
+            No Header:
+              value:
+                "@type": "ABLine"
+                aPoint:
+                  "@type": "Point"
+                  lat: 41.48958
+                  lon: -90.49263851
+                bPoint:
+                  "@type": "Point"
+                  lat: 41.48965382
+                  lon: -90.49263851
+                eastShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrEastShiftComponent"
+                  unit: "cm"
+                northShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrNorthShiftComponent"
+                  unit: "cm"
+                spatialProjection:
+                  "@type": "SpatialProjection"
+                  projectionType: "dtiProjectionDeere"
+                  elevation:
+                    "@type": "MeasurementAsDouble"
+                    valueAsDouble: 0.5
+                    vrDomainId: "vrElevation"
+                    unit: "m"
+                fieldUri: "https://sandboxapi.deere.com/platform/organizations/5555/fields/11111111-2222-3333-4444-555555555555"
+                tramOffset: 0
+                tramSpacing: 1
+                name: "North West"
+                archived: false
+                links:
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/orgId/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
+      description: "Specifies guidance line details"
+    PutRequest:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GuidanceLinePut"
+          examples:
+            No Header:
+              value:
+                "@type": "ABLine"
+                aPoint:
+                  "@type": "Point"
+                  lat: -20.026227344199977
+                  lon: 46.57202165157014
+                bPoint:
+                  "@type": "Point"
+                  lat: -20.03113688350134
+                  lon: 46.572675704956055
+                eastShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrEastShiftComponent"
+                  unit: "cm"
+                northShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrNorthShiftComponent"
+                  unit: "cm"
+                spatialProjection:
+                  "@type": "SpatialProjection"
+                  projectionType: "dtiProjectionDeere"
+                  elevation:
+                    "@type": "MeasurementAsDouble"
+                    valueAsDouble: 0.5
+                    vrDomainId: "vrElevation"
+                    unit: "m"
+                tramOffset: 0
+                tramSpacing: 0
+                name: "NewGuidanceLine"
+                lastModifiedTime: "2018-12-10T21:24:39.567Z"
+                archived: false
+  responses:
+    GuidanceLinesResponse:
+      description: "A collection of guidance lines"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinksArrayGet"
+              total:
+                type: "integer"
+                format: "int32"
+                example: 1
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines"
+                total: 1
+                values:
+                  - "@type": "ABLine"
+                    heading: 102.71825663467035
+                    aPoint:
+                      "@type": "Point"
+                      lat: 41.74557323445754
+                      lon: -92.41092564370683
+                    bPoint:
+                      "@type": "Point"
+                      lat: 41.745060835194764
+                      lon: -92.40789413452148
+                    eastShift:
+                      "@type": "MeasurementAsDouble"
+                      valueAsDouble: 0
+                      vrDomainId: "vrEastShiftComponent"
+                      unit: "cm"
+                    northShift:
+                      "@type": "MeasurementAsDouble"
+                      valueAsDouble: 0
+                      vrDomainId: "vrNorthShiftComponent"
+                      unit: "cm"
+                    tramOffset: 0
+                    tramSpacing: 0
+                    saveMethod: "dtiABLineMethodBPoint"
+                    erid: "0b36bcd2-6464-4680-b204-b0d1f61c4aad"
+                    id: "0b36bcd2-6464-4680-b204-b0d1f61c4aad"
+                    name: "test"
+                    lastModifiedTime: "2019-06-27T19:37:08.151Z"
+                    spatialProjection:
+                      "@type": "SpatialProjection"
+                      projectionType: "dtiProjectionDeere"
+                      elevation:
+                        "@type": "MeasurementAsDouble"
+                        valueAsDouble: 0.5
+                        vrDomainId: "vrElevation"
+                        unit: "m"
+                    links:
+                      - "@type": "Link"
+                        rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1263342/fields/24aa9f68-c699-4f92-9e3e-9def42b8e175/guidanceLines/0b36bcd2-6464-4680-b204-b0d1f61c4aad"
+                      - "@type": "Link"
+                        rel: "field"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1263342/fields/24aa9f68-c699-4f92-9e3e-9def42b8e175"
+                    archived: false
+    GuidanceLinesRetrieve:
+      description: "A collection of guidance lines"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinksArrayGet"
+              total:
+                type: "integer"
+                format: "int32"
+                example: 1
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                "@type": "ABLine"
+                heading: 0
+                aPoint:
+                  "@type": "Point"
+                  lat: 41.48958
+                  lon: -90.49263851
+                bPoint:
+                  "@type": "Point"
+                  lat: 41.48965382
+                  lon: -90.49263851
+                eastShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrEastShiftComponent"
+                  unit: "cm"
+                northShift:
+                  "@type": "MeasurementAsDouble"
+                  valueAsDouble: 0
+                  vrDomainId: "vrNorthShiftComponent"
+                  unit: "cm"
+                tramOffset: 0
+                tramSpacing: 1
+                saveMethod: "dtiABLineMethodBPoint"
+                erid: "2fda92b1-7517-4b2a-8166-7616eb20eb02"
+                id: "2fda92b1-7517-4b2a-8166-7616eb20eb02"
+                fieldUri: "https://sandboxapi.deere.com/platform/organizations/5555/fields/11111111-2222-3333-4444-555555555555"
+                name: "North West"
+                lastModifiedTime: "2017-09-18T17:06:41.484Z"
+                spatialProjection:
+                  "@type": "SpatialProjection"
+                  projectionType: "dtiProjectionDeere"
+                  elevation:
+                    "@type": "MeasurementAsDouble"
+                    valueAsDouble: 0.5
+                    vrDomainId: "vrElevation"
+                    unit: "m"
+                archived: false
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
+    Created:
+      description: "Created, with a Location header containing the URI of the newly created resource"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkArrayPost"
+              total:
+                type: "integer"
+                format: "int32"
+                example: 1
+          examples:
+            Headers:
+              description: "201 Created <br/><br/> Location: https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
+    NoContent:
+      description: "No Content. Request Completed Succesfully."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                type: "integer"
+                format: "int32"
+                example: 1
+          examples:
+            Headers:
+              description: "204 No Content"
+    BadRequest:
+      description: "Request Validation failure"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    Forbidden:
+      description: "The user does not have sufficient privileges to access this resource."
+    NotFound:
+      description: "The specified resource does not exist"
+  schemas:
+    LinksArrayGet:
+      properties:
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
+          description: "Fields Link."
+    LinkArrayPost:
+      properties:
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId"
+          description: "Fields Link."
+    GuidanceLine:
+      type: "object"
+      properties:
+        "@type":
+          description: "Identifies the subclass of guidance line."
+          example: "ABLine"
+          type: "string"
+        name:
+          type: "string"
+          description: "The common name used by an end user to identify this guidance line."
+          example: "North West"
+        archived:
+          type: "boolean"
+          description: "Archived guidance lines will not be available for use in Setup Builder."
+          example: "false"
+        tramOffset:
+          description: "Defines the number of tram lines in relation to the main track. Valid values are 0 - 20"
+          type: "number"
+          example: "0"
+        tramSpacing:
+          description: "The spacing between tram lines."
+          example: "0"
+          type: "number"
+        aPoint:
+          description: "The coordinate representing the A point of an AB Line."
+          type: "object"
+          example: "{ \"@type\": \"Point\", \"lat\": 41.74557323445754, \"lon\": -92.41092564370683 }"
+        bPoint:
+          description: "The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API."
+          type: "object"
+          example: "{ \"@type\": \"Point\", \"lat\": 41.745060835194764, \"lon\": -92.40789413452148 }"
+        heading:
+          description: "The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated."
+          type: "number"
+          example: 122.2365
+        eastShift:
+          description: "The shift in the east direction."
+          type: "object"
+          example: "{ \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrEastShiftComponent\", \"unit\": \"cm\" }"
+        northShift:
+          description: "The shift in the north direction."
+          type: "object"
+          example: "{ \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrNorthShiftComponent\", \"unit\": \"cm\" }"
+        spatialProjection:
+          type: "object"
+          description: "Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values."
+          example: "{ \"@type\": \"SpatialProjection\", \"projectionType\": \"dtiProjectionDeere\", \"elevation\": { \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrElevation\", \"unit\": \"m\" } }"
+        fieldUri:
+          description: "Client associated with farm."
+          example: "https://sandboxapi.deere.com/platform/organizations/5555/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+          type: "string"
+    GuidanceLinePut:
+      type: "object"
+      properties:
+        "@type":
+          description: "Identifies the subclass of guidance line."
+          example: "ABLine"
+          type: "string"
+        name:
+          type: "string"
+          description: "The common name used by an end user to identify this guidance line."
+          example: "North West"
+        archived:
+          type: "boolean"
+          description: "Archived guidance lines will not be available for use in Setup Builder."
+          example: "false"
+        tramOffset:
+          description: "Defines the number of tram lines in relation to the main track. Valid values are 0 - 20"
+          type: "number"
+          example: "0"
+        tramSpacing:
+          description: "The spacing between tram lines."
+          example: "0"
+          type: "number"
+        aPoint:
+          description: "The coordinate representing the A point of an AB Line."
+          type: "object"
+          example: "{ \"@type\": \"Point\", \"lat\": 41.74557323445754, \"lon\": -92.41092564370683 }"
+        bPoint:
+          description: "The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API."
+          type: "object"
+          example: "{ \"@type\": \"Point\", \"lat\": 41.745060835194764, \"lon\": -92.40789413452148 }"
+        heading:
+          description: "The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated."
+          type: "number"
+          example: 122.2365
+        eastShift:
+          description: "The shift in the east direction."
+          type: "object"
+          example: "{ \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrEastShiftComponent\", \"unit\": \"cm\" }"
+        northShift:
+          description: "The shift in the north direction."
+          type: "object"
+          example: "{ \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrNorthShiftComponent\", \"unit\": \"cm\" }"
+        spatialProjection:
+          type: "object"
+          description: "Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values."
+          example: "{ \"@type\": \"SpatialProjection\", \"projectionType\": \"dtiProjectionDeere\", \"elevation\": { \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrElevation\", \"unit\": \"m\" } }"
+    Errors:
+      type: "object"
+      description: "Error response schema for Errors (auto-generated)"
+      properties:
+        message:
+          type: "string"
+        errors:
+          type: "array"
+          items:
+            type: "object"

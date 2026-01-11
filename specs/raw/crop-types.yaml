@@ -1,0 +1,598 @@
+openapi: 3.0.1
+info:
+  title: Crop Types API
+  description: Provides all crop types available in the system
+  version: '3.0'
+  contact:
+    name: ISG Ops Vertex - Brian Ashmore - Jeff Garlich
+    email: ISG_Vertex@JohnDeere.com
+
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - api
+          - partnerapi
+          - sandboxapi
+          - apicert
+          - partnerapicert
+          - apiqa.tal
+          - partnerapiqa
+          - sandboxapiqa
+
+paths:
+  /cropTypes:
+    get:
+      summary: Retrieve all crop types
+      description: This endpoint will return list of available crop types in the system.
+      security:
+        - OAuth2: [ ag1 ]
+      parameters:
+        - $ref: '#/components/parameters/RecordFilter'
+        - $ref: '#/components/parameters/X-deere-signature'
+      responses:
+        200:
+          $ref: '#/components/responses/CropTypeCollectionResponse'
+        405:
+          $ref: '#/components/responses/CropTypeMethodNotAllowed'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Accept-Language: 'en<sup><a href="#additional">1</a></sup> - to specify which language you would like the notifications to be when returned in the response'
+  /cropTypes/{name}:
+    get:
+      summary: View a specific cropType
+      description: This endpoint will return details of specific cropType.
+      security:
+        - OAuth2: [ ag1 ]
+      parameters:
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/X-deere-signature2'
+      responses:
+        200:
+          $ref: '#/components/responses/CropTypeNameResponse'
+        404:
+          $ref: '#/components/responses/CropTypeNotFound'
+        405:
+          $ref: '#/components/responses/CropTypeMethodNotAllowed'
+  /cropTypes/{id}:
+    get:
+      summary: View a specific cropType
+      description: This endpoint will return details of specific cropType.
+      security:
+        - OAuth2: [ ag1 ]
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/X-deere-signature2'
+      responses:
+        200:
+          $ref: '#/components/responses/CropTypeIdResponse'
+        404:
+          $ref: '#/components/responses/CropTypeNotFound'
+        405:
+          $ref: '#/components/responses/CropTypeMethodNotAllowed'
+  /organizations/{organizationId}/cropTypes:
+    get:
+      summary: Retrieve all crop types for a specific organization
+      description: This endpoint will return a list of all crop types for a specific organization.
+      security:
+        - OAuth2: [ ag1 ]
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+        - $ref: '#/components/parameters/RecordFilter'
+        - $ref: '#/components/parameters/X-deere-signature'
+      responses:
+        200:
+          $ref: '#/components/responses/CropTypeorganizationResponse'
+        404:
+          $ref: '#/components/responses/CropTypeNotFound'
+        405:
+          $ref: '#/components/responses/CropTypeMethodNotAllowed'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: 'ag1'
+  parameters:
+    RecordFilter:
+      name: recordFilter
+      in: query
+      description: Filter results based on status
+      required: false
+      schema:
+        type: string
+        example: active, all
+
+    X-deere-signature:
+      in: header
+      name: x-deere-signature
+      description: x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time.
+      required: false
+      schema:
+        type: string
+        example: 9r8392615e4b4e1c12458026f47109bb
+    X-deere-signature2:
+      in: header
+      name: x-deere-signature
+      description: x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time.
+      required: false
+      schema:
+        type: GUID
+        example: 9r8392615e4b4e1c12458026f47109bb
+
+    Name:
+      in: path
+      name: name
+      description: This is the crop type name
+      required: true
+      schema:
+        type: string
+        example: ENERGY_CANE
+    
+    Id:
+      in: path
+      name: id
+      description: This is the crop type Id
+      required: true
+      schema:
+        type: string
+        example: 173
+
+    organizationId:
+      in: path
+      name: organizationId
+      description: This is the organization Id
+      required: true
+      schema:
+        type: string
+        example: 123456
+
+  responses:
+    CropTypeCollectionResponse:
+      description: A collection of crop types
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int64
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CropType'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb'
+              value:
+                links:
+                  - rel: self
+                    uri: ' https://sandboxapi.deere.com/platform/cropTypes'
+                  - rel: nextPage
+                    uri: ' https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10'
+                total: 216
+                values:
+                  - '@type': CropType
+                    name: CORN_WET
+                    translatedName: Corn
+                    "color": "#FFE119"
+                    densityFactor:
+                      '@type': Density
+                      value: 25.4
+                      unit: kg1bu-1
+                    standardPayableMoisture:
+                      '@type': Moisture
+                      value: 15
+                      unit: '%'
+                    supportedEquipmentTypes:
+                      - '@type': SupportedEquipmentType
+                        erid: d9d1c11f-35e0-43af-84ae-696d9ea3c18b
+                        equipmentTypeProtoEnum: ET_CORN_HEAD
+                      - '@type': SupportedEquipmentType
+                        erid: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                        equipmentTypeProtoEnum: ET_COMBINE
+                      - '@type': SupportedEquipmentType
+                        erid: 57c1e304-bf44-4c50-bf3e-0e910d528b92
+                        equipmentTypeProtoEnum: ET_BALER
+                    "lastModifiedTime": "2021-10-14T11:55:00Z"
+                    id: '173'
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: ' https://sandboxapi.deere.com/platform/cropTypes/CORN_WET'
+    CropTypeNameResponse:
+      description: A collection of crop types
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int64
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CropType2'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb'
+              value:
+                '@type': CropType
+                name: CORN_WET
+                translatedName: Corn
+                "color": "#FFE119"
+                densityFactor:
+                  '@type': Density
+                  value: 25.4
+                  unit: kg1bu-1
+                standardPayableMoisture:
+                  '@type': Moisture
+                  value: 15
+                  unit: '%'
+                supportedEquipmentTypes:
+                  - '@type': SupportedEquipmentType
+                    erid: d9d1c11f-35e0-43af-84ae-696d9ea3c18b
+                    equipmentTypeProtoEnum: ET_CORN_HEAD
+                  - '@type': SupportedEquipmentType
+                    erid: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                    equipmentTypeProtoEnum: ET_COMBINE
+                  - '@type': SupportedEquipmentType
+                    erid: 57c1e304-bf44-4c50-bf3e-0e910d528b92
+                    equipmentTypeProtoEnum: ET_BALER
+                "lastModifiedTime": "2021-10-14T11:55:00Z"
+                id: '173'
+                links:
+                  - '@type': Link
+                    rel: self
+                    uri: https://sandboxapi.deere.com/platform/cropTypes/CORN_WET
+    CropTypeIdResponse:
+      description: A collection of crop types
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int64
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CropType3'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb'
+              value:
+                '@type': CropType
+                name: CORN_WET
+                translatedName: Corn
+                "color": "#FFE119"
+                densityFactor:
+                  '@type': Density
+                  value: 25.4
+                  unit: kg1bu-1
+                standardPayableMoisture:
+                  '@type': Moisture
+                  value: 15
+                  unit: '%'
+                supportedEquipmentTypes:
+                  - '@type': SupportedEquipmentType
+                    erid: d9d1c11f-35e0-43af-84ae-696d9ea3c18b
+                    equipmentTypeProtoEnum: ET_CORN_HEAD
+                  - '@type': SupportedEquipmentType
+                    erid: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                    equipmentTypeProtoEnum: ET_COMBINE
+                  - '@type': SupportedEquipmentType
+                    erid: 57c1e304-bf44-4c50-bf3e-0e910d528b92
+                    equipmentTypeProtoEnum: ET_BALER
+                "lastModifiedTime": "2021-10-14T11:55:00Z"
+                id: '173'
+                links:
+                  - '@type': Link
+                    rel: self
+                    uri: https://sandboxapi.deere.com/platform/cropTypes/CORN_WET
+    CropTypeorganizationResponse:
+      description: A collection of crop types
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int64
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CropType4'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb'
+              value:
+                links:
+                  - rel: self
+                    uri: ' https://sandboxapi.deere.com/platform/cropTypes'
+                  - rel: nextPage
+                    uri: ' https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10'
+                total: 216
+                values:
+                  - '@type': CropType
+                    name: CORN_WET
+                    translatedName: Corn
+                    "color": "#FFE119"
+                    densityFactor:
+                      '@type': Density
+                      value: 25.4
+                      unit: kg1bu-1
+                    standardPayableMoisture:
+                      '@type': Moisture
+                      value: 15
+                      unit: '%'
+                    supportedEquipmentTypes:
+                      - '@type': SupportedEquipmentType
+                        erid: d9d1c11f-35e0-43af-84ae-696d9ea3c18b
+                        equipmentTypeProtoEnum: ET_CORN_HEAD
+                      - '@type': SupportedEquipmentType
+                        erid: d8dce5b0-cc8d-4c34-afac-27d93793bd86
+                        equipmentTypeProtoEnum: ET_COMBINE
+                      - '@type': SupportedEquipmentType
+                        erid: 57c1e304-bf44-4c50-bf3e-0e910d528b92
+                        equipmentTypeProtoEnum: ET_BALER
+                    "lastModifiedTime": "2021-10-14T11:55:00Z"
+                    id: '173'
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: ' https://sandboxapi.deere.com/platform/cropTypes/CORN_WET'
+
+    CropTypeMethodNotAllowed:
+      description: The requested method is not allowed
+
+    CropTypeNotFound:
+      description: Not found
+
+  schemas:
+    CropType:
+      type: object
+      properties:
+        x-deere-signature:
+          type: string
+          description: A new x-deere-signature response header will be included if the response has changed since last api call.
+          example: 9b5392615e4b4e1c92013026f47109bb
+        id:
+          type: string
+          description: The primary identifier for the operation.
+          example: '1'
+        name:
+          type: string
+          description: This is the crop type name.
+          example: CORN_WET
+        translatedName:
+          type: string
+          description: 	This is the crop type name translated using the Accept-Language header.
+          example: Corn
+        color:
+          type: string
+          description: This is the color associated with the crop type.
+          example: '#FFE119'
+        lastModifiedTime:
+          type: string
+          description: This is the zoned last modified time of the crop type.
+          example: '2021-10-14T11:55:00Z'
+        Density:
+          properties:
+            value:
+              type: number
+              example: '0.0'
+              description: This is cropType densityFactor value.
+            unit:
+              type: string
+              example: lb1bu-1
+              description: This indicates the unit.
+        Moisture:
+          properties:
+            value:
+              type: number
+              example: '1.0'
+              description: This is the standard payable moisture value for the crop type.
+            unit:
+              type: string
+              example: '%'
+              description: 	This indicates the unit.
+        Supported Equipment Types (REPLACES HARVEST MACHINE TYPE):
+          properties:
+            erid:
+              type: string
+              description: This is the entity resource identifier for the corresponding equipment type
+              example: 'e87e0d9a-91ab-42ea-9000-f96950a64411'
+            equipmentTypeProtoEnum:
+              type: string
+              example: ET_COMBINE
+              description: 	This is the equipment type enumeration value
+    CropType2:
+      type: object
+      properties:
+        x-deere-signature:
+          type: string
+          description: A new x-deere-signature response header will be included if the response has changed since last api call.
+          example: 9b5392615e4b4e1c92013026f47109bb
+        id:
+          type: string
+          description: The primary identifier for the operation.
+          example: '1'
+        name:
+          type: string
+          description: This is the crop type name.
+          example: ENERGY_CANE
+        translatedName:
+          type: string
+          description: This is the crop type name translated using the Accept-Language header.
+          example: Corn
+        color:
+          type: string
+          description: This is the color associated with the crop type.
+          example: '#FFE119'
+        lastModifiedTime:
+          type: string
+          description: This is the zoned last modified time of the crop type.
+          example: '2021-10-14T11:55:00Z'
+        Density:
+          properties:
+            value:
+              type: number
+              example: '0.0'
+              description: This is cropType densityFactor value.
+            unit:
+              type: string
+              example: lb1bu-1
+              description: This indicates the unit.
+        Moisture:
+          properties:
+            moistureValue:
+              type: number
+              example: '1.0'
+              description: 	This is cropType standardPayableMoisture value.
+            moistureUnit:
+              type: string
+              example: '%'
+              description: This indicates the unit.
+        Supported Equipment Types (REPLACES HARVEST MACHINE TYPE):
+          properties:
+            erid:
+              type: string
+              description: This is the entity resource identifier for the corresponding equipment type
+              example: 'e87e0d9a-91ab-42ea-9000-f96950a64411'
+            equipmentTypeProtoEnum:
+              type: string
+              example: ET_COMBINE
+              description: This is the equipment type enumeration value
+    CropType3:
+      type: object
+      properties:
+        x-deere-signature:
+          type: string
+          description: A new x-deere-signature response header will be included if the response has changed since last api call.
+          example: 9b5392615e4b4e1c92013026f47109bb
+        id:
+          type: string
+          description: The primary identifier for the operation.
+          example: '1'
+        name:
+          type: string
+          description: This is the crop type name.
+          example: CORN_WET
+        translatedName:
+          type: string
+          description: 	This is the crop type name translated using the Accept-Language header.
+          example: Corn
+        color:
+          type: string
+          description: This is the color associated with the crop type.
+          example: '#FFE119'
+        lastModifiedTime:
+          type: string
+          description: This is the zoned last modified time of the crop type.
+          example: '2021-10-14T11:55:00Z'
+        Density:
+          properties:
+            value:
+              type: number
+              example: '0.0'
+              description: This is cropType densityFactor value.
+            unit:
+              type: string
+              example: lb1bu-1
+              description: This indicates the unit.
+        Moisture:
+          properties:
+            value:
+              type: number
+              example: '1.0'
+              description: This is the standard payable moisture value for the crop type.
+            unit:
+              type: string
+              example: '%'
+              description: 	This indicates the unit.
+        Supported Equipment Types (REPLACES HARVEST MACHINE TYPE):
+          properties:
+            erid:
+              type: string
+              description: This is the entity resource identifier for the corresponding equipment type
+              example: 'e87e0d9a-91ab-42ea-9000-f96950a64411'
+            equipmentTypeProtoEnum:
+              type: string
+              example: ET_COMBINE
+              description: 	This is the equipment type enumeration value
+    CropType4:
+      type: object
+      properties:
+        x-deere-signature:
+          type: string
+          description: A new x-deere-signature response header will be included if the response has changed since last api call.
+          example: 9b5392615e4b4e1c92013026f47109bb
+        id:
+          type: string
+          description: The primary identifier for the operation.
+          example: '1'
+        name:
+          type: string
+          description: This is the crop type name.
+          example: CORN_WET
+        translatedName:
+          type: string
+          description: 	This is the crop type name translated using the Accept-Language header.
+          example: Corn
+        color:
+          type: string
+          description: This is the color associated with the crop type.
+          example: '#FFE119'
+        lastModifiedTime:
+          type: string
+          description: This is zoned last modified time of the crop type.
+          example: '2021-10-14T11:55:00Z'
+        Density:
+          properties:
+            value:
+              type: number
+              example: '0.0'
+              description: This is cropType densityFactor value.
+            unit:
+              type: string
+              example: lb1bu-1
+              description: This indicates the unit.
+        Moisture:
+          properties:
+            value:
+              type: number
+              example: '1.0'
+              description: This is the standard payable moisture value for the crop type.
+            unit:
+              type: string
+              example: '%'
+              description: 	This indicates the unit.
+        Supported Equipment Types (REPLACES HARVEST MACHINE TYPE):
+          properties:
+            erid:
+              type: string
+              description: This is the entity resource identifier for the corresponding equipment type
+              example: 'e87e0d9a-91ab-42ea-9000-f96950a64411'
+            equipmentTypeProtoEnum:
+              type: string
+              example: ET_COMBINE
+              description: 	This is the equipment type enumeration value
+    

@@ -1,0 +1,1040 @@
+openapi: 3.0.1
+info:
+  title: Contributed Assets API
+  description: |
+    A collection of APIs to contribute Assets and Asset data to MyJohnDeere. Learn more at [developer.deere.com](https://developer.deere.com)
+  contact:
+    name: Peder Kopperud & Patrick O'Connell
+    email: OConnellPatrickD@JohnDeere.com
+  version: 1.0.0
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - api
+          - apicert
+          - apiqa.tal
+          - sandboxapi
+          - partnerapi
+tags:
+- name: "Asset"
+  description: "A networked physical device, an IOT device, with the ability to broadcast geolocations and measurements"
+- name: "Asset Catalog"
+  description: "An inventory of Asset cateories, types and subtypes"
+- name: "Asset Location"
+  description: "A point in time geolocation or measurments broadcast by an Asset, a series of Asset Locations track an Asset's movement and/or measurement changes"
+paths:
+  /organizations/{orgId}/assets:
+    get:
+      tags:
+        - Asset
+      summary: Get all assets
+      operationId: getOrgAssets
+      description: This endpoint will retrieve all assets for an organization.
+      security:
+        - OAuth2: [ eq1 ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/Embed'
+        - $ref: '#/components/parameters/X-deere-sign'
+      headers:
+        - $ref: '#/components/parameters/x-deere-sign2'
+      responses:
+        200:
+          $ref: '#/components/responses/GetOrgId'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        406:
+          $ref: '#/components/responses/406'
+        429:
+          $ref: '#/components/responses/429'
+
+    post:
+      tags:
+        - Asset
+      summary: Create a new asset
+      operationId: postAsset
+      description: This endpoint will create a new asset.
+      note: 'Please Note: Refer to the <b>GET /assetCatalog</b> API sample response for all the possible combinations of asset category, type and subtype.'
+      security:
+        - OAuth2: [ eq2 ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      requestBody:
+        description: Asset to be created.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/CreatePostValues'
+            examples:
+              No Header:
+                value:
+                  title: AgThing Water Sensor
+                  assetCategory: DEVICE
+                  assetType: SENSOR
+                  assetSubType: OTHER
+        required: true
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+      responses:
+        201:
+          $ref: '#/components/responses/CreatePost'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        415:
+          $ref: '#/components/responses/415'
+        429:
+          $ref: '#/components/responses/429'
+
+  /assets/{assetId}:
+    get:
+      tags:
+        - Asset
+      summary: Get a specific asset
+      operationId: getAsset
+      description: This endpoint will retrieve a specific asset by its unique ID.
+      security:
+        - OAuth2: [ eq1 ]
+      parameters:
+      - $ref: '#/components/parameters/AssetId'
+      - $ref: '#/components/parameters/Embed'
+      responses:
+        200:
+          $ref: '#/components/responses/AssetGet'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        429:
+          $ref: '#/components/responses/429'
+
+    put:
+      tags:
+        - Asset
+      summary: Update an asset
+      description: This endpoint will update the asset by its unique id.
+      note: '<b>Please Note:</b> assetCategory, assetType, and assetSubType cannot be updated.'
+      security:
+        - OAuth2: [ eq2 ]
+      parameters:
+      - $ref: '#/components/parameters/AssetId'
+      requestBody:
+        description: Asset to be updated.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/CreatePostValues'
+            examples:
+              No Header:
+                value:
+                  title: AgThing Water Device V2
+                  assetCategory: DEVICE
+                  assetType: SENSOR
+                  assetSubType: OTHER
+        required: true
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+      responses:
+        204:
+          $ref: '#/components/responses/AssetPut'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        415:
+          $ref: '#/components/responses/415'
+        429:
+          $ref: '#/components/responses/429'
+
+    delete:
+      tags:
+        - Asset
+      summary: Delete an Asset
+      description: This endpoint will delete an asset by its unique id.
+      security:
+        - OAuth2: [ eq2 ]
+      parameters:
+      - $ref: '#/components/parameters/AssetId'
+      responses:
+        204:
+          description: Success.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              examples:
+                No Header:
+                  description: '204 No Content'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+
+  /assets/{assetId}/locations:
+    get:
+      tags:
+        - Asset Location
+      summary: Get all locations for an asset
+      operationId: getAssetLocations
+      security:
+        - OAuth2: [ eq1 ]
+      description: 'This endpoint will retrieve all locations for an asset. If you provide startDate and endDate then it will retrieve all the results of the given time range.'
+      note: '<b>Note:</b> This API does not support eTags.'
+      parameters:
+      - $ref: '#/components/parameters/AssetId2'
+      - $ref: '#/components/parameters/StartDate'
+      - $ref: '#/components/parameters/EndDate'
+      - $ref: '#/components/parameters/Count'
+      - $ref: '#/components/parameters/PageKey'
+
+      responses:
+        200:
+          $ref: '#/components/responses/AssetIdGet'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        429:
+          $ref: '#/components/responses/429'
+
+    post:
+      tags:
+        - Asset Location
+      summary: Create new asset location
+      operationId: postAssetLocations
+      security:
+        - OAuth2: [ eq2 ]
+      description: 'This endpoint will create a new Asset Location.<br/><br/><b>We provide <a href="#markdown">Markdown support</a> for measurementData name.</b><br/><br/>
+                    <b>Please Note:</b> Only <i>links</i> are supported for a measurementData name.<br/><br/>Additionally, Asset Locations do not honor fractional seconds in their <mark>timestamps</mark>. So <mark>2019-01-01T12:34:56.900Z</mark> and <mark>2019-01-01T12:34:56Z</mark> are considered equivalent.'
+      parameters:
+      - $ref: '#/components/parameters/AssetId2'
+      requestBody:
+        description: Geolocations and MeasurementData to create.
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/AssetIdValuePost'
+            examples:
+              No Header:
+                value:
+                    - '@type': ContributedAssetLocation
+                      timestamp: '2017-09-17T21:29:59.000Z'
+                      geometry: >-
+                        {"type": "Feature", "geometry": {"geometries": [{"coordinates": [-93.776179,
+                        40.967857], "type": "Point"}], "type": "GeometryCollection"}}
+                      measurementData:
+                        - '@type': BasicMeasurement
+                          name: name of measurement data with [a link](https://www.example.com)
+                          value: V1.3
+                          unit: u1
+                        - '@type': BasicMeasurement
+                          name: a measurement name
+                          value: V2.3
+                          unit: u2
+        required: true
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+      responses:
+        201:
+          $ref: '#/components/responses/201'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        406:
+          $ref: '#/components/responses/406'
+        409:
+          $ref: '#/components/responses/409'
+        413:
+          $ref: '#/components/responses/413'
+        415:
+          $ref: '#/components/responses/415'
+        429:
+          $ref: '#/components/responses/429'
+
+  /assetCatalog:
+    get:
+      summary: Get Asset Catalog List
+      operationId: getAssetCatalog
+      tags:
+        - Asset Catalog
+      description: This endpoint will retrieve the Asset Catalog List.
+      security:
+        - OAuth2: [ eq1 ]
+      parameters:
+        - $ref: '#/components/parameters/x-deere-sign'
+      headers:
+        - $ref: '#/components/parameters/x-deere-sign2'
+      responses:
+        200:
+          description: The Asset Catalog containaing all valid entries.
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: '#/components/schemas/AssetCatalogGet'
+              examples:
+                No Header:
+                  description: '200 OK<br/>
+                                Content-Type: application/vnd.deere.axiom.v3+json<br/>
+                                x-deere-signature: 5b5392615e4b4e1c92013026f47109bb'
+                  value:
+                    links:
+                    - rel: self
+                      uri: https://sandboxapi.deere.com/platform/assetCatalog
+                    total: 2
+                    values:
+                      - '@type': ContributedCatalogItem
+                        assetCategory: DEVICE
+                        assetType: SENSOR
+                        assetSubType: ENVIRONMENTAL
+                        links: [ ]
+                      - '@type': ContributedCatalogItem
+                        assetCategory: DEVICE
+                        assetType: SENSOR
+                        assetSubType: OTHER
+                        links: [ ]
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: 'eq1'
+            eq2: 'eq2'
+  schemas:
+    CollectionBase:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            properties:
+              rel:
+                type: string
+                description: Links relavent to exploring the collection.
+                example: self
+              uri:
+                type: string
+                description: The URI to the related resource.
+                format: uri
+                example: 'https://sandboxapi.deere.com/platform/resources/61265'
+        total:
+          type: number
+          example: 1
+    AssetCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/Asset'
+    AssetLocationCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetLocation'
+    AssetLocationBase:
+      required:
+      - timestamp
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: ContributedAssetLocation
+        timestamp:
+          description: ISO 8601 Date and time in UTC the `measurementData` and/or `geometry` were recorded by the Asset
+          example: '2019-07-12T21:29:50.000Z'
+          type: string
+          format: date-time
+        geometry:
+          type: string
+          description: stringified [GeoJSON Point (RFC 7946)](https://tools.ietf.org/html/rfc7946#section-3.1.2) identifying the Asset geolocation
+          example: '{ "type": "Feature", "geometry": { "geometries": [ { "coordinates":
+            [ -94.5609911, 42.3428859 ], "type": "Point" } ], "type": "GeometryCollection"
+            } }'
+        measurementData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeasurementData'
+    AssetLocation:
+      allOf:
+      - $ref: '#/components/schemas/AssetLocationBase'
+      description: A point in time geolocation or measurments broadcast by an Asset, a series of Asset Locations track an Asset's movement and/or measurement changes.
+          Either `geometry` or `measurementData` is required and both are allowed.
+    LastKnownLocation:
+      allOf:
+      - $ref: '#/components/schemas/AssetLocationBase'
+      description: The Asset Location with the most recent `timestamp`
+    UpdateAsset:
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+            description: The ID of the Asset. Optional, but if included it must match the URL parameter for Asset Id.
+            example: b9d96332-93c7-44ae-ac86-eed8727f13c7
+      - $ref: '#/components/schemas/CreateAsset'
+    CreateAsset:
+      required:
+      - title
+      - assetCategory
+      - assetType
+      - assetSubType
+      - links
+      type: object
+      description: A networked physical device, an IOT device, with the ability to broadcast geolocations and measurements
+      properties:
+        '@type':
+          type: string
+          example: ContributedAsset
+        title:
+          type: string
+          description: The name of the Asset.
+          example: McGill 7000
+        assetCategory:
+          $ref: '#/components/schemas/AssetCategory'
+        assetType:
+          $ref: '#/components/schemas/AssetType'
+        assetSubType:
+          $ref: '#/components/schemas/AssetSubType'
+        # links:
+        #   type: array
+        #   items:
+        #     $ref: '#/components/schemas/ContributionDefinitionLink'
+    Asset:
+      allOf:
+      - $ref: '#/components/schemas/UpdateAsset'
+      - type: object
+        properties:
+          # links:
+          #   type: array
+          #   description: This is the list of related resources to an Asset, which should include
+          #     `organization`, `contributionDefinition`, `locations`, and `lastKnownLocation`
+          #   items:
+          #     $ref: '#/components/schemas/ContributionDefinitionLink'
+          lastModifiedDate:
+            type: string
+            description: A timestamp of the date and time the last operation was performed on this item.
+            format: date-time
+            readOnly: true
+          lastKnownLocation:
+            $ref: '#/components/schemas/LastKnownLocation'
+    AssetCollectionGetLink:
+      properties:
+        self:
+          example: https://sandboxapi.deere.com/platform/organizations/ORG_ID/assets
+          description: This Asset List Link.
+        # contributionDefinition:
+        #   example: https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+        #   description: Contribution Definition Link.
+        organization:
+          example: https://sandboxapi.deere.com/platform/organizations/ORG_ID
+          description: Organizations Link.
+        locations:
+          example: https://sandboxapi.deere.com/platform/assets/ASSET_ID/locations
+          description: Link to get location data for the asset.
+    AssetCollectionGetLink2:
+      properties:
+        # contributionDefinition:
+        #   example: https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+        #   description: Contribution Definition Link.
+        organization:
+          example: https://sandboxapi.deere.com/platform/organizations/ORG_ID
+          description: Organizations Link.
+        locations:
+          example: https://sandboxapi.deere.com/platform/assets/ASSET_ID/locations
+          description: Link to get location data for the asset.
+    AssetCollectionGetValue:
+      properties:
+        links:
+          description: Links to related resources in the Deere ecosystem.
+          example: See "Available Links" below
+          type: array
+        total:
+          description: Count of Assets in response
+          example: '3'
+          type: number
+        values:
+          description: The primary resource listing.
+          example: '---'
+          type: Asset array
+        Asset Details:
+          properties:
+            id:
+              description: The ID of the asset.
+              example: ab2c95d0-48ec-47f9-9fce-9ff42107c662
+              type: GUID
+            title:
+              description: The name of the asset.
+              example: Water sensor
+              type: string
+            assetCategory:
+              description: Asset Category
+              example: DEVICE
+              type: string
+            assetType:
+              description: Asset Type
+              example: SENSOR
+              type: string
+            assetSubType:
+              description: Asset Sub Type
+              example: OTHER
+              type: string
+            lastModifiedDate:
+              description: A timestamp of the date and time the last operation was performed on this item. All timestamps follow the ISO 8601 standard format.
+              example: 2015-04-30T10:23:50.000Z
+              type: datetime
+            lastKnownLocation:
+              description: The Asset Location with the most recent <mark>timestamp</mark>. Included if embed is requested.
+              example: See sample response below
+              type: Location object
+
+    CreatePostLink:
+      properties:
+        contributionDefinition:
+          description: Contribution Definition Link.
+          example: 	https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+    CreatePostValues:
+      properties:
+        title:
+          description: The name of the asset.
+          example: Water Sensor
+          type: string
+        assetCategory:
+          description: Asset Category
+          example: DEVICE
+          type: string
+        assetType:
+          description: Asset Type
+          example: SENSOR
+          type: string
+        assetSubType:
+          description: Asset Sub Type
+          example: OTHER
+          type: string
+    AssetGetValues:
+      properties:
+        id:
+          description: The ID of the asset.
+          example: ab2c95d0-48ec-47f9-9fce-9ff42107c662
+          type: GUID
+        title:
+          description: The name of the asset.
+          example: Water sensor
+          type: string
+        assetCategory:
+          description: Asset Category
+          example: DEVICE
+          type: string
+        assetType:
+          description: Asset Type
+          example: SENSOR
+          type: string
+        assetSubType:
+          description: Asset Sub Type
+          example: OTHER
+          type: string
+        lastModifiedDate:
+          description: All timestamps follow the ISO 8601 standard format.
+          example: 2015-04-30T10:23:50.000Z
+          type: datetime
+        lastKnownLocation:
+          description: Location data about the asset. Included if embed is requested.
+          example: See sample response below
+          type: Location object
+    AssetIdValue:
+      properties:
+        timestamp:
+          description: All timestamps follow the ISO 8601 standard format.
+          type: datetime
+          example: '2015-04-30T10:23:50.000Z'
+        geometry:
+          description: GeoJSON representation of the asset location.
+          example: See sample request below.
+        measurementData:
+          type: '<a href= "#measurement-data">Measurement Data</a> array'
+          description: List of measurement data to be associated with the asset.
+          example: See sample request below
+    AssetIdValuePost:
+      properties:
+        timestamp:
+          description: All timestamps follow the ISO 8601 standard format.
+          type: datetime
+          example: '2015-04-30T10:23:50.000Z'
+        geometry:
+          description: GeoJSON representation of the asset location.
+          type: string
+          example: See sample request below.
+        measurementData:
+          type: '<a href= "#measurement-data">Measurement Data</a> array'
+          description: List of measurement data to be associated with the asset.
+          example: See sample request below
+
+    ContributionDefinitionLink:
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: Link
+        rel:
+          type: string
+          description: The relation of the object to the linked resource.
+          example: contributionDefinition
+        uri:
+          type: string
+          description: The URI to the related resource.
+          format: uri
+          example: https://sandboxapi.deere.com/platform/contributionDefinitions/34973a25-75c0-48a9-a414-7d61587b3e37
+    AssetCatalogGet:
+      properties:
+        assetCategory:
+          description: Asset Category
+          example: DEVICE
+          type: string
+        assetType:
+          description: Asset Type
+          example: SENSOR
+          type: string
+        assetSubType:
+          description: Asset Sub Type
+          example: OTHER
+          type: string
+
+    AssetCatalogCollection:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CollectionBase'
+        - properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetCatalogItem'
+  responses:
+
+    GetOrgId:
+      description: A collection of Assets
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              links:
+                items:
+                  $ref: '#/components/schemas/AssetCollectionGetLink'
+              values:
+                items:
+                  $ref: '#/components/schemas/AssetCollectionGetValue'
+          examples:
+            No Header:
+              description: '200 OK<br/>
+                            Content-Type: application/vnd.deere.axiom.v3+json<br/>
+                            x-deere-signature: 5b5392615e4b4e1c92013026f47109bb'
+              value:
+                links:
+                - rel: self
+                  uri: https://sandboxapi.deere.com/platform/organizations/ORG_ID/assets
+                total: 1
+                values:
+                  - '@type': ContributedAsset
+                    title: AgThing Water Device
+                    assetCategory: DEVICE
+                    assetType: SENSOR
+                    assetSubType: OTHER
+                    lastModifiedDate: '2018-01-31T20:36:16.727Z'
+                    id: ASSET_ID
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: https://sandboxapi.deere.com/platform/assets/ASSET_ID
+                      # - '@type': Link
+                      #   rel: contributionDefinition
+                      #   uri: >-
+                      #     https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+                      - '@type': Link
+                        rel: organization
+                        uri: https://sandboxapi.deere.com/platform/organizations/ORG_ID
+                      - '@type': Link
+                        rel: locations
+                        uri: https://sandboxapi.deere.com/platform/assets/ASSET_ID/locations
+    CreatePost:
+      description: Create
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              # links:
+              #   items:
+              #     $ref: '#/components/schemas/CreatePostLink'
+          examples:
+            Headers:
+              description: '201 Created<br/>Location: https://sandboxapi.deere.com/platform/assets/abx6f24c-2d91-40bd-70e6-0137e6ccbfb0'
+
+    AssetGet:
+      description: The Asset.
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              links:
+                items:
+                  $ref: '#/components/schemas/AssetCollectionGetLink2'
+              values:
+                items:
+                  $ref: '#/components/schemas/AssetGetValues'
+          examples:
+            No Header:
+              description: '200 OK<br/>
+                            Content-Type: application/vnd.deere.axiom.v3+json'
+              value:
+                '@type': ContributedAsset
+                title: AgThing Water Device
+                assetCategory: DEVICE
+                assetType: SENSOR
+                assetSubType: OTHER
+                lastModifiedDate: '2018-01-31T20:19:40.988Z'
+                id: ASSET_ID
+                links:
+                  - '@type': Link
+                    rel: self
+                    uri: https://sandboxapi.deere.com/platform/assets/ASSET_ID
+                  # - '@type': Link
+                  #   rel: contributionDefinition
+                  #   uri: >-
+                  #     https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+                  - '@type': Link
+                    rel: organization
+                    uri: https://sandboxapi.deere.com/platform/organizations/ORG_ID
+                  - '@type': Link
+                    rel: locations
+                    uri: https://sandboxapi.deere.com/platform/assets/ASSET_ID/locations
+    AssetPut:
+      description: Success
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              # links:
+              #   items:
+              #     $ref: '#/components/schemas/CreatePostLink'
+          examples:
+            Headers:
+              description: '204 No Content<br/>
+                                <br/>
+                               Date: Tue, 31 May 2016 08:49:20 GMT<br/>
+                               Content-Encoding: gzip<br/>
+                               Server: Apache-Coyote/1.1
+                               ADRUM_0: g:ec9c31ed-7102-4117-832e-f6986dc31665<br/>
+                               X-Deere-Elapsed-Ms: 449<br/>
+                               X-Frame-Options: SAMEORIGIN<br/>
+                               ADRUM_1: i:3472<br/>
+                               Content-Type: text/plain<br/>
+                               ADRUM_2: e:129<br/>
+                               ADRUM_3: d:467<br/>
+                               Connection: Keep-Alive<br/>
+                               Keep-Alive: timeout=5, max=98<br/>
+                               Content-Length: 0<br/>
+                               X-Deere-Handling-Server: ldxx90tc5'
+
+    AssetIdGet:
+      description: The Asset Locations
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+              type: object
+              properties:
+                values:
+                  items:
+                    $ref: '#/components/schemas/AssetIdValue'
+          examples:
+            No Header:
+              description: '200 OK<br/>
+                            Content-Type: application/vnd.deere.axiom.v3+json<br/><br/>Note: By default, all location data for the asset is returned.'
+              value:
+                links:
+                - rel: self
+                  uri: >-
+                    https://sandboxapi.deere.com/platform/assets/ASSET_ID/locations?startDate=2017-09-18T20%3A29%3A59.000Z&endDate=2017-09-18T23%3A29%3A59.000Z
+                total: 3
+                values:
+                  - '@type': ContributedAssetLocation
+                    timestamp: '2017-09-18T22:49:59.000Z'
+                    geometry:
+                      type: Feature
+                      geometry:
+                        geometries:
+                          - coordinates:
+                              - -93.776179
+                              - 40.967857
+                            type: Point
+                        type: GeometryCollection
+                    measurementData:
+                      - '@type': BasicMeasurement
+                        name: name of measurement data with [a link](https://www.example.com)
+                        value: V1.3
+                        unit: u1
+                      - '@type': BasicMeasurement
+                        name: a measurement name
+                        value: V2.3
+                        unit: u2
+                    links: [ ]
+                  - '@type': ContributedAssetLocation
+                    timestamp: '2017-09-18T22:29:59.000Z'
+                    geometry:
+                      type: Feature
+                      geometry:
+                        geometries:
+                          - coordinates:
+                              - -93.776179
+                              - 40.967857
+                            type: Point
+                        type: GeometryCollection
+                    measurementData:
+                      - '@type': BasicMeasurement
+                        name: name of measurement data with [a link](https://www.example.com)
+                        value: V1.4
+                        unit: u1
+                      - '@type': BasicMeasurement
+                        name: a measurement name
+                        value: V2.4
+                        unit: u2
+                    links: [ ]
+                  - '@type': ContributedAssetLocation
+                    timestamp: '2017-09-18T21:29:59.000Z'
+                    geometry:
+                      type: Feature
+                      geometry:
+                        geometries:
+                          - coordinates:
+                              - -93.776179
+                              - 40.967857
+                            type: Point
+                        type: GeometryCollection
+                    measurementData:
+                      - '@type': BasicMeasurement
+                        name: name of measurement data with [a link](https://www.example.com)
+                        value: V1.5
+                        unit: u1
+                      - '@type': BasicMeasurement
+                        name: a measurement name
+                        value: V2.5
+                        unit: u2
+                    links: [ ]
+
+
+    201:
+      description: 'Request'
+      content:
+        application/vnd.deere.axiom.v3+json:
+          examples:
+            Headers:
+              description: '201 Created<br/>
+                            Location: https://sandboxapi.deere.com/platform/assets/beb295d0-48ec-47f9-9fce-0dd52107c662/locations'
+    400:
+      description: The request body was malformed or the given query parameters were invalid. For example, it was missing a required field or supplied a read-only value.
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/400Errors'
+    401:
+      description: The user's OAuth credentials are not recognized by the server.
+    403:
+      description: The user does not have access to the requested resource.
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/GenericErrors'
+    404:
+      description: The specified resource was not found on the server.
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/GenericErrors'
+    406:
+      description: The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request.
+    409:
+      description: The timestamp on the provided location conflicts with a previously provided location.
+    413:
+      description: The payload is too large. The max payload size is 100KB.
+    415:
+      description: The server refuses to accept the request because the payload format is in an unsupported format.
+    429:
+      description: The user has sent too many requests in a given amount of time.
+    AssetLocation:
+      description: The Asset Location.
+      content:
+        '*/*':
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AssetLocation'
+    Success:
+      description: Success.
+    Created:
+      description: Created.
+      headers:
+        Location:
+          description: https://sandboxapi.deere.com/platform/asset/1234
+          schema:
+            type: string
+  headers:
+    Location:
+      description: URI to the created resource
+      example: https://sandboxapi.deere.com/platform/assets/7a300c61-a663-4c2b-9ec5-967a9c5b4776/locations
+      schema:
+        type: string
+        format: uri
+  parameters:
+    OrgId:
+      name: orgId
+      in: path
+      description: The ID of the organization
+      required: true
+      schema:
+        example: 1234
+        type: string
+        minimum: 1
+        format: int64
+    Embed:
+      name: embed
+      in: query
+      description: Additional data to embed in the response. For example <mark>embed=lastKnownLocation</mark> will return assets with their <mark>lastKnownLocation</mark> included.
+      schema:
+        type: string
+        example: lastKnownLocation
+    X-deere-sign:
+      name: x-deere-signature
+      in: header
+      description: 	See <a href="#eTags">eTags</a> for more information.
+      schema:
+        type: string
+        example: 927392615e4b4e1c12458026f47109bb
+    x-deere-sign:
+      name: x-deere-signature
+      in: header
+      description: See <a href="#eTags">eTags</a> for more information.
+      schema:
+        type: string
+        example: abc392615e4b4e1c1245-8026f47109bb
+    x-deere-sign2:
+      name: x-deere-signature
+      description: See <a href="#eTags">eTags</a> for more information.
+      schema:
+        type: string
+        example: 5b5392615e4b4e1c92013026f47109bb
+
+    AssetId:
+      name: assetId
+      in: path
+      description: The ID of the asset
+      required: true
+      schema:
+        type: GUID
+        format: uuid
+        example: acd3fe92-308e-4d0b-b16f-90af96cc38d0
+    AssetId2:
+      name: assetId
+      in: path
+      description: The ID associated with the asset.
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: ab2c95d0-48ec-47f9-9fce-9ff42107c662
+    StartDate:
+      name: startDate
+      in: query
+      required: false
+      description: 'Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time.'
+      schema:
+        example: '2017-09-18T20:29:59.000Z'
+        type: datetime
+        format: date-time
+    EndDate:
+      name: endDate
+      in: query
+      description: 'Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time.'
+      schema:
+        example: '2017-09-18T20:29:59.000Z'
+        type: datetime
+        format: date-time
+    PageKey:
+      name: pageKey
+      in: query
+      description: A query param returned by the server in the <mark>nextPage</mark> link if there are more results for your query than were returned in the response.
+      schema:
+        type: string
+        format: string
+        example: ab2c95d0-48ec-47f9-9fce-9ff42107c662,1970-01-01T00:00:00Z
+    Count:
+      name: count
+      in: query
+      description: The number of results to include in the response. Must be a positive value greater than or equal to 1. Max 500. Default 500.
+      schema:
+        example: 250
+        type: string
+        format: string
+

@@ -1,0 +1,988 @@
+openapi: 3.0.0
+info:
+  title: Boundaries API
+  description: Provides boundary management within a field context. Management
+    capabilities include creating, retrieving, editing, and archiving boundaries.
+  contact:
+    name: ISG-Break-Point
+    email: ISG-Break-Point@JohnDeere.com
+  version: "3.0"
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - api
+          - partnerapi
+          - sandboxapi
+          - apicert
+          - partnerapicert
+          - apiqa.tal
+          - partnerapiqa
+          - sandboxapiqa
+
+paths:
+  /organizations/{orgId}/boundaries:
+    get:
+      summary: View Boundaries in an Org
+      description: 'View boundaries in an organization.
+                    <ul>
+                      <li><b>fields</b>: View the field associated with these boundaries.</li>
+                      <li><b>owningOrganizations</b>: View the organization that owns the field.</li>
+                    </ul>'
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/Embed'
+        - $ref: '#/components/parameters/RecordFilter'
+      headers:
+        - $ref: '#/components/parameters/Accept-UOM-System'
+      security:
+        - OAuth2: [ ag1 ]
+      responses:
+        200:
+          $ref: '#/components/responses/BoundariesResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /organizations/{orgId}/fields/{fieldId}/boundaries:
+    get:
+      summary: View the Boundaries of a Field
+      description: 'View the boundaries of a specified field.'
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/Embed'
+        - $ref: '#/components/parameters/RecordFilter'
+      headers:
+        - $ref: '#/components/parameters/Accept-UOM-System'
+      security:
+        - OAuth2: [ ag1 ]
+      responses:
+        200:
+          $ref: '#/components/responses/BoundariesResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a Boundary
+      description: Create a boundary with a geometry collection for a field.
+      parameters:
+        - $ref: '#/components/parameters/OrgId2'
+        - $ref: '#/components/parameters/FieldId'
+      security:
+        - OAuth2: [ ag3 ]
+      responses:
+        200:
+          $ref: '#/components/responses/Created'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+      requestBody:
+        content:
+          No Header:
+            examples:
+              No Header:
+
+                value:
+                  '@type': Boundary
+                  name: Boundary_Unique_Name
+                  sourceType: External
+                  multipolygons:
+                    - '@type': Polygon
+                      rings:
+                        - '@type': Ring
+                          points:
+                            - '@type': Point
+                              lat: -17.011617912472012
+                              lon: 73.90490448264597
+                            - '@type': Point
+                              lat: -17.323201320401324
+                              lon: 74.16699984419307
+                            - '@type': Point
+                              lat: -17.634784728330636
+                              lon: 74.2718379888119
+                            - '@type': Point
+                              lat: -17.16740961643667
+                              lon: 74.00974262726481
+                            - '@type': Point
+                              lat: -16.959687344483797
+                              lon: 73.85248541033656
+                            - '@type': Point
+                              lat: -17.011617912472012
+                              lon: 73.90490448264597
+                          type: exterior
+                          passable: true
+                  active: false
+                  archived: false
+                  irrigated: false
+                  signalType: dtiSignalTypeRTK
+
+  /fieldOperations/{operationId}/boundary:
+    get:
+      summary: Generate a Boundary from a FieldOperation
+      description: "Given a <a href='/dev-docs/field-operations#overviews' target='_blank'>field operation</a>, this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before <a href='/dev-docs/boundaries#/organizations/{orgId}/fields/{fieldId}/boundaries/post' target='_blank'>POST'ing the generated boundary</a> back into Operations Center.
+                    <p>There are two cases where this API will return an HTTP 400 - Bad Request:</p>
+                    <ul>
+                      <li><b>If the field already has an active boundary.</b> In this case, please use the existing boundary - it is likely more accurate than a generated boundary.</li>
+                      <li><b>If the field has been merged.</b> In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.</li>
+                     </ul>"
+      headers:
+        - $ref: '#/components/parameters/Accept-UOM-System'
+      security:
+        - OAuth2: [ ag2 ]
+      responses:
+        200:
+          $ref: '#/components/responses/BoundariesResponse2'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}:
+    get:
+      summary: Get a specific boundary
+      description: This endpoint will retrieve a specific boundary.
+      security:
+        - OAuth2: [ ag1 ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId3'
+        - $ref: '#/components/parameters/FieldId2'
+        - $ref: '#/components/parameters/BoundaryId'
+      responses:
+        200:
+          $ref: '#/components/responses/BoundaryResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update a boundary
+      description: This endpoint will update a boundary. The shape of the object must include name, active, irrigated, sourceType, and multipolygons. All these fields can be updated, however a license is required to set sourceType to a value other than "External". If the boundary is set to active, it will mark all other boundaries in this field inactive.
+      requestBody:
+        $ref: '#/components/requestBodies/PutRequest'
+      security:
+        - OAuth2: [ ag3 ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId3'
+        - $ref: '#/components/parameters/FieldId2'
+        - $ref: '#/components/parameters/BoundaryId'
+      responses:
+        200:
+          $ref: '#/components/responses/Update'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+    delete:
+      summary: Delete a boundary
+      description: This endpoint will delete a boundary.
+      security:
+        - OAuth2: [ ag3 ]
+      parameters:
+        - $ref: '#/components/parameters/OrgId3'
+        - $ref: '#/components/parameters/FieldId2'
+        - $ref: '#/components/parameters/BoundaryId'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+      responses:
+        200:
+          $ref: '#/components/responses/NoContent'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: 'ag1'
+            ag2: 'ag2'
+            ag3: 'ag3'
+  parameters:
+    OrgId:
+      name: orgId
+      in: path
+      description: Organization
+      required: true
+      schema:
+        type: string
+        format: int64
+        example: 1234
+    OrgId3:
+      name: orgId
+      in: path
+      description: Organization
+      required: true
+      schema:
+        type: string
+        format: int64
+        example: 654321
+    Accept-UOM-System:
+      name: Accept-UOM-System
+      description: 	'Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system.'
+      required: false
+      in: METRIC
+      schema:
+        type: string
+        example: METRIC
+    OrgId2:
+      name: orgId
+      in: path
+      description: Organization ID
+      required: true
+      schema:
+        type: string
+        format: int64
+        example: 1234
+    Embed:
+      name: embed
+      in: query
+      description: Populates response with data lineage information
+      required: false
+      schema:
+        type: string
+        example: showRecordMetadata
+        format: uuid
+    RecordFilter:
+      name: recordFilter
+      in: query
+      description: Filter results based on status; defaults to active
+      schema:
+        type: string
+        example: active, archived, all
+    Id:
+      name: id
+      in: path
+      description: Field ID
+      required: true
+      schema:
+        type: GUID
+        format: uuid
+        example: a7cb723f-6707-46fb-a9ff-4e734e3daf58
+    FieldId:
+      name: fieldId
+      in: path
+      description: Field GUID
+      required: true
+      schema:
+        type: GUID
+        example: a7cb723f-6707-46fb-a9ff-4e734e3daf58
+    FieldId2:
+      name: fieldId
+      in: path
+      description: Field Id
+      required: true
+      schema:
+        type: GUID
+        example: e61b83f4-3a12-431e-8010-596f2466dc27
+    BoundaryId:
+      name: boundaryId
+      in: path
+      description: Boundary Id
+      required: true
+      schema:
+        example: e7ab3a06-06ca-4d34-8cb7-6fd2a3640a3d
+        type: GUID
+    AcceptUOMSystem:
+      name: Accept-UOM-System
+      in: header
+      description: 'Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system.'
+      required: false
+      schema:
+        type: string
+        enum:
+          - "ENGLISH"
+          - "METRIC"
+        example: "METRIC"
+    Active:
+      name: activeOnly
+      in: query
+      description: Allows filtering based on active boundaries
+      required: false
+      schema:
+        type: boolean
+        default: false
+
+  requestBodies:
+    PostRequest:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/Boundary'
+      description: Specifies Boundary details
+      required: true
+    PutRequest:
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/PutBoundary'
+      description: The desired Boundary to be updated
+      required: true
+  responses:
+    BoundariesResponse:
+      description: A collection of boundaries
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+                links:
+                  items:
+                    $ref: '#/components/schemas/BoundariesLink'
+                total:
+                  type: integer
+                  format: int32
+                  example: 1
+                values:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/BoundaryOrgId'
+          examples:
+            No Header:
+              description: '200 OK
+                            <br/>Content-Type: application/vnd.deere.axiom.v3+json
+                            <br/>x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb'
+              value:
+                links:
+                  - rel: self
+                    uri: https://sandboxapi.deere.com/platform/organizations/123456/boundaries
+                total: 1
+                values:
+                  - '@type': Boundary
+                    id: 519dcf9a-9931-4789-9eaa-3dc7399f2840
+                    name: Unique_Boundary_name
+                    sourceType: HandDrawn
+                    createdTime: '2018-07-01T21:00:11Z'
+                    modifiedTime: '2017-11-16T15:43:27.496Z'
+                    area:
+                      '@type': MeasurementAsDouble
+                      valueAsDouble: 32.45477594323993
+                      unit: ha
+                    workableArea:
+                      '@type': MeasurementAsDouble
+                      valueAsDouble: 32.45477594323993
+                      unit: ha
+                    multipolygons:
+                      - '@type': Polygon
+                        rings:
+                          - '@type': Ring
+                            points:
+                              - '@type': Point
+                                lat: 41.65107816712308
+                                lon: -93.76798868179321
+                              - '@type': Point
+                                lat: 41.650821230227706
+                                lon: -93.76928965078696
+                              - '@type': Point
+                                lat: 41.65052211771455
+                                lon: -93.7704892896499
+                              - '@type': Point
+                                lat: 41.64998810424595
+                                lon: -93.77184439555037
+                              - '@type': Point
+                                lat: 41.64901785518664
+                                lon: -93.77358913421631
+                              - '@type': Point
+                                lat: 41.64780652027916
+                                lon: -93.77499124189404
+                              - '@type': Point
+                                lat: 41.646348170121755
+                                lon: -93.77597093582153
+                              - '@type': Point
+                                lat: 41.64513032597595
+                                lon: -93.7765281704435
+                              - '@type': Point
+                                lat: 41.64421554942042
+                                lon: -93.77667903900146
+                              - '@type': Point
+                                lat: 41.644111321787456
+                                lon: -93.76941561698914
+                              - '@type': Point
+                                lat: 41.64662075564981
+                                lon: -93.77200126647949
+                              - '@type': Point
+                                lat: 41.651158333570876
+                                lon: -93.76485586166382
+                              - '@type': Point
+                                lat: 41.65107816712308
+                                lon: -93.76798868179321
+                            type: exterior
+                            passable: true
+                    extent:
+                      '@type': Extent
+                      topLeft:
+                        '@type': Point
+                        lat: 41.607420743
+                        lon: -93.677587509
+                      bottomRight:
+                        '@type': Point
+                        lat: 41.604179741
+                        lon: -93.676643372
+                    links:
+                      - '@type': Link
+                        rel: self
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+                          /boundaries/519dcf9a-9931-4789-9eaa-3dc7399f2840
+                      - '@type': Link
+                        rel: owningOrganization
+                        uri: https://sandboxapi.deere.com/platform/organizations/123456
+                      - '@type': Link
+                        rel: field
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+                    active: false
+                    irrigated: true
+                    archived: false
+                    signalType: dtiSignalTypeRTK
+    BoundariesResponse2:
+      description: A collection of boundaries
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              links:
+                items:
+                  $ref: '#/components/schemas/BoundariesLink'
+              total:
+                type: integer
+                format: int32
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BoundaryOrgId2'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+              value:
+                '@type': Boundary
+                name: Unique_Boundary_name
+                sourceType: Auto
+                createdTime: '2017-11-16T15:43:27.496Z'
+                modifiedTime: '2017-11-16T15:43:27.496Z'
+                multipolygons:
+                  - '@type': Polygon
+                    rings:
+                      - '@type': Ring
+                        points:
+                          - '@type': Point
+                            lat: 41.65107816712308
+                            lon: -93.76798868179321
+                          - '@type': Point
+                            lat: 41.650821230227706
+                            lon: -93.76928965078696
+                          - '@type': Point
+                            lat: 41.65052211771455
+                            lon: -93.7704892896499
+                          - '@type': Point
+                            lat: 41.64998810424595
+                            lon: -93.77184439555037
+                          - '@type': Point
+                            lat: 41.64901785518664
+                            lon: -93.77358913421631
+                          - '@type': Point
+                            lat: 41.64780652027916
+                            lon: -93.77499124189404
+                          - '@type': Point
+                            lat: 41.646348170121755
+                            lon: -93.77597093582153
+                          - '@type': Point
+                            lat: 41.64513032597595
+                            lon: -93.7765281704435
+                          - '@type': Point
+                            lat: 41.64421554942042
+                            lon: -93.77667903900146
+                          - '@type': Point
+                            lat: 41.644111321787456
+                            lon: -93.76941561698914
+                          - '@type': Point
+                            lat: 41.64662075564981
+                            lon: -93.77200126647949
+                          - '@type': Point
+                            lat: 41.651158333570876
+                            lon: -93.76485586166382
+                          - '@type': Point
+                            lat: 41.65107816712308
+                            lon: -93.76798868179321
+                        type: exterior
+                        passable: true
+                extent:
+                  '@type': Extent
+                  topLeft:
+                    '@type': Point
+                    lat: 41.607420743
+                    lon: -93.677587509
+                  bottomRight:
+                    '@type': Point
+                    lat: 41.604179741
+                    lon: -93.676643372
+                archived: false
+                id: 519dcf9a-9931-4789-9eaa-3dc7399f2840
+                links:
+                  - '@type': Link
+                    rel: self
+                    uri: >-
+                      https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c/boundaries/519dcf9a-9931-4789-9eaa-3dc7399f2840
+                  - '@type': Link
+                    rel: owningOrganization
+                    uri: https://sandboxapi.deere.com/platform/organizations/123456
+                  - '@type': Link
+                    rel: field
+                    uri: >-
+                      https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+                active: false
+                irrigated: true
+                signalType: dtiSignalTypeRTK
+
+    BoundaryResponse:
+      description: A single boundary
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              links:
+                items:
+                  $ref: '#/components/schemas/BoundariesLink'
+              total:
+                type: integer
+                format: int32
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostBoundaryGet'
+          examples:
+            No Header:
+              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+              value:
+                '@type': Boundary
+                name: Unique_Boundary_name
+                sourceType: HandDrawn
+                createdTime: '2018-07-01T21:00:11Z'
+                modifiedTime: '2017-11-16T15:43:27.496Z'
+                area:
+                  '@type': MeasurementAsDouble
+                  valueAsDouble: 32.45477594323993
+                  unit: ha
+                workableArea:
+                  '@type': MeasurementAsDouble
+                  valueAsDouble: 32.45477594323993
+                  unit: ha
+                multipolygons:
+                  - '@type': Polygon
+                    rings:
+                      - '@type': Ring
+                        points:
+                          - '@type': Point
+                            lat: 41.65107816712308
+                            lon: -93.76798868179321
+                          - '@type': Point
+                            lat: 41.650821230227706
+                            lon: -93.76928965078696
+                          - '@type': Point
+                            lat: 41.65052211771455
+                            lon: -93.7704892896499
+                          - '@type': Point
+                            lat: 41.64998810424595
+                            lon: -93.77184439555037
+                          - '@type': Point
+                            lat: 41.64901785518664
+                            lon: -93.77358913421631
+                          - '@type': Point
+                            lat: 41.64780652027916
+                            lon: -93.77499124189404
+                          - '@type': Point
+                            lat: 41.646348170121755
+                            lon: -93.77597093582153
+                          - '@type': Point
+                            lat: 41.64513032597595
+                            lon: -93.7765281704435
+                          - '@type': Point
+                            lat: 41.64421554942042
+                            lon: -93.77667903900146
+                          - '@type': Point
+                            lat: 41.644111321787456
+                            lon: -93.76941561698914
+                          - '@type': Point
+                            lat: 41.64662075564981
+                            lon: -93.77200126647949
+                          - '@type': Point
+                            lat: 41.651158333570876
+                            lon: -93.76485586166382
+                          - '@type': Point
+                            lat: 41.65107816712308
+                            lon: -93.76798868179321
+                        type: exterior
+                        passable: true
+                extent:
+                  '@type': Extent
+                  topLeft:
+                    '@type': Point
+                    lat: 41.607420743
+                    lon: -93.677587509
+                  bottomRight:
+                    '@type': Point
+                    lat: 41.604179741
+                    lon: -93.676643372
+                id: 519dcf9a-9931-4789-9eaa-3dc7399f2840
+                links:
+                  - '@type': Link
+                    rel: self
+                    uri: >-
+                      https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c/boundaries/519dcf9a-9931-4789-9eaa-3dc7399f2840
+                  - '@type': Link
+                    rel: owningOrganization
+                    uri: https://sandboxapi.deere.com/platform/organizations/123456
+                  - '@type': Link
+                    rel: field
+                    uri: >-
+                      https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+                active: false
+                archived: false
+                irrigated: true
+                signalType: dtiSignalTypeRTK
+
+    Created:
+      description: Created, with a Location header containing the URI of the newly created resource
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int32
+                example: 1
+              values:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostBoundary'
+          examples:
+            Headers:
+              description: '201 Created<br/>
+                            Location: https://sandboxapi.deere.com/platform/organizations/123456/fields/109b3c20-f33a-4c96-9a2c-613def198e0c/boundaries/96d79d34-89be-4f2b-b041-6b0181bc65db'
+    Create:
+      description: Created, with a Location header containing the URI of the newly created resource
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int32
+                example: 1
+
+    Update:
+      description: Updated, with a Location header containing the URI of the newly created resource
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                format: int32
+                example: 1
+          examples:
+            Headers:
+              description: '200 OK'
+
+    NoContent:
+      description: No Content. Request Completed Succesfully.
+      content:
+        No Content:
+          schema:
+            properties: {}
+          examples:
+            Headers:
+              description: '204 No Content'
+
+    BadRequest:
+      description: Request Validation failure. The boundary name must be between 1-20 characters. There must be at least
+        one exterior ring. Each ring must have 4 or more points. The first and last point must be
+        the same for each ring.
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+
+    Forbidden:
+      description:
+        The user does not have sufficient privileges to access this organization's boundaries.
+
+    NotFound:
+      description: The specified resource does not exist
+
+  schemas:
+    BoundaryOrgId:
+      type: object
+      properties:
+        id:
+          description: Boundary ID
+          type: GUID
+          format: uuid
+          example: "6232611a-0303-0234-8g7d-e1e1e11871b8"
+        name:
+          type: string
+          example: "Unique_Boundary_name"
+          description: Boundary name
+        area:
+          example: See sample response below.
+          description: Boundary area
+        workableArea:
+          example: See sample response below.
+          description: Exteriors-interiors of the boundary.
+        sourceType:
+          description: 	Describes the source of boundary (requires license to set).
+          type: string
+          example: "HandDrawn"
+        multipolygons:
+          description: Boundary shape and exact location.
+          example: 	See sample response below
+        type<sup><a href='#additional'>1</a></sup>:
+          description: Boundary type
+          type: string
+          example: exterior
+        passable:
+          description: '"True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).'
+          type: boolean
+          example: true
+        extent:
+          description: Coordinates of the extent of the boundary.
+          example: See sample response below.
+        active:
+          description: Indicates whether or not the boundary is active.
+          type: boolean
+          example: true
+        archived:
+          type: boolean
+          example: true
+          description: Indicates whether or not the boundary is archived.
+        signalType:
+          type: string
+          example: dtiSignalTypeRTK
+          description: Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+        modifiedTime:
+          example: 	2017-11-16T15:43:27.496Z
+          type: datetime
+          description: An ISO-8601 formatted timestamp of the last modification made to this boundary.
+        createdTime:
+          example: 2017-11-16T15:43:27.496Z
+          type: datetime
+          description: An ISO-8601 formatted timestamp of the time this boundary was created.
+        irrigated:
+          type: boolean
+          example: true
+          description: Indicates whether the contained area is irrigated.
+    BoundaryOrgId2:
+      type: object
+      properties:
+        id:
+          description: Boundary ID
+          type: GUID
+          format: uuid
+          example: "6232611a-0303-0234-8g7d-e1e1e11871b8"
+        name:
+          type: string
+          example: "AutoGenerated 2020 Seeding"
+          description: Boundary name
+        sourceType:
+          description: Describes the source of boundary (requires license to set).
+          type: string
+          example: "Auto"
+        multipolygons:
+          description: Boundary shape and exact location.
+          example: See sample response below
+        type<sup><a href='#additional'>1</a></sup>:
+          description: Boundary type
+          type: string
+          example: exterior
+        passable:
+          description: '"True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).'
+          type: boolean
+          example: true
+        extent:
+          description: Coordinates of the extent of the boundary.
+          example: See sample response below.
+        active:
+          description: Indicates whether or not the boundary is active.
+          type: boolean
+          example: true
+        signalType:
+          type: string
+          example: dtiSignalTypeRTK
+          description: Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+        modifiedTime:
+          example: 2017-11-16T15:43:27.496Z
+          type: datetime
+          description: An ISO-8601 formatted timestamp of the last modification made to this boundary.
+        irrigated:
+          type: boolean
+          example: true
+          description: Indicates whether the contained area is irrigated.
+    PostBoundaryGet:
+      properties:
+        id:
+          description: An identifier for this boundary, which is unique within a field context.
+          type: GUID
+          format: uuid
+          example: "bed69949-df25-4319-8f6c-94c62b466126"
+        name:
+          type: string
+          example: "Unique_Boundary_name"
+          description: Boundary name
+        modifiedTime:
+          example: 2017-11-16T15:43:27.496Z
+          type: datetime
+          description: An ISO-8601 formatted timestamp of the last modification made to this boundary.
+        createdTime:
+          example: 2017-11-16T15:43:27.496Z
+          type: datetime
+          description: An ISO-8601 formatted timestamp of the time this boundary was created.
+        area:
+          example: See sample response below.
+          description: The sum of all exterior polygons.
+        workableArea:
+          example: See sample response below.
+          description: Exteriors-interiors of the boundary.
+        sourceType:
+          description: Describes the source of boundary (requires license to set).
+          type: string
+          example: "HandDrawn"
+        multipolygons:
+          description: A collection of polygons.
+          type: array
+          example: See sample response below
+        extent:
+          description: Coordinates of the extent of the boundary.
+          type: object
+          example: See sample response below.
+        active:
+          description: 	Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries.
+          type: boolean
+          example: true
+        archived:
+          type: boolean
+          example: true
+          description: Indicates whether or not this boundary is currently archived
+        signalType:
+          type: string
+          example: dtiSignalTypeRTK
+          description: Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+        irrigated:
+          type: boolean
+          example: 'false'
+          description: Indicates whether the contained area is irrigated.
+        type<sup><a href='#additional'>1</a></sup>:
+          description: Boundary type
+          type: string
+          example: exterior
+        passable:
+          description: '"True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).'
+          type: boolean
+          example: true
+
+    PostBoundary:
+      properties:
+        name:
+          type: string
+          example: Boundary_Unique_Name
+          description: Boundary Name.
+        active:
+          type: boolean
+          example: 'false'
+          description: 	Indicates whether the boundary is active in this field.
+        archive:
+          type: boolean
+          example: 'false'
+          description: 	Indicates whether the boundary is archived.
+        irrigated:
+          type: boolean
+          example: 'false'
+          description: Indicates whether the boundary is irrigated.
+        multipolygons:
+          description: Polygon representation of the new boundary.
+          example: See sample request below.
+        sourceType:
+          example: External
+          type: string
+          description: 	Describes the source of boundary (requires license to set).
+        signalType:
+          type: string
+          example: dtiSignalTypeRTK
+          description: Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+    PutBoundary:
+      properties:
+        name:
+          type: string
+          example: Boundary01
+          description: Boundary Name.
+        active:
+          type: boolean
+          example: 'false'
+          description: Indicates whether the boundary is active in this field.
+        archive:
+          type: boolean
+          example: 'false'
+          description: Indicates whether the boundary is archived.
+        irrigated:
+          type: boolean
+          example: 'false'
+          description: Indicates whether the boundary is irrigated.
+        multipolygons:
+          description: Polygon representation of the new boundary.
+          example: See sample request below.
+        sourceType:
+          example: External
+          type: string
+          description: Describes the source of boundary (requires license to set).
+        signalType:
+          type: string
+          example: dtiSignalTypeRTK
+          description: Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+
+    BoundariesLink:
+      properties:
+        field:
+          example: https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+          description: Fields Link.
+        owningOrganization:
+          example: 	https://sandboxapi.deere.com/platform/organizations/1234
+          description: Organizations Link.

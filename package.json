@@ -1,0 +1,71 @@
+{
+  "name": "deere-sdk",
+  "version": "0.1.0",
+  "description": "Unofficial TypeScript SDK for John Deere Operations Center API",
+  "author": "ProductOfAmerica",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProductOfAmerica/deere-sdk.git"
+  },
+  "homepage": "https://github.com/ProductOfAmerica/deere-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/ProductOfAmerica/deere-sdk/issues"
+  },
+  "keywords": [
+    "john-deere",
+    "deere",
+    "agriculture",
+    "farming",
+    "api",
+    "sdk",
+    "typescript",
+    "operations-center",
+    "precision-agriculture"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/generated/index.js",
+      "types": "./dist/types/generated/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "fetch-specs": "tsx scripts/fetch-specs.ts",
+    "fix-specs": "tsx scripts/fix-specs.ts",
+    "generate-types": "tsx scripts/generate-types.ts",
+    "generate-sdk": "tsx scripts/generate-sdk.ts",
+    "generate": "pnpm fetch-specs && pnpm fix-specs && pnpm generate-types && pnpm generate-sdk",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "openapi-typescript": "^7.0.0",
+    "rimraf": "^5.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "yaml": "^2.3.0"
+  },
+  "peerDependencies": {},
+  "sideEffects": false
+}

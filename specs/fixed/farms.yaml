@@ -1,0 +1,513 @@
+openapi: "3.0.0"
+info:
+  title: "Farms API"
+  version: "3.0"
+  contact:
+    name: "Land"
+    email: "ISGLand@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /organizations/{orgId}/farms:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+    get:
+      description: "Retrieve all of the farms for an organization"
+      summary: "View Farms in an Org"
+      operationId: "getAllFarms"
+      parameters:
+        - $ref: "#/components/parameters/RecordMetadataEmbed"
+        - $ref: "#/components/parameters/RecordFilter"
+      responses:
+        "200":
+          $ref: "#/components/responses/FarmsReturned"
+        "304":
+          $ref: "#/components/responses/HasNotChanged"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgNotFound"
+    post:
+      description: "Create a farm for a given organization"
+      summary: "Create Farm"
+      operationId: "createFarm"
+      requestBody:
+        $ref: "#/components/requestBodies/FarmRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/FarmCreatedResponse"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
+        "404":
+          $ref: "#/components/responses/OrgNotFound"
+  /organizations/{orgId}/farms/{farmId}:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+      - $ref: "#/components/parameters/FarmId"
+    get:
+      description: "Get farm by organization and farmId"
+      summary: "View a Farm"
+      operationId: "getFarm"
+      parameters:
+        - $ref: "#/components/parameters/RecordMetadataEmbed"
+      responses:
+        "200":
+          $ref: "#/components/responses/FarmReturned"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgOrFarmNotFound"
+    put:
+      description: "Update farm by Id"
+      summary: "Update a Farm"
+      operationId: "updateFarm"
+      requestBody:
+        $ref: "#/components/requestBodies/FarmRequest"
+      responses:
+        "204":
+          $ref: "#/components/responses/UpdatedResponse"
+        "400":
+          $ref: "#/components/responses/MalformedRequest"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
+        "404":
+          $ref: "#/components/responses/OrgOrFarmNotFound"
+    delete:
+      description: "Delete a farm by Id"
+      summary: "Delete a Farm"
+      operationId: "deleteFarm"
+      responses:
+        "204":
+          $ref: "#/components/responses/DeletedResponse"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
+        "404":
+          $ref: "#/components/responses/OrgOrFarmNotFound"
+  /organizations/{orgId}/farms/{farmId}/clients:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+      - $ref: "#/components/parameters/FarmId"
+    get:
+      description: "Get clients by organization and farmId"
+      summary: "View Clients that Own a Farm"
+      operationId: "getAllClients"
+      responses:
+        "200":
+          $ref: "#/components/responses/ClientsReturned"
+        "304":
+          $ref: "#/components/responses/HasNotChanged"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/OrgNotFound"
+  /organizations/{orgID}/farms/{id}/fields:
+    get:
+      description: "View details on the field to which a specified farm belongs. The response will link to the following resources: <ul> <li><b>boundaries:</b> View the boundaries of this field.</li> <li><b>clients:</b> View the clients associated with this field.</li> <li><b>farms:</b> View the farms belonging to this field.</li> <li><b>owningOrganization:</b> View the organization that owns the field.</li> <li><b>activeBoundary:</b> View the active boundary of this field.</li> </ul>"
+      summary: "View a Farm's Field"
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/Id3"
+        - $ref: "#/components/parameters/X-deere-signature"
+      responses:
+        "200":
+          description: "Get Field by client Id"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/GroupLink"
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+                  values:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/FieldResponse2"
+              examples:
+                No Header:
+                  description: "20O OK<br/>Content-Type: application/vnd.deere.axiom.v3+json</br>x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                    total: 1
+                    values:
+                      - name: "Nautilus"
+                        archived: false
+                        id: "a7cb723f-6707-46fb-a9ff-4e734e3daf58"
+                        lastModifiedTime: "2020-09-21T15:41:15.205Z"
+                        links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58"
+                          - rel: "boundaries"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/boundaries"
+                          - rel: "clients"
+                            uri: "https://sandboxapi.deere.comm/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
+                          - rel: "farms"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/farms"
+                          - rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                          - rel: "contributionDefinition"
+                            uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef                            "
+components:
+  parameters:
+    OrgId:
+      in: "path"
+      name: "orgId"
+      description: "The id of the organization"
+      schema:
+        type: "integer"
+        format: "int64"
+        example: 12345
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "9r8392615e4b4e1c92018026f47109bb"
+    Id3:
+      name: "id"
+      in: "path"
+      description: "Farm ID"
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "14e69520-34b2-4e67-b5f1-fffaf49531de"
+    FarmId:
+      in: "path"
+      name: "farmId"
+      description: "Farm id"
+      schema:
+        type: "string"
+        example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+    RecordMetadataEmbed:
+      in: "query"
+      name: "embed"
+      description: "Embed additional traceability record metadata to response"
+      schema:
+        type: "string"
+        example: "showRecordMetadata"
+    RecordFilter:
+      name: "recordFilter"
+      in: "query"
+      description: "Allows filtering based on archived status"
+      example: "archived"
+      schema:
+        type: "string"
+        enum:
+          - "available"
+          - "archived"
+          - "all"
+        default: "available"
+  requestBodies:
+    FarmRequest:
+      description: "The request body used to create or update a farm"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/PostFarm"
+          examples:
+            Create Farm:
+              value:
+                name: "farmName"
+                archived: false
+                links:
+                  - "@type": "Link"
+                    rel: "client"
+                    links: "https://sandboxapi.deere.com/platform/organizations/{ordId}/clients/{clientId}"
+  responses:
+    ClientsReturned:
+      description: "Array of clients containing links related to assets"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Clients"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/d9e5d785-6a0f-4b38-83b9-297a5a87675f/clients"
+                total: 2
+                values:
+                  - name: "Captain Nemo"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                    archived: false
+                  - name: "Aslan"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                    archived: false
+    FarmsReturned:
+      description: "Array of farms containing links related to assets"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GetFarms"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms"
+                total: 2
+                values:
+                  - name: "FarmName"
+                    clientUri: "https://sandboxapi.deere.com/platform/organizations/592715/clients/e45d1773-cb82-468-96ac-ba65917dd274,"
+                    archived: false
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/clients"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+    FarmReturned:
+      description: "Success"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/GetFarm"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                values:
+                  - name: "FarmName"
+                    clientUri: "https://sandboxapi.deere.com/platform/organizations/592715/clients/e45d1773-cb82-468-96ac-ba65917dd274,"
+                    archived: false
+                    id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                      - rel: "fields"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                      - rel: "farms"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/clients"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+    FarmCreatedResponse:
+      description: "created"
+      headers:
+        Location:
+          schema:
+            description: "The uri of the newly created resource"
+            type: "string"
+            format: "url"
+            example: "https://sandboxapi.deere.com/platform/organizations/1234/clients/795b80cf-eb03-4c43-a9e1-f46eb0fbf912"
+    DeletedResponse:
+      description: "Deleted"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                type: "integer"
+                example: 1
+                format: "int32"
+          examples:
+            Headers:
+              description: "204 No Content"
+    UpdatedResponse:
+      description: "Updated"
+    DoesNotHaveAccessResponse:
+      description: "Does not have access"
+    DoesNotHaveAccessToOrg:
+      description: "Invalid access to organization"
+    HasNotChanged:
+      description: "Content has not changed since last call"
+    OrgNotFound:
+      description: "Organization not found"
+    OrgOrFarmNotFound:
+      description: "Organization or farm not found"
+    MalformedRequest:
+      description: "Request Validation failure."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/MalformedRequestError"
+  schemas:
+    Clients:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GroupLink"
+        name:
+          type: "string"
+        id:
+          type: "string"
+        archived:
+          type: "boolean"
+    FieldResponse2:
+      properties:
+        x-deere-signature:
+          type: "string"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+          example: "3b5392615e4b4e1c92013026f47109bb"
+        id:
+          type: "string"
+          format: "uuid"
+          example: "14e69520-34b2-4e67-b5f1-fffaf49531de"
+          description: "Farm ID"
+        name:
+          type: "string"
+          description: "Farm Name"
+          example: "Aronnax Farm"
+        lastModifiedTime:
+          type: "string"
+          description: null
+          example: "2020-09-21T15:41:15.205Z"
+    GetFarms:
+      type: "object"
+      properties:
+        total:
+          type: "integer"
+          example: 1
+          format: "int32"
+        links:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              rel:
+                type: "string"
+                example: "self"
+              uri:
+                type: "string"
+                example: "https://sandboxapi.deere.com/platform/organizations/5555/farms/"
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GetFarm"
+    GetFarm:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Farm"
+        name:
+          type: "string"
+          example: "John Doe"
+          description: "Farm Name"
+        id:
+          type: "string"
+          format: "uuid"
+          example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+          readOnly: true
+          description: "Farm Id"
+        archived:
+          type: "boolean"
+          example: false
+          description: "Archived Status"
+        clientUri:
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c"
+          description: "Client Uri"
+        links:
+          type: "array"
+          readOnly: true
+          items:
+            type: "object"
+            properties:
+              "@type":
+                type: "string"
+                example: "Link"
+              rel:
+                type: "string"
+                example: "self"
+              uri:
+                type: "string"
+                example: "https://sandboxapi.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+    GroupLink:
+      description: "Link to another resource"
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+    PostFarm:
+      type: "object"
+      required:
+        - "name"
+        - "clientUri"
+      properties:
+        name:
+          type: "string"
+          example: "John Doe"
+        archived:
+          type: "boolean"
+          example: false
+        clientUri:
+          description: "Link to client resource"
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+    MalformedRequestError:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Link"
+        rel:
+          type: "string"
+          example: "self"
+        uri:
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "ed292512-1f3c-4285-83c3-1fb084423f9b"
+              message:
+                type: "string"
+                example: "This field is required."
+        otherAttributes:
+          type: "object"
+          example: {}

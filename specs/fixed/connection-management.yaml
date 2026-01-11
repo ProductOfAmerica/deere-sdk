@@ -1,0 +1,158 @@
+openapi: "3.0.3"
+info:
+  description: "Allows CSCs to see all of their connections and remove connections outside of any particular user token\n"
+  version: "1.0.0"
+  contact:
+    name: "SOUP Team"
+    email: "ISG_SOUPERFRIENDS@JohnDeere.com"
+  title: "CSC Connection Management"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+paths:
+  /connections:
+    get:
+      summary: "Get list of connections"
+      description: "Retrieve all of the connections for a CSC based on the client in the token"
+      parameters:
+        - $ref: "#/components/parameters/CreatedAfter"
+      responses:
+        "200":
+          description: "List of Connections that can be removed"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionsResponse"
+  /connections/{connectionId}:
+    parameters:
+      - $ref: "#/components/parameters/ConnectionId"
+    delete:
+      summary: "Delete connection by connection ID"
+      description: "Remove specific connection by ID"
+      responses:
+        "204":
+          $ref: "#/components/responses/Deleted"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /organizations/{orgId}/connections:
+    parameters:
+      - $ref: "#/components/parameters/OrgId"
+    delete:
+      summary: "Delete all partner connections by Org Id"
+      description: "Remove all connections between the calling application and the org. This includes all partner connections."
+      responses:
+        "204":
+          $ref: "#/components/responses/Deleted"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+components:
+  parameters:
+    ConnectionId:
+      in: "path"
+      name: "connectionId"
+      description: "The identifier of the connection"
+      schema:
+        type: "string"
+        example: "123456"
+    OrgId:
+      in: "path"
+      name: "orgId"
+      description: "Organization Id"
+      schema:
+        type: "integer"
+        example: 2101
+    CreatedAfter:
+      in: "query"
+      name: "createdAfter"
+      description: "ISO 8601 DateTime to filter the responses to only those created after the supplied date"
+      schema:
+        type: "string"
+        example: "2021-10-15T08:00:00Z"
+  responses:
+    Forbidden:
+      description: "Requester not authorized to delete the requested connection"
+    Deleted:
+      description: "Deleted"
+      content:
+        application/json:
+          schema:
+            type: "object"
+          examples:
+            Headers:
+              description: "204 No Content, the connection has been deleted"
+  schemas:
+    Link:
+      description: "Link to the delete action"
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+      properties:
+        "@type":
+          type: "string"
+          default: "Link"
+          example: "Link"
+        rel:
+          type: "string"
+          example: "self"
+        uri:
+          type: "string"
+          example: "https://api.deere.com/platform/connections/abc123"
+    Connection:
+      type: "object"
+      required:
+        - "id"
+        - "orgId"
+      properties:
+        id:
+          type: "string"
+          example: "abc123"
+        orgId:
+          type: "integer"
+          format: "int32"
+          example: 2551
+        partnerOrgId:
+          type: "integer"
+          format: "int32"
+          example: 2101
+        orgName:
+          type: "string"
+          example: "Spahn Ranch"
+        created:
+          type: "string"
+          description: "ISO date the connection was created."
+          example: "2020-01-01T00:00:00Z"
+        permissions:
+          type: "array"
+          description: "An array of permission IDs for the connection"
+          example: "[1001, 1002]"
+        links:
+          type: "array"
+          description: "Link to the delete action"
+          items:
+            $ref: "#/components/schemas/Link"
+    ConnectionsResponse:
+      type: "object"
+      required:
+        - "links"
+        - "total"
+        - "values"
+      properties:
+        links:
+          type: "array"
+          $ref: "#/components/schemas/Link"
+        total:
+          type: "integer"
+          format: "int32"
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Connection"
