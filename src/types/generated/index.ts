@@ -2,7 +2,7 @@
  * John Deere API TypeScript Types
  * Auto-generated from OpenAPI specifications
  *
- * @generated 2026-01-11T16:50:57.653Z
+ * @generated 2026-01-11T17:13:09.556Z
  */
 
 export * as Assets from './assets.js';
