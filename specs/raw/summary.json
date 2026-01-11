@@ -1,0 +1,102 @@
+{
+  "fetchedAt": "2026-01-11T17:12:51.760Z",
+  "baseUrl": "https://developer.deere.com/devDoc/apiDetails",
+  "specs": [
+    {
+      "id": 27,
+      "name": "field-operations-api",
+      "file": "field-operations-api.yaml"
+    },
+    {
+      "id": 5,
+      "name": "fields",
+      "file": "fields.yaml"
+    },
+    {
+      "id": 22,
+      "name": "farms",
+      "file": "farms.yaml"
+    },
+    {
+      "id": 84,
+      "name": "clients",
+      "file": "clients.yaml"
+    },
+    {
+      "id": 106,
+      "name": "organizations",
+      "file": "organizations.yaml"
+    },
+    {
+      "id": 74,
+      "name": "boundaries",
+      "file": "boundaries.yaml"
+    },
+    {
+      "id": 8,
+      "name": "equipment",
+      "file": "equipment.yaml"
+    },
+    {
+      "id": 68,
+      "name": "crop-types",
+      "file": "crop-types.yaml"
+    },
+    {
+      "id": 4,
+      "name": "assets",
+      "file": "assets.yaml"
+    },
+    {
+      "id": 100,
+      "name": "users",
+      "file": "users.yaml"
+    },
+    {
+      "id": 101,
+      "name": "operators",
+      "file": "operators.yaml"
+    },
+    {
+      "id": 18,
+      "name": "files",
+      "file": "files.yaml"
+    },
+    {
+      "id": 81,
+      "name": "flags",
+      "file": "flags.yaml"
+    },
+    {
+      "id": 78,
+      "name": "guidance-lines",
+      "file": "guidance-lines.yaml"
+    },
+    {
+      "id": 96,
+      "name": "map-layers",
+      "file": "map-layers.yaml"
+    },
+    {
+      "id": 9,
+      "name": "products",
+      "file": "products.yaml"
+    },
+    {
+      "id": 6,
+      "name": "work-plans",
+      "file": "work-plans.yaml"
+    },
+    {
+      "id": 103,
+      "name": "webhook",
+      "file": "webhook.yaml"
+    },
+    {
+      "id": 75,
+      "name": "connection-management",
+      "file": "connection-management.yaml"
+    }
+  ],
+  "notFound": []
+}
