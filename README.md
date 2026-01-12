@@ -31,6 +31,7 @@
 - **Fully typed** — Auto-generated TypeScript types from OpenAPI specs
 - **Auto-pagination** — `listAll()` methods handle pagination automatically
 - **HAL support** — Built-in link following for John Deere's HAL-style responses
+- **Automatic retries** — Exponential backoff with jitter for transient failures
 - **Daily health checks** — Automated monitoring of API availability
 
 ---
@@ -451,6 +452,8 @@ import { DeereClient } from 'deere-sdk';
 const client = new DeereClient({
   accessToken: 'your-token',
   environment: 'sandbox',
+  timeout: 30000,   // Request timeout in ms (default: 30000)
+  maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
 
 // Raw requests
@@ -470,6 +473,37 @@ for await (const items of client.paginate('/large/collection')) {
 
 ## Error Handling
 
+### Automatic Retries
+
+The SDK automatically retries failed requests with exponential backoff and jitter:
+
+| Error Type | Retried? | Notes |
+|------------|----------|-------|
+| `429` Rate Limit | Yes | Respects `Retry-After` header |
+| `500`, `502`, `503`, `504` | Yes | Server errors |
+| Network failures | Yes | Connection issues |
+| Timeouts | Yes | Request took too long |
+| `401`, `403` Auth errors | No | Refresh your token |
+| `400`, `404`, `422` | No | Fix your request |
+
+**Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
+
+```typescript
+// Customize retry behavior
+const deere = new Deere({
+  accessToken: 'your-token',
+  maxRetries: 5,  // More retries (default: 3)
+});
+
+// Disable retries entirely
+const deere = new Deere({
+  accessToken: 'your-token',
+  maxRetries: 0,
+});
+```
+
+### Error Types
+
 ```typescript
 import { DeereError, RateLimitError, AuthError } from 'deere-sdk';
 
@@ -477,8 +511,10 @@ try {
   const fields = await deere.fields.listAll('org-id');
 } catch (error) {
   if (error instanceof RateLimitError) {
+    // Only thrown after all retries exhausted
     console.log(`Rate limited. Retry after ${error.retryAfter}s`);
   } else if (error instanceof AuthError) {
+    // Never retried - refresh your token
     console.log('Token expired - refresh required');
   } else if (error instanceof DeereError) {
     console.log(`API error: ${error.status} ${error.message}`);
