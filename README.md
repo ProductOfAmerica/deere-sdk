@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/63/Deere_and_Company_logo.svg/220px-Deere_and_Company_logo.svg.png" alt="John Deere" width="120">
-</p>
-
 <h1 align="center">deere-sdk</h1>
 
 <p align="center">
