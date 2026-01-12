@@ -16,25 +16,25 @@ export class BoundariesApi {
    * @description View boundaries in an organization. <ul> <li><b>fields</b>: View the field associated with these boundaries.</li> <li><b>owningOrganizations</b>: View the organization that owns the field.</li> </ul>
    * @generated from GET /organizations/{orgId}/boundaries
    */
-  async list(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<unknown> {
+  async list(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/boundaries
    */
-  async listAll(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<unknown[]> {
+  async listAll(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<components['schemas']['BoundaryOrgId'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<components['schemas']['BoundaryOrgId']>(path, options);
   }
 
   /**
@@ -42,13 +42,13 @@ export class BoundariesApi {
    * @description View the boundaries of a specified field.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/boundaries
    */
-  async listBoundaries(orgId: string, fieldId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<unknown> {
+  async listBoundaries(orgId: string, fieldId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(path, options);
   }
 
   /**
@@ -66,9 +66,9 @@ export class BoundariesApi {
    * @description Given a <a href='/dev-docs/field-operations#overviews' target='_blank'>field operation</a>, this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before <a href='/dev-docs/boundaries#/organizations/{orgId}/fields/{fieldId}/boundaries/post' target='_blank'>POST'ing the generated boundary</a> back into Operations Center. <p>There are two cases where this API will return an HTTP 400 - Bad Request:</p> <ul> <li><b>If the field already has an active boundary.</b> In this case, please use the existing boundary - it is likely more accurate than a generated boundary.</li> <li><b>If the field has been merged.</b> In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.</li> </ul>
    * @generated from GET /fieldOperations/{operationId}/boundary
    */
-  async get(operationId: string, options?: RequestOptions): Promise<unknown> {
+  async get(operationId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
     const path = `/fieldOperations/${operationId}/boundary`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(path, options);
   }
 
   /**
@@ -76,9 +76,9 @@ export class BoundariesApi {
    * @description This endpoint will retrieve a specific boundary.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
-  async getBoundaries(orgId: string, fieldId: string, boundaryId: string, options?: RequestOptions): Promise<unknown> {
+  async getBoundaries(orgId: string, fieldId: string, boundaryId: string, options?: RequestOptions): Promise<components['schemas']['PostBoundaryGet']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<components['schemas']['PostBoundaryGet']>(path, options);
   }
 
   /**
@@ -86,7 +86,7 @@ export class BoundariesApi {
    * @description This endpoint will update a boundary. The shape of the object must include name, active, irrigated, sourceType, and multipolygons. All these fields can be updated, however a license is required to set sourceType to a value other than "External". If the boundary is set to active, it will mark all other boundaries in this field inactive.
    * @generated from PUT /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
-  async update(orgId: string, fieldId: string, boundaryId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(orgId: string, fieldId: string, boundaryId: string, data: components['schemas']['PutBoundary'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
     await this.client.put(path, data, options);
   }

@@ -16,7 +16,7 @@ export class EquipmentApi {
    * @description This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation <a  href='#oAuth2' target='_blank'>here</a> for more details on obtaining a user token and connecting the user’s organizations to your application..
    * @generated from GET /equipment
    */
-  async get(params?: { ids?: number[]; serialNumbers?: string[]; organizationIds?: number[]; principalIds?: number[]; capableOf?: 'Connectivity' | '!Connectivity'; categories?: 'Machine' | 'Implement'; organizationRoleType?: 'Controlling' | 'NonControlling'; archived?: boolean; embed?: 'devices' | 'equipment' | 'icon' | 'pairingDetails'; pageOffset?: number; itemLimit?: number }, options?: RequestOptions): Promise<unknown> {
+  async get(params?: { ids?: number[]; serialNumbers?: string[]; organizationIds?: number[]; principalIds?: number[]; capableOf?: 'Connectivity' | '!Connectivity'; categories?: 'Machine' | 'Implement'; organizationRoleType?: 'Controlling' | 'NonControlling'; archived?: boolean; embed?: 'devices' | 'equipment' | 'icon' | 'pairingDetails'; pageOffset?: number; itemLimit?: number }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipmentForList']>> {
     const query = new URLSearchParams();
     if (params?.ids !== undefined) query.set('ids', String(params.ids));
     if (params?.serialNumbers !== undefined) query.set('serialNumbers', String(params.serialNumbers));
@@ -31,7 +31,7 @@ export class EquipmentApi {
     if (params?.itemLimit !== undefined) query.set('itemLimit', String(params.itemLimit));
     const queryString = query.toString();
     const path = `/equipment${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipmentForList']>>(path, options);
   }
 
   /**
@@ -39,7 +39,7 @@ export class EquipmentApi {
    * @description This resource allows the client to create a piece of equipment within a user’s organization. <br><br> <b>Getting Started</b><br>The process of contributing equipment to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s model IDs</li> <li> Create the Equipment</li> <li> Contribute Measurements. Please see the <a  href='/dev-docs/equipment-measurement' target='_blank'>Equipment Measurements (POST) API</a> for more information on uploading measurements for the created equipment.</li> </ol> <b>Determining the Equipment’s model</b> <ol> <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li> <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”.</li> </ol> <b>Creating the Equipment</b><br/> Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. <ul> <li>In this request you will provide the type of the equipment, a serialNumber  (optional), name (displayed to the user in Operations Center), and the equipment model IDs.</li> <ul> <li><b>type:</b> Machine or Implement</li> <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li> <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li> <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li> </ul> <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345).</li> <li>If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li> </ul>
    * @generated from POST /organizations/{organizationId}/equipment
    */
-  async create(organizationId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(organizationId: string, data: components['schemas']['createEquipment'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${organizationId}/equipment`;
     await this.client.post(path, data, options);
   }
@@ -49,12 +49,12 @@ export class EquipmentApi {
    * @description This resource allows the client to view the details of one piece of equipment.
    * @generated from GET /equipment/{id}
    */
-  async getEquipment(id: string, params?: { embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities' }, options?: RequestOptions): Promise<unknown> {
+  async getEquipment(id: string, params?: { embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities' }, options?: RequestOptions): Promise<components['schemas']['equipment']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipment/${id}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<components['schemas']['equipment']>(path, options);
   }
 
   /**
@@ -82,17 +82,17 @@ export class EquipmentApi {
    * @description This resource allows the client to view equipment makes and their associated IDs and names.
    * @generated from GET /equipmentMakes
    */
-  async list(options?: RequestOptions): Promise<unknown> {
+  async list(options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-make']>> {
     const path = `/equipmentMakes`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-make']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /equipmentMakes
    */
-  async listAll(options?: RequestOptions): Promise<unknown[]> {
+  async listAll(options?: RequestOptions): Promise<components['schemas']['equipment-make'][]> {
     const path = `/equipmentMakes`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<components['schemas']['equipment-make']>(path, options);
   }
 
   /**
@@ -130,13 +130,13 @@ export class EquipmentApi {
    * @description This resource allows the client to view equipment models in our reference database and their associated IDs and names.
    * @generated from GET /equipmentModels
    */
-  async listEquipmentmodels(params?: { embed?: 'make' | 'type' | 'isgType'; equipmentModelName?: 'string or partial string with * wildcard search' }, options?: RequestOptions): Promise<unknown> {
+  async listEquipmentmodels(params?: { embed?: 'make' | 'type' | 'isgType'; equipmentModelName?: 'string or partial string with * wildcard search' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.equipmentModelName !== undefined) query.set('equipmentModelName', String(params.equipmentModelName));
     const queryString = query.toString();
     const path = `/equipmentModels${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(path, options);
   }
 
   /**

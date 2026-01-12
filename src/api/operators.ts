@@ -44,7 +44,7 @@ export class OperatorsApi {
    * @description This endpoint will create a new Operator in the system for the provided organization ID
    * @generated from POST /organizations/{orgId}/operators
    */
-  async create(orgId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(orgId: string, data: components['schemas']['PostOperator'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/operators`;
     await this.client.post(path, data, options);
   }
@@ -77,7 +77,7 @@ export class OperatorsApi {
    * @description This endpoint will update a specific operator in the system in an org for the provided Operator ID to the data of an operator in the request body
    * @generated from PUT /organizations/{orgId}/operators/{id}
    */
-  async update(orgId: string, id: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(orgId: string, id: string, data: components['schemas']['PutOperator'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/operators/${id}`;
     await this.client.put(path, data, options);
   }

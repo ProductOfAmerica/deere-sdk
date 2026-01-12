@@ -42,7 +42,7 @@ export class MapLayersApi {
    * @description Creates a new Map Layer Summary resource.
    * @generated from POST /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
-  async create(orgId: string, id: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(orgId: string, id: string, data: components['schemas']['PostRequest'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries`;
     await this.client.post(path, data, options);
   }

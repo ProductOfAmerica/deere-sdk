@@ -16,7 +16,7 @@ export class FlagsApi {
    * @description This endpoint will return a flag for a given org and Flag id.
    * @generated from GET /organizations/{orgId}/flags/{flagId}
    */
-  async get(orgId: string, flagId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<unknown> {
+  async get(orgId: string, flagId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<components['schemas']['ValuesFlagId']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
@@ -30,7 +30,7 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/flags/${flagId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<components['schemas']['ValuesFlagId']>(path, options);
   }
 
   /**
@@ -38,7 +38,7 @@ export class FlagsApi {
    * @description This resource will update flag by Organization and Flag Id.
    * @generated from PUT /organizations/{orgId}/flags/{flagId}
    */
-  async update(orgId: string, flagId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(orgId: string, flagId: string, data: components['schemas']['ValuesFlagIdPut'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/flags/${flagId}`;
     await this.client.put(path, data, options);
   }
@@ -58,7 +58,7 @@ export class FlagsApi {
    * @description This resource will return a Flags list for Organization.
    * @generated from GET /organizations/{orgId}/flags
    */
-  async getFlags(orgId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<unknown> {
+  async getFlags(orgId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
@@ -72,7 +72,7 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(path, options);
   }
 
   /**
@@ -80,7 +80,7 @@ export class FlagsApi {
    * @description This resource will create a flag in the given organization.
    * @generated from POST /organizations/{orgId}/flags
    */
-  async create(orgId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(orgId: string, data: components['schemas']['ValuesFlagIdPut'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/flags`;
     await this.client.post(path, data, options);
   }
@@ -90,7 +90,7 @@ export class FlagsApi {
    * @description This resource will return a list of flag objects associated with the field.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/flags
    */
-  async list(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<unknown> {
+  async list(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
@@ -103,13 +103,13 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/flags
    */
-  async listAll(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<unknown[]> {
+  async listAll(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<components['schemas']['ValuesFlagId'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
@@ -122,7 +122,7 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<components['schemas']['ValuesFlagId']>(path, options);
   }
 }
 

@@ -26,7 +26,7 @@ export class NotificationsApi {
    * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event.
    * @generated from POST /notificationEvents
    */
-  async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(data: components['schemas']['PostNotifications'], options?: RequestOptions): Promise<void> {
     const path = `/notificationEvents`;
     await this.client.post(path, data, options);
   }

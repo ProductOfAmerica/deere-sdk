@@ -16,7 +16,7 @@ export class FieldOperationsApi {
    * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> </ul>
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/fieldOperations
    */
-  async list(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<unknown> {
+  async list(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FieldOperation']>> {
     const query = new URLSearchParams();
     if (params?.cropSeason !== undefined) query.set('cropSeason', String(params.cropSeason));
     if (params?.fieldOperationType !== undefined) query.set('fieldOperationType', String(params.fieldOperationType));
@@ -26,13 +26,13 @@ export class FieldOperationsApi {
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['FieldOperation']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/fieldOperations
    */
-  async listAll(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<unknown[]> {
+  async listAll(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<components['schemas']['FieldOperation'][]> {
     const query = new URLSearchParams();
     if (params?.cropSeason !== undefined) query.set('cropSeason', String(params.cropSeason));
     if (params?.fieldOperationType !== undefined) query.set('fieldOperationType', String(params.fieldOperationType));
@@ -42,7 +42,7 @@ export class FieldOperationsApi {
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<components['schemas']['FieldOperation']>(path, options);
   }
 
   /**
@@ -50,12 +50,12 @@ export class FieldOperationsApi {
    * @description View a single field operation. The response will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> <ul>
    * @generated from GET /fieldOperations/{operationId}
    */
-  async get(operationId: string, params?: { embed?: 'measurementTypes' }, options?: RequestOptions): Promise<unknown> {
+  async get(operationId: string, params?: { embed?: 'measurementTypes' }, options?: RequestOptions): Promise<components['schemas']['FieldOperationId']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/fieldOperations/${operationId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<components['schemas']['FieldOperationId']>(path, options);
   }
 
   /**

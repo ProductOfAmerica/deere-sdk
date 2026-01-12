@@ -16,25 +16,25 @@ export class FarmsApi {
    * @description Retrieve all of the farms for an organization
    * @generated from GET /organizations/{orgId}/farms
    */
-  async list(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<unknown> {
+  async list(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['GetFarms']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/farms
    */
-  async listAll(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<unknown[]> {
+  async listAll(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<components['schemas']['GetFarms'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<components['schemas']['GetFarms']>(path, options);
   }
 
   /**
@@ -42,7 +42,7 @@ export class FarmsApi {
    * @description Create a farm for a given organization
    * @generated from POST /organizations/{orgId}/farms
    */
-  async create(orgId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(orgId: string, data: components['schemas']['PostFarm'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/farms`;
     await this.client.post(path, data, options);
   }
@@ -52,12 +52,12 @@ export class FarmsApi {
    * @description Get farm by organization and farmId
    * @generated from GET /organizations/{orgId}/farms/{farmId}
    */
-  async get(orgId: string, farmId: string, params?: { embed?: string }, options?: RequestOptions): Promise<unknown> {
+  async get(orgId: string, farmId: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['GetFarm']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms/${farmId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<components['schemas']['GetFarm']>(path, options);
   }
 
   /**
@@ -65,7 +65,7 @@ export class FarmsApi {
    * @description Update farm by Id
    * @generated from PUT /organizations/{orgId}/farms/{farmId}
    */
-  async update(orgId: string, farmId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(orgId: string, farmId: string, data: components['schemas']['PostFarm'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/farms/${farmId}`;
     await this.client.put(path, data, options);
   }
@@ -85,9 +85,9 @@ export class FarmsApi {
    * @description Get clients by organization and farmId
    * @generated from GET /organizations/{orgId}/farms/{farmId}/clients
    */
-  async listClients(orgId: string, farmId: string, options?: RequestOptions): Promise<unknown> {
+  async listClients(orgId: string, farmId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Clients']>> {
     const path = `/organizations/${orgId}/farms/${farmId}/clients`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(path, options);
   }
 
   /**

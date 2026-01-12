@@ -44,7 +44,7 @@ export class GuidanceLinesApi {
    * @description This endpoint will create a guidance line and associate it to a given field. This operation currently only supports the creation of AB Lines.
    * @generated from POST /organizations/{orgId}/fields/{fieldId}/guidanceLines
    */
-  async create(orgId: string, fieldId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(orgId: string, fieldId: string, data: components['schemas']['GuidanceLine'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines`;
     await this.client.post(path, data, options);
   }
@@ -67,7 +67,7 @@ export class GuidanceLinesApi {
    * @description This endpoint will update the GuidanceLines name.
    * @generated from PUT /organizations/{orgId}/fields/{fieldId}/guidanceLines/{guidanceLineId}
    */
-  async update(orgId: string, fieldId: string, guidanceLineId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(orgId: string, fieldId: string, guidanceLineId: string, data: components['schemas']['GuidanceLinePut'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}`;
     await this.client.put(path, data, options);
   }

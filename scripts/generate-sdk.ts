@@ -33,6 +33,8 @@ interface OpenAPISpec {
   components?: {
     schemas?: Record<string, SchemaObject>;
     parameters?: Record<string, ParameterObject>;
+    responses?: Record<string, ResponseObject>;
+    requestBodies?: Record<string, RequestBodyObject>;
   };
 }
 
@@ -92,6 +94,7 @@ interface ParsedOperation {
   pathParams: PathParam[];
   queryParams: QueryParam[];
   hasRequestBody: boolean;
+  requestBodySchemaRef?: string;
   responseSchemaRef?: string;
   isCollection: boolean;
 }
@@ -240,6 +243,71 @@ function getSchemaType(schema: SchemaObject | undefined): string {
 }
 
 // ============================================================================
+// Schema Resolution Helpers
+// ============================================================================
+
+/**
+ * Extracts schema reference from response/requestBody content.
+ * Handles both direct schema refs and nested values.items refs (for collections).
+ */
+function extractSchemaFromContent(
+  content?: Record<string, { schema?: SchemaObject }>
+): string | undefined {
+  const c = content?.['application/vnd.deere.axiom.v3+json'] || content?.['application/json'];
+  if (!c?.schema) return undefined;
+
+  // Direct $ref to schema
+  if (c.schema.$ref) {
+    return resolveRef(c.schema.$ref);
+  }
+
+  // Nested values.items.$ref pattern (common for collections)
+  if (c.schema.properties?.values?.items?.$ref) {
+    return resolveRef(c.schema.properties.values.items.$ref);
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolves response schema, handling both $ref responses and inline responses.
+ */
+function resolveResponseSchema(
+  response: ResponseObject | { $ref: string },
+  spec: OpenAPISpec
+): string | undefined {
+  // If it's a $ref, resolve it from components.responses
+  if ('$ref' in response && response.$ref) {
+    const responseName = resolveRef(response.$ref);
+    const resolved = spec.components?.responses?.[responseName];
+    if (!resolved) return undefined;
+    return extractSchemaFromContent(resolved.content);
+  }
+
+  // If it's an inline response
+  return extractSchemaFromContent((response as ResponseObject).content);
+}
+
+/**
+ * Resolves request body schema, handling both $ref and inline requestBodies.
+ */
+function resolveRequestBodySchema(
+  requestBody: RequestBodyObject | { $ref: string },
+  spec: OpenAPISpec
+): string | undefined {
+  // If it's a $ref, resolve it from components.requestBodies
+  if ('$ref' in requestBody && requestBody.$ref) {
+    const name = resolveRef(requestBody.$ref);
+    const resolved = spec.components?.requestBodies?.[name];
+    if (!resolved) return undefined;
+    return extractSchemaFromContent(resolved.content);
+  }
+
+  // If it's an inline request body
+  return extractSchemaFromContent((requestBody as RequestBodyObject).content);
+}
+
+// ============================================================================
 // OpenAPI Spec Parser
 // ============================================================================
 
@@ -315,24 +383,19 @@ function parseSpec(specPath: string): GeneratedApi | null {
         }
       }
 
+      // Extract request body schema reference
       let hasRequestBody = false;
+      let requestBodySchemaRef: string | undefined;
       if (operation.requestBody) {
         hasRequestBody = true;
+        requestBodySchemaRef = resolveRequestBodySchema(operation.requestBody, spec);
       }
 
+      // Extract response schema reference (handles both $ref and inline responses)
       let responseSchemaRef: string | undefined;
       const response200 = operation.responses?.['200'] || operation.responses?.['201'];
-      if (response200 && !('$ref' in response200)) {
-        const content =
-          response200.content?.['application/vnd.deere.axiom.v3+json'] ||
-          response200.content?.['application/json'];
-        if (content?.schema) {
-          if (content.schema.$ref) {
-            responseSchemaRef = resolveRef(content.schema.$ref);
-          } else if (content.schema.properties?.values?.items?.$ref) {
-            responseSchemaRef = resolveRef(content.schema.properties.values.items.$ref);
-          }
-        }
+      if (response200) {
+        responseSchemaRef = resolveResponseSchema(response200, spec);
       }
 
       operations.push({
@@ -344,6 +407,7 @@ function parseSpec(specPath: string): GeneratedApi | null {
         pathParams,
         queryParams,
         hasRequestBody,
+        requestBodySchemaRef,
         responseSchemaRef,
         isCollection: isCollectionEndpoint(path, method),
       });
@@ -386,7 +450,11 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
   }
 
   if (op.hasRequestBody) {
-    params.push(`data: Record<string, unknown>`);
+    if (op.requestBodySchemaRef) {
+      params.push(`data: components['schemas']['${op.requestBodySchemaRef}']`);
+    } else {
+      params.push(`data: Record<string, unknown>`);
+    }
   }
 
   if (op.queryParams.length > 0) {

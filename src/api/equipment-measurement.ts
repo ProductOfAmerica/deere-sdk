@@ -16,7 +16,7 @@ export class EquipmentMeasurementApi {
    * @description This resource allows the client to provide metadata for a third-party managed piece of equipment in Operations Center. <br><br> <b>Getting Started</b><br>The process of contributing equipment measurement data to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s make, type, and model IDs</li> <li> Create the Equipment. Please see the <a  href='/dev-docs/equipment' target='_blank'>Equipment API</a> for more information on creating equipment.</li> <li> Contribute Measurements</li> </ol>
    * @generated from POST /organizations/{organizationId}/equipment/{principalId}/measurements
    */
-  async create(organizationId: string, principalId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(organizationId: string, principalId: string, data: components['schemas']['EquipmentMeasurementsNew'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${organizationId}/equipment/${principalId}/measurements`;
     await this.client.post(path, data, options);
   }
