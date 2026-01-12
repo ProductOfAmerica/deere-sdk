@@ -102,6 +102,7 @@ This SDK requires an OAuth 2.0 access token from John Deere:
 | `sandbox`    | sandboxapi.deere.com | Development          |
 | `partner`    | partnerapi.deere.com | Partner integrations |
 | `cert`       | apicert.deere.com    | Certification        |
+| `qa`         | apiqa.tal.deere.com  | QA testing           |
 
 </details>
 
@@ -113,39 +114,39 @@ This SDK requires an OAuth 2.0 access token from John Deere:
 
 | API                                                                       | Property                     | Methods | Description                       |
 |---------------------------------------------------------------------------|------------------------------|---------|-----------------------------------|
-| [Organizations](https://developer.deere.com/dev-docs/organizations)       | `deere.organizations`        | 4       | Organization management           |
-| [Fields](https://developer.deere.com/dev-docs/fields)                     | `deere.fields`               | 7       | Field CRUD and boundaries         |
-| [Farms](https://developer.deere.com/dev-docs/farms)                       | `deere.farms`                | 7       | Farm management                   |
-| [Boundaries](https://developer.deere.com/dev-docs/boundaries)             | `deere.boundaries`           | 7       | Field boundary management         |
-| [Clients](https://developer.deere.com/dev-docs/clients)                   | `deere.clients`              | 7       | Customer management               |
-| [Equipment](https://developer.deere.com/dev-docs/equipment)               | `deere.equipment`            | 15      | Machines and implements           |
+| [Organizations](https://developer.deere.com/dev-docs/organizations)       | `deere.organizations`        | 5       | Organization management           |
+| [Fields](https://developer.deere.com/dev-docs/fields)                     | `deere.fields`               | 8       | Field CRUD and boundaries         |
+| [Farms](https://developer.deere.com/dev-docs/farms)                       | `deere.farms`                | 8       | Farm management                   |
+| [Boundaries](https://developer.deere.com/dev-docs/boundaries)             | `deere.boundaries`           | 8       | Field boundary management         |
+| [Clients](https://developer.deere.com/dev-docs/clients)                   | `deere.clients`              | 8       | Customer management               |
+| [Equipment](https://developer.deere.com/dev-docs/equipment)               | `deere.equipment`            | 16      | Machines and implements           |
 | [Field Operations](https://developer.deere.com/dev-docs/field-operations) | `deere.fieldOperations`      | 4       | Harvests, plantings, applications |
-| [Crop Types](https://developer.deere.com/dev-docs/crop-types)             | `deere.cropTypes`            | 4       | Crop type catalog                 |
-| [Products](https://developer.deere.com/dev-docs/products)                 | `deere.products`             | 9       | Seeds and chemicals catalog       |
-| [Map Layers](https://developer.deere.com/dev-docs/map-layers)             | `deere.mapLayers`            | 4       | Map layer management              |
-| [Files](https://developer.deere.com/dev-docs/files)                       | `deere.files`                | 5       | File management                   |
-| [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 6       | Field flags/markers               |
-| [Guidance Lines](https://developer.deere.com/dev-docs/guidance-lines)     | `deere.guidanceLines`        | 4       | GPS guidance lines                |
-| [Operators](https://developer.deere.com/dev-docs/operators)               | `deere.operators`            | 6       | Machine operator management       |
+| [Crop Types](https://developer.deere.com/dev-docs/crop-types)             | `deere.cropTypes`            | 5       | Crop type catalog                 |
+| [Products](https://developer.deere.com/dev-docs/products)                 | `deere.products`             | 10      | Seeds and chemicals catalog       |
+| [Map Layers](https://developer.deere.com/dev-docs/map-layers)             | `deere.mapLayers`            | 5       | Map layer management              |
+| [Files](https://developer.deere.com/dev-docs/files)                       | `deere.files`                | 6       | File management                   |
+| [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 7       | Field flags/markers               |
+| [Guidance Lines](https://developer.deere.com/dev-docs/guidance-lines)     | `deere.guidanceLines`        | 5       | GPS guidance lines                |
+| [Operators](https://developer.deere.com/dev-docs/operators)               | `deere.operators`            | 7       | Machine operator management       |
 | [Users](https://developer.deere.com/dev-docs/users)                       | `deere.users`                | 1       | User information                  |
-| [Assets](https://developer.deere.com/dev-docs/assets)                     | `deere.assets`               | 8       | Asset tracking                    |
-| [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 4       | Event subscriptions               |
-| [Connections](https://developer.deere.com/dev-docs/connection-management) | `deere.connectionManagement` | 3       | OAuth connections                 |
+| [Assets](https://developer.deere.com/dev-docs/assets)                     | `deere.assets`               | 9       | Asset tracking                    |
+| [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 5       | Event subscriptions               |
+| [Connections](https://developer.deere.com/dev-docs/connection-management) | `deere.connectionManagement` | 4       | OAuth connections                 |
 
 ### Machine Data APIs
 
 | API                                                                                   | Property                          | Methods | Description               |
 |---------------------------------------------------------------------------------------|-----------------------------------|---------|---------------------------|
 | [Machine Locations](https://developer.deere.com/dev-docs/machine-locations)           | `deere.machineLocations`          | 1       | GPS location history      |
-| [Machine Alerts](https://developer.deere.com/dev-docs/machine-alerts)                 | `deere.machineAlerts`             | 1       | DTC alerts                |
-| [Engine Hours](https://developer.deere.com/dev-docs/machine-engine-hours)             | `deere.machineEngineHours`        | 1       | Engine hours tracking     |
-| [Hours of Operation](https://developer.deere.com/dev-docs/machine-hours-of-operation) | `deere.machineHoursOfOperation`   | 1       | On/off duration           |
+| [Machine Alerts](https://developer.deere.com/dev-docs/machine-alerts)                 | `deere.machineAlerts`             | 2       | DTC alerts                |
+| [Engine Hours](https://developer.deere.com/dev-docs/machine-engine-hours)             | `deere.machineEngineHours`        | 2       | Engine hours tracking     |
+| [Hours of Operation](https://developer.deere.com/dev-docs/machine-hours-of-operation) | `deere.machineHoursOfOperation`   | 2       | On/off duration           |
 | [Device State](https://developer.deere.com/dev-docs/machine-device-state-reports)     | `deere.machineDeviceStateReports` | 1       | Terminal state reports    |
-| [Notifications](https://developer.deere.com/dev-docs/notifications)                   | `deere.notifications`             | 4       | Push notifications        |
-| [Harvest ID](https://developer.deere.com/dev-docs/harvest-id)                         | `deere.harvestId`                 | 2       | Cotton module data        |
+| [Notifications](https://developer.deere.com/dev-docs/notifications)                   | `deere.notifications`             | 5       | Push notifications        |
+| [Harvest ID](https://developer.deere.com/dev-docs/harvest-id)                         | `deere.harvestId`                 | 3       | Cotton module data        |
 | [AEMP](https://developer.deere.com/dev-docs/aemp)                                     | `deere.aemp`                      | 1       | ISO 15143-3 fleet data    |
 | [Equipment Measurement](https://developer.deere.com/dev-docs/equipment-measurement)   | `deere.equipmentMeasurement`      | 1       | Third-party measurements  |
-| [Partnerships](https://developer.deere.com/dev-docs/partnerships)                     | `deere.partnerships`              | 6       | Organization partnerships |
+| [Partnerships](https://developer.deere.com/dev-docs/partnerships)                     | `deere.partnerships`              | 7       | Organization partnerships |
 
 ---
 
