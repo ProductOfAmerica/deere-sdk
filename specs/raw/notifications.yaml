@@ -1,0 +1,515 @@
+swagger: '3.0.0'
+info:
+  version: 0.0.1
+  title: 'Notification API'
+  description: |
+    APIs for creating, monitoring the creation of, as well as the viewing of Notifications
+  contact:
+    name: Notifications Team
+    email: ISGDataPlatformNotifications@JohnDeere.com
+paths:
+  /notifications/{sourceEvent}:
+    get:
+      summary: Fetch single notification.
+      description: Retrieve a single notification by source event.
+      parameters:
+        - in: path
+          name: sourceEvent
+          description: Source event of the notification
+          required: true
+          schema:
+            type: string
+            example: 'b22956b7-0b43-40ea-a396-1fdc816ebb58'
+            format: uuid
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: '#/components/schemas/GetResponse'
+                  links:
+                    items:
+                      $ref: '#/components/schemas/GetAvailableLinks'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    notificationsEvents:
+                      - geometries: '[{"type":"Point","coordinates":[-90.1805376,41.4475633]}]'
+                        contributionDefinition: "/contributionDefinitions/148e6f00-6389-49b3-86ee-c37fc27929d6"
+                        title: Andy Fence - Enter
+                        text: "This machine entered the defined Geofence boundaries.  \r\n\r\n **GEOFENCE**  \r\nEnter  \r\n\r\n**LAT/LONG LOCATION AT THE TIME OF ALERT**  \r\n41.4475633, -90.1805376"
+                        severity: HIGH
+                        sourceEvent: b22956b7-0b43-40ea-a396-1fdc816ebb58
+                        eventType: CURFENCE_ALERT
+                        minimizedNotifications:
+                          - additionalDetails:
+                              - name: targetResourceName
+                                value: Andy Fusion
+                              - name: machineCompanyId
+                                value: '1890893'
+                              - name: routingClass
+                                value: '0'
+                              - name: latitude
+                                value: '41.4475633'
+                              - name: visible
+                                value: 'Y'
+                              - name: colorId
+                                value: '3'
+                              - name: alertCreatedTimestamp
+                                value: '2018-03-31T23:49:46.431Z'
+                              - name: isAcknowledged
+                                value: 'false'
+                              - name: color
+                                value: RED
+                              - name: machineAlertDefinitionId
+                                value: '104496'
+                              - name: longitude
+                                value: '-90.1805376'
+                              - name: priorityClass
+                                value: '10'
+                              - name: machineAlertId
+                                value: '1401066547'
+                              - name: geofenceType
+                                value: Enter
+                              - name: targetResourceId
+                                value: '317783'
+                              - name: correlationId
+                                value: '0'
+                              - name: typeDescription
+                                value: This machine entered the defined Geofence boundaries.
+                              - name: appId
+                                value: '35'
+                              - name: deviceId
+                                value: '461521'
+                              - name: alertCapturedTimestamp
+                                value: '2018-03-31T23:49:39.000Z'
+                              - name: targetResourceType
+                                value: Machine
+                              - name: userTitle
+                                value: Andy Fence
+                            notificationState: ACTIVE
+                            targetResourceOrgId: 123456
+                            dateCreated: '2018-03-31T23:49:39.000Z'
+                            id: c84ad945-5b3e-447e-b139-f2318f73679f
+        400:
+          $ref: 'common-schemas.yaml#/components/schemas/Error'
+        404:
+          description: Not Found
+        403:
+          description: Not authorized
+
+  /notificationEvents:
+    post:
+      description: This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event.
+      summary: Create Notification Event
+      note: <b>Note:</b> Event ID is available as the location header in the response.
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: '#/components/schemas/PostNotifications'
+            examples:
+              Target Resource Association:
+                value:
+                  links:
+                    - rel: contributionDefinition
+                      uri: >-
+                        https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
+                  eventAssociation:
+                    links:
+                      - rel: targetResource
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
+                  title: Some Agronomy Title
+                  text: Detailed Agronomy Information
+                  severity: HIGH
+                  eventType: AGRONOMY
+                  additionalDetails:
+                    - name: some name
+                      value: some value
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    items:
+                      $ref: '#/components/schemas/Links'
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: '201 Created<br/>Location: https://sandboxapi.deere.com/platform/notificationEvents/b89c2933-96da-45f4-9f93-880023611e07'
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Content-Type: 'application/vnd.deere.axiom.v3+json'
+
+  /notificationEvents/{sourceEvent}:
+    delete:
+      description: This resource deletes a notification event that was previously posted to MJD as well as any generated notifications.
+      summary: Delete a Notification Event
+      parameters:
+        - $ref: '#/components/parameters/sourceEvent'
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: integer
+                    example: 1
+                    format: int32
+              examples:
+                Headers:
+                  description: ' 202 Accepted'
+
+  /organizations/{orgId}/notifications/events:
+    get:
+      description: 'This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: 
+                      <ul>
+                      <li><b>targetResource:</b> View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example.</li>
+                      <li><b>contributionDefinition:</b> View the definition of "notification".</li>
+                      </ul>'
+      summary: Search Notifications for an Organization
+      note: 'Please Note: This API does not support eTags.'
+      parameters:
+        - $ref: '#/components/parameters/orgId'
+        - $ref: '#/components/parameters/before'
+        - $ref: '#/components/parameters/after'
+        - $ref: '#/components/parameters/count'
+        - $ref: '#/components/parameters/eventTypes'
+        - $ref: '#/components/parameters/severities'
+        - $ref: '#/components/parameters/sourceEvents'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+      responses:
+        200:
+          description: Created
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  values:
+                    items:
+                      $ref: '#/components/schemas/GetResponse'
+                  links:
+                    items:
+                      $ref: '#/components/schemas/GetAvailableLinks'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - rel: self
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/organizations/123456/notifications/events
+                    total: 1
+                    values:
+                      - '@type': GroupedNotifications
+                        geometries: '[{"type":"Point","coordinates":[-90.1805376,41.4475633]}]'
+                        title: Andy Fence - Enter
+                        text: "This machine entered the defined Geofence boundaries.  \r\n\r\n **GEOFENCE**  \r\nEnter  \r\n\r\n**LAT/LONG LOCATION AT THE TIME OF ALERT**  \r\n41.4475633, -90.1805376"
+                        severity: HIGH
+                        sourceEvent: b22956b7-0b43-40ea-a396-1fdc816ebb58
+                        eventType: CURFENCE_ALERT
+                        minimizedNotifications:
+                          - '@type': MinimizedNotification
+                            additionalDetails:
+                              - '@type': AdditionalDetail
+                                name: targetResourceName
+                                value: Andy Fusion
+                              - '@type': AdditionalDetail
+                                name: machineCompanyId
+                                value: '1890893'
+                              - '@type': AdditionalDetail
+                                name: routingClass
+                                value: '0'
+                              - '@type': AdditionalDetail
+                                name: latitude
+                                value: '41.4475633'
+                              - '@type': AdditionalDetail
+                                name: visible
+                                value: 'Y'
+                              - '@type': AdditionalDetail
+                                name: colorId
+                                value: '3'
+                              - '@type': AdditionalDetail
+                                name: alertCreatedTimestamp
+                                value: '2018-03-31T23:49:46.431Z'
+                              - '@type': AdditionalDetail
+                                name: isAcknowledged
+                                value: 'false'
+                              - '@type': AdditionalDetail
+                                name: color
+                                value: RED
+                              - '@type': AdditionalDetail
+                                name: machineAlertDefinitionId
+                                value: '104496'
+                              - '@type': AdditionalDetail
+                                name: longitude
+                                value: '-90.1805376'
+                              - '@type': AdditionalDetail
+                                name: priorityClass
+                                value: '10'
+                              - '@type': AdditionalDetail
+                                name: machineAlertId
+                                value: '1401066547'
+                              - '@type': AdditionalDetail
+                                name: geofenceType
+                                value: Enter
+                              - '@type': AdditionalDetail
+                                name: targetResourceId
+                                value: '317783'
+                              - '@type': AdditionalDetail
+                                name: correlationId
+                                value: '0'
+                              - '@type': AdditionalDetail
+                                name: typeDescription
+                                value: This machine entered the defined Geofence boundaries.
+                              - '@type': AdditionalDetail
+                                name: appId
+                                value: '35'
+                              - '@type': AdditionalDetail
+                                name: deviceId
+                                value: '461521'
+                              - '@type': AdditionalDetail
+                                name: alertCapturedTimestamp
+                                value: '2018-03-31T23:49:39.000Z'
+                              - '@type': AdditionalDetail
+                                name: targetResourceType
+                                value: Machine
+                              - '@type': AdditionalDetail
+                                name: userTitle
+                                value: Andy Fence
+                            notificationState: ACTIVE
+                            targetResourceOrgId: 123456
+                            dateCreated: '2018-03-31T23:49:39.000Z'
+                            id: c84ad945-5b3e-447e-b139-f2318f73679f
+                            links:
+                              - '@type': Link
+                                rel: targetResource
+                                uri: https://sandboxapi.deere.com/platform/machines/317783
+                        links:
+                          - '@type': Link
+                            rel: contribution
+                            uri: >-
+                              https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
+      
+      
+      
+      
+
+      contentType:
+        description: The request body used to create or update a client
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              properties:
+                Accept-Language: 'en - to specify which language you would like the notifications to be when returned in the response'
+
+components:
+  parameters:
+    sourceEvent:
+      in: path
+      name: sourceEvent
+      description: Source Event
+      required: true
+      schema:
+        type: string
+        example: 'b22956b7-0b43-40ea-a396-1fdc816ebb58'
+        format: uuid
+    orgId:
+      in: path
+      name: orgId
+      description: Organization
+      required: true
+      schema:
+        type: string
+        example: 123456
+    before:
+      in: query
+      name: before
+      description: Criteria to search Notifications before event GUID
+      required: false
+      schema:
+        type: Notification event GUID
+        example: 753b1ce2-74bd-4183-8e13-d0f03b9be20
+        format: uuid
+    after:
+      in: query
+      name: after
+      description: Criteria to search Notifications after event GUID.
+      required: false
+      schema:
+        type: Notification event GUID
+        example: 753b1ce2-74bd-4183-8e13-d0f03b9be20d
+        format: uuid
+    count:
+      in: query
+      name: count
+      description: Number of records, maximum up to 100 supported.
+      required: false
+      schema:
+        type: number
+        example: 100
+    eventTypes:
+      in: query
+      name: eventTypes
+      description: Criteria to search for multiple (comma separated) event types.
+      required: false
+      schema:
+        type: List of String
+        example: FILE, ORGANIZATION, ANNOUNCEMENT
+    severities:
+      in: query
+      name: severities
+      description: Criteria to search for multiple severities.
+      required: false
+      schema:
+        type: List of String
+        example: NONE, LOW, MEDIUM
+    sourceEvents:
+      in: query
+      name: sourceEvents
+      description: Criteria to search for multiple event GUID.
+      required: false
+      schema:
+        type: List of Notification event GUID
+        example: 45acf8953-2eaf-7487-9cd0-691059fcbfcb, 2acf8953-8eaf-4487-9cd0-391059fcbfcf
+        format: uuid
+    startDate:
+      in: query
+      name: startDate
+      description: Criteria to search for start date in time range.
+      required: false
+      schema:
+        type: datetime
+        example: '2017-07-25T08:33:27.311Z'
+    endDate:
+      in: query
+      name: endDate
+      description: Criteria to search for end date in time range.
+      required: false
+      schema:
+        type: datetime
+        example: '2017-07-25T08:33:27.311Z'
+
+  schemas:
+    ResponseDetails:
+      properties:
+        eventId:
+          type: string
+          example: b22956b7-0b43-40ea-a396-1fdc816ebb58
+          description: Event ID
+        eventStatusCode<sup><a href="#event-status-code">4</a></sup>:
+          type: string
+          example: SUCCESS
+          description: Event status code.
+        expectedNotificationCount:
+          type: integer
+          example: 2
+          description: Number of notifications expected to generate from this event.
+        actualNotificationCount:
+          type: integer
+          example: 2
+          description: Actual number of notifications generated from this event.
+
+    PostNotifications:
+      properties:
+        title:
+          type: string
+          example: Some Title
+          description: Event title.
+        text:
+          type: string
+          example: Detailed event text
+          description: Event description.
+        severity<sup><a href="#event-severity">1</a></sup>:
+          type: string
+          description: Event severity.
+          example: HIGH
+        eventType<sup><a href="#event-type">2</a></sup>:
+          type: string
+          example: AGRONOMY
+          description: Event type.
+        created:
+          type: datetime
+          example: '2015-04-30T10:23:50.000Z'
+          description: Event creation time (UTC). This value is only valid for Machine Alert types and is optional.
+        additionalDetails:
+          example: See sample request below.
+          description: More event details.
+        timeRange<sup>DEPRECATED</sup>:
+          example: See sample request below.
+          description: <sup>DEPRECATED</sup>Time range of the event
+        eventAssociation:
+          example: See sample request below.
+          description: Instructions on how to associate the resulting Notifications with resources.
+        Target Resource Event Association:
+          properties:
+            links:
+              type: string
+              example: '[{“rel”:”targetResource”,”/some/target/123”}]'
+              description: A link that contains the URI of the target resource. An event association can have multiple links.
+
+    GetResponse:
+      properties:
+        title:
+          type: string
+          example: Some Title
+          description: Event title.
+        geometries:
+          type:
+          example: See sample response below.
+          description: GeoJSON representation of the location.
+        text:
+          type: string
+          example: Detailed event text.
+          description: Event description.
+        severity<sup><a href="#event-severity">1</a></sup>:
+          type: string
+          example: HIGH
+          description: Event severity.
+        eventType<sup><a href="#event-type">2</a></sup>:
+          type: string
+          example: AGRONOMY
+          description: Event type.
+        sourceEvent:
+          type: Event GUID
+          example: 2acf8953-8eaf-4487-9cd0-391059fcbfcf
+          description: Notification Event GUID
+        minimizedNotifications:
+          type: List of objects
+          example: See sample response below.
+          description: Minimized version of notification having additionalDetails, notificationState<sup><a href="#notification-state">5</a></sup>, targetResourceOrgId, dateCreated and link to targetResource.
+    GetAvailableLinks:
+      properties:
+        contribution:
+          example: https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
+          description: Contribution Definitions Link.
+        targetResource:
+          example: https://sandboxapi.deere.com/platform/machines/317783
+          description: Machines Link.
+    Links:
+      properties:
+        contributionDefinition:
+          example: https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
+          description: Contribution Definitions Link.
+        targetResource:
+          example: https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
+          description: Fields Link.

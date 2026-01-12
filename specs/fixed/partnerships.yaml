@@ -1,0 +1,387 @@
+openapi: "3.0.0"
+info:
+  title: "Partnerships & Permission"
+  version: "0.0.1"
+servers:
+  - url: "https://api.deere.com/platform"
+    description: "MyJohnDeere API"
+tags:
+  - name: "Partnership Endpoints"
+paths:
+  /partnerships:
+    get:
+      summary: "List Partners"
+      description: "This request allows the client to view a list of partners. Each data point links to the following: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>"
+      tags:
+        - "Partnership Endpoints"
+      security:
+        - OAuth2:
+            - "org1"
+      parameters:
+        - $ref: "#/components/parameters/X-deere-signature"
+      responses:
+        "200":
+          description: "Partnerships"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: "#/components/schemas/Partnerships"
+              examples:
+                No Header:
+                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 3b6402615e4b4e1c92013026f47109bb"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships"
+                    total: 2
+                    values:
+                      - links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc"
+                          - rel: "fromPartnership"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/0987"
+                          - rel: "toPartnership"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                          - rel: "permissions"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+                          - rel: "contactInvitation"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703"
+                        status: "ACCEPTED"
+                      - links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/4ecbb066-bd4c-485e-bcf8-99a470364d5a"
+                          - rel: "fromPartnership"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/7654"
+                          - rel: "toPartnership"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                          - rel: "permissions"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/4ecbb066-bd4c-485e-bcf8-99a470364d5a/permissions"
+                          - rel: "contactInvitation"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/47f27b3a-2639-4bc4-a1c3-33dc0bce32ac"
+                        status: "ACCEPTED"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      summary: "Request a Partnership"
+      description: "This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the <a href=\"/dev-docs/organizations\" target=\"_blank\">/organizations</a> endpoint to discover available organizations for a user."
+      tags:
+        - "Partnership Endpoints"
+      security:
+        - OAuth2:
+            - "org2"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              No Header:
+                value:
+                  links:
+                    - rel: "toPartnership"
+                      uri: "mailto:partnerorg@gmail.com"
+                    - rel: "fromPartnership"
+                      uri: "https://partnerapi.deere.com/platform/organizations/orgId"
+      responses:
+        "200":
+          description: "Created Partnership"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "201 Created<br/> <br/> Date: Mon, 17 Mar 2014 15:56:13 GMT<br/> Server: Apache-Coyote/1.1<br/> X-Deere-Handling-Server: ldxtc2<br/> X-Deere-Elapsed-Ms: 2300<br/> Content-Type: text/plain<br/> Location: https://sandboxapi.deere.com/platform/partnerships/6076f729-d3b0-4297-bfb4-8f88b99420ac<br/> Connection: Keep-Alive<br/> Keep-Alive: timeout=5, max=99<br/> Content-Length: 0"
+        "400":
+          $ref: "#/components/responses/BadCreateRequests"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /partnerships/{token}:
+    get:
+      summary: "Get Partnership Details"
+      description: "This request allows the client to view partnership details. The response links to the following resources: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>"
+      security:
+        - OAuth2:
+            - "org1"
+      tags:
+        - "Partnership Endpoints"
+      parameters:
+        - $ref: "#/components/parameters/PartnershipId"
+      responses:
+        "200":
+          description: "Partnerships"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: "#/components/schemas/PartnershipsId"
+              examples:
+                No Header:
+                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc"
+                      - rel: "fromPartnership"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/0987"
+                      - rel: "toPartnership"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                      - rel: "permissions"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+                      - rel: "contactInvitation"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703"
+                    status: "ACCEPTED"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TokenNotFound"
+    delete:
+      summary: "Delete a Partnership"
+      description: "This request lets the client delete a partnership."
+      security:
+        - OAuth2:
+            - "org2"
+      tags:
+        - "Partnership Endpoints"
+      parameters:
+        - $ref: "#/components/parameters/PartnershipId"
+      responses:
+        "200":
+          description: "Deleted Partnership"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "204 No Content<br/> <br/> Date: Mon, 17 Mar 2014 16:01:32 GMT<br/> Server: Apache-Coyote/1.1<br/> X-Deere-Handling-Server: ldxtc4<br/> X-Deere-Elapsed-Ms: 856<br/> Content-Type: text/plain<br/> Connection: Keep-Alive<br/> Keep-Alive: timeout=5, max=100<br/> Content-Length: 0"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/TokenNotFound"
+  /partnerships/{token}/permissions:
+    get:
+      summary: "View Permissions in a Partnership"
+      description: "This request allows the client to view all the permissions that one partner has assigned the other. The response will also link to the Assign Permissions resource, which will allow the client to assign permissions to a partner."
+      parameters:
+        - $ref: "#/components/parameters/PartnershipId"
+      security:
+        - OAuth2:
+            - "org1"
+      responses:
+        "200":
+          description: "Permissions"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: "#/components/schemas/Permissions"
+              examples:
+                No Header:
+                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+                      - rel: "requestPermissions"
+                        uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+                    permissions:
+                      - links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions/productionAgronomicDetailData"
+                        type: "productionAgronomicDetailData"
+                        status: "requested"
+                      - links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions/prescriptionFiles"
+                        type: "prescriptionFiles"
+                        status: "notGiven"
+    post:
+      summary: "Request/Assign Permissions"
+      description: "This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.<sup><a href=\"#additional-type\">2</a></sup>"
+      parameters:
+        - $ref: "#/components/parameters/PartnershipId"
+      security:
+        - OAuth2:
+            - "org2"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              No Header:
+                description: "Accept: application/vnd.deere.axiom.v3+json<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                value:
+                  permissions:
+                    - type: "viewDetailsAndMapLocation"
+                      status: "requested"
+      responses:
+        "200":
+          description: "Permissions"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: "#/components/schemas/PermissionsPost"
+              examples:
+                Headers:
+                  description: "204 No Content"
+components:
+  parameters:
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "9f5396716e4b4e1c92018026f47109bb"
+    PartnershipId:
+      name: "token"
+      in: "path"
+      description: "Token Id"
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "2b1b34fc-2cc3-4a57-8120-28ea912113fc"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            org1: "org1"
+            org2: "org2"
+  responses:
+    Forbidden:
+      description: "Not authorized"
+    BadCreateRequests:
+      description: "Stub response for BadCreateRequests (auto-generated)"
+      content:
+        application/json:
+          schema:
+            type: "object"
+    TokenNotFound:
+      description: "Stub response for TokenNotFound (auto-generated)"
+      content:
+        application/json:
+          schema:
+            type: "object"
+  schemas:
+    Partnerships:
+      description: "A list of partnerships"
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PartnershipsLink"
+        total:
+          type: "integer"
+          format: "int64"
+          description: "Number of partnerships found."
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Partnership"
+    Partnership:
+      description: "A partnership object"
+      type: "object"
+      properties:
+        x-deere-signature:
+          type: "string"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+          example: "3b6402615e4b4e1c92013026f47109bb"
+        status<sup><a href="#additional-status">1</a></sup>:
+          type: "string"
+          example: "REJECTED"
+          description: "View the status of the partnership"
+    PartnershipsLink:
+      properties:
+        fromPartnership:
+          example: "https://sandboxapi.deere.com/platform/organizations/0987"
+          description: "Organizations Link."
+        toPartnership:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organizations Link."
+        permissions:
+          example: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+          description: "Permissions Link."
+        contactInvitation:
+          example: "https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703"
+          description: "Partnerships Link."
+    PartnershipsId:
+      description: "A list of partnerships"
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PartnershipsLink"
+        total:
+          type: "integer"
+          format: "int64"
+          description: "Number of partnerships found."
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PartnershipId"
+    PartnershipId:
+      properties:
+        status<sup><a href="#additional-status">1</a></sup>:
+          type: "string"
+          example: "PENDING"
+          description: "View the status of the partnership"
+    Permissions:
+      description: "A list of permissions"
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PermissionsLink"
+        total:
+          type: "integer"
+          format: "int64"
+          description: "Number of permissions found."
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PermissionValue"
+    PermissionsLink:
+      properties:
+        requestPermissions:
+          example: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+          description: "Permissions Link."
+    PermissionValue:
+      properties:
+        type<sup><a href="#additional-type">2</a></sup>:
+          type: "string"
+          example: "prescription Files"
+          description: "The type of permission."
+        status:
+          type: "string"
+          example: "PENDING"
+          description: "View the status of the partnership"
+    PermissionsPost:
+      description: "A list of permissions"
+      type: "object"
+      properties:
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/PermissionPostValue"
+    PermissionPostValue:
+      properties:
+        type<sup><a href="#additional-type">2</a></sup>:
+          type: "string"
+          example: "viewDetailsAndMapLocation"
+          description: "The type of permission."
+        status:
+          type: "string"
+          example: "requested"
+          description: "Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved."

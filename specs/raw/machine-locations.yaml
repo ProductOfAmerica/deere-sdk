@@ -1,0 +1,164 @@
+openapi: 3.0.1
+info:
+  title: Machine locations history API
+  description: Endpoints related to machine locations and location history without
+    considering machine data
+  contact:
+    name: Team Concept
+    email: JDIITISGJDLinkTeamConcept@JohnDeere.com
+  version: 1.0.0
+servers:
+  - url: https://api.deere.com/platform
+paths:
+  /machines/{principalId}/locationHistory:
+    get:
+      tags:
+        - Alpha
+      description: "The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the <strong>/machines</strong> resource."
+      note: 'Please Note: This API does not support eTags.'
+      summary: Machine Location History
+      security:
+        - OAuth2: [ eq1 ]
+      parameters:
+        - name: principalId
+          in: path
+          description: Principal Id of Machine/Equipment.
+          required: true
+          schema:
+            type: string
+            default: N/A
+            example: 5432
+            format: int64
+        - name: lastKnown
+          in: query
+          description: Includes the last known machine location.
+          schema:
+            type: boolean
+            default: N/A
+            example: 'false'
+        - name: startDate
+          in: query
+          description: 'Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard.'
+          schema:
+            type: datetime
+            default: N/A
+            example: '<mark>2010-10-04T14:35:05.000Z</mark>'
+            format: date
+        - name: endDate
+          in: query
+          description: 'Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z'
+          schema:
+            type: datetime
+            default: N/A
+            example: '<mark>2010-10-04T14:38:35.000Z</mark>'
+            format: date
+      responses:
+        200:
+          description: Location list for the machine
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: object
+                properties:
+                  links:
+                    type: array
+                    description: Link list
+                    items:
+                      $ref: '#/components/schemas/MyJD_links'
+                  total:
+                    type: integer
+                    description: Number of results in the list
+                  values:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportedLocation'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - rel: self
+                        uri: https://sandboxapi.deere.com/platform/machines/4321/locationHistory
+                    total: 2
+                    values:
+                      - point:
+                          lat: 41.597164
+                          lon: -90.54383
+                          altitude:
+                            "@type": measurementAsDouble
+                            valueAsDouble: 0
+                            links: null
+                            unit: meters
+                          links: null
+                        eventTimestamp: 2010-10-20T22:32:16.000Z
+                        gpsFixTimestamp: 1970-01-01T00:00:00.000Z
+                        links:
+                          - rel: machine
+                            uri: https://sandboxapi.deere.com/platform/machines/4321
+                      - point:
+                          lat: 41.597305
+                          lon: -90.543884
+                          altitude:
+                            "@type": measurementAsDouble
+                            valueAsDouble: 0
+                            links: null
+                            unit: meters
+                          links: null
+                        eventTimestamp: 2010-10-04T15:06:34.000Z
+                        gpsFixTimestamp: 2010-10-04T15:06:24.000Z
+                        links:
+                          - rel: machine
+                            uri: https://sandboxapi.deere.com/platform/machines/4321
+
+        403:
+          description: The user does not have access to the machine or is not allowed
+            to see mahcine locations
+          content: {}
+        404:
+          description: Machine not found
+          content: {}
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: 'eq1'
+  schemas:
+    MyJD_links:
+      properties:
+        machine:
+          example: https://sandboxapi.deere.com/platform/machines/4321
+          description: Machines Link.
+    ReportedLocation:
+      properties:
+        point:
+          description: Contains the <mark>&lt;lat&gt;</mark>, <mark>&lt;lon&gt;</mark>, and <mark>&lt;altitude&gt;</mark> tags.
+          type: 'N/A'
+          example: 'N/A'
+        lat:
+          type: double
+          example: <mark>41.688612</mark>
+          description: The latitude of the machine's location.
+          format: float
+        lon:
+          type: double
+          description: The longitude of the machine's location.
+          example: <mark>-93.693612</mark>
+          format: float
+        altitude:
+          type: measurement AsDouble
+          description: The altitude of the machine's location. The value and unit of measurement are both included.
+          example: See sample response below.
+          default: ReportedLocation
+        eventTimestamp:
+          type: datetime
+          example: 2012-11-07T18:42:07.186Z
+          description: 'Timestamp of the machine location report. All timestamps follow the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard format.'
+          format: date
+        gpsFixTimestamp:
+          type: datetime
+          description: The last time the machine noted its GPS location.
+          example: 2010-10-04T15:06:24.000Z
+          format: date

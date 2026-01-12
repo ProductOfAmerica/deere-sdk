@@ -1,0 +1,162 @@
+openapi: "3.0.0"
+info:
+  description: "Endpoint provides hours of Operation for Machines"
+  version: "1.0.0"
+  title: "Axiom - /hoursOfOperation API"
+  contact:
+    name: "ISG Data Platform Equipment Data Engine"
+    email: "ISGDataPlatformEquipmentDataEngine@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /machines/{principalId}/hoursOfOperation:
+    get:
+      operationId: "fetchHoursOfOperation"
+      summary: "Hours of Operation"
+      description: "The Hours of Operation service allows the user to view the durations for which the engine was on or off during a specified time period. You will also be able to view the last known state of the machine's engine. Each request returns a link to <mark>machine</mark>, which will return a state report for the specified machine.<br/><b>Note</b>: When the terminal is powered off, hours of operation are not recorded."
+      tags:
+        - "/hoursOfOperation"
+      security:
+        - OAuth2:
+            - "eq1"
+      parameters:
+        - name: "principalId"
+          in: "path"
+          description: "PrincipalId of Machine/Equipment."
+          schema:
+            type: "string"
+            default: "N/A"
+            format: "Long"
+            example: "5432"
+        - name: "startDate"
+          in: "query"
+          description: "Filters hours of operation starting from a specified date. Request date as UTC Timestamp."
+          schema:
+            type: "string"
+            format: "date-time"
+            default: "N/A"
+            example: "2013-04-29T00:00:00Z"
+        - name: "endDate"
+          in: "query"
+          description: "Filters hours of operation before a specified date. Request date as UTC Timestamp."
+          schema:
+            type: "string"
+            format: "date-time"
+            default: "N/A"
+            example: "2013-04-30T23:30:00Z"
+        - name: "detailedState"
+          in: "query"
+          description: "detailedState"
+          schema:
+            type: "string"
+            example: "PTOStatus or genericMachineUtilization or genericEngineUtilization"
+      responses:
+        "200":
+          description: "HoursOfOperation with list engine State at times for the machine"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                $ref: "#/components/schemas/HoursOfOperation_Response"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/machines/5432/hoursOfOperation"
+                    total: 2
+                    values:
+                      - links:
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/5432"
+                        startDate: "2013-04-29T00:00:00Z"
+                        endDate: "2013-04-30T00:00:00Z"
+                        engineState: 0
+                        detailedState: "PTO Status On"
+                      - links:
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/5432"
+                        startDate: "2013-04-29T00:00:00Z"
+                        endDate: "2013-04-30T00:00:00Z"
+                        engineState: 0
+                        detailedState: "PTO Status On"
+        "403":
+          description: "Invalid access to machine id"
+        "404":
+          description: "Machine does not exists with given machine id"
+components:
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"
+  schemas:
+    HoursOfOperation_Response:
+      description: "Page of hoursOfOperation information for the machine."
+      properties:
+        links:
+          description: "Link list"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MyJD_links"
+        total:
+          description: "Number of results in the list"
+          type: "integer"
+          format: "int64"
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/HoursOfOperation"
+    MyJD_links:
+      description: "The link object provides links to ressources which are related to the response"
+      required:
+        - "@type"
+        - "rel"
+        - "uri"
+      properties:
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/5432"
+          description: "Machines Link."
+    HoursOfOperation:
+      description: "Hours Of Operation"
+      type: "object"
+      required:
+        - "startDate"
+        - "endDate"
+        - "engineState"
+      properties:
+        startDate:
+          x-zally-ignore:
+            - "D010"
+          description: "Time at which the machine started. Returns a UTC Timestamp."
+          type: "string"
+          format: "date-time"
+          example: "2013-04-29T00:00:00Z"
+        endDate:
+          x-zally-ignore:
+            - "D010"
+          description: "Time at which the machine stopped. Returns a UTC Timestamp."
+          type: "string"
+          format: "date-time"
+          example: "2013-04-30T23:30:00Z"
+        engineState:
+          type: "integer"
+          description: "The returned value indicates the current state of the engine<sup><a href=\"#additional\">1</a></sup>"
+          format: "boolean"
+          example: "1"
+        detailedState:
+          description: "The returned value indicates the user queried definedType value."
+          type: "string"
+          example: "PTO Status On"

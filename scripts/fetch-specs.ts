@@ -18,8 +18,9 @@ import { join } from 'path';
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');
 
-// All known John Deere Operations Center APIs
+// All John Deere APIs to include in the SDK
 const API_SLUGS = [
+  // Precision Tech / Operations Center (18)
   'field-operations-api',
   'fields',
   'farms',
@@ -36,9 +37,20 @@ const API_SLUGS = [
   'guidance-lines',
   'map-layers',
   'products',
-  'work-plans',
   'webhook',
   'connection-management',
+
+  // Precision Tech / Machine Data (10)
+  'notifications',
+  'machine-locations',
+  'machine-alerts',
+  'machine-device-state-reports',
+  'machine-engine-hours',
+  'machine-hours-of-operation',
+  'harvest-id',
+  'aemp',
+  'equipment-measurement',
+  'partnerships',
 ];
 
 interface ApiResponse {

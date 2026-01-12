@@ -1,0 +1,504 @@
+openapi: "3.0.1"
+info:
+  title: "HID Cotton Modules API"
+  description: "Provides access to HID Cotton Module event data"
+  version: "3.0"
+  contact:
+    name: "Chex Mix - Matt Nivarel"
+    email: "ISGOpsCenterChexMix@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "partnerapi"
+          - "sandboxapi"
+          - "apicert"
+          - "partnerapicert"
+          - "apiqa.tal"
+          - "partnerapiqa"
+          - "sandboxapiqa"
+paths:
+  /organizations/{orgId}/harvestIdentificationModules:
+    get:
+      tags:
+        - "HID Modules"
+      summary: "Retrieve all Cotton HID modules for a given org"
+      description: "This endpoint will return list of HID Cotton modules in the system for the provided organization ID (filtered by user-level access)."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/WrapStartDate"
+        - $ref: "#/components/parameters/WrapEndDate"
+      security:
+        - OAuth2:
+            - "files"
+            - " ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/HIDCottonModules"
+        "400":
+          $ref: "#/components/responses/BadDateRange"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/InputOrgIdInvalid"
+  /organizations/{orgId}/harvestIdentificationModules/{serialNumber}:
+    get:
+      tags:
+        - "HID Modules"
+      summary: "Retrieve a specific HID module by serial number"
+      description: "This endpoint will retrieve a specific HID module by serial number."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/ModuleSerialNumber"
+        - $ref: "#/components/parameters/Embed"
+      security:
+        - OAuth2:
+            - "files"
+            - " ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/SingleHIDCottonModule"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToOrg"
+        "404":
+          $ref: "#/components/responses/HidModuleIdIsInvalid"
+components:
+  parameters:
+    AcceptJSON:
+      name: "Accept"
+      in: "header"
+      schema:
+        type: "string"
+        enum:
+          - "application/vnd.deere.axiom.v3+json"
+    ModuleSerialNumber:
+      name: "moduleSerialNumber"
+      in: "path"
+      description: "Module Serial Number"
+      schema:
+        type: "string"
+        example: 14404565493
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Organization ID"
+      schema:
+        type: "string"
+        format: "int64"
+        example: 913523
+    Embed:
+      name: "embed"
+      in: "query"
+      description: "Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.)"
+      schema:
+        type: "string"
+        example: "clients,farms,field"
+    Accept-UOM-System:
+      name: "Accept-UOM-System"
+      in: "METRIC"
+      description: "Desired unit system. Takes ENGLISH or METRIC."
+      schema:
+        type: "string"
+        example: "ENGLISH"
+        enum:
+          - "ENGLISH"
+          - "METRIC"
+          - "MIXED"
+        default: "METRIC"
+    Accept-Yield-Preference:
+      name: "Accept-Yield-Preference"
+      in: "VOLUME"
+      description: "Desired yield representation (unit) type. Takes VOLUME or MASS."
+      schema:
+        type: "string"
+        example: "MASS"
+    DeereTags:
+      name: "x-deere-signature"
+      in: "header"
+      description: "Refer to https://developer.deere.com/#!help&doc=.%2Fgetstarted%2FHELPdeereTags.htm"
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "d5837765-4499-47b0-b2ab-6dde098e0e83"
+    WrapStartDate:
+      name: "startDate"
+      in: "query"
+      description: "Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter."
+      schema:
+        type: "string"
+        format: "date-time"
+        example: "2019-01-01T00:00:00Z"
+    WrapEndDate:
+      name: "endDate"
+      in: "query"
+      description: "End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter."
+      schema:
+        type: "string"
+        format: "date-time"
+        example: "2020-01-01T00:00:00Z"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+            ag2: "ag2"
+  responses:
+    HIDCottonModules:
+      description: "An array of HID Cotton modules"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinkHarvestIdentificationModules"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int32"
+                example: 761
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/HIDCottonModule"
+          examples:
+            No Header:
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/12345/harvestIdentificationModules/;count=1?startDate=2018-10-08T00:00:00Z&endDate=2018-10-09T00:00:00Z"
+                  - rel: "nextPage"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/12345/harvestIdentificationModules/;start=1;count=1?startDate=2018-10-08T00:00:00Z&endDate=2018-10-09T00:00:00Z"
+                total: 130
+                values:
+                  - links:
+                      - "@type": "Link"
+                        rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/12345/harvestIdentificationModules/18401233000"
+                      - "@type": "Link"
+                        rel: "field"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/12345/fields/4dd005c7-0000-1000-4022-e1e1e113c667"
+                    moduleSerialNumber: "18401233000"
+                    moduleId: "3500B98123456C0448E4F32A"
+                    wrapLocation:
+                      "@type": "Point"
+                      lat: 37.777422
+                      lon: -58.128557
+                    wrapDateTime: "2018-10-08T15:53:24.000Z"
+                    dataIngestionDate: "2020-12-07T21:09:33.749Z"
+                    tagCount: 3
+                    varietyName: "ST 4946GLB2"
+                    machinePin: "1N0C690PHJ1234567"
+                    operator: "OPERATOR 1"
+                    ginName: "AB123456"
+                    producerName: "AB123456"
+                    moisture:
+                      "@type": "EventMeasurement"
+                      value: 9.4
+                      unitId: "prcnt"
+                    diameter:
+                      "@type": "EventMeasurement"
+                      value: 89.76377952755907
+                      unitId: "in"
+                    weight:
+                      "@type": "EventMeasurement"
+                      value: 5178.658538722774
+                      unitId: "lb"
+                    dropLocation:
+                      "@type": "Point"
+                      lat: 37.777422
+                      lon: -58.128557
+                    incrementalArea:
+                      "@type": "EventMeasurement"
+                      value: 1.265673763874821
+                      unitId: "ac"
+                    comment: "Here is a comment"
+                    fieldId: "4dd005c7-0000-1000-4022-e1e1e113c667"
+                    orgId: 12345
+    SingleHIDCottonModule:
+      description: "A single HID Cotton Module"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinkSerialNumber"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int32"
+                example: 761
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/HIDCottonModule"
+          examples:
+            No Header:
+              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
+              value:
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/12345/harvestIdentificationModules/18401233000"
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/12345/fields/4dd005c7-0000-1000-4022-e1e1e113c667"
+                moduleSerialNumber: "18401233000"
+                moduleId: "3500B98123456C0448E4F32A"
+                wrapLocation:
+                  "@type": "Point"
+                  lat: 37.777422
+                  lon: -58.128557
+                wrapDateTime: "2018-10-08T15:53:24.000Z"
+                dataIngestionDate: "2020-12-07T21:09:33.749Z"
+                tagCount: 3
+                varietyName: "ST 4946GLB2"
+                machinePin: "1N0C690PHJ1234567"
+                operator: "OPERATOR 1"
+                ginName: "AB123456"
+                producerName: "AB123456"
+                moisture:
+                  "@type": "EventMeasurement"
+                  value: 9.4
+                  unitId: "prcnt"
+                diameter:
+                  "@type": "EventMeasurement"
+                  value: 89.76377952755907
+                  unitId: "in"
+                weight:
+                  "@type": "EventMeasurement"
+                  value: 5178.658538722774
+                  unitId: "lb"
+                dropLocation:
+                  "@type": "Point"
+                  lat: 37.777422
+                  lon: -58.128557
+                incrementalArea:
+                  "@type": "EventMeasurement"
+                  value: 1.265673763874821
+                  unitId: "ac"
+                comment: "Here is a comment"
+                fieldId: "4dd005c7-0000-1000-4022-e1e1e113c667"
+                orgId: 12345
+    Years:
+      description: "A list of years"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "array"
+            items:
+              type: "integer"
+              format: "int32"
+            example:
+              - 2018
+              - 2020
+    BadDateRange:
+      description: "Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    HidModuleIdIsInvalid:
+      description: "The specified organization or HID Cotton module does not exist"
+    InputOrgIdInvalid:
+      description: "The specified Organization ID does not exist"
+    DoesNotHaveAccessToOrg:
+      description: "The user has not been provided access to data in this organization"
+    DoesNotHaveAccessToFieldOperation:
+      description: "The user has not been provided access to the field operation specified by id."
+    InputFieldOpGuidInvalid:
+      description: "The specified field operation does not exist."
+  schemas:
+    LinkHarvestIdentificationModules:
+      properties:
+        self:
+          description: "Self Link."
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules"
+    LinkSerialNumber:
+      properties:
+        self:
+          description: "Self Link."
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493"
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das"
+          description: "Field Link."
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+    Link:
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+      description: "A link provides a URI to access resources that are related to the response."
+      properties:
+        "@type":
+          type: "string"
+        rel:
+          type: "string"
+          description: "The relation of the object to the linked resource."
+          example: "self"
+        uri:
+          type: "string"
+          format: "uri"
+          description: "The URI to the related resource."
+          example: "https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564"
+    Point:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Point"
+        lat:
+          type: "number"
+          format: "double"
+          description: "The latitude of the point"
+          example: 43.6187
+        lon:
+          type: "number"
+          format: "double"
+          description: "The longitude of the point"
+          example: 116.2146
+    EventMeasurement:
+      type: "object"
+      description: "A general representation of quantity and unit."
+      properties:
+        "@type":
+          type: "string"
+          example: "EventMeasurement"
+        value:
+          type: "number"
+          format: "double"
+          description: "The quantity represented by this measurement."
+          example: 5.1
+        unitId:
+          type: "string"
+          description: "The unit associated to the quantity measured"
+          example: "gal1ac-1."
+    HIDCottonModule:
+      type: "object"
+      description: "A data entity representing a single HID Cotton module"
+      properties:
+        moduleSerialNumber:
+          type: "string"
+          description: "Module Serial Number"
+          example: 14404565493
+        moduleId:
+          type: "string"
+          description: "Module RFID"
+          example: "3500B988061103035A9439F5"
+        wrapLocation:
+          type: null
+          example: "See sample response below."
+        wrapDateTime:
+          x-zally-ignore:
+            - "D010"
+          type: "string"
+          format: "date-time"
+          description: "Datetime when the module wrap started (GMT)"
+          example: "2019-03-22T08:48:20Z"
+        dataIngestionDate:
+          x-zally-ignore:
+            - "D010"
+          type: "string"
+          format: "date-time"
+          description: "Datetime when the module was first processed"
+          example: "2019-03-22T08:48:20Z"
+        tagCount:
+          type: "integer"
+          format: "int32"
+          description: "Number of times the RFID tags were read while the module wrap was being applied"
+          example: 5
+        varietyName:
+          type: "string"
+          description: "Cotton variety inside the module"
+          example: "Cotton ABC"
+        machinePin:
+          type: "string"
+          description: "Machine PIN"
+          example: "PCFVUGALC0067"
+        operator:
+          type: "string"
+          description: "Machine Operator"
+          format: "name"
+          example: "John Doe"
+        ginName:
+          type: "string"
+          description: "Gin Name"
+          example: "AB123456"
+        producerName:
+          type: "string"
+          description: "Producer Name"
+          example: "AB123456"
+        moisture:
+          type: null
+          example: "See sample response below."
+        diameter:
+          type: null
+          example: "See sample response below."
+        weight:
+          type: null
+          example: "See sample response below."
+        dropLocation:
+          type: null
+          example: "See sample response below."
+        incrementalArea:
+          type: null
+          example: "See sample response below."
+        comment:
+          type: "string"
+          example: "Here is a comment"
+        fieldId:
+          type: "string"
+          format: "uuid"
+          example: "qqwe524-0000-1000-4022-qsdfef23341"
+          description: "Field Id"
+        orgId:
+          type: "string"
+          example: 1234
+          description: "Organization ID"
+    Errors:
+      type: "object"
+      format: "Errors/DataValidationException"
+      properties:
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
+              message:
+                type: "string"
+                description: "An english description of the error"
+                example: "End date should not be specified without start date"
+              code:
+                type: "string"
+                example: "validation_constraint_operation_end_date_without_start_date"
+                description: "A string constant representing the type of error"
+              field:
+                type: "string"
+                example: "startDate"
+                description: "The name of the property or parameter deemed invalid"
+              invalidValue:
+                type: "string"
+                example: "null"
+                description: "The value that was supplied for this field in the request"

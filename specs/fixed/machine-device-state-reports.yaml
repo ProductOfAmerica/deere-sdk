@@ -1,0 +1,358 @@
+openapi: "3.0.0"
+info:
+  description: "Endpoint provides device state report for Machines"
+  version: "1.0.0"
+  title: "Axiom - /deviceStateReports API"
+  contact:
+    name: "ISG Data Platform Equipment Data Engine"
+    email: "ISGDataPlatformEquipmentDataEngine@JohnDeere.com"
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "apicert"
+          - "apiqa.tal"
+          - "sandboxapi"
+          - "partnerapi"
+paths:
+  /machines/{principalId}/deviceStateReports:
+    get:
+      operationId: "getDeviceStateReportbyMachineId"
+      summary: "Terminal Device State Reports"
+      security:
+        - OAuth2:
+            - "eq1"
+      description: "A device state report is generated from a terminal at a specified time. The report contains the following information: <ul> <li>Engine State</li> <li>Power State</li> <li>Model State</li> <li>RSSI Value (signal strength of the terminal)</li> <li>Local Information</li> <li>GPS State/Error</li> <li>WIFI Info/Error</li> <li>GSM/WIFI Antenna Type</li> <li>Wifi SSID</li> <li>BatteryVoltage</li> <li>LastBootType</li> <li>LastBootTimestamp</li> <li>VehiclePowerState</li> </ul> This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. </br></br> Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to </br> <ul> <li><b>Machine</b>: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear.</li> <li><b>Terminal</b>: Request a Device State Report from the specified terminal.</li> </ul>"
+      tags:
+        - "/deviceStateReports"
+      parameters:
+        - $ref: "#/components/parameters/principalId"
+        - $ref: "#/components/parameters/lastKnown"
+        - $ref: "#/components/parameters/startDate"
+        - $ref: "#/components/parameters/endDate"
+      responses:
+        "200":
+          description: "DeviceStateReport with location points list for the machine"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/MyJD_links"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/DeviceStateReport"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports"
+                    total: 1
+                    values:
+                      - "@type": "DeviceStateReport"
+                        time: "2010-10-04T14:35:05.000Z"
+                        gatewayType: 2
+                        location:
+                          "@type": "Point"
+                          lat: "41.597164"
+                          lon: "-90.54383"
+                          altitude:
+                            "@type": "measurementAsDouble"
+                            unit: "meters"
+                            valueAsDouble: "0.0"
+                        minRSSI:
+                          "@type": "measurementAsDouble"
+                          unit: "dbM"
+                          valueAsDouble: "0.0"
+                        maxRSSI:
+                          "@type": "measurementAsDouble"
+                          unit: "dbM"
+                          valueAsDouble: "0.0"
+                        averageRSSI:
+                          "@type": "measurementAsDouble"
+                          unit: "dbM"
+                          valueAsDouble: "0.0"
+                        gpsFixTimestamp: "2010-10-04T14:35:05.000Z"
+                        engineState: 0
+                        terminalPowerState: 0
+                        batteryLevel:
+                          "@type": "measurementAsInteger"
+                          unit: "Percent"
+                          valueAsInteger: "0"
+                        cellModemState: 0
+                        cellModemAntennaState: 0
+                        gpsModemState: 0
+                        gpsAntennaState: 0
+                        network: 0
+                        rssi: 0
+                        gpsError: 0
+                        gpsFirmwareLevelError: 0
+                        tetheringStatus: 0
+                        apStatus: 0
+                        m2mMode: 0
+                        tetheringConnected: 0
+                        apConnected: 0
+                        m2mConnected: 0
+                        gsmAntennaType: 1
+                        wifiAntennaType: 3
+                        antennaFailure: 0
+                        failedToTether: 0
+                        failedToM2M: 0
+                        cellModemError: 0
+                        cellModemFirmwareLevelError: 0
+                        wifiSSID: "vatican"
+                        batteryVoltage: 50
+                        lastBootType: 2
+                        lastBootTimestamp: "2005-04-04T14:35:05.000Z"
+                        machineId: 2
+                        vehiclePowerState: 2
+        "403":
+          description: "Invalid access to machine id"
+        "404":
+          description: "Machines details does not exists"
+        "410":
+          description: "The requested resource is no longer available"
+components:
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"
+  parameters:
+    principalId:
+      name: "principalId"
+      in: "path"
+      description: "Principal ID of the machine/equipment."
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 5432
+    startDate:
+      name: "startDate<sup><a href='#parameters-note'>1</a></sup>"
+      in: "query"
+      description: "Return DSR from the specified startDate."
+      schema:
+        type: "string"
+        format: "date-time"
+        default: "2 months old from CurrentTime"
+        example: "2010-10-04T14:35:05.000Z"
+    endDate:
+      name: "endDate<sup><a href='#parameters-note'>1</a></sup>"
+      in: "query"
+      description: "Return DSR till the specified endDate."
+      schema:
+        type: "string"
+        format: "date-time"
+        default: "Current Time"
+        example: "2010-10-04T14:38:35.000Z"
+    lastKnown:
+      name: "lastKnown"
+      in: "query"
+      description: "If true, startDate and endDate won't be used. Send true to fetch lastKnown call History."
+      schema:
+        type: "boolean"
+        format: "boolean"
+        default: "false"
+        example: "true"
+  schemas:
+    MyJD_links:
+      description: "The link object provides links to ressources which are related to the response"
+      required:
+        - "@type"
+        - "rel"
+        - "uri"
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports"
+          description: "Device State Report Link."
+    DeviceStateReport:
+      description: "Device State Report"
+      type: "object"
+      properties:
+        time:
+          description: "UTC Timestamp of the DSR."
+          type: "string"
+          format: "date-time"
+          example: "2025-04-04T14:35:05.000Z"
+        gatewayType<sup><a href='#gateway-types'>1</a></sup>:
+          description: "This number identifies the type of gateway the report traveled through."
+          type: "byte"
+          format: "int32"
+          example: 2
+        location:
+          description: "Shows the latitude, longitude, and altitude at the time of this report."
+          type: "Point"
+          example: "<mark>See sample response below.</mark>"
+        minRSSI:
+          description: "The minimum signal strength of the machine at the time of the report."
+          type: "measurementAsDouble"
+          example: "<mark>See sample response below.</mark>"
+        maxRSSI:
+          description: "The maximum signal strength of the machine at the time of the report."
+          type: "measurementAsDouble"
+          example: "See sample response below."
+        averageRSSI:
+          description: "The average signal strength of the machine at the time of the report."
+          type: "measurementAsDouble"
+          example: "See sample response below."
+        gpsFixTimestamp:
+          description: "UTC Timestamp, of the GPS position of the Machine."
+          type: "string"
+          format: "date-time"
+          example: "<mark>2025-04-04T14:35:05.000Z</mark>"
+        engineState:
+          description: "This number identifies the power state of the engine."
+          type: "byte"
+          format: "int32"
+          example: "1"
+        terminalPowerState:
+          description: "This number identifies the power state of the terminal."
+          type: "byte"
+          format: "int32"
+          example: "1"
+        batteryLevel:
+          description: "Battery level of the terminal."
+          type: "measurementAsInteger"
+          example: "See sample response below."
+        cellModemState:
+          description: "This number indicates whether any errors were occurring on the Cell Modem at the time of this report."
+          type: "byte"
+          format: "int32"
+          example: "0"
+        cellModemAntennaState:
+          description: "This number indicates whether any errors were occurring on the Cell Modem Antenna at the time of this report."
+          type: "byte"
+          format: "int32"
+          example: 1
+        gpsModemState:
+          description: "This number indicates whether any errors were occurring on the GPS Modem at the time of this report."
+          type: "byte"
+          format: "int32"
+          example: 1
+        gpsAntennaState:
+          description: "This number indicates whether any errors were occurring on the GPS Antenna at the time of this report."
+          type: "byte"
+          format: "int32"
+          example: 1
+        network:
+          description: "Identifies the sattelite or cellular network through which the report was sent by the terminal."
+          type: "byte"
+          format: "int32"
+          example: 1
+        rssi:
+          description: "Last reported RSSI (signal strength) of the network."
+          type: "integer"
+          format: "int32"
+          example: 7
+        gpsError:
+          description: "This number identifies any gps error occured"
+          type: "byte"
+          format: "int32"
+          example: 4
+        gpsFirmwareLevelError:
+          description: "This number identifies any gps firmware error"
+          type: "byte"
+          format: "int32"
+          example: 1
+        tetheringStatus:
+          description: "This number identifies wifi tethering status"
+          type: "byte"
+          format: "int32"
+          example: "0"
+        apStatus:
+          description: "This number identifies wifi access point(ap) status"
+          type: "byte"
+          format: "int32"
+          example: 1
+        m2mMode:
+          description: "This number identifies wifi machine to machine(m2m) mode"
+          type: "byte"
+          format: "int32"
+          example: 1
+        tetheringConnected:
+          description: "This number identifies wifi tethering connection"
+          type: "byte"
+          format: "int32"
+          example: 1
+        apConnected:
+          description: "This number identifies wifi access point connection"
+          type: "byte"
+          format: "int32"
+          example: 1
+        m2mConnected:
+          description: "This number identifies wifi machine to machine connection"
+          type: "byte"
+          format: "int32"
+          example: 1
+        gsmAntennaType:
+          description: "This number identifies gsm Antenna type"
+          type: "byte"
+          format: "int32"
+          example: 7
+        wifiAntennaType:
+          description: "This number identifies wifi Antenna type"
+          type: "byte"
+          format: "int32"
+          example: 3
+        antennaFailure:
+          description: "This number identifies the antenna failure state"
+          type: "byte"
+          format: "int32"
+          example: 1
+        failedToTether:
+          description: "This number identifies the Tethering failure state"
+          type: "byte"
+          format: "int32"
+          example: "0"
+        failedToM2M:
+          description: "This number identifies the machine to machine connection failure state"
+          type: "byte"
+          format: "int32"
+          example: "0"
+        cellModemError:
+          description: "This number identifies any cell modem error ocurred"
+          type: "byte"
+          format: "int32"
+          example: 0
+        cellModemFirmwareLevelError:
+          description: "This number identifies any cell modem firmware level error ocurred"
+          type: "byte"
+          format: "int32"
+          example: 0
+        wifiSSID:
+          description: "SSID being used for tethering at the time the message is generated"
+          type: "string"
+          example: "vatican"
+        batteryVoltage:
+          description: "This number identifies the MTG Battery Voltage (Unswitched Power Supply) in Hundredths of a Volt"
+          type: "double"
+          format: "int64"
+          example: 12.64
+        lastBootType:
+          description: "This number identifies if the device was cold booted or warm booted"
+          type: "integer"
+          format: "int32"
+          example: 2
+        lastBootTimestamp:
+          description: "UTC Timestamp, when the device was booted up last time"
+          type: "string"
+          format: "date-time"
+          example: "<mark>2005-04-04T14:35:05.000Z</mark>"
+        machineId:
+          description: "This number identifies the principalId for which this records was generated"
+          type: "integer"
+          format: "int32"
+          example: 123456
+        vehiclePowerState:
+          description: "This number identifies the Vehicle Power State at the time this record is generated"
+          type: "byte"
+          format: "int32"
+          example: 2

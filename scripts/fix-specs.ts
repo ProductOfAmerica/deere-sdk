@@ -273,6 +273,55 @@ function addMissingSchemas(spec: Record<string, unknown>, missingRefs: Set<strin
 // These endpoints exist in the API but aren't in the public OpenAPI specs
 // ============================================================================
 
+// ============================================================================
+// Fix external $refs that point to non-existent files
+// These need to be converted to local refs with stub schemas
+// ============================================================================
+
+function fixExternalRefs(obj: unknown, addedSchemas: Set<string>): unknown {
+  if (obj === null || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => fixExternalRefs(item, addedSchemas));
+  }
+
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      if (key === '$ref' && typeof value === 'string') {
+        let fixedValue = value;
+
+        // Fix external refs like "common-schemas.yaml#/components/schemas/Error"
+        if (value.includes('.yaml') || value.includes('.json')) {
+          const match = value.match(/#\/components\/schemas\/(\w+)$/);
+          if (match) {
+            const schemaName = match[1];
+            console.log(`  Fixing external ref: ${value} → #/components/schemas/${schemaName}`);
+            fixedValue = `#/components/schemas/${schemaName}`;
+            addedSchemas.add(schemaName);
+          }
+        }
+
+        // Fix singular "Response" to plural "responses" (equipment-measurement spec bug)
+        if (fixedValue.includes('#/components/Response/')) {
+          const corrected = fixedValue.replace('#/components/Response/', '#/components/responses/');
+          console.log(`  Fixing singular Response: ${fixedValue} → ${corrected}`);
+          fixedValue = corrected;
+        }
+
+        result[key] = fixedValue;
+      } else {
+        result[key] = fixExternalRefs(value, addedSchemas);
+      }
+    }
+
+    return result;
+  }
+
+  return obj;
+}
+
 function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: string): void {
   const paths = spec.paths as Record<string, unknown> | undefined;
   if (!paths) return;
@@ -358,6 +407,14 @@ function fixSpec(content: string, filename: string): string {
     return content;
   }
 
+  // Fix incorrect swagger version (notifications.yaml has "swagger: '3.0.0'" instead of "openapi: '3.0.0'")
+  if (spec.swagger && !spec.openapi) {
+    console.log(`  Fixing incorrect swagger field: "${spec.swagger}" → openapi: "3.0.0"`);
+    // Reconstruct spec with openapi at the beginning (YAML preserves key order)
+    const { swagger, ...rest } = spec;
+    spec = { openapi: '3.0.0', ...rest };
+  }
+
   if (!spec || !spec.openapi) {
     console.log('  Not a valid OpenAPI spec');
     return content;
@@ -382,6 +439,22 @@ function fixSpec(content: string, filename: string): string {
 
   removeInvalidFields(spec);
   spec = fixTypes(spec) as Record<string, unknown>;
+
+  // Fix external $refs and collect schemas to add
+  const externalSchemas = new Set<string>();
+  spec = fixExternalRefs(spec, externalSchemas) as Record<string, unknown>;
+  for (const schemaName of externalSchemas) {
+    missingRefs.add(`#/components/schemas/${schemaName}`);
+  }
+
+  // Fix singular "Response" to plural "responses" in components (equipment-measurement spec bug)
+  const components = spec.components as Record<string, unknown> | undefined;
+  if (components && components.Response && !components.responses) {
+    console.log('  Fixing components.Response → components.responses');
+    components.responses = components.Response;
+    delete components.Response;
+  }
+
   addMissingSchemas(spec, missingRefs);
   injectUndocumentedEndpoints(spec, filename);
 

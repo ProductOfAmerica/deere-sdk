@@ -1,0 +1,174 @@
+openapi: '3.0.0'
+info:
+  description: Endpoint provides engine Hours for Machines
+  version: 1.0.0
+  title: Axiom - /engineHours API
+  contact:
+    name: ISG Data Platform Equipment Data Engine
+    email: ISGDataPlatformEquipmentDataEngine@JohnDeere.com
+
+servers:
+  - url: https://{environment}.deere.com/platform
+    variables:
+      environment:
+        default: api
+        enum:
+          - api
+          - apicert
+          - apiqa.tal
+          - sandboxapi
+          - partnerapi
+
+paths:
+  '/machines/{principalId}/engineHours':
+    get:
+      operationId: fetchEngineHoursForMachine
+      summary: Engine Hours
+      description: The engine hours service returns the last reported number of hours that a machine's engine has recorded.Each response includes a timestamp for the report and the source of the report.For each returned engine hours report, the response will include a link to the machine's information.
+      note: Please Note - This API does not support eTags.
+      tags:
+        - /engineHours
+      security:
+        - OAuth2: [ eq1 ]
+      parameters:
+        - name: principalId
+          in: path
+          description: Principal ID of the machine/equipment.
+          required: true
+          schema:
+            type: string
+            example: 5432
+            default: N/A
+        - name: startDate
+          in: query
+          description: Start date.
+          required: false
+          schema:
+            type: datetime
+            format: date-time
+            example: '2015-02-03T9:00:00.000Z'
+            default: N/A
+        - name: endDate
+          in: query
+          description: End date.
+          required: false
+          schema:
+            type: datetime
+            format: date-time
+            example: "2015-02-03T10:42:24.282Z"
+            default: N/A
+        - name: lastKnown
+          in: query
+          description: 	If true, returned only the last known engine hour reading. startDate and endDate are ignored.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            format: boolean
+            example: 'true'
+            default: 'false'
+
+      responses:
+        200:
+          description: EngineHours with list reporting time for the machine
+          content:
+            'application/vnd.deere.axiom.v3+json':
+              schema:
+                $ref: '#/components/schemas/EngineHours_Response'
+              examples:
+                No Header:
+                  description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                  value:
+                    links:
+                      - rel: self
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/machines/4321/engineHours?lastKnown=false
+                    total: 2
+                    values:
+                      - reading:
+                          '@type': measurementAsDouble
+                          valueAsDouble: 1.1833333
+                          links: null
+                          unit: Hours
+                        reportTime: '2010-10-04T15:06:34.000Z'
+                        source: TM
+                        links:
+                          - rel: machine
+                            uri: https://sandboxapi.deere.com/platform/machines/4321
+                      - reading:
+                          '@type': measurementAsDouble
+                          valueAsDouble: 1.1833333
+                          links: null
+                          unit: Hours
+                        reportTime: '2010-10-04T15:04:33.000Z'
+                        source: TM
+                        links:
+                          - rel: machine
+                            uri: https://sandboxapi.deere.com/platform/machines/4321
+        403:
+          description: 'Invalid access to machine id'
+        404:
+          description: 'Machine does not exists with given machine id'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: 'eq1'
+  schemas:
+    EngineHours_Response:
+      description: Page of engineHours information for the machine.
+      type: object
+      required:
+        - links
+        - total
+        - values
+      properties:
+        links:
+          description: Link list
+          type: array
+          items:
+            $ref: "#/components/schemas/MyJD_links"
+        total:
+          description: Number of results in the list
+          type: integer
+          format: int64
+          example: 1
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/EngineHours"
+
+    MyJD_links:
+      description: The link object provides links to ressources which are related to the response
+      properties:
+        machine:
+          description: Machines Link.
+          example: https://sandboxapi.deere.com/platform/machines/4321
+
+    EngineHours:
+      description: Engine Hours
+      type: object
+      required:
+        - reportTime
+        - reading
+      properties:
+        reading:
+          description: The number of hours the engine has been running.
+          example: '<mark>&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;</mark>'
+          type: measurementAsDouble
+        reportTime:
+          description: Timestamp at which the report was created.
+          type: datetime
+          format: date-time
+          example: "2010-10-04T14:35:05.000Z"
+        source<sup><a href='#additional'>1</a></sup>:
+          type: string
+          description: Device which collected the data.
+          example: CI
+
+

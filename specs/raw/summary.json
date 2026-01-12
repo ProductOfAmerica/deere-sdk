@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-01-11T17:26:46.901Z",
+  "fetchedAt": "2026-01-12T02:53:04.053Z",
   "baseUrl": "https://developer.deere.com/devDoc/apiDetails",
   "specs": [
     {
@@ -83,11 +83,6 @@
       "file": "products.yaml"
     },
     {
-      "id": 6,
-      "name": "work-plans",
-      "file": "work-plans.yaml"
-    },
-    {
       "id": 103,
       "name": "webhook",
       "file": "webhook.yaml"
@@ -96,6 +91,56 @@
       "id": 75,
       "name": "connection-management",
       "file": "connection-management.yaml"
+    },
+    {
+      "id": 3,
+      "name": "notifications",
+      "file": "notifications.yaml"
+    },
+    {
+      "id": 23,
+      "name": "machine-locations",
+      "file": "machine-locations.yaml"
+    },
+    {
+      "id": 29,
+      "name": "machine-alerts",
+      "file": "machine-alerts.yaml"
+    },
+    {
+      "id": 30,
+      "name": "machine-device-state-reports",
+      "file": "machine-device-state-reports.yaml"
+    },
+    {
+      "id": 31,
+      "name": "machine-engine-hours",
+      "file": "machine-engine-hours.yaml"
+    },
+    {
+      "id": 32,
+      "name": "machine-hours-of-operation",
+      "file": "machine-hours-of-operation.yaml"
+    },
+    {
+      "id": 66,
+      "name": "harvest-id",
+      "file": "harvest-id.yaml"
+    },
+    {
+      "id": 72,
+      "name": "aemp",
+      "file": "aemp.yaml"
+    },
+    {
+      "id": 73,
+      "name": "equipment-measurement",
+      "file": "equipment-measurement.yaml"
+    },
+    {
+      "id": 85,
+      "name": "partnerships",
+      "file": "partnerships.yaml"
     }
   ],
   "notFound": []
