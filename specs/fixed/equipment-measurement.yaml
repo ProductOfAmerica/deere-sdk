@@ -513,4 +513,3 @@ components:
           examples:
             Headers:
               description: "204 No Content"
-  Response: {}

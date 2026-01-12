@@ -445,12 +445,32 @@ function fixSpec(content: string, filename: string): string {
     missingRefs.add(`#/components/schemas/${schemaName}`);
   }
 
+  // Fix singular "Response" to plural "responses" in missingRefs (equipment-measurement spec bug)
+  for (const ref of [...missingRefs]) {
+    if (ref.includes('#/components/Response/')) {
+      const fixed = ref.replace('#/components/Response/', '#/components/responses/');
+      missingRefs.delete(ref);
+      missingRefs.add(fixed);
+    }
+  }
+
   // Fix singular "Response" to plural "responses" in components (equipment-measurement spec bug)
   const components = spec.components as Record<string, unknown> | undefined;
-  if (components?.Response && !components.responses) {
-    console.log('  Fixing components.Response → components.responses');
-    components.responses = components.Response;
-    components.Response = undefined;
+  if (components?.Response) {
+    console.log('  Removing invalid components.Response (merged to responses)');
+    if (!components.responses) {
+      components.responses = components.Response;
+    } else {
+      // Merge Response into existing responses
+      const responses = components.responses as Record<string, unknown>;
+      const response = components.Response as Record<string, unknown>;
+      for (const [key, value] of Object.entries(response)) {
+        if (!responses[key]) {
+          responses[key] = value;
+        }
+      }
+    }
+    delete components.Response;
   }
 
   addMissingSchemas(spec, missingRefs);

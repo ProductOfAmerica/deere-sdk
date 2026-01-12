@@ -623,9 +623,7 @@ ${typeExports}
 }
 
 function generateMainClass(apis: GeneratedApi[]): string {
-  const imports = apis
-    .map((api) => `import { ${api.className} } from './api/${api.specName}.js';`)
-    .join('\n');
+  const classNames = apis.map((api) => api.className).join(',\n  ');
 
   const properties = apis
     .map(
@@ -647,7 +645,9 @@ function generateMainClass(apis: GeneratedApi[]): string {
  */
 
 import { DeereClient, type DeereClientConfig } from './client.js';
-${imports}
+import {
+  ${classNames},
+} from './api';
 
 /**
  * John Deere SDK

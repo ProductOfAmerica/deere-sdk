@@ -5,34 +5,36 @@
  * @generated
  */
 
-import { AempApi } from './api/aemp.js';
-import { AssetsApi } from './api/assets.js';
-import { BoundariesApi } from './api/boundaries.js';
-import { ClientsApi } from './api/clients.js';
-import { ConnectionManagementApi } from './api/connection-management.js';
-import { CropTypesApi } from './api/crop-types.js';
-import { EquipmentApi } from './api/equipment.js';
-import { EquipmentMeasurementApi } from './api/equipment-measurement.js';
-import { FarmsApi } from './api/farms.js';
-import { FieldOperationsApi } from './api/field-operations-api.js';
-import { FieldsApi } from './api/fields.js';
-import { FilesApi } from './api/files.js';
-import { FlagsApi } from './api/flags.js';
-import { GuidanceLinesApi } from './api/guidance-lines.js';
-import { HarvestIdApi } from './api/harvest-id.js';
-import { MachineAlertsApi } from './api/machine-alerts.js';
-import { MachineDeviceStateReportsApi } from './api/machine-device-state-reports.js';
-import { MachineEngineHoursApi } from './api/machine-engine-hours.js';
-import { MachineHoursOfOperationApi } from './api/machine-hours-of-operation.js';
-import { MachineLocationsApi } from './api/machine-locations.js';
-import { MapLayersApi } from './api/map-layers.js';
-import { NotificationsApi } from './api/notifications.js';
-import { OperatorsApi } from './api/operators.js';
-import { OrganizationsApi } from './api/organizations.js';
-import { PartnershipsApi } from './api/partnerships.js';
-import { ProductsApi } from './api/products.js';
-import { UsersApi } from './api/users.js';
-import { WebhookApi } from './api/webhook.js';
+import {
+  AempApi,
+  AssetsApi,
+  BoundariesApi,
+  ClientsApi,
+  ConnectionManagementApi,
+  CropTypesApi,
+  EquipmentApi,
+  EquipmentMeasurementApi,
+  FarmsApi,
+  FieldOperationsApi,
+  FieldsApi,
+  FilesApi,
+  FlagsApi,
+  GuidanceLinesApi,
+  HarvestIdApi,
+  MachineAlertsApi,
+  MachineDeviceStateReportsApi,
+  MachineEngineHoursApi,
+  MachineHoursOfOperationApi,
+  MachineLocationsApi,
+  MapLayersApi,
+  NotificationsApi,
+  OperatorsApi,
+  OrganizationsApi,
+  PartnershipsApi,
+  ProductsApi,
+  UsersApi,
+  WebhookApi,
+} from './api';
 import { DeereClient, type DeereClientConfig } from './client.js';
 
 /**
