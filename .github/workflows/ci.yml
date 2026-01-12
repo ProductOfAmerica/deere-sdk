@@ -48,8 +48,8 @@ jobs:
         run: |
           pnpm test:coverage 2>&1 | tee coverage-output.txt
 
-          # Extract coverage percentage from output
-          COVERAGE=$(grep "all files" coverage-output.txt | awk '{print $4}' | sed 's/%//')
+          # Extract coverage percentage from output (line % is 2nd column after |)
+          COVERAGE=$(grep "all files" coverage-output.txt | awk -F'|' '{print $2}' | tr -d ' ')
           echo "Coverage: $COVERAGE%"
 
           # Determine badge color
