@@ -53,11 +53,11 @@ yarn add deere-sdk
 ## Quick Start
 
 ```typescript
-import { Deere } from 'deere-sdk';
+import {Deere} from 'deere-sdk';
 
 const deere = new Deere({
-  accessToken: 'your-oauth-access-token',
-  environment: 'sandbox', // or 'production'
+    accessToken: 'your-oauth-access-token',
+    environment: 'sandbox', // or 'production'
 });
 
 // List all organizations
@@ -84,24 +84,24 @@ This SDK requires an OAuth 2.0 access token from John Deere:
 <details>
 <summary><strong>OAuth Scopes</strong></summary>
 
-| Scope | Description |
-|-------|-------------|
-| `ag1` | Read access to agricultural data |
-| `ag2` | Write access to agricultural data |
-| `ag3` | Additional agricultural data access |
-| `offline_access` | Refresh token support |
+| Scope            | Description                         |
+|------------------|-------------------------------------|
+| `ag1`            | Read access to agricultural data    |
+| `ag2`            | Write access to agricultural data   |
+| `ag3`            | Additional agricultural data access |
+| `offline_access` | Refresh token support               |
 
 </details>
 
 <details>
 <summary><strong>Environments</strong></summary>
 
-| Environment | URL | Use Case |
-|-------------|-----|----------|
-| `production` | api.deere.com | Live data |
-| `sandbox` | sandboxapi.deere.com | Development |
-| `partner` | partnerapi.deere.com | Partner integrations |
-| `cert` | apicert.deere.com | Certification |
+| Environment  | URL                  | Use Case             |
+|--------------|----------------------|----------------------|
+| `production` | api.deere.com        | Live data            |
+| `sandbox`    | sandboxapi.deere.com | Development          |
+| `partner`    | partnerapi.deere.com | Partner integrations |
+| `cert`       | apicert.deere.com    | Certification        |
 
 </details>
 
@@ -111,41 +111,41 @@ This SDK requires an OAuth 2.0 access token from John Deere:
 
 ### Operations Center APIs
 
-| API | Property | Methods | Description |
-|-----|----------|---------|-------------|
-| [Organizations](https://developer.deere.com/documentation/organizations) | `deere.organizations` | 4 | Organization management |
-| [Fields](https://developer.deere.com/documentation/fields) | `deere.fields` | 7 | Field CRUD and boundaries |
-| [Farms](https://developer.deere.com/documentation/farms) | `deere.farms` | 7 | Farm management |
-| [Boundaries](https://developer.deere.com/documentation/boundaries) | `deere.boundaries` | 7 | Field boundary management |
-| [Clients](https://developer.deere.com/documentation/clients) | `deere.clients` | 7 | Customer management |
-| [Equipment](https://developer.deere.com/documentation/equipment) | `deere.equipment` | 15 | Machines and implements |
-| [Field Operations](https://developer.deere.com/documentation/field-operations-api) | `deere.fieldOperations` | 4 | Harvests, plantings, applications |
-| [Crop Types](https://developer.deere.com/documentation/crop-types) | `deere.cropTypes` | 4 | Crop type catalog |
-| [Products](https://developer.deere.com/documentation/products) | `deere.products` | 9 | Seeds and chemicals catalog |
-| [Map Layers](https://developer.deere.com/documentation/map-layers) | `deere.mapLayers` | 4 | Map layer management |
-| [Files](https://developer.deere.com/documentation/files) | `deere.files` | 5 | File management |
-| [Flags](https://developer.deere.com/documentation/flags) | `deere.flags` | 6 | Field flags/markers |
-| [Guidance Lines](https://developer.deere.com/documentation/guidance-lines) | `deere.guidanceLines` | 4 | GPS guidance lines |
-| [Operators](https://developer.deere.com/documentation/operators) | `deere.operators` | 6 | Machine operator management |
-| [Users](https://developer.deere.com/documentation/users) | `deere.users` | 1 | User information |
-| [Assets](https://developer.deere.com/documentation/assets) | `deere.assets` | 8 | Asset tracking |
-| [Webhooks](https://developer.deere.com/documentation/webhook) | `deere.webhook` | 4 | Event subscriptions |
-| [Connections](https://developer.deere.com/documentation/connection-management) | `deere.connectionManagement` | 3 | OAuth connections |
+| API                                                                       | Property                     | Methods | Description                       |
+|---------------------------------------------------------------------------|------------------------------|---------|-----------------------------------|
+| [Organizations](https://developer.deere.com/dev-docs/organizations)       | `deere.organizations`        | 4       | Organization management           |
+| [Fields](https://developer.deere.com/dev-docs/fields)                     | `deere.fields`               | 7       | Field CRUD and boundaries         |
+| [Farms](https://developer.deere.com/dev-docs/farms)                       | `deere.farms`                | 7       | Farm management                   |
+| [Boundaries](https://developer.deere.com/dev-docs/boundaries)             | `deere.boundaries`           | 7       | Field boundary management         |
+| [Clients](https://developer.deere.com/dev-docs/clients)                   | `deere.clients`              | 7       | Customer management               |
+| [Equipment](https://developer.deere.com/dev-docs/equipment)               | `deere.equipment`            | 15      | Machines and implements           |
+| [Field Operations](https://developer.deere.com/dev-docs/field-operations) | `deere.fieldOperations`      | 4       | Harvests, plantings, applications |
+| [Crop Types](https://developer.deere.com/dev-docs/crop-types)             | `deere.cropTypes`            | 4       | Crop type catalog                 |
+| [Products](https://developer.deere.com/dev-docs/products)                 | `deere.products`             | 9       | Seeds and chemicals catalog       |
+| [Map Layers](https://developer.deere.com/dev-docs/map-layers)             | `deere.mapLayers`            | 4       | Map layer management              |
+| [Files](https://developer.deere.com/dev-docs/files)                       | `deere.files`                | 5       | File management                   |
+| [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 6       | Field flags/markers               |
+| [Guidance Lines](https://developer.deere.com/dev-docs/guidance-lines)     | `deere.guidanceLines`        | 4       | GPS guidance lines                |
+| [Operators](https://developer.deere.com/dev-docs/operators)               | `deere.operators`            | 6       | Machine operator management       |
+| [Users](https://developer.deere.com/dev-docs/users)                       | `deere.users`                | 1       | User information                  |
+| [Assets](https://developer.deere.com/dev-docs/assets)                     | `deere.assets`               | 8       | Asset tracking                    |
+| [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 4       | Event subscriptions               |
+| [Connections](https://developer.deere.com/dev-docs/connection-management) | `deere.connectionManagement` | 3       | OAuth connections                 |
 
 ### Machine Data APIs
 
-| API | Property | Methods | Description |
-|-----|----------|---------|-------------|
-| [Machine Locations](https://developer.deere.com/documentation/machine-locations) | `deere.machineLocations` | 1 | GPS location history |
-| [Machine Alerts](https://developer.deere.com/documentation/machine-alerts) | `deere.machineAlerts` | 1 | DTC alerts |
-| [Engine Hours](https://developer.deere.com/documentation/machine-engine-hours) | `deere.machineEngineHours` | 1 | Engine hours tracking |
-| [Hours of Operation](https://developer.deere.com/documentation/machine-hours-of-operation) | `deere.machineHoursOfOperation` | 1 | On/off duration |
-| [Device State](https://developer.deere.com/documentation/machine-device-state-reports) | `deere.machineDeviceStateReports` | 1 | Terminal state reports |
-| [Notifications](https://developer.deere.com/documentation/notifications) | `deere.notifications` | 4 | Push notifications |
-| [Harvest ID](https://developer.deere.com/documentation/harvest-id) | `deere.harvestId` | 2 | Cotton module data |
-| [AEMP](https://developer.deere.com/documentation/aemp) | `deere.aemp` | 1 | ISO 15143-3 fleet data |
-| [Equipment Measurement](https://developer.deere.com/documentation/equipment-measurement) | `deere.equipmentMeasurement` | 1 | Third-party measurements |
-| [Partnerships](https://developer.deere.com/documentation/partnerships) | `deere.partnerships` | 6 | Organization partnerships |
+| API                                                                                   | Property                          | Methods | Description               |
+|---------------------------------------------------------------------------------------|-----------------------------------|---------|---------------------------|
+| [Machine Locations](https://developer.deere.com/dev-docs/machine-locations)           | `deere.machineLocations`          | 1       | GPS location history      |
+| [Machine Alerts](https://developer.deere.com/dev-docs/machine-alerts)                 | `deere.machineAlerts`             | 1       | DTC alerts                |
+| [Engine Hours](https://developer.deere.com/dev-docs/machine-engine-hours)             | `deere.machineEngineHours`        | 1       | Engine hours tracking     |
+| [Hours of Operation](https://developer.deere.com/dev-docs/machine-hours-of-operation) | `deere.machineHoursOfOperation`   | 1       | On/off duration           |
+| [Device State](https://developer.deere.com/dev-docs/machine-device-state-reports)     | `deere.machineDeviceStateReports` | 1       | Terminal state reports    |
+| [Notifications](https://developer.deere.com/dev-docs/notifications)                   | `deere.notifications`             | 4       | Push notifications        |
+| [Harvest ID](https://developer.deere.com/dev-docs/harvest-id)                         | `deere.harvestId`                 | 2       | Cotton module data        |
+| [AEMP](https://developer.deere.com/dev-docs/aemp)                                     | `deere.aemp`                      | 1       | ISO 15143-3 fleet data    |
+| [Equipment Measurement](https://developer.deere.com/dev-docs/equipment-measurement)   | `deere.equipmentMeasurement`      | 1       | Third-party measurements  |
+| [Partnerships](https://developer.deere.com/dev-docs/partnerships)                     | `deere.partnerships`              | 6       | Organization partnerships |
 
 ---
 
@@ -178,8 +178,8 @@ const allFields = await deere.fields.listAll('org-id');
 
 // Filter fields
 const filtered = await deere.fields.list('org-id', {
-  farmName: 'North Farm',
-  recordFilter: 'AVAILABLE'
+    farmName: 'North Farm',
+    recordFilter: 'AVAILABLE'
 });
 
 // Get a specific field
@@ -187,13 +187,13 @@ const field = await deere.fields.get('org-id', 'field-id');
 
 // Create a field
 await deere.fields.create('org-id', {
-  name: 'North Field',
-  farmName: 'Smith Farm',
-  clientName: 'John Smith'
+    name: 'North Field',
+    farmName: 'Smith Farm',
+    clientName: 'John Smith'
 });
 
 // Update a field
-await deere.fields.update('org-id', 'field-id', { name: 'Updated Name' });
+await deere.fields.update('org-id', 'field-id', {name: 'Updated Name'});
 
 // Delete a field
 await deere.fields.delete('org-id', 'field-id');
@@ -210,12 +210,12 @@ const farms = await deere.farms.list('org-id');
 const allFarms = await deere.farms.listAll('org-id');
 
 // Include archived
-const all = await deere.farms.list('org-id', { recordFilter: 'all' });
+const all = await deere.farms.list('org-id', {recordFilter: 'all'});
 
 // CRUD operations
 const farm = await deere.farms.get('org-id', 'farm-id');
-await deere.farms.create('org-id', { name: 'North Farm' });
-await deere.farms.update('org-id', 'farm-id', { name: 'Updated' });
+await deere.farms.create('org-id', {name: 'North Farm'});
+await deere.farms.update('org-id', 'farm-id', {name: 'Updated'});
 await deere.farms.delete('org-id', 'farm-id');
 
 // Related resources
@@ -241,13 +241,13 @@ const generated = await deere.boundaries.get('operation-id');
 
 // Create boundary
 await deere.boundaries.create('org-id', 'field-id', {
-  name: 'Main Boundary',
-  active: true,
-  multipolygons: [/* GeoJSON */]
+    name: 'Main Boundary',
+    active: true,
+    multipolygons: [/* GeoJSON */]
 });
 
 // Update/Delete
-await deere.boundaries.update('org-id', 'field-id', 'boundary-id', { name: 'New Name' });
+await deere.boundaries.update('org-id', 'field-id', 'boundary-id', {name: 'New Name'});
 await deere.boundaries.delete('org-id', 'field-id', 'boundary-id');
 ```
 
@@ -262,23 +262,23 @@ const equipment = await deere.equipment.get();
 
 // Filter equipment
 const filtered = await deere.equipment.get({
-  organizationIds: [123],
-  categories: 'Machine',
-  capableOf: 'Connectivity'
+    organizationIds: [123],
+    categories: 'Machine',
+    capableOf: 'Connectivity'
 });
 
 // Get equipment details
 const machine = await deere.equipment.getEquipment('equipment-id');
 
 // CRUD
-await deere.equipment.create('org-id', { type: 'Machine', name: 'Tractor 1' });
-await deere.equipment.update('equipment-id', { name: 'Updated' });
+await deere.equipment.create('org-id', {type: 'Machine', name: 'Tractor 1'});
+await deere.equipment.update('equipment-id', {name: 'Updated'});
 await deere.equipment.delete('equipment-id');
 
 // Reference data
 const makes = await deere.equipment.list();
 const types = await deere.equipment.listEquipmenttypes();
-const models = await deere.equipment.listEquipmentmodels({ equipmentModelName: '9RX*' });
+const models = await deere.equipment.listEquipmentmodels({equipmentModelName: '9RX*'});
 ```
 
 </details>
@@ -292,8 +292,8 @@ const ops = await deere.fieldOperations.list('org-id', 'field-id');
 
 // Filter by type and season
 const harvests = await deere.fieldOperations.list('org-id', 'field-id', {
-  cropSeason: '2024',
-  fieldOperationType: 'harvest'
+    cropSeason: '2024',
+    fieldOperationType: 'harvest'
 });
 
 // Get operation details
@@ -301,8 +301,8 @@ const op = await deere.fieldOperations.get('operation-id');
 
 // Download shapefile
 const shapefile = await deere.fieldOperations.getFieldops('operation-id', {
-  shapeType: 'Polygon',
-  resolution: 'EachSection'
+    shapeType: 'Polygon',
+    resolution: 'EachSection'
 });
 ```
 
@@ -314,15 +314,15 @@ const shapefile = await deere.fieldOperations.getFieldops('operation-id', {
 ```typescript
 // Machine locations
 const locations = await deere.machineLocations.get('principal-id', {
-  startDate: '2024-01-01T00:00:00Z',
-  endDate: '2024-01-31T23:59:59Z'
+    startDate: '2024-01-01T00:00:00Z',
+    endDate: '2024-01-31T23:59:59Z'
 });
 
 // Machine alerts
 const alerts = await deere.machineAlerts.list('principal-id');
 
 // Engine hours
-const hours = await deere.machineEngineHours.list('principal-id', { lastKnown: true });
+const hours = await deere.machineEngineHours.list('principal-id', {lastKnown: true});
 
 // Hours of operation
 const opHours = await deere.machineHoursOfOperation.list('principal-id');
@@ -342,14 +342,14 @@ const notifications = await deere.notifications.list('org-id');
 
 // Filter by severity
 const critical = await deere.notifications.list('org-id', {
-  severities: 'HIGH,CRITICAL'
+    severities: 'HIGH,CRITICAL'
 });
 
 // Create notification
 await deere.notifications.create({
-  sourceEvent: 'my-app-event-123',
-  title: 'Action Required',
-  message: 'Please review the prescription map'
+    sourceEvent: 'my-app-event-123',
+    title: 'Action Required',
+    message: 'Please review the prescription map'
 });
 
 // Delete notification
@@ -370,20 +370,20 @@ const asset = await deere.assets.get('asset-id');
 
 // Create asset
 await deere.assets.create('org-id', {
-  title: 'Fuel Tank #1',
-  assetCategory: 'DEVICE',
-  assetType: 'SENSOR'
+    title: 'Fuel Tank #1',
+    assetCategory: 'DEVICE',
+    assetType: 'SENSOR'
 });
 
 // Asset locations
 const locations = await deere.assets.listLocations('asset-id', {
-  startDate: '2024-01-01T00:00:00Z',
-  endDate: '2024-12-31T23:59:59Z'
+    startDate: '2024-01-01T00:00:00Z',
+    endDate: '2024-12-31T23:59:59Z'
 });
 
 await deere.assets.createLocations('asset-id', {
-  timestamp: '2024-06-15T12:00:00Z',
-  geometry: { type: 'Point', coordinates: [-93.5, 42.5] }
+    timestamp: '2024-06-15T12:00:00Z',
+    geometry: {type: 'Point', coordinates: [-93.5, 42.5]}
 });
 ```
 
@@ -398,14 +398,14 @@ const subs = await deere.webhook.listAll();
 
 // Create subscription
 await deere.webhook.create({
-  clientKey: 'your-client-key',
-  eventTypeId: 'equipment-status',
-  callbackUrl: 'https://your-server.com/webhook'
+    clientKey: 'your-client-key',
+    eventTypeId: 'equipment-status',
+    callbackUrl: 'https://your-server.com/webhook'
 });
 
 // Update subscription
 await deere.webhook.update('subscription-id', {
-  callbackUrl: 'https://new-server.com/webhook'
+    callbackUrl: 'https://new-server.com/webhook'
 });
 ```
 
@@ -420,8 +420,8 @@ const partnerships = await deere.partnerships.listAll();
 
 // Create partnership request
 await deere.partnerships.create({
-  toOrganizationId: 'partner-org-id',
-  message: 'Request to share data'
+    toOrganizationId: 'partner-org-id',
+    message: 'Request to share data'
 });
 
 // Get/delete partnership
@@ -431,8 +431,8 @@ await deere.partnerships.delete('token');
 // Permissions
 const perms = await deere.partnerships.listPermissions('token');
 await deere.partnerships.createPermissions('token', {
-  permissionType: 'ViewData',
-  enabled: true
+    permissionType: 'ViewData',
+    enabled: true
 });
 ```
 
@@ -445,25 +445,25 @@ await deere.partnerships.createPermissions('token', {
 For custom endpoints or advanced use cases:
 
 ```typescript
-import { DeereClient } from 'deere-sdk';
+import {DeereClient} from 'deere-sdk';
 
 const client = new DeereClient({
-  accessToken: 'your-token',
-  environment: 'sandbox',
-  timeout: 30000,   // Request timeout in ms (default: 30000)
-  maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
+    accessToken: 'your-token',
+    environment: 'sandbox',
+    timeout: 30000,   // Request timeout in ms (default: 30000)
+    maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
 
 // Raw requests
 const response = await client.get<CustomType>('/some/endpoint');
-const created = await client.post('/some/endpoint', { data: 'value' });
+const created = await client.post('/some/endpoint', {data: 'value'});
 
 // Follow HAL links
 const nextPage = await client.followLink(response.links[0]);
 
 // Automatic pagination
 for await (const items of client.paginate('/large/collection')) {
-  console.log(items);
+    console.log(items);
 }
 ```
 
@@ -475,48 +475,48 @@ for await (const items of client.paginate('/large/collection')) {
 
 The SDK automatically retries failed requests with exponential backoff and jitter:
 
-| Error Type | Retried? | Notes |
-|------------|----------|-------|
-| `429` Rate Limit | Yes | Respects `Retry-After` header |
-| `500`, `502`, `503`, `504` | Yes | Server errors |
-| Network failures | Yes | Connection issues |
-| Timeouts | Yes | Request took too long |
-| `401`, `403` Auth errors | No | Refresh your token |
-| `400`, `404`, `422` | No | Fix your request |
+| Error Type                 | Retried? | Notes                         |
+|----------------------------|----------|-------------------------------|
+| `429` Rate Limit           | Yes      | Respects `Retry-After` header |
+| `500`, `502`, `503`, `504` | Yes      | Server errors                 |
+| Network failures           | Yes      | Connection issues             |
+| Timeouts                   | Yes      | Request took too long         |
+| `401`, `403` Auth errors   | No       | Refresh your token            |
+| `400`, `404`, `422`        | No       | Fix your request              |
 
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
 ```typescript
 // Customize retry behavior
 const deere = new Deere({
-  accessToken: 'your-token',
-  maxRetries: 5,  // More retries (default: 3)
+    accessToken: 'your-token',
+    maxRetries: 5,  // More retries (default: 3)
 });
 
 // Disable retries entirely
 const deere = new Deere({
-  accessToken: 'your-token',
-  maxRetries: 0,
+    accessToken: 'your-token',
+    maxRetries: 0,
 });
 ```
 
 ### Error Types
 
 ```typescript
-import { DeereError, RateLimitError, AuthError } from 'deere-sdk';
+import {DeereError, RateLimitError, AuthError} from 'deere-sdk';
 
 try {
-  const fields = await deere.fields.listAll('org-id');
+    const fields = await deere.fields.listAll('org-id');
 } catch (error) {
-  if (error instanceof RateLimitError) {
-    // Only thrown after all retries exhausted
-    console.log(`Rate limited. Retry after ${error.retryAfter}s`);
-  } else if (error instanceof AuthError) {
-    // Never retried - refresh your token
-    console.log('Token expired - refresh required');
-  } else if (error instanceof DeereError) {
-    console.log(`API error: ${error.status} ${error.message}`);
-  }
+    if (error instanceof RateLimitError) {
+        // Only thrown after all retries exhausted
+        console.log(`Rate limited. Retry after ${error.retryAfter}s`);
+    } else if (error instanceof AuthError) {
+        // Never retried - refresh your token
+        console.log('Token expired - refresh required');
+    } else if (error instanceof DeereError) {
+        console.log(`API error: ${error.status} ${error.message}`);
+    }
 }
 ```
 
@@ -527,7 +527,7 @@ try {
 Access auto-generated types from OpenAPI specs:
 
 ```typescript
-import { Types } from 'deere-sdk';
+import {Types} from 'deere-sdk';
 
 type Farm = Types.Farms.components['schemas']['GetFarm'];
 type Field = Types.Fields.components['schemas']['FieldsResponse'];
@@ -540,23 +540,23 @@ type Equipment = Types.Equipment.components['schemas']['equipment-model'];
 
 This SDK includes automated daily health checks to monitor John Deere API availability.
 
-| Status | Meaning |
-|--------|---------|
-| ![passing](https://img.shields.io/badge/API%20Health-28%2F28-brightgreen?style=flat-square) | All APIs responding with valid specs |
-| ![degraded](https://img.shields.io/badge/API%20Health-25%2F28-yellow?style=flat-square) | Some APIs unavailable or returning empty specs |
-| ![failing](https://img.shields.io/badge/API%20Health-10%2F28-red?style=flat-square) | Major API outage detected |
+| Status                                                                                      | Meaning                                        |
+|---------------------------------------------------------------------------------------------|------------------------------------------------|
+| ![passing](https://img.shields.io/badge/API%20Health-28%2F28-brightgreen?style=flat-square) | All APIs responding with valid specs           |
+| ![degraded](https://img.shields.io/badge/API%20Health-25%2F28-yellow?style=flat-square)     | Some APIs unavailable or returning empty specs |
+| ![failing](https://img.shields.io/badge/API%20Health-10%2F28-red?style=flat-square)         | Major API outage detected                      |
 
 <details>
 <summary><strong>APIs Without Public Specs</strong></summary>
 
 These APIs are listed on John Deere's portal but don't provide public OpenAPI specs:
 
-| API | Notes |
-|-----|-------|
-| `work-plans` | Listed but returns empty spec |
-| `retrieve-warranty-information` | Dealer-only |
-| `retrieve-pip` | Dealer-only |
-| `valid-pin` | Dealer-only |
+| API                             | Notes                         |
+|---------------------------------|-------------------------------|
+| `work-plans`                    | Listed but returns empty spec |
+| `retrieve-warranty-information` | Dealer-only                   |
+| `retrieve-pip`                  | Dealer-only                   |
+| `valid-pin`                     | Dealer-only                   |
 
 </details>
 
@@ -600,7 +600,8 @@ pnpm test
 
 ## Disclaimer
 
-> **This is an unofficial SDK** and is not affiliated with, endorsed by, or connected to John Deere or Deere & Company. Use at your own risk.
+> **This is an unofficial SDK** and is not affiliated with, endorsed by, or connected to John Deere or Deere & Company.
+> Use at your own risk.
 >
 > John Deere, Operations Center, and the leaping deer logo are trademarks of Deere & Company.
 
