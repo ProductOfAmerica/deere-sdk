@@ -1,9 +1,9 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { DeereClient, DeereError, RateLimitError } from '../src/client.js';
 import {
-  mockFailThenSucceed,
   mockErrorResponse,
+  mockFailThenSucceed,
   mockNetworkError,
   mockTimeout,
 } from './helpers/mock-fetch.js';
@@ -148,7 +148,7 @@ describe('retry behavior', () => {
         (error: Error) => {
           assert(error instanceof DeereError);
           return true;
-        },
+        }
       );
 
       // 1 initial + 3 retries = 4 total attempts
@@ -250,7 +250,7 @@ describe('retry behavior', () => {
         (error: Error) => {
           assert(error instanceof TypeError);
           return true;
-        },
+        }
       );
 
       assert.strictEqual(attempts, 3); // 1 initial + 2 retries
@@ -272,7 +272,7 @@ describe('retry behavior', () => {
         (error: Error) => {
           assert.strictEqual(error.message, 'Some other error');
           return true;
-        },
+        }
       );
 
       assert.strictEqual(attempts, 1); // No retries
@@ -326,7 +326,7 @@ describe('retry behavior', () => {
           assert.strictEqual(error.message, 'Request timeout');
           assert.strictEqual((error as DeereError).status, 0);
           return true;
-        },
+        }
       );
     });
   });

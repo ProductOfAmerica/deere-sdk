@@ -5,7 +5,7 @@
  * @generated from aemp.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/aemp.js';
 
 export class AempApi {

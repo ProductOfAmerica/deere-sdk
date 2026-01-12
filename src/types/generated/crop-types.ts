@@ -4,538 +4,538 @@
  */
 
 export interface paths {
-    "/cropTypes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve all crop types
-         * @description This endpoint will return list of available crop types in the system.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter results based on status */
-                    recordFilter?: components["parameters"]["RecordFilter"];
-                };
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["CropTypeCollectionResponse"];
-                405: components["responses"]["CropTypeMethodNotAllowed"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/cropTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/cropTypes/{name}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Retrieve all crop types
+     * @description This endpoint will return list of available crop types in the system.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filter results based on status */
+          recordFilter?: components['parameters']['RecordFilter'];
         };
-        /**
-         * View a specific cropType
-         * @description This endpoint will return details of specific cropType.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature2"];
-                };
-                path: {
-                    /** @description This is the crop type name */
-                    name: components["parameters"]["Name"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["CropTypeNameResponse"];
-                404: components["responses"]["CropTypeNotFound"];
-                405: components["responses"]["CropTypeMethodNotAllowed"];
-            };
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['CropTypeCollectionResponse'];
+        405: components['responses']['CropTypeMethodNotAllowed'];
+      };
     };
-    "/cropTypes/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * View a specific cropType
-         * @description This endpoint will return details of specific cropType.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature2"];
-                };
-                path: {
-                    /** @description This is the crop type Id */
-                    id: components["parameters"]["Id"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["CropTypeIdResponse"];
-                404: components["responses"]["CropTypeNotFound"];
-                405: components["responses"]["CropTypeMethodNotAllowed"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cropTypes/{name}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{organizationId}/cropTypes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * View a specific cropType
+     * @description This endpoint will return details of specific cropType.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature2'];
         };
-        /**
-         * Retrieve all crop types for a specific organization
-         * @description This endpoint will return a list of all crop types for a specific organization.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Filter results based on status */
-                    recordFilter?: components["parameters"]["RecordFilter"];
-                };
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path: {
-                    /** @description This is the organization Id */
-                    organizationId: components["parameters"]["organizationId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["CropTypeorganizationResponse"];
-                404: components["responses"]["CropTypeNotFound"];
-                405: components["responses"]["CropTypeMethodNotAllowed"];
-            };
+        path: {
+          /** @description This is the crop type name */
+          name: components['parameters']['Name'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['CropTypeNameResponse'];
+        404: components['responses']['CropTypeNotFound'];
+        405: components['responses']['CropTypeMethodNotAllowed'];
+      };
     };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cropTypes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a specific cropType
+     * @description This endpoint will return details of specific cropType.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature2'];
+        };
+        path: {
+          /** @description This is the crop type Id */
+          id: components['parameters']['Id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['CropTypeIdResponse'];
+        404: components['responses']['CropTypeNotFound'];
+        405: components['responses']['CropTypeMethodNotAllowed'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/cropTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve all crop types for a specific organization
+     * @description This endpoint will return a list of all crop types for a specific organization.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filter results based on status */
+          recordFilter?: components['parameters']['RecordFilter'];
+        };
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
+        };
+        path: {
+          /** @description This is the organization Id */
+          organizationId: components['parameters']['organizationId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['CropTypeorganizationResponse'];
+        404: components['responses']['CropTypeNotFound'];
+        405: components['responses']['CropTypeMethodNotAllowed'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        CropType: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 9b5392615e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description The primary identifier for the operation.
-             * @example 1
-             */
-            id?: string;
-            /**
-             * @description This is the crop type name.
-             * @example CORN_WET
-             */
-            name?: string;
-            /**
-             * @description This is the crop type name translated using the Accept-Language header.
-             * @example Corn
-             */
-            translatedName?: string;
-            /**
-             * @description This is the color associated with the crop type.
-             * @example #FFE119
-             */
-            color?: string;
-            /**
-             * @description This is the zoned last modified time of the crop type.
-             * @example 2021-10-14T11:55:00Z
-             */
-            lastModifiedTime?: string;
-            Density?: {
-                /**
-                 * @description This is cropType densityFactor value.
-                 * @example 0.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example lb1bu-1
-                 */
-                unit?: string;
-            };
-            Moisture?: {
-                /**
-                 * @description This is the standard payable moisture value for the crop type.
-                 * @example 1.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example %
-                 */
-                unit?: string;
-            };
-            "Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)"?: {
-                /**
-                 * @description This is the entity resource identifier for the corresponding equipment type
-                 * @example e87e0d9a-91ab-42ea-9000-f96950a64411
-                 */
-                erid?: string;
-                /**
-                 * @description This is the equipment type enumeration value
-                 * @example ET_COMBINE
-                 */
-                equipmentTypeProtoEnum?: string;
-            };
-        };
-        CropType2: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 9b5392615e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description The primary identifier for the operation.
-             * @example 1
-             */
-            id?: string;
-            /**
-             * @description This is the crop type name.
-             * @example ENERGY_CANE
-             */
-            name?: string;
-            /**
-             * @description This is the crop type name translated using the Accept-Language header.
-             * @example Corn
-             */
-            translatedName?: string;
-            /**
-             * @description This is the color associated with the crop type.
-             * @example #FFE119
-             */
-            color?: string;
-            /**
-             * @description This is the zoned last modified time of the crop type.
-             * @example 2021-10-14T11:55:00Z
-             */
-            lastModifiedTime?: string;
-            Density?: {
-                /**
-                 * @description This is cropType densityFactor value.
-                 * @example 0.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example lb1bu-1
-                 */
-                unit?: string;
-            };
-            Moisture?: {
-                /**
-                 * @description This is cropType standardPayableMoisture value.
-                 * @example 1.0
-                 */
-                moistureValue?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example %
-                 */
-                moistureUnit?: string;
-            };
-            "Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)"?: {
-                /**
-                 * @description This is the entity resource identifier for the corresponding equipment type
-                 * @example e87e0d9a-91ab-42ea-9000-f96950a64411
-                 */
-                erid?: string;
-                /**
-                 * @description This is the equipment type enumeration value
-                 * @example ET_COMBINE
-                 */
-                equipmentTypeProtoEnum?: string;
-            };
-        };
-        CropType3: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 9b5392615e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description The primary identifier for the operation.
-             * @example 1
-             */
-            id?: string;
-            /**
-             * @description This is the crop type name.
-             * @example CORN_WET
-             */
-            name?: string;
-            /**
-             * @description This is the crop type name translated using the Accept-Language header.
-             * @example Corn
-             */
-            translatedName?: string;
-            /**
-             * @description This is the color associated with the crop type.
-             * @example #FFE119
-             */
-            color?: string;
-            /**
-             * @description This is the zoned last modified time of the crop type.
-             * @example 2021-10-14T11:55:00Z
-             */
-            lastModifiedTime?: string;
-            Density?: {
-                /**
-                 * @description This is cropType densityFactor value.
-                 * @example 0.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example lb1bu-1
-                 */
-                unit?: string;
-            };
-            Moisture?: {
-                /**
-                 * @description This is the standard payable moisture value for the crop type.
-                 * @example 1.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example %
-                 */
-                unit?: string;
-            };
-            "Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)"?: {
-                /**
-                 * @description This is the entity resource identifier for the corresponding equipment type
-                 * @example e87e0d9a-91ab-42ea-9000-f96950a64411
-                 */
-                erid?: string;
-                /**
-                 * @description This is the equipment type enumeration value
-                 * @example ET_COMBINE
-                 */
-                equipmentTypeProtoEnum?: string;
-            };
-        };
-        CropType4: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 9b5392615e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description The primary identifier for the operation.
-             * @example 1
-             */
-            id?: string;
-            /**
-             * @description This is the crop type name.
-             * @example CORN_WET
-             */
-            name?: string;
-            /**
-             * @description This is the crop type name translated using the Accept-Language header.
-             * @example Corn
-             */
-            translatedName?: string;
-            /**
-             * @description This is the color associated with the crop type.
-             * @example #FFE119
-             */
-            color?: string;
-            /**
-             * @description This is zoned last modified time of the crop type.
-             * @example 2021-10-14T11:55:00Z
-             */
-            lastModifiedTime?: string;
-            Density?: {
-                /**
-                 * @description This is cropType densityFactor value.
-                 * @example 0.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example lb1bu-1
-                 */
-                unit?: string;
-            };
-            Moisture?: {
-                /**
-                 * @description This is the standard payable moisture value for the crop type.
-                 * @example 1.0
-                 */
-                value?: number;
-                /**
-                 * @description This indicates the unit.
-                 * @example %
-                 */
-                unit?: string;
-            };
-            "Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)"?: {
-                /**
-                 * @description This is the entity resource identifier for the corresponding equipment type
-                 * @example e87e0d9a-91ab-42ea-9000-f96950a64411
-                 */
-                erid?: string;
-                /**
-                 * @description This is the equipment type enumeration value
-                 * @example ET_COMBINE
-                 */
-                equipmentTypeProtoEnum?: string;
-            };
-        };
+  schemas: {
+    CropType: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 9b5392615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The primary identifier for the operation.
+       * @example 1
+       */
+      id?: string;
+      /**
+       * @description This is the crop type name.
+       * @example CORN_WET
+       */
+      name?: string;
+      /**
+       * @description This is the crop type name translated using the Accept-Language header.
+       * @example Corn
+       */
+      translatedName?: string;
+      /**
+       * @description This is the color associated with the crop type.
+       * @example #FFE119
+       */
+      color?: string;
+      /**
+       * @description This is the zoned last modified time of the crop type.
+       * @example 2021-10-14T11:55:00Z
+       */
+      lastModifiedTime?: string;
+      Density?: {
+        /**
+         * @description This is cropType densityFactor value.
+         * @example 0.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example lb1bu-1
+         */
+        unit?: string;
+      };
+      Moisture?: {
+        /**
+         * @description This is the standard payable moisture value for the crop type.
+         * @example 1.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example %
+         */
+        unit?: string;
+      };
+      'Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)'?: {
+        /**
+         * @description This is the entity resource identifier for the corresponding equipment type
+         * @example e87e0d9a-91ab-42ea-9000-f96950a64411
+         */
+        erid?: string;
+        /**
+         * @description This is the equipment type enumeration value
+         * @example ET_COMBINE
+         */
+        equipmentTypeProtoEnum?: string;
+      };
     };
-    responses: {
-        /** @description A collection of crop types */
-        CropTypeCollectionResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /**
-                     * Format: int64
-                     * @example 1
-                     */
-                    total?: number;
-                    values?: components["schemas"]["CropType"][];
-                };
-            };
-        };
-        /** @description A collection of crop types */
-        CropTypeNameResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /**
-                     * Format: int64
-                     * @example 1
-                     */
-                    total?: number;
-                    values?: components["schemas"]["CropType2"][];
-                };
-            };
-        };
-        /** @description A collection of crop types */
-        CropTypeIdResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /**
-                     * Format: int64
-                     * @example 1
-                     */
-                    total?: number;
-                    values?: components["schemas"]["CropType3"][];
-                };
-            };
-        };
-        /** @description A collection of crop types */
-        CropTypeorganizationResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /**
-                     * Format: int64
-                     * @example 1
-                     */
-                    total?: number;
-                    values?: components["schemas"]["CropType4"][];
-                };
-            };
-        };
-        /** @description The requested method is not allowed */
-        CropTypeMethodNotAllowed: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Not found */
-        CropTypeNotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+    CropType2: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 9b5392615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The primary identifier for the operation.
+       * @example 1
+       */
+      id?: string;
+      /**
+       * @description This is the crop type name.
+       * @example ENERGY_CANE
+       */
+      name?: string;
+      /**
+       * @description This is the crop type name translated using the Accept-Language header.
+       * @example Corn
+       */
+      translatedName?: string;
+      /**
+       * @description This is the color associated with the crop type.
+       * @example #FFE119
+       */
+      color?: string;
+      /**
+       * @description This is the zoned last modified time of the crop type.
+       * @example 2021-10-14T11:55:00Z
+       */
+      lastModifiedTime?: string;
+      Density?: {
+        /**
+         * @description This is cropType densityFactor value.
+         * @example 0.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example lb1bu-1
+         */
+        unit?: string;
+      };
+      Moisture?: {
+        /**
+         * @description This is cropType standardPayableMoisture value.
+         * @example 1.0
+         */
+        moistureValue?: number;
+        /**
+         * @description This indicates the unit.
+         * @example %
+         */
+        moistureUnit?: string;
+      };
+      'Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)'?: {
+        /**
+         * @description This is the entity resource identifier for the corresponding equipment type
+         * @example e87e0d9a-91ab-42ea-9000-f96950a64411
+         */
+        erid?: string;
+        /**
+         * @description This is the equipment type enumeration value
+         * @example ET_COMBINE
+         */
+        equipmentTypeProtoEnum?: string;
+      };
     };
-    parameters: {
-        /** @description Filter results based on status */
-        RecordFilter: string;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature": string;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
-        "X-deere-signature2": string;
-        /** @description This is the crop type name */
-        Name: string;
-        /** @description This is the crop type Id */
-        Id: string;
-        /** @description This is the organization Id */
-        organizationId: string;
+    CropType3: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 9b5392615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The primary identifier for the operation.
+       * @example 1
+       */
+      id?: string;
+      /**
+       * @description This is the crop type name.
+       * @example CORN_WET
+       */
+      name?: string;
+      /**
+       * @description This is the crop type name translated using the Accept-Language header.
+       * @example Corn
+       */
+      translatedName?: string;
+      /**
+       * @description This is the color associated with the crop type.
+       * @example #FFE119
+       */
+      color?: string;
+      /**
+       * @description This is the zoned last modified time of the crop type.
+       * @example 2021-10-14T11:55:00Z
+       */
+      lastModifiedTime?: string;
+      Density?: {
+        /**
+         * @description This is cropType densityFactor value.
+         * @example 0.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example lb1bu-1
+         */
+        unit?: string;
+      };
+      Moisture?: {
+        /**
+         * @description This is the standard payable moisture value for the crop type.
+         * @example 1.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example %
+         */
+        unit?: string;
+      };
+      'Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)'?: {
+        /**
+         * @description This is the entity resource identifier for the corresponding equipment type
+         * @example e87e0d9a-91ab-42ea-9000-f96950a64411
+         */
+        erid?: string;
+        /**
+         * @description This is the equipment type enumeration value
+         * @example ET_COMBINE
+         */
+        equipmentTypeProtoEnum?: string;
+      };
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    CropType4: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 9b5392615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The primary identifier for the operation.
+       * @example 1
+       */
+      id?: string;
+      /**
+       * @description This is the crop type name.
+       * @example CORN_WET
+       */
+      name?: string;
+      /**
+       * @description This is the crop type name translated using the Accept-Language header.
+       * @example Corn
+       */
+      translatedName?: string;
+      /**
+       * @description This is the color associated with the crop type.
+       * @example #FFE119
+       */
+      color?: string;
+      /**
+       * @description This is zoned last modified time of the crop type.
+       * @example 2021-10-14T11:55:00Z
+       */
+      lastModifiedTime?: string;
+      Density?: {
+        /**
+         * @description This is cropType densityFactor value.
+         * @example 0.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example lb1bu-1
+         */
+        unit?: string;
+      };
+      Moisture?: {
+        /**
+         * @description This is the standard payable moisture value for the crop type.
+         * @example 1.0
+         */
+        value?: number;
+        /**
+         * @description This indicates the unit.
+         * @example %
+         */
+        unit?: string;
+      };
+      'Supported Equipment Types (REPLACES HARVEST MACHINE TYPE)'?: {
+        /**
+         * @description This is the entity resource identifier for the corresponding equipment type
+         * @example e87e0d9a-91ab-42ea-9000-f96950a64411
+         */
+        erid?: string;
+        /**
+         * @description This is the equipment type enumeration value
+         * @example ET_COMBINE
+         */
+        equipmentTypeProtoEnum?: string;
+      };
+    };
+  };
+  responses: {
+    /** @description A collection of crop types */
+    CropTypeCollectionResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['CropType'][];
+        };
+      };
+    };
+    /** @description A collection of crop types */
+    CropTypeNameResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['CropType2'][];
+        };
+      };
+    };
+    /** @description A collection of crop types */
+    CropTypeIdResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['CropType3'][];
+        };
+      };
+    };
+    /** @description A collection of crop types */
+    CropTypeorganizationResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['CropType4'][];
+        };
+      };
+    };
+    /** @description The requested method is not allowed */
+    CropTypeMethodNotAllowed: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Not found */
+    CropTypeNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    /** @description Filter results based on status */
+    RecordFilter: string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
+    'X-deere-signature2': string;
+    /** @description This is the crop type name */
+    Name: string;
+    /** @description This is the crop type Id */
+    Id: string;
+    /** @description This is the organization Id */
+    organizationId: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

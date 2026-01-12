@@ -4,327 +4,327 @@
  */
 
 export interface paths {
-    "/machines/{principalId}/deviceStateReports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Terminal Device State Reports
-         * @description A device state report is generated from a terminal at a specified time. The report contains the following information: <ul> <li>Engine State</li> <li>Power State</li> <li>Model State</li> <li>RSSI Value (signal strength of the terminal)</li> <li>Local Information</li> <li>GPS State/Error</li> <li>WIFI Info/Error</li> <li>GSM/WIFI Antenna Type</li> <li>Wifi SSID</li> <li>BatteryVoltage</li> <li>LastBootType</li> <li>LastBootTimestamp</li> <li>VehiclePowerState</li> </ul> This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. </br></br> Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to </br> <ul> <li><b>Machine</b>: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear.</li> <li><b>Terminal</b>: Request a Device State Report from the specified terminal.</li> </ul>
-         */
-        get: operations["getDeviceStateReportbyMachineId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/machines/{principalId}/deviceStateReports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * Terminal Device State Reports
+     * @description A device state report is generated from a terminal at a specified time. The report contains the following information: <ul> <li>Engine State</li> <li>Power State</li> <li>Model State</li> <li>RSSI Value (signal strength of the terminal)</li> <li>Local Information</li> <li>GPS State/Error</li> <li>WIFI Info/Error</li> <li>GSM/WIFI Antenna Type</li> <li>Wifi SSID</li> <li>BatteryVoltage</li> <li>LastBootType</li> <li>LastBootTimestamp</li> <li>VehiclePowerState</li> </ul> This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. </br></br> Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to </br> <ul> <li><b>Machine</b>: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear.</li> <li><b>Terminal</b>: Request a Device State Report from the specified terminal.</li> </ul>
+     */
+    get: operations['getDeviceStateReportbyMachineId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description The link object provides links to ressources which are related to the response */
-        MyJD_links: {
-            /**
-             * @description Device State Report Link.
-             * @example https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports
-             */
-            self?: unknown;
-        };
-        /** @description Device State Report */
-        DeviceStateReport: {
-            /**
-             * Format: date-time
-             * @description UTC Timestamp of the DSR.
-             * @example 2025-04-04T14:35:05.000Z
-             */
-            time?: string;
-            /**
-             * Format: int32
-             * @description This number identifies the type of gateway the report traveled through.
-             * @example 2
-             */
-            "gatewayType<sup><a href='#gateway-types'>1</a></sup>"?: Record<string, never>;
-            /**
-             * @description Shows the latitude, longitude, and altitude at the time of this report.
-             * @example <mark>See sample response below.</mark>
-             */
-            location?: Record<string, never>;
-            /**
-             * @description The minimum signal strength of the machine at the time of the report.
-             * @example <mark>See sample response below.</mark>
-             */
-            minRSSI?: Record<string, never>;
-            /**
-             * @description The maximum signal strength of the machine at the time of the report.
-             * @example See sample response below.
-             */
-            maxRSSI?: Record<string, never>;
-            /**
-             * @description The average signal strength of the machine at the time of the report.
-             * @example See sample response below.
-             */
-            averageRSSI?: Record<string, never>;
-            /**
-             * Format: date-time
-             * @description UTC Timestamp, of the GPS position of the Machine.
-             * @example <mark>2025-04-04T14:35:05.000Z</mark>
-             */
-            gpsFixTimestamp?: string;
-            /**
-             * Format: int32
-             * @description This number identifies the power state of the engine.
-             * @example 1
-             */
-            engineState?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies the power state of the terminal.
-             * @example 1
-             */
-            terminalPowerState?: Record<string, never>;
-            /**
-             * @description Battery level of the terminal.
-             * @example See sample response below.
-             */
-            batteryLevel?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number indicates whether any errors were occurring on the Cell Modem at the time of this report.
-             * @example 0
-             */
-            cellModemState?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number indicates whether any errors were occurring on the Cell Modem Antenna at the time of this report.
-             * @example 1
-             */
-            cellModemAntennaState?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number indicates whether any errors were occurring on the GPS Modem at the time of this report.
-             * @example 1
-             */
-            gpsModemState?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number indicates whether any errors were occurring on the GPS Antenna at the time of this report.
-             * @example 1
-             */
-            gpsAntennaState?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description Identifies the sattelite or cellular network through which the report was sent by the terminal.
-             * @example 1
-             */
-            network?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description Last reported RSSI (signal strength) of the network.
-             * @example 7
-             */
-            rssi?: number;
-            /**
-             * Format: int32
-             * @description This number identifies any gps error occured
-             * @example 4
-             */
-            gpsError?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies any gps firmware error
-             * @example 1
-             */
-            gpsFirmwareLevelError?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi tethering status
-             * @example 0
-             */
-            tetheringStatus?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi access point(ap) status
-             * @example 1
-             */
-            apStatus?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi machine to machine(m2m) mode
-             * @example 1
-             */
-            m2mMode?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi tethering connection
-             * @example 1
-             */
-            tetheringConnected?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi access point connection
-             * @example 1
-             */
-            apConnected?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi machine to machine connection
-             * @example 1
-             */
-            m2mConnected?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies gsm Antenna type
-             * @example 7
-             */
-            gsmAntennaType?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies wifi Antenna type
-             * @example 3
-             */
-            wifiAntennaType?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies the antenna failure state
-             * @example 1
-             */
-            antennaFailure?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies the Tethering failure state
-             * @example 0
-             */
-            failedToTether?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies the machine to machine connection failure state
-             * @example 0
-             */
-            failedToM2M?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies any cell modem error ocurred
-             * @example 0
-             */
-            cellModemError?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies any cell modem firmware level error ocurred
-             * @example 0
-             */
-            cellModemFirmwareLevelError?: Record<string, never>;
-            /**
-             * @description SSID being used for tethering at the time the message is generated
-             * @example vatican
-             */
-            wifiSSID?: string;
-            /**
-             * Format: int64
-             * @description This number identifies the MTG Battery Voltage (Unswitched Power Supply) in Hundredths of a Volt
-             * @example 12.64
-             */
-            batteryVoltage?: Record<string, never>;
-            /**
-             * Format: int32
-             * @description This number identifies if the device was cold booted or warm booted
-             * @example 2
-             */
-            lastBootType?: number;
-            /**
-             * Format: date-time
-             * @description UTC Timestamp, when the device was booted up last time
-             * @example <mark>2005-04-04T14:35:05.000Z</mark>
-             */
-            lastBootTimestamp?: string;
-            /**
-             * Format: int32
-             * @description This number identifies the principalId for which this records was generated
-             * @example 123456
-             */
-            machineId?: number;
-            /**
-             * Format: int32
-             * @description This number identifies the Vehicle Power State at the time this record is generated
-             * @example 2
-             */
-            vehiclePowerState?: Record<string, never>;
-        };
+  schemas: {
+    /** @description The link object provides links to ressources which are related to the response */
+    MyJD_links: {
+      /**
+       * @description Device State Report Link.
+       * @example https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports
+       */
+      self?: unknown;
     };
-    responses: never;
-    parameters: {
-        /** @description Principal ID of the machine/equipment. */
-        principalId: string;
-        /** @description Return DSR from the specified startDate. */
-        startDate: string;
-        /** @description Return DSR till the specified endDate. */
-        endDate: string;
-        /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
-        lastKnown: boolean;
+    /** @description Device State Report */
+    DeviceStateReport: {
+      /**
+       * Format: date-time
+       * @description UTC Timestamp of the DSR.
+       * @example 2025-04-04T14:35:05.000Z
+       */
+      time?: string;
+      /**
+       * Format: int32
+       * @description This number identifies the type of gateway the report traveled through.
+       * @example 2
+       */
+      "gatewayType<sup><a href='#gateway-types'>1</a></sup>"?: Record<string, never>;
+      /**
+       * @description Shows the latitude, longitude, and altitude at the time of this report.
+       * @example <mark>See sample response below.</mark>
+       */
+      location?: Record<string, never>;
+      /**
+       * @description The minimum signal strength of the machine at the time of the report.
+       * @example <mark>See sample response below.</mark>
+       */
+      minRSSI?: Record<string, never>;
+      /**
+       * @description The maximum signal strength of the machine at the time of the report.
+       * @example See sample response below.
+       */
+      maxRSSI?: Record<string, never>;
+      /**
+       * @description The average signal strength of the machine at the time of the report.
+       * @example See sample response below.
+       */
+      averageRSSI?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description UTC Timestamp, of the GPS position of the Machine.
+       * @example <mark>2025-04-04T14:35:05.000Z</mark>
+       */
+      gpsFixTimestamp?: string;
+      /**
+       * Format: int32
+       * @description This number identifies the power state of the engine.
+       * @example 1
+       */
+      engineState?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies the power state of the terminal.
+       * @example 1
+       */
+      terminalPowerState?: Record<string, never>;
+      /**
+       * @description Battery level of the terminal.
+       * @example See sample response below.
+       */
+      batteryLevel?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number indicates whether any errors were occurring on the Cell Modem at the time of this report.
+       * @example 0
+       */
+      cellModemState?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number indicates whether any errors were occurring on the Cell Modem Antenna at the time of this report.
+       * @example 1
+       */
+      cellModemAntennaState?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number indicates whether any errors were occurring on the GPS Modem at the time of this report.
+       * @example 1
+       */
+      gpsModemState?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number indicates whether any errors were occurring on the GPS Antenna at the time of this report.
+       * @example 1
+       */
+      gpsAntennaState?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description Identifies the sattelite or cellular network through which the report was sent by the terminal.
+       * @example 1
+       */
+      network?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description Last reported RSSI (signal strength) of the network.
+       * @example 7
+       */
+      rssi?: number;
+      /**
+       * Format: int32
+       * @description This number identifies any gps error occured
+       * @example 4
+       */
+      gpsError?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies any gps firmware error
+       * @example 1
+       */
+      gpsFirmwareLevelError?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi tethering status
+       * @example 0
+       */
+      tetheringStatus?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi access point(ap) status
+       * @example 1
+       */
+      apStatus?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi machine to machine(m2m) mode
+       * @example 1
+       */
+      m2mMode?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi tethering connection
+       * @example 1
+       */
+      tetheringConnected?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi access point connection
+       * @example 1
+       */
+      apConnected?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi machine to machine connection
+       * @example 1
+       */
+      m2mConnected?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies gsm Antenna type
+       * @example 7
+       */
+      gsmAntennaType?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies wifi Antenna type
+       * @example 3
+       */
+      wifiAntennaType?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies the antenna failure state
+       * @example 1
+       */
+      antennaFailure?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies the Tethering failure state
+       * @example 0
+       */
+      failedToTether?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies the machine to machine connection failure state
+       * @example 0
+       */
+      failedToM2M?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies any cell modem error ocurred
+       * @example 0
+       */
+      cellModemError?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies any cell modem firmware level error ocurred
+       * @example 0
+       */
+      cellModemFirmwareLevelError?: Record<string, never>;
+      /**
+       * @description SSID being used for tethering at the time the message is generated
+       * @example vatican
+       */
+      wifiSSID?: string;
+      /**
+       * Format: int64
+       * @description This number identifies the MTG Battery Voltage (Unswitched Power Supply) in Hundredths of a Volt
+       * @example 12.64
+       */
+      batteryVoltage?: Record<string, never>;
+      /**
+       * Format: int32
+       * @description This number identifies if the device was cold booted or warm booted
+       * @example 2
+       */
+      lastBootType?: number;
+      /**
+       * Format: date-time
+       * @description UTC Timestamp, when the device was booted up last time
+       * @example <mark>2005-04-04T14:35:05.000Z</mark>
+       */
+      lastBootTimestamp?: string;
+      /**
+       * Format: int32
+       * @description This number identifies the principalId for which this records was generated
+       * @example 123456
+       */
+      machineId?: number;
+      /**
+       * Format: int32
+       * @description This number identifies the Vehicle Power State at the time this record is generated
+       * @example 2
+       */
+      vehiclePowerState?: Record<string, never>;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  };
+  responses: never;
+  parameters: {
+    /** @description Principal ID of the machine/equipment. */
+    principalId: string;
+    /** @description Return DSR from the specified startDate. */
+    startDate: string;
+    /** @description Return DSR till the specified endDate. */
+    endDate: string;
+    /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
+    lastKnown: boolean;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getDeviceStateReportbyMachineId: {
-        parameters: {
-            query?: {
-                /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
-                lastKnown?: components["parameters"]["lastKnown"];
-                /** @description Return DSR from the specified startDate. */
-                "startDate<sup><a href='#parameters-note'>1</a></sup>"?: components["parameters"]["startDate"];
-                /** @description Return DSR till the specified endDate. */
-                "endDate<sup><a href='#parameters-note'>1</a></sup>"?: components["parameters"]["endDate"];
-            };
-            header?: never;
-            path: {
-                /** @description Principal ID of the machine/equipment. */
-                principalId: components["parameters"]["principalId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description DeviceStateReport with location points list for the machine */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/vnd.deere.axiom.v3+json": {
-                        links?: unknown;
-                        values?: unknown;
-                    };
-                };
-            };
-            /** @description Invalid access to machine id */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Machines details does not exists */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description The requested resource is no longer available */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  getDeviceStateReportbyMachineId: {
+    parameters: {
+      query?: {
+        /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
+        lastKnown?: components['parameters']['lastKnown'];
+        /** @description Return DSR from the specified startDate. */
+        "startDate<sup><a href='#parameters-note'>1</a></sup>"?: components['parameters']['startDate'];
+        /** @description Return DSR till the specified endDate. */
+        "endDate<sup><a href='#parameters-note'>1</a></sup>"?: components['parameters']['endDate'];
+      };
+      header?: never;
+      path: {
+        /** @description Principal ID of the machine/equipment. */
+        principalId: components['parameters']['principalId'];
+      };
+      cookie?: never;
     };
+    requestBody?: never;
+    responses: {
+      /** @description DeviceStateReport with location points list for the machine */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: unknown;
+            values?: unknown;
+          };
+        };
+      };
+      /** @description Invalid access to machine id */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Machines details does not exists */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The requested resource is no longer available */
+      410: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }

@@ -11,8 +11,8 @@
  * Usage: pnpm fix-specs
  */
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'fs';
-import { join, basename } from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
@@ -38,12 +38,12 @@ interface RefUsage {
   ref: string;
 }
 
-function collectRefs(obj: unknown, path: string = ''): RefUsage[] {
+function collectRefs(obj: unknown, path = ''): RefUsage[] {
   const refs: RefUsage[] = [];
 
   if (obj && typeof obj === 'object') {
-    if ('$ref' in obj && typeof (obj as Record<string, unknown>)['$ref'] === 'string') {
-      refs.push({ path, ref: (obj as Record<string, unknown>)['$ref'] as string });
+    if ('$ref' in obj && typeof (obj as Record<string, unknown>).$ref === 'string') {
+      refs.push({ path, ref: (obj as Record<string, unknown>).$ref as string });
     }
 
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
@@ -148,9 +148,9 @@ function fixTypes(obj: unknown): unknown {
       if (key === 'type' && typeof value === 'string') {
         const fix = TYPE_FIXES[value];
         if (fix) {
-          result['type'] = fix.type;
+          result.type = fix.type;
           if (fix.format) {
-            result['format'] = fix.format;
+            result.format = fix.format;
           }
           continue;
         }
@@ -206,7 +206,7 @@ function removeInvalidFields(spec: Record<string, unknown>): void {
             }
 
             if (operation.headers && !operation.responses) {
-              delete operation.headers;
+              operation.headers = undefined;
             }
           }
         }
@@ -334,9 +334,7 @@ function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: st
         get: {
           summary: 'List Organization Users',
           description: 'Returns a list of users belonging to the specified organization.',
-          parameters: [
-            { $ref: '#/components/parameters/OrgIdGet' },
-          ],
+          parameters: [{ $ref: '#/components/parameters/OrgIdGet' }],
           responses: {
             '200': {
               description: 'Organization Users List',
@@ -365,8 +363,8 @@ function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: st
       const components = spec.components as Record<string, unknown> | undefined;
       if (components) {
         const schemas = components.schemas as Record<string, unknown> | undefined;
-        if (schemas && !schemas['OrganizationUser']) {
-          schemas['OrganizationUser'] = {
+        if (schemas && !schemas.OrganizationUser) {
+          schemas.OrganizationUser = {
             properties: {
               accountName: {
                 type: 'string',
@@ -449,10 +447,10 @@ function fixSpec(content: string, filename: string): string {
 
   // Fix singular "Response" to plural "responses" in components (equipment-measurement spec bug)
   const components = spec.components as Record<string, unknown> | undefined;
-  if (components && components.Response && !components.responses) {
+  if (components?.Response && !components.responses) {
     console.log('  Fixing components.Response → components.responses');
     components.responses = components.Response;
-    delete components.Response;
+    components.Response = undefined;
   }
 
   addMissingSchemas(spec, missingRefs);

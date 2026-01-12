@@ -4,377 +4,377 @@
  */
 
 export interface paths {
-    "/organizations/{organizationId}/equipment/{principalId}/measurements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Contribute measurements for a given equipment (NEW)
-         * @description This resource allows the client to provide metadata for a third-party managed piece of equipment in Operations Center. <br><br> <b>Getting Started</b><br>The process of contributing equipment measurement data to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s make, type, and model IDs</li> <li> Create the Equipment. Please see the <a  href='/dev-docs/equipment' target='_blank'>Equipment API</a> for more information on creating equipment.</li> <li> Contribute Measurements</li> </ol>
-         *     <b>Determining the Equipment’s make, type, and model</b> <ol> <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentTypes endpoint to get a list of associated equipment types for that specific equipment make and obtain a respective “id” for a specific type you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li> <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,type which will include all models with search string results and include make and type 'id' as well as model 'id'.</li> </ol>
-         *     <b>Create the Equipment</b><br/> Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. <ul> <li>In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment make, type, and model IDs.</li> <ul> <li><b>type:</b> Machine or Implement</li> <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li> <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li> <li><b>make:</b> The ID for the Make of the vehicle, found from the previous step of this document.</li> <li><b>type:</b> The ID for the Type of the vehicle, found from the API in previous step of this document. </li> <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li> </ul> <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the <u>organization specific</u> machine ID (ie 'https://equipmentapi.deere.com/isg/equipment/12345' is a link to the machine 12345).</li> <li> Once the equipment is created, you will need to follow the location header link provided above and obtain the 'principalId' of the equipment which will be used in the measurements POST URL.</li> <li> If you attempt to create a machine with a vin that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li> <li> If you attempt to create a machine with a name that already exists within the organization, you will receive a 400 Bad Request response. The body will include the error information.</li> </ul> <b>Contribute Measurements</b> <br> First, you must call the returned URL for the equipment created in above steps to view the new machine record, to obtain the “principalId” of the machine. Then, make a POST call to the <a  href='#' target='_blank'>/organizations/{organizationId}/equipment/{principalId}/measurements</a> API endpoint to provide metadata for the equipment that you created in the previous steps. <ul> <li>A properly formatted message will result in a 204 No Content response indicating that the measurement has been taken for processing. After a short delay (generally less than 30 seconds) you should see the icon on the Operations Center map reflecting the new information.</li> <li>You MUST pass the “principalId” of the equipment (obtained from querying the equipment record in the GET /equipment endpoint) otherwise the API will return an error. We check to ensure the calling application and user has access to the current controlling organization of the equipment prior to accepting the measurements. Measurement will only be shown in the current controlling organization of the equipment.</li> </ul>
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /**
-                     * @description The identifier of the organization
-                     * @example 1234
-                     */
-                    organizationId: components["parameters"]["OrganizationId"];
-                    /**
-                     * @description The master record identifier of the equipment
-                     * @example 1234
-                     */
-                    principalId: components["parameters"]["EquipmentId"];
-                };
-                cookie?: never;
-            };
-            /** @description A list of measurements provided. */
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["EquipmentMeasurementsNew"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                204: components["responses"]["CreateEquip"];
-                /** @description Measurement format invalid or an unexpected measurements name was found. */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The user is not allowed to contribute measurements for this machine. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description No machine was found with the provided machineId within the provided organization. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{organizationId}/equipment/{principalId}/measurements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Contribute measurements for a given equipment (NEW)
+     * @description This resource allows the client to provide metadata for a third-party managed piece of equipment in Operations Center. <br><br> <b>Getting Started</b><br>The process of contributing equipment measurement data to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s make, type, and model IDs</li> <li> Create the Equipment. Please see the <a  href='/dev-docs/equipment' target='_blank'>Equipment API</a> for more information on creating equipment.</li> <li> Contribute Measurements</li> </ol>
+     *     <b>Determining the Equipment’s make, type, and model</b> <ol> <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentTypes endpoint to get a list of associated equipment types for that specific equipment make and obtain a respective “id” for a specific type you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li> <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,type which will include all models with search string results and include make and type 'id' as well as model 'id'.</li> </ol>
+     *     <b>Create the Equipment</b><br/> Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. <ul> <li>In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment make, type, and model IDs.</li> <ul> <li><b>type:</b> Machine or Implement</li> <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li> <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li> <li><b>make:</b> The ID for the Make of the vehicle, found from the previous step of this document.</li> <li><b>type:</b> The ID for the Type of the vehicle, found from the API in previous step of this document. </li> <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li> </ul> <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the <u>organization specific</u> machine ID (ie 'https://equipmentapi.deere.com/isg/equipment/12345' is a link to the machine 12345).</li> <li> Once the equipment is created, you will need to follow the location header link provided above and obtain the 'principalId' of the equipment which will be used in the measurements POST URL.</li> <li> If you attempt to create a machine with a vin that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li> <li> If you attempt to create a machine with a name that already exists within the organization, you will receive a 400 Bad Request response. The body will include the error information.</li> </ul> <b>Contribute Measurements</b> <br> First, you must call the returned URL for the equipment created in above steps to view the new machine record, to obtain the “principalId” of the machine. Then, make a POST call to the <a  href='#' target='_blank'>/organizations/{organizationId}/equipment/{principalId}/measurements</a> API endpoint to provide metadata for the equipment that you created in the previous steps. <ul> <li>A properly formatted message will result in a 204 No Content response indicating that the measurement has been taken for processing. After a short delay (generally less than 30 seconds) you should see the icon on the Operations Center map reflecting the new information.</li> <li>You MUST pass the “principalId” of the equipment (obtained from querying the equipment record in the GET /equipment endpoint) otherwise the API will return an error. We check to ensure the calling application and user has access to the current controlling organization of the equipment prior to accepting the measurements. Measurement will only be shown in the current controlling organization of the equipment.</li> </ul>
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description The identifier of the organization
+           * @example 1234
+           */
+          organizationId: components['parameters']['OrganizationId'];
+          /**
+           * @description The master record identifier of the equipment
+           * @example 1234
+           */
+          principalId: components['parameters']['EquipmentId'];
+        };
+        cookie?: never;
+      };
+      /** @description A list of measurements provided. */
+      requestBody?: {
+        content: {
+          'application/json': components['schemas']['EquipmentMeasurementsNew'];
+        };
+      };
+      responses: {
+        /** @description Created */
+        204: components['responses']['CreateEquip'];
+        /** @description Measurement format invalid or an unexpected measurements name was found. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The user is not allowed to contribute measurements for this machine. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description No machine was found with the provided machineId within the provided organization. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        PTOStatusValue: {
-            /**
-             * @description Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable.
-             * @example On
-             * @enum {string}
-             */
-            value?: "On" | "Off" | "Fault" | "Unavailable";
-        };
-        /** Measurement */
-        MeasurementNew: {
-            Speed?: components["schemas"]["MeasurementValueNew"] & string;
-            Heading?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
-                 * @enum {string}
-                 */
-                name?: "heading";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            FuelLevel?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
-                 * @enum {string}
-                 */
-                name?: "fuelLevelPercentage";
-                /**
-                 * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
-                 * @enum {string}
-                 */
-                unit?: "percent";
-            };
-            /** Latitude */
-            Latitude?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
-                 * @enum {string}
-                 */
-                name?: "latitude";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            /** Longitude */
-            Longitude?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
-                 * @enum {string}
-                 */
-                name?: "longitude";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            /** EngineState */
-            EngineState?: components["schemas"]["EngineStateValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
-                 * @enum {string}
-                 */
-                name?: "engineState";
-            };
-            /** Odometer */
-            Odometer?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
-                 * @enum {string}
-                 */
-                name?: "odometer";
-                /**
-                 * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
-                 * @enum {string}
-                 */
-                unit?: "km";
-            };
-            /** EngineHours */
-            EngineHours?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
-                 * @enum {string}
-                 */
-                name?: "engineHours";
-                /**
-                 * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
-                 * @enum {string}
-                 */
-                unit?: "hours";
-            };
-            EngineSpeed?: components["schemas"]["MeasurementValueNew"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. engineSpeed only possible value for providing engineSpeed.
-                 * @enum {string}
-                 */
-                name?: "engineSpeed";
-                /**
-                 * @description The unit of measure we should interpret the value as. RPM is the only supported unit for engineSpeed
-                 * @enum {string}
-                 */
-                unit?: "RPM";
-            };
-            PTOStatus?: components["schemas"]["PTOStatusValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. ptoStatus only possible value for providing ptoStatus.
-                 * @enum {string}
-                 */
-                name?: "ptoStatus";
-            };
-        };
-        EquipmentMeasurements: {
-            /**
-             * Format: date-time
-             * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
-             */
-            timestamp?: string;
-            /** Format: date-time */
-            measurements?: components["schemas"]["Measurement"][];
-        };
-        EquipmentMeasurementsNew: {
-            /**
-             * Format: date-time
-             * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
-             */
-            timestamp?: string;
-            /** Format: date-time */
-            measurements?: components["schemas"]["MeasurementNew"][];
-        };
-        ContentType: {
-            /**
-             * @description Fixed from invalid string value: application/json
-             * @enum {string}
-             */
-            "Content-Type"?: "application/json";
-        };
-        Accept: {
-            /**
-             * @description Fixed from invalid string value: application/json
-             * @enum {string}
-             */
-            Accept?: "application/json";
-        };
-        /** Equipment */
-        Equipment: {
-            /**
-             * Format: int64
-             * @description Equipment Id of a configured equipment
-             * @example 7269
-             */
-            id?: number;
-            /**
-             * @description Make of a configured equipment, maxLength = 20
-             * @example JOHN DEERE
-             */
-            make?: string;
-            /**
-             * @description Name of a configured equipment (sometimes called model). maxLength
-             * @example 6120
-             */
-            name?: string;
-        };
-        /** Measurement */
-        Measurement: {
-            Speed?: components["schemas"]["MeasurementValue"] & string;
-            Heading?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
-                 * @enum {string}
-                 */
-                name?: "heading";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            FuelLevel?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
-                 * @enum {string}
-                 */
-                name?: "fuelLevelPercentage";
-                /**
-                 * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
-                 * @enum {string}
-                 */
-                unit?: "percent";
-            };
-            /** Latitude */
-            Latitude?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
-                 * @enum {string}
-                 */
-                name?: "latitude";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            /** Longitude */
-            Longitude?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
-                 * @enum {string}
-                 */
-                name?: "longitude";
-                /**
-                 * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
-                 * @enum {string}
-                 */
-                unit?: "degrees";
-            };
-            /** EngineState */
-            EngineState?: components["schemas"]["EngineStateValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
-                 * @enum {string}
-                 */
-                name?: "engineState";
-            };
-            /** Odometer */
-            Odometer?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
-                 * @enum {string}
-                 */
-                name?: "odometer";
-                /**
-                 * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
-                 * @enum {string}
-                 */
-                unit?: "km";
-            };
-            /** EngineHours */
-            EngineHours?: components["schemas"]["MeasurementValue"] & {
-                /**
-                 * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
-                 * @enum {string}
-                 */
-                name?: "engineHours";
-                /**
-                 * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
-                 * @enum {string}
-                 */
-                unit?: "hours";
-            };
-        };
-        MeasurementValue: string;
-        MeasurementValueNew: string;
-        EngineStateValue: {
-            /**
-             * @description State of the engine. engineState only possible values are: On or Off.
-             * @example On
-             * @enum {string}
-             */
-            value?: "On" | "Off";
-        };
+  schemas: {
+    PTOStatusValue: {
+      /**
+       * @description Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable.
+       * @example On
+       * @enum {string}
+       */
+      value?: 'On' | 'Off' | 'Fault' | 'Unavailable';
     };
-    responses: {
-        /** @description No Content */
-        CreateEquip: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
+    /** Measurement */
+    MeasurementNew: {
+      Speed?: components['schemas']['MeasurementValueNew'] & string;
+      Heading?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
+         * @enum {string}
+         */
+        name?: 'heading';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      FuelLevel?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
+         * @enum {string}
+         */
+        name?: 'fuelLevelPercentage';
+        /**
+         * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
+         * @enum {string}
+         */
+        unit?: 'percent';
+      };
+      /** Latitude */
+      Latitude?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
+         * @enum {string}
+         */
+        name?: 'latitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** Longitude */
+      Longitude?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
+         * @enum {string}
+         */
+        name?: 'longitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** EngineState */
+      EngineState?: components['schemas']['EngineStateValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
+         * @enum {string}
+         */
+        name?: 'engineState';
+      };
+      /** Odometer */
+      Odometer?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
+         * @enum {string}
+         */
+        name?: 'odometer';
+        /**
+         * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
+         * @enum {string}
+         */
+        unit?: 'km';
+      };
+      /** EngineHours */
+      EngineHours?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
+         * @enum {string}
+         */
+        name?: 'engineHours';
+        /**
+         * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
+         * @enum {string}
+         */
+        unit?: 'hours';
+      };
+      EngineSpeed?: components['schemas']['MeasurementValueNew'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineSpeed only possible value for providing engineSpeed.
+         * @enum {string}
+         */
+        name?: 'engineSpeed';
+        /**
+         * @description The unit of measure we should interpret the value as. RPM is the only supported unit for engineSpeed
+         * @enum {string}
+         */
+        unit?: 'RPM';
+      };
+      PTOStatus?: components['schemas']['PTOStatusValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. ptoStatus only possible value for providing ptoStatus.
+         * @enum {string}
+         */
+        name?: 'ptoStatus';
+      };
     };
-    parameters: {
-        /**
-         * @description The identifier of the machine
-         * @example 1234
-         */
-        MachineId: number;
-        /**
-         * @description The identifier of the organization
-         * @example 1234
-         */
-        OrganizationId: number;
-        /**
-         * @description The master record identifier of the equipment
-         * @example 1234
-         */
-        EquipmentId: number;
+    EquipmentMeasurements: {
+      /**
+       * Format: date-time
+       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
+       */
+      timestamp?: string;
+      /** Format: date-time */
+      measurements?: components['schemas']['Measurement'][];
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    EquipmentMeasurementsNew: {
+      /**
+       * Format: date-time
+       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
+       */
+      timestamp?: string;
+      /** Format: date-time */
+      measurements?: components['schemas']['MeasurementNew'][];
+    };
+    ContentType: {
+      /**
+       * @description Fixed from invalid string value: application/json
+       * @enum {string}
+       */
+      'Content-Type'?: 'application/json';
+    };
+    Accept: {
+      /**
+       * @description Fixed from invalid string value: application/json
+       * @enum {string}
+       */
+      Accept?: 'application/json';
+    };
+    /** Equipment */
+    Equipment: {
+      /**
+       * Format: int64
+       * @description Equipment Id of a configured equipment
+       * @example 7269
+       */
+      id?: number;
+      /**
+       * @description Make of a configured equipment, maxLength = 20
+       * @example JOHN DEERE
+       */
+      make?: string;
+      /**
+       * @description Name of a configured equipment (sometimes called model). maxLength
+       * @example 6120
+       */
+      name?: string;
+    };
+    /** Measurement */
+    Measurement: {
+      Speed?: components['schemas']['MeasurementValue'] & string;
+      Heading?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
+         * @enum {string}
+         */
+        name?: 'heading';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      FuelLevel?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
+         * @enum {string}
+         */
+        name?: 'fuelLevelPercentage';
+        /**
+         * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
+         * @enum {string}
+         */
+        unit?: 'percent';
+      };
+      /** Latitude */
+      Latitude?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
+         * @enum {string}
+         */
+        name?: 'latitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** Longitude */
+      Longitude?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
+         * @enum {string}
+         */
+        name?: 'longitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** EngineState */
+      EngineState?: components['schemas']['EngineStateValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
+         * @enum {string}
+         */
+        name?: 'engineState';
+      };
+      /** Odometer */
+      Odometer?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
+         * @enum {string}
+         */
+        name?: 'odometer';
+        /**
+         * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
+         * @enum {string}
+         */
+        unit?: 'km';
+      };
+      /** EngineHours */
+      EngineHours?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
+         * @enum {string}
+         */
+        name?: 'engineHours';
+        /**
+         * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
+         * @enum {string}
+         */
+        unit?: 'hours';
+      };
+    };
+    MeasurementValue: string;
+    MeasurementValueNew: string;
+    EngineStateValue: {
+      /**
+       * @description State of the engine. engineState only possible values are: On or Off.
+       * @example On
+       * @enum {string}
+       */
+      value?: 'On' | 'Off';
+    };
+  };
+  responses: {
+    /** @description No Content */
+    CreateEquip: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+  };
+  parameters: {
+    /**
+     * @description The identifier of the machine
+     * @example 1234
+     */
+    MachineId: number;
+    /**
+     * @description The identifier of the organization
+     * @example 1234
+     */
+    OrganizationId: number;
+    /**
+     * @description The master record identifier of the equipment
+     * @example 1234
+     */
+    EquipmentId: number;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

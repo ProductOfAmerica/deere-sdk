@@ -5,7 +5,7 @@
  * @generated from map-layers.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/map-layers.js';
 
 export class MapLayersApi {
@@ -16,9 +16,15 @@ export class MapLayersApi {
    * @description This resource will list all Map Layer Summaries for a specified field.<br/>
    * @generated from GET /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
-  async list(orgId: string, id: string, params?: { includePartialSummaries?: boolean; embed?: string }, options?: RequestOptions): Promise<unknown> {
+  async list(
+    orgId: string,
+    id: string,
+    params?: { includePartialSummaries?: boolean; embed?: string },
+    options?: RequestOptions
+  ): Promise<unknown> {
     const query = new URLSearchParams();
-    if (params?.includePartialSummaries !== undefined) query.set('includePartialSummaries', String(params.includePartialSummaries));
+    if (params?.includePartialSummaries !== undefined)
+      query.set('includePartialSummaries', String(params.includePartialSummaries));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
@@ -28,9 +34,15 @@ export class MapLayersApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
-  async listAll(orgId: string, id: string, params?: { includePartialSummaries?: boolean; embed?: string }, options?: RequestOptions): Promise<unknown[]> {
+  async listAll(
+    orgId: string,
+    id: string,
+    params?: { includePartialSummaries?: boolean; embed?: string },
+    options?: RequestOptions
+  ): Promise<unknown[]> {
     const query = new URLSearchParams();
-    if (params?.includePartialSummaries !== undefined) query.set('includePartialSummaries', String(params.includePartialSummaries));
+    if (params?.includePartialSummaries !== undefined)
+      query.set('includePartialSummaries', String(params.includePartialSummaries));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
@@ -42,7 +54,12 @@ export class MapLayersApi {
    * @description Creates a new Map Layer Summary resource.
    * @generated from POST /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
-  async create(orgId: string, id: string, data: components['schemas']['PostRequest'], options?: RequestOptions): Promise<void> {
+  async create(
+    orgId: string,
+    id: string,
+    data: components['schemas']['PostRequest'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries`;
     await this.client.post(path, data, options);
   }
@@ -52,7 +69,10 @@ export class MapLayersApi {
    * @description Returns a specific Map Layer Summary resource.
    * @generated from GET /mapLayerSummaries/{id}
    */
-  async get(id: string, options?: RequestOptions): Promise<components['schemas']['PostContributedMapLayerSummary']> {
+  async get(
+    id: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['PostContributedMapLayerSummary']> {
     const path = `/mapLayerSummaries/${id}`;
     return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(path, options);
   }

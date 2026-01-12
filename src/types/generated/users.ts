@@ -4,93 +4,93 @@
  */
 
 export interface paths {
-    "/users/{username}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * View User Info
-         * @description This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information.<br/> The response also contains links to the following resources: <ul><li><b>organizations:</b> View a list of organizations to which the user belongs.</li> <li><b>files:</b> View a list of files belonging to the user.</li></ul>
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Add user's staff organizations and available links to response. */
-                    embed?: string;
-                };
-                header?: never;
-                path: {
-                    /** @description Filter by username. */
-                    username: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The users. */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            values?: unknown;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/users/{username}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * View User Info
+     * @description This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information.<br/> The response also contains links to the following resources: <ul><li><b>organizations:</b> View a list of organizations to which the user belongs.</li> <li><b>files:</b> View a list of files belonging to the user.</li></ul>
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Add user's staff organizations and available links to response. */
+          embed?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Filter by username. */
+          username: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The users. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        UsersLink: {
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/users/johndoe/organizations
-             */
-            organizations?: unknown;
-        };
-        UsersValue: {
-            /**
-             * @description User's account name.
-             * @example JohnDoe
-             */
-            accountName?: string;
-            /**
-             * @description User's first name.
-             * @example John
-             */
-            givenName?: string;
-            /**
-             * @description User's last name.
-             * @example Doe
-             */
-            familyName?: string;
-            /**
-             * @description User's type. Examples are customer, dealer, internal
-             * @example Customer
-             */
-            userType?: string;
-        };
+  schemas: {
+    UsersLink: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/users/johndoe/organizations
+       */
+      organizations?: unknown;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    UsersValue: {
+      /**
+       * @description User's account name.
+       * @example JohnDoe
+       */
+      accountName?: string;
+      /**
+       * @description User's first name.
+       * @example John
+       */
+      givenName?: string;
+      /**
+       * @description User's last name.
+       * @example Doe
+       */
+      familyName?: string;
+      /**
+       * @description User's type. Examples are customer, dealer, internal
+       * @example Customer
+       */
+      userType?: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

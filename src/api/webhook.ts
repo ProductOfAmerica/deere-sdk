@@ -5,7 +5,7 @@
  * @generated from webhook.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/webhook.js';
 
 export class WebhookApi {
@@ -17,7 +17,7 @@ export class WebhookApi {
    * @generated from GET /eventSubscriptions
    */
   async list(options?: RequestOptions): Promise<unknown> {
-    const path = `/eventSubscriptions`;
+    const path = '/eventSubscriptions';
     return this.client.get<unknown>(path, options);
   }
   /**
@@ -25,7 +25,7 @@ export class WebhookApi {
    * @generated from GET /eventSubscriptions
    */
   async listAll(options?: RequestOptions): Promise<unknown[]> {
-    const path = `/eventSubscriptions`;
+    const path = '/eventSubscriptions';
     return this.client.getAll<unknown>(path, options);
   }
 
@@ -35,7 +35,7 @@ export class WebhookApi {
    * @generated from POST /eventSubscriptions
    */
   async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
-    const path = `/eventSubscriptions`;
+    const path = '/eventSubscriptions';
     await this.client.post(path, data, options);
   }
 
@@ -44,7 +44,10 @@ export class WebhookApi {
    * @description This resource will get a single event subscription by id. The response will include links to: <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The subscription itself.</li> </ul>
    * @generated from GET /eventSubscriptions/{id}
    */
-  async get(id: string, options?: RequestOptions): Promise<components['schemas']['CreatedSubscriptionValues']> {
+  async get(
+    id: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions/${id}`;
     return this.client.get<components['schemas']['CreatedSubscriptionValues']>(path, options);
   }
@@ -54,7 +57,11 @@ export class WebhookApi {
    * @description This resource will update an event subscription for a user. Only certain fields are editable.
    * @generated from PUT /eventSubscriptions/{id}
    */
-  async update(id: string, data: components['schemas']['SubscriptionResponseContent'], options?: RequestOptions): Promise<void> {
+  async update(
+    id: string,
+    data: components['schemas']['SubscriptionResponseContent'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/eventSubscriptions/${id}`;
     await this.client.put(path, data, options);
   }

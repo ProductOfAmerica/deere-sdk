@@ -12,8 +12,8 @@
  *   - specs/raw/summary.json (fetch metadata)
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');

@@ -4,395 +4,395 @@
  */
 
 export interface paths {
-    "/notifications/{sourceEvent}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Fetch single notification.
-         * @description Retrieve a single notification by source event.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Source event of the notification */
-                    sourceEvent: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Created */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            values?: unknown;
-                            links?: unknown;
-                        };
-                    };
-                };
-                400: components["schemas"]["Error"];
-                /** @description Not authorized */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/notifications/{sourceEvent}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notificationEvents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Fetch single notification.
+     * @description Retrieve a single notification by source event.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Source event of the notification */
+          sourceEvent: string;
         };
-        get?: never;
-        put?: never;
-        /**
-         * Create Notification Event
-         * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+              links?: unknown;
             };
-            requestBody?: {
-                content: {
-                    "application/vnd.deere.axiom.v3+json": components["schemas"]["PostNotifications"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            /**
-                             * Format: int32
-                             * @example 1
-                             */
-                            total?: number;
-                        };
-                    };
-                };
-            };
+          };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        400: components['schemas']['Error'];
+        /** @description Not authorized */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
     };
-    "/notificationEvents/{sourceEvent}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete a Notification Event
-         * @description This resource deletes a notification event that was previously posted to MJD as well as any generated notifications.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Source Event */
-                    sourceEvent: components["parameters"]["sourceEvent"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Created */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            /**
-                             * Format: int32
-                             * @example 1
-                             */
-                            total?: number;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notificationEvents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/notifications/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Create Notification Event
+     * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostNotifications'];
         };
-        /**
-         * Search Notifications for an Organization
-         * @description This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: <ul> <li><b>targetResource:</b> View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example.</li> <li><b>contributionDefinition:</b> View the definition of "notification".</li> </ul>
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Criteria to search Notifications before event GUID */
-                    before?: components["parameters"]["before"];
-                    /** @description Criteria to search Notifications after event GUID. */
-                    after?: components["parameters"]["after"];
-                    /** @description Number of records, maximum up to 100 supported. */
-                    count?: components["parameters"]["count"];
-                    /** @description Criteria to search for multiple (comma separated) event types. */
-                    eventTypes?: components["parameters"]["eventTypes"];
-                    /** @description Criteria to search for multiple severities. */
-                    severities?: components["parameters"]["severities"];
-                    /** @description Criteria to search for multiple event GUID. */
-                    sourceEvents?: components["parameters"]["sourceEvents"];
-                    /** @description Criteria to search for start date in time range. */
-                    startDate?: components["parameters"]["startDate"];
-                    /** @description Criteria to search for end date in time range. */
-                    endDate?: components["parameters"]["endDate"];
-                };
-                header?: never;
-                path: {
-                    /** @description Organization */
-                    orgId: components["parameters"]["orgId"];
-                };
-                cookie?: never;
+      };
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
             };
-            requestBody?: never;
-            responses: {
-                /** @description Created */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            values?: unknown;
-                            links?: unknown;
-                        };
-                    };
-                };
-            };
+          };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notificationEvents/{sourceEvent}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete a Notification Event
+     * @description This resource deletes a notification event that was previously posted to MJD as well as any generated notifications.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Source Event */
+          sourceEvent: components['parameters']['sourceEvent'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/notifications/events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Search Notifications for an Organization
+     * @description This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: <ul> <li><b>targetResource:</b> View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example.</li> <li><b>contributionDefinition:</b> View the definition of "notification".</li> </ul>
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Criteria to search Notifications before event GUID */
+          before?: components['parameters']['before'];
+          /** @description Criteria to search Notifications after event GUID. */
+          after?: components['parameters']['after'];
+          /** @description Number of records, maximum up to 100 supported. */
+          count?: components['parameters']['count'];
+          /** @description Criteria to search for multiple (comma separated) event types. */
+          eventTypes?: components['parameters']['eventTypes'];
+          /** @description Criteria to search for multiple severities. */
+          severities?: components['parameters']['severities'];
+          /** @description Criteria to search for multiple event GUID. */
+          sourceEvents?: components['parameters']['sourceEvents'];
+          /** @description Criteria to search for start date in time range. */
+          startDate?: components['parameters']['startDate'];
+          /** @description Criteria to search for end date in time range. */
+          endDate?: components['parameters']['endDate'];
+        };
+        header?: never;
+        path: {
+          /** @description Organization */
+          orgId: components['parameters']['orgId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+              links?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        ResponseDetails: {
-            /**
-             * @description Event ID
-             * @example b22956b7-0b43-40ea-a396-1fdc816ebb58
-             */
-            eventId?: string;
-            /**
-             * @description Event status code.
-             * @example SUCCESS
-             */
-            "eventStatusCode<sup><a href=\"#event-status-code\">4</a></sup>"?: string;
-            /**
-             * @description Number of notifications expected to generate from this event.
-             * @example 2
-             */
-            expectedNotificationCount?: number;
-            /**
-             * @description Actual number of notifications generated from this event.
-             * @example 2
-             */
-            actualNotificationCount?: number;
-        };
-        PostNotifications: {
-            /**
-             * @description Event title.
-             * @example Some Title
-             */
-            title?: string;
-            /**
-             * @description Event description.
-             * @example Detailed event text
-             */
-            text?: string;
-            /**
-             * @description Event severity.
-             * @example HIGH
-             */
-            "severity<sup><a href=\"#event-severity\">1</a></sup>"?: string;
-            /**
-             * @description Event type.
-             * @example AGRONOMY
-             */
-            "eventType<sup><a href=\"#event-type\">2</a></sup>"?: string;
-            /**
-             * Format: date-time
-             * @description Event creation time (UTC). This value is only valid for Machine Alert types and is optional.
-             * @example 2015-04-30T10:23:50.000Z
-             */
-            created?: string;
-            /**
-             * @description More event details.
-             * @example See sample request below.
-             */
-            additionalDetails?: unknown;
-            /**
-             * @description <sup>DEPRECATED</sup>Time range of the event
-             * @example See sample request below.
-             */
-            "timeRange<sup>DEPRECATED</sup>"?: unknown;
-            /**
-             * @description Instructions on how to associate the resulting Notifications with resources.
-             * @example See sample request below.
-             */
-            eventAssociation?: unknown;
-            "Target Resource Event Association"?: {
-                /**
-                 * @description A link that contains the URI of the target resource. An event association can have multiple links.
-                 * @example [{“rel”:”targetResource”,”/some/target/123”}]
-                 */
-                links?: string;
-            };
-        };
-        GetResponse: {
-            /**
-             * @description Event title.
-             * @example Some Title
-             */
-            title?: string;
-            /**
-             * @description GeoJSON representation of the location.
-             * @example See sample response below.
-             */
-            geometries?: Record<string, never>;
-            /**
-             * @description Event description.
-             * @example Detailed event text.
-             */
-            text?: string;
-            /**
-             * @description Event severity.
-             * @example HIGH
-             */
-            "severity<sup><a href=\"#event-severity\">1</a></sup>"?: string;
-            /**
-             * @description Event type.
-             * @example AGRONOMY
-             */
-            "eventType<sup><a href=\"#event-type\">2</a></sup>"?: string;
-            /**
-             * @description Notification Event GUID
-             * @example 2acf8953-8eaf-4487-9cd0-391059fcbfcf
-             */
-            sourceEvent?: Record<string, never>;
-            /**
-             * @description Minimized version of notification having additionalDetails, notificationState<sup><a href="#notification-state">5</a></sup>, targetResourceOrgId, dateCreated and link to targetResource.
-             * @example See sample response below.
-             */
-            minimizedNotifications?: Record<string, never>;
-        };
-        GetAvailableLinks: {
-            /**
-             * @description Contribution Definitions Link.
-             * @example https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
-             */
-            contribution?: unknown;
-            /**
-             * @description Machines Link.
-             * @example https://sandboxapi.deere.com/platform/machines/317783
-             */
-            targetResource?: unknown;
-        };
-        Links: {
-            /**
-             * @description Contribution Definitions Link.
-             * @example https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
-             */
-            contributionDefinition?: unknown;
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
-             */
-            targetResource?: unknown;
-        };
-        /** @description Error response schema for Error (auto-generated) */
-        Error: {
-            message?: string;
-            errors?: Record<string, never>[];
-        };
+  schemas: {
+    ResponseDetails: {
+      /**
+       * @description Event ID
+       * @example b22956b7-0b43-40ea-a396-1fdc816ebb58
+       */
+      eventId?: string;
+      /**
+       * @description Event status code.
+       * @example SUCCESS
+       */
+      'eventStatusCode<sup><a href="#event-status-code">4</a></sup>'?: string;
+      /**
+       * @description Number of notifications expected to generate from this event.
+       * @example 2
+       */
+      expectedNotificationCount?: number;
+      /**
+       * @description Actual number of notifications generated from this event.
+       * @example 2
+       */
+      actualNotificationCount?: number;
     };
-    responses: never;
-    parameters: {
-        /** @description Source Event */
-        sourceEvent: string;
-        /** @description Organization */
-        orgId: string;
-        /** @description Criteria to search Notifications before event GUID */
-        before: Record<string, never>;
-        /** @description Criteria to search Notifications after event GUID. */
-        after: Record<string, never>;
-        /** @description Number of records, maximum up to 100 supported. */
-        count: number;
-        /** @description Criteria to search for multiple (comma separated) event types. */
-        eventTypes: Record<string, never>;
-        /** @description Criteria to search for multiple severities. */
-        severities: Record<string, never>;
-        /** @description Criteria to search for multiple event GUID. */
-        sourceEvents: Record<string, never>;
-        /** @description Criteria to search for start date in time range. */
-        startDate: string;
-        /** @description Criteria to search for end date in time range. */
-        endDate: string;
+    PostNotifications: {
+      /**
+       * @description Event title.
+       * @example Some Title
+       */
+      title?: string;
+      /**
+       * @description Event description.
+       * @example Detailed event text
+       */
+      text?: string;
+      /**
+       * @description Event severity.
+       * @example HIGH
+       */
+      'severity<sup><a href="#event-severity">1</a></sup>'?: string;
+      /**
+       * @description Event type.
+       * @example AGRONOMY
+       */
+      'eventType<sup><a href="#event-type">2</a></sup>'?: string;
+      /**
+       * Format: date-time
+       * @description Event creation time (UTC). This value is only valid for Machine Alert types and is optional.
+       * @example 2015-04-30T10:23:50.000Z
+       */
+      created?: string;
+      /**
+       * @description More event details.
+       * @example See sample request below.
+       */
+      additionalDetails?: unknown;
+      /**
+       * @description <sup>DEPRECATED</sup>Time range of the event
+       * @example See sample request below.
+       */
+      'timeRange<sup>DEPRECATED</sup>'?: unknown;
+      /**
+       * @description Instructions on how to associate the resulting Notifications with resources.
+       * @example See sample request below.
+       */
+      eventAssociation?: unknown;
+      'Target Resource Event Association'?: {
+        /**
+         * @description A link that contains the URI of the target resource. An event association can have multiple links.
+         * @example [{“rel”:”targetResource”,”/some/target/123”}]
+         */
+        links?: string;
+      };
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    GetResponse: {
+      /**
+       * @description Event title.
+       * @example Some Title
+       */
+      title?: string;
+      /**
+       * @description GeoJSON representation of the location.
+       * @example See sample response below.
+       */
+      geometries?: Record<string, never>;
+      /**
+       * @description Event description.
+       * @example Detailed event text.
+       */
+      text?: string;
+      /**
+       * @description Event severity.
+       * @example HIGH
+       */
+      'severity<sup><a href="#event-severity">1</a></sup>'?: string;
+      /**
+       * @description Event type.
+       * @example AGRONOMY
+       */
+      'eventType<sup><a href="#event-type">2</a></sup>'?: string;
+      /**
+       * @description Notification Event GUID
+       * @example 2acf8953-8eaf-4487-9cd0-391059fcbfcf
+       */
+      sourceEvent?: Record<string, never>;
+      /**
+       * @description Minimized version of notification having additionalDetails, notificationState<sup><a href="#notification-state">5</a></sup>, targetResourceOrgId, dateCreated and link to targetResource.
+       * @example See sample response below.
+       */
+      minimizedNotifications?: Record<string, never>;
+    };
+    GetAvailableLinks: {
+      /**
+       * @description Contribution Definitions Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
+       */
+      contribution?: unknown;
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/317783
+       */
+      targetResource?: unknown;
+    };
+    Links: {
+      /**
+       * @description Contribution Definitions Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
+       */
+      contributionDefinition?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
+       */
+      targetResource?: unknown;
+    };
+    /** @description Error response schema for Error (auto-generated) */
+    Error: {
+      message?: string;
+      errors?: Record<string, never>[];
+    };
+  };
+  responses: never;
+  parameters: {
+    /** @description Source Event */
+    sourceEvent: string;
+    /** @description Organization */
+    orgId: string;
+    /** @description Criteria to search Notifications before event GUID */
+    before: Record<string, never>;
+    /** @description Criteria to search Notifications after event GUID. */
+    after: Record<string, never>;
+    /** @description Number of records, maximum up to 100 supported. */
+    count: number;
+    /** @description Criteria to search for multiple (comma separated) event types. */
+    eventTypes: Record<string, never>;
+    /** @description Criteria to search for multiple severities. */
+    severities: Record<string, never>;
+    /** @description Criteria to search for multiple event GUID. */
+    sourceEvents: Record<string, never>;
+    /** @description Criteria to search for start date in time range. */
+    startDate: string;
+    /** @description Criteria to search for end date in time range. */
+    endDate: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

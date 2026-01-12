@@ -4,1721 +4,1858 @@
  */
 
 export interface paths {
-    "/organizations/{orgId}/fields/{fieldId}/fieldOperations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Field Operations
-         * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> </ul>
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Retrieve operations for a specific crop season (year). */
-                    cropSeason?: components["parameters"]["CropSeason"];
-                    /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
-                    fieldOperationType?: components["parameters"]["FieldOperationType"];
-                    /** @description Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
-                    startDate?: components["parameters"]["StartDate"];
-                    /** @description Specify the ending date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
-                    endDate?: components["parameters"]["EndDate"];
-                    /** @description List available operation measurement types and totals. */
-                    embed?: components["parameters"]["FieldEmbed"];
-                    /** @description Query by one or more workPlanIds(comma separated) */
-                    workPlanIds?: components["parameters"]["WorkPlanIds"];
-                };
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path: {
-                    /** @description Owning Organization ID */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description Field ID */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FieldOperations"];
-                403: components["responses"]["DoesNotHaveAccessToFieldOperations"];
-                404: components["responses"]["RequestedResourceNotFound"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{orgId}/fields/{fieldId}/fieldOperations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/fieldOperations/{operationId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * List Field Operations
+     * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> </ul>
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Retrieve operations for a specific crop season (year). */
+          cropSeason?: components['parameters']['CropSeason'];
+          /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
+          fieldOperationType?: components['parameters']['FieldOperationType'];
+          /** @description Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
+          startDate?: components['parameters']['StartDate'];
+          /** @description Specify the ending date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
+          endDate?: components['parameters']['EndDate'];
+          /** @description List available operation measurement types and totals. */
+          embed?: components['parameters']['FieldEmbed'];
+          /** @description Query by one or more workPlanIds(comma separated) */
+          workPlanIds?: components['parameters']['WorkPlanIds'];
         };
-        /**
-         * View a Field Operation
-         * @description View a single field operation. The response will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> <ul>
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description List available operation measurement types and totals. */
-                    embed?: components["parameters"]["FieldEmbed"];
-                };
-                header?: never;
-                path: {
-                    /** @description Operation ID */
-                    operationId: components["parameters"]["OperationId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FieldOperationId"];
-                403: components["responses"]["DoesNotHaveAccessToFieldOperations"];
-                404: components["responses"]["InputFieldOperationValueIsInvalid"];
-            };
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        path: {
+          /** @description Owning Organization ID */
+          orgId: components['parameters']['OrgId'];
+          /** @description Field ID */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldOperations'];
+        403: components['responses']['DoesNotHaveAccessToFieldOperations'];
+        404: components['responses']['RequestedResourceNotFound'];
+      };
     };
-    "/fieldOps/{operationId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Asynchronous Shapefile Download
-         * @description An ESRI Shapefile is available for each Field Operation. <b>Please see the <a href=/dev-docs/field-operations#shapefile-overview>shapefiles overview</a> for details</b> on the shapefile format and how to consume it.<p>The expected response codes are:</p> <ul> <li><b>202 Accepted – </b>The request was received and is being processed. Call back later to check for completion. <ul> <li>This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307.</li> <li>Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: <mark>secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)</mark></li> </ul> </li> <li><b>307 Temporary Redirect – </b>The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. </li> <li><b>406 Not Acceptable - </b>A shapefile cannot be generated. </li> </ul> Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. <br/><br/>For a sample integration, see our <a href=https://github.com/JohnDeere/MyJohnDeereAPI-OAuth2-Java-Example>Java sample code</a>.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description If true, this will download the shapefile in small 20MB pieces */
-                    splitShapeFile?: components["parameters"]["SplitShapeFile"];
-                    /** @description Choose between point-based and polygon-based shapefiles. Accepted values are "Point" and "Polygon". */
-                    shapeType?: components["parameters"]["ShapeType"];
-                    /** @description Choose a data resolution for the shapefile. Accepted values are "EachSection", "EachSensor", and "OneHertz". */
-                    resolution?: components["parameters"]["Resolution"];
-                };
-                header?: {
-                    /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
-                    "Accept-UOM-System"?: components["parameters"]["Accept-UOM-System"];
-                    /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
-                    "Accept-Yield-Preference"?: components["parameters"]["Accept-Yield-Preference"];
-                };
-                path: {
-                    /** @description Operation ID */
-                    operationId: components["parameters"]["OperationId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                202: components["responses"]["RequestHasBeenAccepted"];
-                307: components["responses"]["RedirectToPreSignedURL"];
-                403: components["responses"]["DoesNotHaveAccessToFieldOperations"];
-                404: components["responses"]["InputFieldOperationValueIsInvalid"];
-                406: components["responses"]["RequestHasNotBeenAccepted"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fieldOperations/{operationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * View a Field Operation
+     * @description View a single field operation. The response will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> <ul>
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description List available operation measurement types and totals. */
+          embed?: components['parameters']['FieldEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description Operation ID */
+          operationId: components['parameters']['OperationId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldOperationId'];
+        403: components['responses']['DoesNotHaveAccessToFieldOperations'];
+        404: components['responses']['InputFieldOperationValueIsInvalid'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fieldOps/{operationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Asynchronous Shapefile Download
+     * @description An ESRI Shapefile is available for each Field Operation. <b>Please see the <a href=/dev-docs/field-operations#shapefile-overview>shapefiles overview</a> for details</b> on the shapefile format and how to consume it.<p>The expected response codes are:</p> <ul> <li><b>202 Accepted – </b>The request was received and is being processed. Call back later to check for completion. <ul> <li>This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307.</li> <li>Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: <mark>secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)</mark></li> </ul> </li> <li><b>307 Temporary Redirect – </b>The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. </li> <li><b>406 Not Acceptable - </b>A shapefile cannot be generated. </li> </ul> Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. <br/><br/>For a sample integration, see our <a href=https://github.com/JohnDeere/MyJohnDeereAPI-OAuth2-Java-Example>Java sample code</a>.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description If true, this will download the shapefile in small 20MB pieces */
+          splitShapeFile?: components['parameters']['SplitShapeFile'];
+          /** @description Choose between point-based and polygon-based shapefiles. Accepted values are "Point" and "Polygon". */
+          shapeType?: components['parameters']['ShapeType'];
+          /** @description Choose a data resolution for the shapefile. Accepted values are "EachSection", "EachSensor", and "OneHertz". */
+          resolution?: components['parameters']['Resolution'];
+        };
+        header?: {
+          /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
+          'Accept-UOM-System'?: components['parameters']['Accept-UOM-System'];
+          /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
+          'Accept-Yield-Preference'?: components['parameters']['Accept-Yield-Preference'];
+        };
+        path: {
+          /** @description Operation ID */
+          operationId: components['parameters']['OperationId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        202: components['responses']['RequestHasBeenAccepted'];
+        307: components['responses']['RedirectToPreSignedURL'];
+        403: components['responses']['DoesNotHaveAccessToFieldOperations'];
+        404: components['responses']['InputFieldOperationValueIsInvalid'];
+        406: components['responses']['RequestHasNotBeenAccepted'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description Operators that performed work using this machine */
-        Operators: {
-            /**
-             * @description Unique identifier for this operator
-             * @example 657b4391-79b3-4012-a617-7ceba7111ad0
-             */
-            operatorId?: string;
-            /**
-             * @description Name of the operator
-             * @example John Doe
-             */
-            name?: string;
-            /**
-             * @description Operator license number
-             * @example ABC123
-             */
-            license?: string;
-        };
-        /** @description Machines utilized during this operation */
-        FieldOperationMachines: {
-            /**
-             * @description Doc File based Field Operation Machine erid.
-             * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
-             */
-            erid?: string;
-            Operators?: components["schemas"]["Operators"];
-            /**
-             * Format: int64
-             * @description PrincipalId of the machine
-             * @example 637795
-             */
-            machineId?: number | null;
-            /**
-             * @description VIN of the machine
-             * @example WXYEJKB73894JE3
-             */
-            vin?: string;
-        };
-        LinkGETFieldOperations: {
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456
-             */
-            organization?: unknown;
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27
-             */
-            field?: unknown;
-            /**
-             * @description Field Operation Measurements Link.
-             * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes
-             */
-            measurementTypes?: unknown;
-            /**
-             * @description zero or more field operation measurements links. These will vary by the type of operation
-             * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult
-             */
-            measurement?: unknown;
-            /**
-             * @description Clients Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0
-             */
-            client?: unknown;
-            /**
-             * @description Farms Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0
-             */
-            farm?: unknown;
-            /**
-             * @description Asynchronous Shapefiles Link.
-             * @example https://sandboxapi.deere.com/platform/fieldOps/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNg
-             */
-            shapeFileAsync?: unknown;
-            /**
-             * @description Link to work plan associated to the operation.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e
-             */
-            workPlans?: unknown;
-        };
-        LinkGETFieldOperationsId: {
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456
-             */
-            organization?: unknown;
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27
-             */
-            field?: unknown;
-            /**
-             * @description Field Operation Measurements Link.
-             * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes
-             */
-            measurementTypes?: unknown;
-            /**
-             * @description zero or more field operation measurements links. These will vary by the type of operation
-             * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult
-             */
-            measurement?: unknown;
-            /**
-             * @description Clients Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0
-             */
-            client?: unknown;
-            /**
-             * @description Farms Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0
-             */
-            farm?: unknown;
-        };
-        Link: string;
-        /** @description A link provides a URI to access resources that are related to the response. */
-        FieldLink: {
-            /**
-             * @description The relation of the object to the linked resource.
-             * @example field
-             */
-            rel?: string;
-            /**
-             * Format: uri
-             * @description The URI to the related resource.
-             * @example https://sandboxapi.deere.com/platform/organizations/1234/fields/e48a7dd0-9af2-44e1-81b4-435d494f7cd5
-             */
-            uri?: string;
-        };
-        /**
-         * @description The type of operation
-         * @example HARVEST
-         */
-        FieldOperationTypesEnum: string;
-        /** @description The client associated with this FieldOperation.  Populated only when the associated embed is requested. */
-        Client: {
-            /**
-             * @description Globally unique identifier for this client.
-             * @example 66dd9c64-71d7-4904-86f8-e04d40ccf59d
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-            /**
-             * @description The name of the client.
-             * @example My Custom Client Name
-             */
-            name?: string;
-            /** @example false */
-            archived?: boolean;
-        };
-        /** @description The farm associated with this FieldOperation.  Populated only when the associated embed is requested. */
-        Farm: {
-            /**
-             * @description Globally unique identifier for this farm.
-             * @example 4b781329-2f8c-4a68-98ce-8d5213fc8588
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-            /**
-             * @description The name of the farm.
-             * @example My Custom Farm Name
-             */
-            name?: string;
-            /** @example false */
-            archived?: boolean;
-        };
-        /** @description The field associated with this FieldOperation.  Populated only when the associated embed is requested. */
-        Field: {
-            /**
-             * @description Globally unique identifier for this field.
-             * @example 5ef3b56c-c01d-4ce5-b630-bd1850e39c29
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-            /**
-             * @description The name of the field.
-             * @example My Custom Field Name
-             */
-            name?: string;
-            /** @example false */
-            archived?: boolean;
-            /**
-             * Format: date-time
-             * @example 2020-09-21T15:41:15.205Z
-             */
-            lastModifiedTime?: string;
-        };
-        /**
-         * Format: int64
-         * @description The organization owning the fields and associated operations
-         * @example 123456
-         */
-        OrgId: number;
-        TankMixProduct: {
-            guid?: components["schemas"]["ProductErid"];
-            /**
-             * @description Flag indicating whether the product is a tank mix (true) or a single component (false).
-             * @example true
-             */
-            tankMix?: boolean;
-            rate?: components["schemas"]["EventMeasurement"];
-            carrier?: components["schemas"]["Component"];
-            components?: components["schemas"]["Component"][];
-        };
-        NonTankMixProduct: {
-            /** @example Product */
-            "@type"?: string;
-            guid?: components["schemas"]["ProductErid"];
-            productType?: components["schemas"]["FieldOperationProductTypesEnum"];
-            /**
-             * @description The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier,
-             *     for APPLICATION operations.
-             * @example Priaxor
-             */
-            name?: string;
-            /**
-             * @description The brand name of product.
-             * @example BrandForProducts
-             */
-            brand?: string;
-            agencyRegistrationNumber?: components["schemas"]["AgencyRegistrationNumber"];
-            /**
-             * @description Flag indicating whether the product is a tank mix (true) or a single component (false).
-             * @example false
-             */
-            tankMix?: boolean;
-        };
-        /** @description An individual product combined with others in a tank mix. */
-        Component: {
-            /** @example Component */
-            "@type"?: string;
-            /**
-             * @description Display recorded Component GUID.
-             * @example fa14f029-831c-456b-a76e-2d3c26207c19
-             */
-            guid?: string;
-            /**
-             * @description The general name of the product.
-             * @example Water
-             */
-            name?: string;
-            agencyRegistrationNumber?: components["schemas"]["AgencyRegistrationNumber"];
-            rate?: components["schemas"]["EventMeasurement"];
-        };
-        /**
-         * @description The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency
-         * @example 0084229-00011-AA-0000000
-         */
-        AgencyRegistrationNumber: string;
-        /**
-         * @description The type of display
-         * @enum {string}
-         */
-        JohnDeereDisplayTypeEnum: "GS4_4600" | "GS3_2630" | "GS2_2600" | "GS2_1800" | "GS2_CommandCenter";
-        /**
-         * @description The type of display
-         * @enum {string}
-         */
-        ConnectMobileEnum: "OneAppMobile";
-        /**
-         * @description The type of display
-         * @enum {string}
-         */
-        ThirdPartyDisplayTypeEnum: "IntegraVersa" | "ProtobufV36" | "ProtobufV41" | "TrimbleFMX" | "Unknown";
-        DisplayTypeEnum: components["schemas"]["JohnDeereDisplayTypeEnum"] & components["schemas"]["ConnectMobileEnum"] & components["schemas"]["ThirdPartyDisplayTypeEnum"];
-        /**
-         * @description - A unique textual identifier for a type of Crop
-         *     - EnumList is based on ISG_Shared/blob/master/crops/crops.xml
-         *     - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids.
-         * @example ALFALFA
-         */
-        CropToken: string;
-        /**
-         * @description Filter results by crop season.
-         * @example 2016
-         */
-        CropSeason: number;
-        /**
-         * @description The crop seasons (year) of the recent operation
-         * @example [
-         *       "2016",
-         *       "2015"
-         *     ]
-         */
-        CropSeasons: components["schemas"]["CropSeason"][];
-        CropSeasonSummary: {
-            links?: components["schemas"]["FieldLink"][];
-            fieldOperationType?: components["schemas"]["FieldOperationTypesEnum"];
-            cropSeasons?: components["schemas"]["CropSeasons"];
-        };
-        /**
-         * @description FieldOperation Product Types TODO Enum
-         * @enum {string}
-         */
-        FieldOperationProductTypesEnum: "OTHER" | "CHEMICAL" | "SEED" | "FEED" | "FERTILIZER";
-        FieldOperationMeasurementTypesEnum: string & components["schemas"]["FieldOperationMeasurementTypesInFullRelease"] & components["schemas"]["FieldOperationMeasurementTypesInAgreportsApi"];
-        /**
-         * @description FieldOperation Measurement Types supported in the HDP versions of the endpoints and therefore fully released.
-         * @enum {string}
-         */
-        FieldOperationMeasurementTypesInFullRelease: "SeedingRateTarget" | "SeedingRateResult" | "SeedingSpeedResult" | "SeedingVarietiesTarget" | "SeedingVarietiesResult" | "ApplicationRateTarget" | "ApplicationRateResult" | "ApplicationSpeedResult" | "HarvestYieldResult" | "HarvestYieldContourResult" | "HarvestSpecialtyGrossYieldResult" | "HarvestWetMassResult" | "HarvestMoistureResult" | "HarvestTrashResult" | "HarvestSpeedResult" | "HarvestAdfResult" | "HarvestNdfResult" | "HarvestCrudeProteinResult" | "HarvestStarchResult" | "HarvestSugarResult" | "TillageDepthResult" | "TillagePressureResult" | "TillageSpeedResult" | "TillageDepthTarget" | "TillagePressureTarget";
-        /**
-         * @description FieldOperation Measurement Types supported in the Agreports/DataLake versions of the endpoints. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints.
-         * @enum {string}
-         */
-        FieldOperationMeasurementTypesInAgreportsApi: "ElevationResult" | "ApplicationHeightTarget" | "FuelRateResult" | "WindSpeed" | "AirTemperature" | "TemperatureDifference" | "RelativeHumidity" | "SoilTemperature" | "RatePrescription" | "PressurePrescription" | "DepthPrescription" | "SeedDepthTarget" | "SprayPressure" | "InoculantDosing" | "LengthOfCut" | "GaugeWheelMargin" | "DownforceResult" | "RideQuality" | "SeedSpacingVariation" | "GroundContact" | "Singulation" | "SkyCondition" | "SoilMoisture" | "TargetQuality" | "PrescriptionQuality";
-        /**
-         * @description FieldOperation Measurement Category
-         * @enum {string}
-         */
-        FieldOperationMeasurementCategoryEnum: "Target" | "Result" | "Prescription";
-        FieldOperationLayersEnum: string & components["schemas"]["FieldOperationMeasurementLayersEnum"] & components["schemas"]["FieldOperationIndexLayersEnum"] & components["schemas"]["FieldOperationCompositeLayersEnum"];
-        /**
-         * @description Layers based on variable rate measurements recorded during the field operation. They will use EventMeasurementStats for statistics.
-         * @enum {string}
-         */
-        FieldOperationMeasurementLayersEnum: "AreaWorked" | "Speed" | "Elevation" | "FuelRate" | "FuelConsumption" | "DieselExhaustFluid" | "EngineHours" | "YieldByVolume" | "YieldByMass" | "WetMass" | "Moisture" | "Trash" | "AcidDetergentFiber" | "NeutralDetergentFiber" | "CrudeProtein" | "Starch" | "Sugar" | "RateResult" | "RateTarget" | "RatePrescription" | "InoculantDosing" | "LengthOfCut" | "GaugeWheelMargin" | "DownforceResult" | "GroundContact" | "RideQuality" | "SeedSpacingVariation" | "Singulation" | "ApplicationHeight" | "SprayPressure" | "PressureTarget" | "PressureResult" | "PressurePrescription" | "DepthResult" | "DepthTarget" | "DepthPrescription" | "WindSpeed" | "AirTemperature" | "TemperatureDifference" | "RelativeHumidity" | "SoilTemperature";
-        /**
-         * @description Layers based on defined types recorded or entered during the field operation. They will use EventObservationStats for statistics.
-         * @enum {string}
-         */
-        FieldOperationIndexLayersEnum: "RateResultByProduct" | "RateTargetByProduct" | "WindDirection" | "SkyCondition" | "SoilMoisture" | "Varieties";
-        /**
-         * @description Layers based on defined comparisons of other layers
-         * @enum {string}
-         */
-        FieldOperationCompositeLayersEnum: "QualityTarget" | "QualityPrescription";
-        FieldOperation: {
-            /**
-             * @description Field Operation ID
-             * @example MjkyMDdfNT
-             */
-            id?: string;
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 520122365ebb4870a344784570d202c7
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description Field Operation type.
-             * @example application
-             */
-            "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
-            /**
-             * @description Crop season year.
-             * @example 2015
-             */
-            cropSeason?: string;
-            /**
-             * @description The type of machine that generated the field operation. This may be "unknown".
-             * @example unknown
-             */
-            adaptMachineType?: string;
-            /**
-             * Format: date-time
-             * @description Starting date and time of this field operation..
-             * @example 2015-05-29T22:00:19.200Z
-             */
-            startDate?: string;
-            /**
-             * Format: date-time
-             * @description Ending date and time of this field operation.
-             * @example 2015-05-29T22:23:53.746Z
-             */
-            endDate?: string;
-            /**
-             * Format: date-time
-             * @description Last time that anything was modified on this field operation.
-             * @example 2016-04-29T22:12:53.446Z
-             */
-            modifiedTime?: string;
-            /**
-             * Format: string
-             * @description Crop Name.
-             * @example CORN_WET
-             */
-            cropName?: string;
-            /**
-             * @description List of seed varieties. Only available on harvest and seeding operation types. May contain guid, productType, name, brand, agencyRegistrationNumber, and tankMix
-             * @example [ { "@type": "Product", "productType": "SEED", "name": "aa1", "tankMix": false } ]
-             */
-            varieties?: unknown[];
-            /**
-             * @description Details of the product applied during this field operation. Includes name, tankmix, rate, carrier, and components data.
-             * @example See sample response below.
-             */
-            products?: unknown;
-            /**
-             * @description Name of the tank mix
-             * @example Tank Mix Use 1
-             */
-            name?: string;
-            /**
-             * @description Boolean flag as to whether the application operation was for a tank mix or not.
-             * @example true
-             */
-            tankMix?: boolean;
-            /**
-             * @description Rate of the application. Includes value and unitId<sup><a href='#field-operation-additional'>2</a></sup> data.
-             * @example See sample response below.
-             */
-            rate?: unknown;
-            /**
-             * @description Numeric value.
-             * @example 10
-             */
-            value?: number;
-            /**
-             * @description Unit of value.
-             * @example gal1ac-1
-             */
-            "unitId<sup><a href='#field-operation-additional'>2</a></sup>"?: string;
-            /**
-             * @description Data on the product carrier. Includes name and rate.
-             * @example See sample response below.
-             */
-            carrier?: unknown;
-            /**
-             * @description Data on the product component. Includes name and rate.
-             * @example See sample response below.
-             */
-            components?: unknown;
-            fieldOperationMachines?: components["schemas"]["FieldOperationMachines"];
-        };
-        FieldOperationId: {
-            /**
-             * @description The organization ID.
-             * @example 1234
-             */
-            orgId?: string;
-            /**
-             * @description The year in which the grower logically assigned this operation. Note that operational activity may occur outside this calendar year.
-             * @example 2015
-             */
-            cropSeason?: string;
-            /**
-             * @description A string indicating the type of operation (valid values include: seeding, application, harvest, or tillage).
-             * @example Harvest
-             */
-            "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
-            /**
-             * Format: string
-             * @description A string indicating the type of crop used during this operation. Can be omitted based on operation type and original data source. Only available on harvest and seeding operation types.
-             * @example CORN_WET
-             */
-            cropName?: string;
-            /**
-             * Format: date-time
-             * @description Last time that anything was modified on this field operation.
-             * @example 2018-11-17T11:53:00.000Z
-             */
-            modifiedTime?: string;
-            /**
-             * @description List of seed varieties. Only available on harvest and seeding operation types. May contain guid, productType, name, brand, agencyRegistrationNumber, and tankMix
-             * @example [ { "@type": "Product", "productType": "SEED", "name": "aa1", "tankMix": false } ]
-             */
-            varieties?: unknown[];
-            /**
-             * @description The type of machine that generated the field operation. This may be "unknown".
-             * @example unknown
-             */
-            adaptMachineType?: string;
-            fieldOperationMachines?: components["schemas"]["FieldOperationMachines"];
-        };
-        UpdateFieldOperation: {
-            cropSeason?: components["schemas"]["CropSeason"];
-            cropName?: components["schemas"]["CropToken"];
-            varieties?: (components["schemas"]["NameToEridEdit"] | components["schemas"]["EridToEridEdit"])[];
-            product?: {
-                guid?: components["schemas"]["ProductErid"];
-            };
-        };
-        FieldOperationMachine: {
-            /** @example FieldOperationMachine */
-            "@type"?: string;
-            /**
-             * @description Doc File based Field Operation Machine erid.
-             * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
-             */
-            erid?: string;
-            /**
-             * Format: guid
-             * @description Doc File based Field Operation Machine GUID.  Deprecated, use erid instead.
-             * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
-             */
-            GUID?: string;
-            /** @example JOHN DEERE */
-            make?: string;
-            /**
-             * Format: int64
-             * @example 2016
-             */
-            modelYear?: number;
-            /** @example 824K */
-            model?: string;
-            /** @example Machine1 */
-            name?: string;
-            /** @example WXYEJKB73894JE3 */
-            vin?: string;
-            /** @example combine */
-            adaptMachineType?: string;
-            /**
-             * Format: int64
-             * @description The earliest engine hour measurement for a machine participating in the field operation.
-             * @example 300
-             */
-            beginEngineHours?: number;
-            /**
-             * Format: int64
-             * @description The earliest engine hour measurement for a machine participating in the field operation.
-             * @example 300
-             */
-            endEngineHours?: number;
-            /**
-             * Format: date-time
-             * @description The starting date of the field operation by machine in ISO-8601 format.
-             * @example 2016-11-17T11:53:00.000Z
-             */
-            beginTime?: string;
-            /**
-             * Format: date-time
-             * @description The ending date of the field operation by machine in ISO-8601 format.
-             * @example 2016-11-17T11:53:00.000Z
-             */
-            endTime?: string;
-            /**
-             * Format: date-time
-             * @description The most recent time the operational data was updated in ISO-8601 format.
-             * @example 2018-11-17T11:53:00.000Z
-             */
-            modifiedTime?: string;
-            cropName?: components["schemas"]["CropToken"];
-            products?: components["schemas"]["TankMixProduct"] & components["schemas"]["NonTankMixProduct"];
-            /**
-             * Format: double
-             * @description The calibration factor for this machine
-             * @example 1.25
-             */
-            calibrationFactor?: number;
-            /**
-             * @description JDLink machine that is only populated when the 'machine' embed is specified
-             * @example {
-             *       "id": "someId",
-             *       "serialNumber": "1234567890123"
-             *     }
-             */
-            machine?: Record<string, never>;
-            operators?: components["schemas"]["Operator"][];
-            links?: components["schemas"]["Link"][];
-        };
-        UpdateFieldOperationMachine: {
-            /**
-             * @description Doc File based Field Operation Machine erid.
-             * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
-             */
-            erid?: string;
-            /**
-             * Format: double
-             * @description The calibration factor for this machine
-             * @example 1.25
-             */
-            calibrationFactor?: number;
-        };
-        FieldOperationWorkNote: {
-            /** @example FieldOperationWorkNote */
-            "@type"?: string;
-            /**
-             * Format: guid
-             * @description eventId of the work note.
-             * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
-             */
-            id: string;
-            /** @example note1 */
-            note: string;
-            /**
-             * Format: date-time
-             * @description Timestamp of the work note.
-             * @example 2018-08-27T08:08:08.000Z
-             */
-            timestamp?: string;
-            /** @description GPS location where the the work note was taken. */
-            gpsLocation?: components["schemas"]["Point"];
-        };
-        MapRangeForIndex: {
-            /** @example MapLegendItem */
-            "@type"?: string;
-            /**
-             * @description The string label for this range. Used for images that are not based on numerical values
-             * @example Variety 1
-             */
-            label?: string;
-            /**
-             * @description The color used in the image for this rage
-             * @example #cc0000
-             */
-            hexColor?: string;
-            /**
-             * Format: double
-             * @description The proportion of the field operation matching this range (not actually a percentage).
-             * @example 0.15
-             */
-            percent?: number;
-            /**
-             * Format: int64
-             * @description This is a placeholder for various index key
-             * @example 55
-             */
-            key?: number;
-        };
-        MapRangeForMeasurement: {
-            /** @example MapLegendItem */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @description The inclusive minimum value included in this range
-             * @example 13.15
-             */
-            minimum?: number;
-            /**
-             * Format: double
-             * @description The exclusive maximum value included in this range
-             * @example 17.95
-             */
-            maximum?: number;
-            /**
-             * @description The color used in the image for this rage
-             * @example #cc0000
-             */
-            hexColor?: string;
-            /**
-             * Format: double
-             * @description The proportion of the field operation matching this range (not actually a percentage).
-             * @example 0.15
-             */
-            percent?: number;
-        };
-        MapRangeForGeoTiff: {
-            /** @example MapLegendItem */
-            "@type"?: string;
-            /**
-             * @description The string label for this range. Used for images that are not based on numerical values
-             * @example Variety 1
-             */
-            label?: string;
-            /**
-             * Format: int64
-             * @description This is a placeholder for GeoTiff based Index Key
-             * @example 1
-             */
-            key?: number;
-        };
-        MapRange: components["schemas"]["MapRangeForGeoTiff"] & components["schemas"]["MapRangeForIndex"] & components["schemas"]["MapRangeForMeasurement"];
-        MapRangeWithLayerStatistics: Record<string, never> & components["schemas"]["MapRange"] & {
-            /** @example MapRangeWithLayerStatistics */
-            "@type"?: string;
-            statistics?: components["schemas"]["LayerStatistics"];
-        };
-        /** @description Describes the breaks and their colors for an image */
-        MapLegend: {
-            /** @example MapLegend */
-            "@type"?: string;
-            layerName?: components["schemas"]["FieldOperationLayersEnum"];
-            /**
-             * @description Units for the legend
-             * @example lb1ac-1
-             */
-            unitId?: string;
-            ranges?: components["schemas"]["MapRange"][];
-        };
-        /** @description The GPS extents of a map image */
-        MapExtent: {
-            /**
-             * Format: double
-             * @example 41.66470503009207
-             */
-            minimumLatitude?: number;
-            /**
-             * Format: double
-             * @example 41.67086022030498
-             */
-            maximumLatitude?: number;
-            /**
-             * Format: double
-             * @example -93.15582275390625
-             */
-            minimumLongitude?: number;
-            /**
-             * Format: double
-             * @example -93.1475830078125
-             */
-            maximumLongitude?: number;
-        };
-        FieldOperationPNGImage: {
-            /**
-             * @description Base64 encoded PNG image
-             * @example data:image/png;base64,{base64EncodedContent}
-             */
-            image?: string;
-            mapLegend?: components["schemas"]["MapLegend"];
-            extent?: components["schemas"]["MapExtent"];
-        };
-        FieldOperationGeoTIFFLocation: {
-            /**
-             * Format: uri
-             * @description AWS S3 Presigned URL of Resource. Use gzip for best compression.
-             * @example https://s3.us-east-2.amazonaws.com/s3-bucket-path/49f35d8a-ff54-4b83-81c4-0f45b7b47eba
-             */
-            location?: string;
-            mapLegend?: components["schemas"]["MapLegend"];
-            extent?: components["schemas"]["MapExtent"];
-        };
-        /** @description Includes the summarized values for all layers on a field operation */
-        FieldOperationLayerStatistics: {
-            /** @example FieldOperationLayerStatistics */
-            "@type"?: string;
-            /** @description Links to associated data. */
-            links?: components["schemas"]["Link"][];
-            layerName?: components["schemas"]["FieldOperationLayersEnum"];
-            statistics?: components["schemas"]["LayerStatistics"];
-        }[];
-        /** @description The statistics for a given layer context. */
-        LayerStatistics: {
-            /** @example LayerStatistics */
-            "@type"?: string;
-        } & (components["schemas"]["EventMeasurementStats"] | components["schemas"]["EventObservationStats"]);
-        FieldOperationLayerImageRequest: {
-            ranges?: components["schemas"]["MapRange"][];
-        };
-        FieldOperationCompareStatisticsRequest: {
-            /** @description The field operation ids that we are comparing so for Yield By Variety the target is the Seeding field operation(s) */
-            compareOperationIds: string[];
-            baseLayer: components["schemas"]["FieldOperationLayersEnum"];
-            compareLayer: components["schemas"]["FieldOperationLayersEnum"];
-            boundary?: components["schemas"]["Polygon"];
-        };
-        FieldOperationMeasurement: unknown & components["schemas"]["FieldOperationMeasurementInFullRelease"] & components["schemas"]["FieldOperationMeasurementFromAgreportsApi"];
-        /** @description The fully released portion of the FieldOperationMeasurement. */
-        FieldOperationMeasurementInFullRelease: {
-            links?: components["schemas"]["Link"][];
-            /** @example FieldOperationMeasurement */
-            "@type"?: string;
-            measurementName?: components["schemas"]["FieldOperationMeasurementTypesEnum"];
-            measurementCategory?: components["schemas"]["FieldOperationMeasurementCategoryEnum"];
-            area?: components["schemas"]["EventMeasurement"];
-            yield?: components["schemas"]["EventMeasurement"];
-            averageYield?: components["schemas"]["EventMeasurement"];
-            averageMoisture?: components["schemas"]["EventMeasurement"];
-            wetMass?: components["schemas"]["EventMeasurement"];
-            averageWetMass?: components["schemas"]["EventMeasurement"];
-            harvestLabAccumulatedWetMass?: components["schemas"]["EventMeasurement"];
-            averageSpeed?: components["schemas"]["EventMeasurement"];
-            totalMaterial?: components["schemas"]["EventMeasurement"];
-            averageMaterial?: components["schemas"]["EventMeasurement"];
-            averageDepth?: components["schemas"]["EventMeasurement"];
-            averagePressure?: components["schemas"]["EventMeasurement"];
-            averageTrash?: components["schemas"]["EventMeasurement"];
-            averageAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageStarch?: components["schemas"]["EventMeasurement"];
-            averageCrudeProtein?: components["schemas"]["EventMeasurement"];
-            averageSugar?: components["schemas"]["EventMeasurement"];
-            maxAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxStarch?: components["schemas"]["EventMeasurement"];
-            maxCrudeProtein?: components["schemas"]["EventMeasurement"];
-            maxSugar?: components["schemas"]["EventMeasurement"];
-            varietyTotals?: components["schemas"]["VarietyTotal"][];
-            productTotals?: components["schemas"]["ProductTotal"][];
-        };
-        /** @description Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints. */
-        FieldOperationMeasurementFromAgreportsApi: {
-            elevation?: components["schemas"]["EventMeasurementStats"];
-            fuelRate?: components["schemas"]["EventMeasurementStats"];
-            applicationHeight?: components["schemas"]["EventMeasurementStats"];
-            windSpeed?: components["schemas"]["EventMeasurementStats"];
-            temperature?: components["schemas"]["EventMeasurementStats"];
-            temperatureDifference?: components["schemas"]["EventMeasurementStats"];
-            humidity?: components["schemas"]["EventMeasurementStats"];
-            windDirection?: components["schemas"]["EventObservationStats"];
-            skyCondition?: components["schemas"]["EventObservationStats"];
-            soilMoisture?: components["schemas"]["EventObservationStats"];
-            rate?: components["schemas"]["EventMeasurementStats"];
-            pressure?: components["schemas"]["EventMeasurementStats"];
-            depth?: components["schemas"]["EventMeasurementStats"];
-            dosing?: components["schemas"]["EventMeasurementStats"];
-            cutLength?: components["schemas"]["EventMeasurementStats"];
-            gaugeWheelMargin?: components["schemas"]["EventMeasurementStats"];
-            downforce?: components["schemas"]["EventMeasurementStats"];
-            groundContact?: components["schemas"]["EventMeasurementStats"];
-            rideQuality?: components["schemas"]["EventMeasurementStats"];
-            seedSpacingVariation?: components["schemas"]["EventMeasurementStats"];
-            singulation?: components["schemas"]["EventMeasurementStats"];
-            doubles?: components["schemas"]["EventMeasurementStats"];
-            skips?: components["schemas"]["EventMeasurementStats"];
-            yieldVolume?: components["schemas"]["EventMeasurementStats"];
-            quality?: components["schemas"]["EventMeasurementStats"];
-        };
-        /**
-         * @description A general representation of quantity and unit.
-         * @example {
-         *       "@type": "EventMeasurement",
-         *       "value": 17.13,
-         *       "unitId": "gal1ac-1"
-         *     }
-         */
-        EventMeasurement: {
-            /** @example EventMeasurement */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @description The quantity represented by this measurement.
-             */
-            value?: number;
-            /**
-             * @description The unit associated to the quantity measured
-             * @example gal1ac-1.
-             */
-            unitId?: string;
-            /** @example vrSolutionRateLiquid */
-            variableRepresentation?: string;
-            /**
-             * @description Indicates whether a manual data edit was directly applied to this value. If a data edit for a different layer affected this value, it *will not be set*. May not be serialized if false.
-             * @example false
-             */
-            edited?: boolean;
-        };
-        /** @description Relevant stats for a measurement recorded during the operation. */
-        EventMeasurementStats: {
-            /** @example EventMeasurementStats */
-            "@type"?: string;
-            areaRecorded?: components["schemas"]["EventMeasurement"];
-            averageValue?: components["schemas"]["EventMeasurement"];
-            totalValue?: components["schemas"]["EventMeasurement"];
-            minValue?: components["schemas"]["EventMeasurement"];
-            maxValue?: components["schemas"]["EventMeasurement"];
-            firstValue?: components["schemas"]["EventMeasurement"];
-            lastValue?: components["schemas"]["EventMeasurement"];
-        };
-        /** @description A general representation of an observed value. */
-        EventObservation: {
-            /** @example EventObservation */
-            "@type"?: string;
-            /**
-             * @description The observed value, e.g. NW wind direction.
-             * @example NW
-             */
-            value?: string;
-        };
-        /** @description Relevant stats for the values for an observation during the operation. */
-        EventObservationStats: {
-            areaRecorded?: components["schemas"]["EventMeasurement"];
-            firstObservation?: components["schemas"]["EventObservation"];
-            lastObservation?: components["schemas"]["EventObservation"];
-            predominantObservation?: components["schemas"]["EventObservation"];
-        };
-        Operator: {
-            /**
-             * @description Identifies the class Operator
-             * @example Operator
-             */
-            "@type"?: string;
-            /** @example OPERATOR_GUID */
-            guid?: string;
-            /** @example OPERATOR_NAME */
-            name?: string;
-            /** @example OPERATOR_LICENSE */
-            license?: string;
-        };
-        Point: {
-            /**
-             * @description Identifies the class Point
-             * @example Point
-             */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @description The latitude of the point
-             * @example 54.14
-             */
-            lat?: number;
-            /**
-             * Format: double
-             * @description The longitude of the point
-             * @example -88.786
-             */
-            lon?: number;
-        };
-        /** @description GeoJSon Polygon. Positions all 2D. */
-        Polygon: {
-            /**
-             * @description The type of Geometry. In this case, must be 'Polygon' per GeoJSON
-             *     spec.  Note that the "coordinates" member is validated to be be an
-             *     array of size one. This implies there are no interior rings allowed
-             *     currently.
-             * @enum {string}
-             */
-            type: "Polygon";
-            /**
-             * @description The number of polygons allowed.  Currently 1, implying no interior rings.  If this number is changes, the maxItems should be considered.
-             *     From RFC7946: o  For type "Polygon", the "coordinates" member MUST be an array of linear ring coordinate arrays.
-             *     o  For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings.  The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface.
-             *     Again, note we only allow a single set of coordinates, implying no interior rings.
-             */
-            coordinates: number[][][];
-        };
-        /** @description The ProductTotal associated with this FieldOperation. */
-        ProductTotal: {
-            /** @example ProductTotal */
-            "@type"?: string;
-            /**
-             * Format: guid
-             * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
-             */
-            productId?: string;
-            /** @example Water */
-            name?: string;
-            /** @example --- */
-            brand?: string;
-            /** @example true */
-            carrier?: boolean;
-            area?: components["schemas"]["EventMeasurement"];
-            yield?: components["schemas"]["EventMeasurement"];
-            averageYield?: components["schemas"]["EventMeasurement"];
-            averageMoisture?: components["schemas"]["EventMeasurement"];
-            wetMass?: components["schemas"]["EventMeasurement"];
-            averageWetMass?: components["schemas"]["EventMeasurement"];
-            harvestLabAccumulatedWetMass?: components["schemas"]["EventMeasurement"];
-            totalMaterial?: components["schemas"]["EventMeasurement"];
-            averageMaterial?: components["schemas"]["EventMeasurement"];
-            averageTrash?: components["schemas"]["EventMeasurement"];
-            averageAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageStarch?: components["schemas"]["EventMeasurement"];
-            averageCrudeProtein?: components["schemas"]["EventMeasurement"];
-            averageSugar?: components["schemas"]["EventMeasurement"];
-            maxAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxStarch?: components["schemas"]["EventMeasurement"];
-            maxCrudeProtein?: components["schemas"]["EventMeasurement"];
-            maxSugar?: components["schemas"]["EventMeasurement"];
-        };
-        /** @description The VarietyTotal associated with this FieldOperation. */
-        VarietyTotal: {
-            /** @example VarietyTotal */
-            "@type"?: string;
-            /**
-             * Format: guid
-             * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
-             */
-            varietyId?: string;
-            /** @example 2D351 */
-            name?: string;
-            /** @example Mycogen Corp. */
-            brand?: string;
-            area?: components["schemas"]["EventMeasurement"];
-            yield?: components["schemas"]["EventMeasurement"];
-            averageYield?: components["schemas"]["EventMeasurement"];
-            averageMoisture?: components["schemas"]["EventMeasurement"];
-            wetMass?: components["schemas"]["EventMeasurement"];
-            averageWetMass?: components["schemas"]["EventMeasurement"];
-            harvestLabAccumulatedWetMass?: components["schemas"]["EventMeasurement"];
-            totalMaterial?: components["schemas"]["EventMeasurement"];
-            averageMaterial?: components["schemas"]["EventMeasurement"];
-            averageTrash?: components["schemas"]["EventMeasurement"];
-            averageAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            averageStarch?: components["schemas"]["EventMeasurement"];
-            averageCrudeProtein?: components["schemas"]["EventMeasurement"];
-            averageSugar?: components["schemas"]["EventMeasurement"];
-            maxAcidDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxNeutralDetergentFiber?: components["schemas"]["EventMeasurement"];
-            maxStarch?: components["schemas"]["EventMeasurement"];
-            maxCrudeProtein?: components["schemas"]["EventMeasurement"];
-            maxSugar?: components["schemas"]["EventMeasurement"];
-        };
-        Errors: components["schemas"]["Error"][];
-        Error: {
-            /**
-             * Format: guid
-             * @example 11111111-2222-3333-4444-555555555555
-             */
-            guid?: string;
-            /**
-             * @description An english description of the error
-             * @example <parameter> was invalid because <reason>
-             */
-            message?: string;
-            /**
-             * @description A string constant representing the type of error
-             * @example 400
-             */
-            code?: string;
-            /**
-             * @description The name of the property or parameter deemed invalid
-             * @example example-field
-             */
-            field?: string;
-            /**
-             * @description The value that was supplied for this field in the request
-             * @example Bad value
-             */
-            invalidValue?: string;
-        };
-        /** Format: Errors/FieldOperationContextException */
-        FieldOperationSearchErrors: {
-            /**
-             * Format: guid
-             * @example 17826sd23-e5e1-4921-8841-3c5f582e3a2e
-             */
-            guid?: string;
-            /**
-             * @description The value that was supplied for this field in the request
-             * @example invalid/unsupported geojson
-             */
-            message?: string;
-            errors?: Record<string, never>[];
-        };
-        FieldOperationsSearch: {
-            fieldIds?: string[];
-            fieldOperationTypes?: components["schemas"]["FieldOperationTypesEnum"][];
-            cropTypes?: components["schemas"]["CropToken"][];
-            displayTypes?: components["schemas"]["DisplayTypeEnum"][];
-            /**
-             * Format: date-time
-             * @description The starting date of the operation in ISO-8601 format.
-             * @example 2018-08-27T08:08:08.000Z
-             */
-            startDate?: string;
-            /**
-             * Format: date-time
-             * @description The ending date of the operation in ISO-8601 format.
-             * @example 2019-08-27T08:08:08.000Z
-             */
-            endDate?: string;
-            embed?: ("client" | "farm" | "field" | "fieldOperationMachines" | "measurementTypes")[];
-        };
-        /**
-         * @description Recorded Product Erid.
-         * @example fa14f029-831c-456b-a76e-2d3c26207c19
-         */
-        ProductErid: string;
-        /** @description Describes an edit that should change the id of any object that matches the name */
-        NameToEridEdit: {
-            /**
-             * @description The name to match against
-             * @example Variety A
-             */
-            fromName?: string;
-            toGuid?: components["schemas"]["ProductErid"];
-        };
-        /** @description Describes an edit that should change the id of any object that matches the fromGuid */
-        EridToEridEdit: {
-            fromGuid?: components["schemas"]["ProductErid"];
-            toGuid?: components["schemas"]["ProductErid"];
-        };
-        /** @description Describe an reponse of operaton layers */
-        FieldOperationLayers: components["schemas"]["FieldOperationLayer"][];
-        FieldOperationLayer: {
-            /** @example FieldOperationLayer */
-            "@type"?: string;
-            id: components["schemas"]["FieldOperationLayersEnum"];
-            links?: components["schemas"]["Link"][];
-        };
+  schemas: {
+    /** @description Operators that performed work using this machine */
+    Operators: {
+      /**
+       * @description Unique identifier for this operator
+       * @example 657b4391-79b3-4012-a617-7ceba7111ad0
+       */
+      operatorId?: string;
+      /**
+       * @description Name of the operator
+       * @example John Doe
+       */
+      name?: string;
+      /**
+       * @description Operator license number
+       * @example ABC123
+       */
+      license?: string;
     };
-    responses: {
-        /** @description A collection of field with crop season and FieldOprationType */
-        CropSeasonSummaries: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["CropSeasonSummary"][];
-                };
-            };
-        };
-        /** @description A collection of field operations */
-        FieldOperations: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["LinkGETFieldOperations"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperation"][];
-                };
-            };
-        };
-        /** @description A field operation object */
-        FieldOperation: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["LinkGETFieldOperations"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperation"][];
-                };
-            };
-        };
-        /** @description A field operation object */
-        FieldOperationId: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["LinkGETFieldOperationsId"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationId"][];
-                };
-            };
-        };
-        /** @description A collection of field operation machines */
-        FieldOperationMachines: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationMachine"][];
-                };
-            };
-        };
-        /** @description A collection of field operation work notes */
-        FieldOperationWorkNotes: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 10
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationWorkNote"][];
-                };
-            };
-        };
-        /** @description A field operation work note object */
-        FieldOperationWorkNote: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationWorkNote"];
-            };
-        };
-        /** @description A collection of Field Operation Measurements */
-        FieldOperationMeasurements: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationMeasurement"][];
-                };
-            };
-        };
-        /** @description An object of Field Operation Measurements or image */
-        FieldOperationMeasurementOrImage: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationMeasurement"];
-                "application/vnd.deere.axiom.v3.image+json": components["schemas"]["FieldOperationPNGImage"];
-                "application/vnd.deere.axiom.v3.location+tif+json": components["schemas"]["FieldOperationGeoTIFFLocation"];
-            };
-        };
-        /** @description An Object of Field Operation Statistics */
-        FieldOperationLayerStatistics: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationLayerStatistics"];
-                };
-            };
-        };
-        /** @description Field Operation Statistics broken down according to the legend for another context. */
-        FieldOperationDataAnalysisStatistics: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["MapRangeWithLayerStatistics"][];
-                };
-            };
-        };
-        /** @description An Object of Field Operation Layers */
-        FieldOperationLayers: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["Link"][];
-                    /**
-                     * Format: int64
-                     * @description Number of results in the list
-                     * @example 70
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldOperationLayers"];
-                };
-            };
-        };
-        /** @description An Object of Field Operation layer legend */
-        FieldOperationLayerLegend: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    id?: components["schemas"]["FieldOperationLayersEnum"];
-                    /**
-                     * @description The unit associated to the quantity measured
-                     * @example gal1ac-1.
-                     */
-                    unitId?: string;
-                    /** @example vrSolutionRateLiquid */
-                    variableRepresentation?: string;
-                    ranges?: components["schemas"]["MapRange"][];
-                    /** @description embedable base64 encoded PNG image */
-                    image?: {
-                        /** @example data:image/png;base64,{base64EncodedContent} */
-                        data?: string;
-                        extent?: components["schemas"]["MapExtent"];
-                    };
-                };
-            };
-        };
-        /** @description An Object of Field Operation layer image */
-        FieldOperationLayerImage: {
-            headers: {
-                /**
-                 * @description The minimum longitude represented in the image
-                 * @example -96.776622
-                 */
-                "x-minimum-longitude"?: number;
-                /**
-                 * @description The minimum latitude represented in the image
-                 * @example 40.282002
-                 */
-                "x-minimum-latitude"?: number;
-                /**
-                 * @description The maximum longitude represented in the image
-                 * @example -90.047496
-                 */
-                "x-maximum-longitude"?: number;
-                /**
-                 * @description The maximum latitude represented in the image
-                 * @example 43.542938
-                 */
-                "x-maximum-latitude"?: number;
-                [name: string]: unknown;
-            };
-            content: {
-                "image/png": string;
-            };
-        };
-        /** @description Accepted */
-        RequestHasBeenAccepted: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": Record<string, never>;
-            };
-        };
-        /** @description Updated successfully */
-        UpdatedResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Not Acceptable. Expected in case of TILLAGE operation. */
-        RequestHasNotBeenAccepted: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Temporary Redirect. The location will be a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to that URL. Do not include an Authorization header in this request, as the authorization is provided via the pre-signed nature of the URL. */
-        RedirectToPreSignedURL: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to the field operations for this organization. */
-        DoesNotHaveAccessToFieldOperations: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to the field operation specified by id. */
-        DoesNotHaveAccessToFieldOperation: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to the Field Operation Measurements for this organization. */
-        DoesNotHaveAccessToFieldOperationMeasurements: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to the Field Operation Layers for this organization. */
-        DoesNotHaveAccessToFieldOperationLayers: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified organization does not exist. */
-        InputOrgValueIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified field operation does not exist. */
-        InputFieldOperationValueIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The layer you are trying to edit cannot be edited. */
-        RequestedOperationNotSupported: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["Errors"];
-            };
-        };
-        /** @description The specified organization or field operation does not exist. */
-        InputOrganizationOrFieldOperationIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified organization or measurement Type does not exist. */
-        InputOrganizationOrMeasurementTypeIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified organization, field operation, or layer does not exist. */
-        InputOrganizationOrFieldOperationOrLayerIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified organization, field operation, or measurement name does not exist. */
-        InputOrganizationOrFieldOperationOrMeasurementIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The requested resource was not found. */
-        RequestedResourceNotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Created work note */
-        CreatedWorkNote: {
-            headers: {
-                /** @description The uri of the newly created resource */
-                Location?: string;
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+    /** @description Machines utilized during this operation */
+    FieldOperationMachines: {
+      /**
+       * @description Doc File based Field Operation Machine erid.
+       * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
+       */
+      erid?: string;
+      Operators?: components['schemas']['Operators'];
+      /**
+       * Format: int64
+       * @description PrincipalId of the machine
+       * @example 637795
+       */
+      machineId?: number | null;
+      /**
+       * @description VIN of the machine
+       * @example WXYEJKB73894JE3
+       */
+      vin?: string;
     };
-    parameters: {
-        /** @description Owning Organization ID */
-        OrgId: string;
-        /** @description Field ID */
-        FieldId: string;
-        /** @description Operation ID */
-        OperationId: string;
-        /** @description The identifier for a work note. The work note id will be used to identify unique work notes. */
-        WorkNoteId: string;
-        /** @description The measurementType within field operation by machine */
-        MeasurementType: components["schemas"]["FieldOperationMeasurementTypesEnum"];
-        /** @description The operation layer name for a given field operation */
-        OperationLayerName: components["schemas"]["FieldOperationLayersEnum"];
+    LinkGETFieldOperations: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      field?: unknown;
+      /**
+       * @description Field Operation Measurements Link.
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes
+       */
+      measurementTypes?: unknown;
+      /**
+       * @description zero or more field operation measurements links. These will vary by the type of operation
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult
+       */
+      measurement?: unknown;
+      /**
+       * @description Clients Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0
+       */
+      client?: unknown;
+      /**
+       * @description Farms Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0
+       */
+      farm?: unknown;
+      /**
+       * @description Asynchronous Shapefiles Link.
+       * @example https://sandboxapi.deere.com/platform/fieldOps/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNg
+       */
+      shapeFileAsync?: unknown;
+      /**
+       * @description Link to work plan associated to the operation.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e
+       */
+      workPlans?: unknown;
+    };
+    LinkGETFieldOperationsId: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      field?: unknown;
+      /**
+       * @description Field Operation Measurements Link.
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes
+       */
+      measurementTypes?: unknown;
+      /**
+       * @description zero or more field operation measurements links. These will vary by the type of operation
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult
+       */
+      measurement?: unknown;
+      /**
+       * @description Clients Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0
+       */
+      client?: unknown;
+      /**
+       * @description Farms Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0
+       */
+      farm?: unknown;
+    };
+    Link: string;
+    /** @description A link provides a URI to access resources that are related to the response. */
+    FieldLink: {
+      /**
+       * @description The relation of the object to the linked resource.
+       * @example field
+       */
+      rel?: string;
+      /**
+       * Format: uri
+       * @description The URI to the related resource.
+       * @example https://sandboxapi.deere.com/platform/organizations/1234/fields/e48a7dd0-9af2-44e1-81b4-435d494f7cd5
+       */
+      uri?: string;
+    };
+    /**
+     * @description The type of operation
+     * @example HARVEST
+     */
+    FieldOperationTypesEnum: string;
+    /** @description The client associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    Client: {
+      /**
+       * @description Globally unique identifier for this client.
+       * @example 66dd9c64-71d7-4904-86f8-e04d40ccf59d
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+      /**
+       * @description The name of the client.
+       * @example My Custom Client Name
+       */
+      name?: string;
+      /** @example false */
+      archived?: boolean;
+    };
+    /** @description The farm associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    Farm: {
+      /**
+       * @description Globally unique identifier for this farm.
+       * @example 4b781329-2f8c-4a68-98ce-8d5213fc8588
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+      /**
+       * @description The name of the farm.
+       * @example My Custom Farm Name
+       */
+      name?: string;
+      /** @example false */
+      archived?: boolean;
+    };
+    /** @description The field associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    Field: {
+      /**
+       * @description Globally unique identifier for this field.
+       * @example 5ef3b56c-c01d-4ce5-b630-bd1850e39c29
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+      /**
+       * @description The name of the field.
+       * @example My Custom Field Name
+       */
+      name?: string;
+      /** @example false */
+      archived?: boolean;
+      /**
+       * Format: date-time
+       * @example 2020-09-21T15:41:15.205Z
+       */
+      lastModifiedTime?: string;
+    };
+    /**
+     * Format: int64
+     * @description The organization owning the fields and associated operations
+     * @example 123456
+     */
+    OrgId: number;
+    TankMixProduct: {
+      guid?: components['schemas']['ProductErid'];
+      /**
+       * @description Flag indicating whether the product is a tank mix (true) or a single component (false).
+       * @example true
+       */
+      tankMix?: boolean;
+      rate?: components['schemas']['EventMeasurement'];
+      carrier?: components['schemas']['Component'];
+      components?: components['schemas']['Component'][];
+    };
+    NonTankMixProduct: {
+      /** @example Product */
+      '@type'?: string;
+      guid?: components['schemas']['ProductErid'];
+      productType?: components['schemas']['FieldOperationProductTypesEnum'];
+      /**
+       * @description The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier,
+       *     for APPLICATION operations.
+       * @example Priaxor
+       */
+      name?: string;
+      /**
+       * @description The brand name of product.
+       * @example BrandForProducts
+       */
+      brand?: string;
+      agencyRegistrationNumber?: components['schemas']['AgencyRegistrationNumber'];
+      /**
+       * @description Flag indicating whether the product is a tank mix (true) or a single component (false).
+       * @example false
+       */
+      tankMix?: boolean;
+    };
+    /** @description An individual product combined with others in a tank mix. */
+    Component: {
+      /** @example Component */
+      '@type'?: string;
+      /**
+       * @description Display recorded Component GUID.
+       * @example fa14f029-831c-456b-a76e-2d3c26207c19
+       */
+      guid?: string;
+      /**
+       * @description The general name of the product.
+       * @example Water
+       */
+      name?: string;
+      agencyRegistrationNumber?: components['schemas']['AgencyRegistrationNumber'];
+      rate?: components['schemas']['EventMeasurement'];
+    };
+    /**
+     * @description The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency
+     * @example 0084229-00011-AA-0000000
+     */
+    AgencyRegistrationNumber: string;
+    /**
+     * @description The type of display
+     * @enum {string}
+     */
+    JohnDeereDisplayTypeEnum:
+      | 'GS4_4600'
+      | 'GS3_2630'
+      | 'GS2_2600'
+      | 'GS2_1800'
+      | 'GS2_CommandCenter';
+    /**
+     * @description The type of display
+     * @enum {string}
+     */
+    ConnectMobileEnum: 'OneAppMobile';
+    /**
+     * @description The type of display
+     * @enum {string}
+     */
+    ThirdPartyDisplayTypeEnum:
+      | 'IntegraVersa'
+      | 'ProtobufV36'
+      | 'ProtobufV41'
+      | 'TrimbleFMX'
+      | 'Unknown';
+    DisplayTypeEnum: components['schemas']['JohnDeereDisplayTypeEnum'] &
+      components['schemas']['ConnectMobileEnum'] &
+      components['schemas']['ThirdPartyDisplayTypeEnum'];
+    /**
+     * @description - A unique textual identifier for a type of Crop
+     *     - EnumList is based on ISG_Shared/blob/master/crops/crops.xml
+     *     - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids.
+     * @example ALFALFA
+     */
+    CropToken: string;
+    /**
+     * @description Filter results by crop season.
+     * @example 2016
+     */
+    CropSeason: number;
+    /**
+     * @description The crop seasons (year) of the recent operation
+     * @example [
+     *       "2016",
+     *       "2015"
+     *     ]
+     */
+    CropSeasons: components['schemas']['CropSeason'][];
+    CropSeasonSummary: {
+      links?: components['schemas']['FieldLink'][];
+      fieldOperationType?: components['schemas']['FieldOperationTypesEnum'];
+      cropSeasons?: components['schemas']['CropSeasons'];
+    };
+    /**
+     * @description FieldOperation Product Types TODO Enum
+     * @enum {string}
+     */
+    FieldOperationProductTypesEnum: 'OTHER' | 'CHEMICAL' | 'SEED' | 'FEED' | 'FERTILIZER';
+    FieldOperationMeasurementTypesEnum: string &
+      components['schemas']['FieldOperationMeasurementTypesInFullRelease'] &
+      components['schemas']['FieldOperationMeasurementTypesInAgreportsApi'];
+    /**
+     * @description FieldOperation Measurement Types supported in the HDP versions of the endpoints and therefore fully released.
+     * @enum {string}
+     */
+    FieldOperationMeasurementTypesInFullRelease:
+      | 'SeedingRateTarget'
+      | 'SeedingRateResult'
+      | 'SeedingSpeedResult'
+      | 'SeedingVarietiesTarget'
+      | 'SeedingVarietiesResult'
+      | 'ApplicationRateTarget'
+      | 'ApplicationRateResult'
+      | 'ApplicationSpeedResult'
+      | 'HarvestYieldResult'
+      | 'HarvestYieldContourResult'
+      | 'HarvestSpecialtyGrossYieldResult'
+      | 'HarvestWetMassResult'
+      | 'HarvestMoistureResult'
+      | 'HarvestTrashResult'
+      | 'HarvestSpeedResult'
+      | 'HarvestAdfResult'
+      | 'HarvestNdfResult'
+      | 'HarvestCrudeProteinResult'
+      | 'HarvestStarchResult'
+      | 'HarvestSugarResult'
+      | 'TillageDepthResult'
+      | 'TillagePressureResult'
+      | 'TillageSpeedResult'
+      | 'TillageDepthTarget'
+      | 'TillagePressureTarget';
+    /**
+     * @description FieldOperation Measurement Types supported in the Agreports/DataLake versions of the endpoints. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints.
+     * @enum {string}
+     */
+    FieldOperationMeasurementTypesInAgreportsApi:
+      | 'ElevationResult'
+      | 'ApplicationHeightTarget'
+      | 'FuelRateResult'
+      | 'WindSpeed'
+      | 'AirTemperature'
+      | 'TemperatureDifference'
+      | 'RelativeHumidity'
+      | 'SoilTemperature'
+      | 'RatePrescription'
+      | 'PressurePrescription'
+      | 'DepthPrescription'
+      | 'SeedDepthTarget'
+      | 'SprayPressure'
+      | 'InoculantDosing'
+      | 'LengthOfCut'
+      | 'GaugeWheelMargin'
+      | 'DownforceResult'
+      | 'RideQuality'
+      | 'SeedSpacingVariation'
+      | 'GroundContact'
+      | 'Singulation'
+      | 'SkyCondition'
+      | 'SoilMoisture'
+      | 'TargetQuality'
+      | 'PrescriptionQuality';
+    /**
+     * @description FieldOperation Measurement Category
+     * @enum {string}
+     */
+    FieldOperationMeasurementCategoryEnum: 'Target' | 'Result' | 'Prescription';
+    FieldOperationLayersEnum: string &
+      components['schemas']['FieldOperationMeasurementLayersEnum'] &
+      components['schemas']['FieldOperationIndexLayersEnum'] &
+      components['schemas']['FieldOperationCompositeLayersEnum'];
+    /**
+     * @description Layers based on variable rate measurements recorded during the field operation. They will use EventMeasurementStats for statistics.
+     * @enum {string}
+     */
+    FieldOperationMeasurementLayersEnum:
+      | 'AreaWorked'
+      | 'Speed'
+      | 'Elevation'
+      | 'FuelRate'
+      | 'FuelConsumption'
+      | 'DieselExhaustFluid'
+      | 'EngineHours'
+      | 'YieldByVolume'
+      | 'YieldByMass'
+      | 'WetMass'
+      | 'Moisture'
+      | 'Trash'
+      | 'AcidDetergentFiber'
+      | 'NeutralDetergentFiber'
+      | 'CrudeProtein'
+      | 'Starch'
+      | 'Sugar'
+      | 'RateResult'
+      | 'RateTarget'
+      | 'RatePrescription'
+      | 'InoculantDosing'
+      | 'LengthOfCut'
+      | 'GaugeWheelMargin'
+      | 'DownforceResult'
+      | 'GroundContact'
+      | 'RideQuality'
+      | 'SeedSpacingVariation'
+      | 'Singulation'
+      | 'ApplicationHeight'
+      | 'SprayPressure'
+      | 'PressureTarget'
+      | 'PressureResult'
+      | 'PressurePrescription'
+      | 'DepthResult'
+      | 'DepthTarget'
+      | 'DepthPrescription'
+      | 'WindSpeed'
+      | 'AirTemperature'
+      | 'TemperatureDifference'
+      | 'RelativeHumidity'
+      | 'SoilTemperature';
+    /**
+     * @description Layers based on defined types recorded or entered during the field operation. They will use EventObservationStats for statistics.
+     * @enum {string}
+     */
+    FieldOperationIndexLayersEnum:
+      | 'RateResultByProduct'
+      | 'RateTargetByProduct'
+      | 'WindDirection'
+      | 'SkyCondition'
+      | 'SoilMoisture'
+      | 'Varieties';
+    /**
+     * @description Layers based on defined comparisons of other layers
+     * @enum {string}
+     */
+    FieldOperationCompositeLayersEnum: 'QualityTarget' | 'QualityPrescription';
+    FieldOperation: {
+      /**
+       * @description Field Operation ID
+       * @example MjkyMDdfNT
+       */
+      id?: string;
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 520122365ebb4870a344784570d202c7
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description Field Operation type.
+       * @example application
+       */
+      "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
+      /**
+       * @description Crop season year.
+       * @example 2015
+       */
+      cropSeason?: string;
+      /**
+       * @description The type of machine that generated the field operation. This may be "unknown".
+       * @example unknown
+       */
+      adaptMachineType?: string;
+      /**
+       * Format: date-time
+       * @description Starting date and time of this field operation..
+       * @example 2015-05-29T22:00:19.200Z
+       */
+      startDate?: string;
+      /**
+       * Format: date-time
+       * @description Ending date and time of this field operation.
+       * @example 2015-05-29T22:23:53.746Z
+       */
+      endDate?: string;
+      /**
+       * Format: date-time
+       * @description Last time that anything was modified on this field operation.
+       * @example 2016-04-29T22:12:53.446Z
+       */
+      modifiedTime?: string;
+      /**
+       * Format: string
+       * @description Crop Name.
+       * @example CORN_WET
+       */
+      cropName?: string;
+      /**
+       * @description List of seed varieties. Only available on harvest and seeding operation types. May contain guid, productType, name, brand, agencyRegistrationNumber, and tankMix
+       * @example [ { "@type": "Product", "productType": "SEED", "name": "aa1", "tankMix": false } ]
+       */
+      varieties?: unknown[];
+      /**
+       * @description Details of the product applied during this field operation. Includes name, tankmix, rate, carrier, and components data.
+       * @example See sample response below.
+       */
+      products?: unknown;
+      /**
+       * @description Name of the tank mix
+       * @example Tank Mix Use 1
+       */
+      name?: string;
+      /**
+       * @description Boolean flag as to whether the application operation was for a tank mix or not.
+       * @example true
+       */
+      tankMix?: boolean;
+      /**
+       * @description Rate of the application. Includes value and unitId<sup><a href='#field-operation-additional'>2</a></sup> data.
+       * @example See sample response below.
+       */
+      rate?: unknown;
+      /**
+       * @description Numeric value.
+       * @example 10
+       */
+      value?: number;
+      /**
+       * @description Unit of value.
+       * @example gal1ac-1
+       */
+      "unitId<sup><a href='#field-operation-additional'>2</a></sup>"?: string;
+      /**
+       * @description Data on the product carrier. Includes name and rate.
+       * @example See sample response below.
+       */
+      carrier?: unknown;
+      /**
+       * @description Data on the product component. Includes name and rate.
+       * @example See sample response below.
+       */
+      components?: unknown;
+      fieldOperationMachines?: components['schemas']['FieldOperationMachines'];
+    };
+    FieldOperationId: {
+      /**
+       * @description The organization ID.
+       * @example 1234
+       */
+      orgId?: string;
+      /**
+       * @description The year in which the grower logically assigned this operation. Note that operational activity may occur outside this calendar year.
+       * @example 2015
+       */
+      cropSeason?: string;
+      /**
+       * @description A string indicating the type of operation (valid values include: seeding, application, harvest, or tillage).
+       * @example Harvest
+       */
+      "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
+      /**
+       * Format: string
+       * @description A string indicating the type of crop used during this operation. Can be omitted based on operation type and original data source. Only available on harvest and seeding operation types.
+       * @example CORN_WET
+       */
+      cropName?: string;
+      /**
+       * Format: date-time
+       * @description Last time that anything was modified on this field operation.
+       * @example 2018-11-17T11:53:00.000Z
+       */
+      modifiedTime?: string;
+      /**
+       * @description List of seed varieties. Only available on harvest and seeding operation types. May contain guid, productType, name, brand, agencyRegistrationNumber, and tankMix
+       * @example [ { "@type": "Product", "productType": "SEED", "name": "aa1", "tankMix": false } ]
+       */
+      varieties?: unknown[];
+      /**
+       * @description The type of machine that generated the field operation. This may be "unknown".
+       * @example unknown
+       */
+      adaptMachineType?: string;
+      fieldOperationMachines?: components['schemas']['FieldOperationMachines'];
+    };
+    UpdateFieldOperation: {
+      cropSeason?: components['schemas']['CropSeason'];
+      cropName?: components['schemas']['CropToken'];
+      varieties?: (
+        | components['schemas']['NameToEridEdit']
+        | components['schemas']['EridToEridEdit']
+      )[];
+      product?: {
+        guid?: components['schemas']['ProductErid'];
+      };
+    };
+    FieldOperationMachine: {
+      /** @example FieldOperationMachine */
+      '@type'?: string;
+      /**
+       * @description Doc File based Field Operation Machine erid.
+       * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
+       */
+      erid?: string;
+      /**
+       * Format: guid
+       * @description Doc File based Field Operation Machine GUID.  Deprecated, use erid instead.
+       * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
+       */
+      GUID?: string;
+      /** @example JOHN DEERE */
+      make?: string;
+      /**
+       * Format: int64
+       * @example 2016
+       */
+      modelYear?: number;
+      /** @example 824K */
+      model?: string;
+      /** @example Machine1 */
+      name?: string;
+      /** @example WXYEJKB73894JE3 */
+      vin?: string;
+      /** @example combine */
+      adaptMachineType?: string;
+      /**
+       * Format: int64
+       * @description The earliest engine hour measurement for a machine participating in the field operation.
+       * @example 300
+       */
+      beginEngineHours?: number;
+      /**
+       * Format: int64
+       * @description The earliest engine hour measurement for a machine participating in the field operation.
+       * @example 300
+       */
+      endEngineHours?: number;
+      /**
+       * Format: date-time
+       * @description The starting date of the field operation by machine in ISO-8601 format.
+       * @example 2016-11-17T11:53:00.000Z
+       */
+      beginTime?: string;
+      /**
+       * Format: date-time
+       * @description The ending date of the field operation by machine in ISO-8601 format.
+       * @example 2016-11-17T11:53:00.000Z
+       */
+      endTime?: string;
+      /**
+       * Format: date-time
+       * @description The most recent time the operational data was updated in ISO-8601 format.
+       * @example 2018-11-17T11:53:00.000Z
+       */
+      modifiedTime?: string;
+      cropName?: components['schemas']['CropToken'];
+      products?: components['schemas']['TankMixProduct'] &
+        components['schemas']['NonTankMixProduct'];
+      /**
+       * Format: double
+       * @description The calibration factor for this machine
+       * @example 1.25
+       */
+      calibrationFactor?: number;
+      /**
+       * @description JDLink machine that is only populated when the 'machine' embed is specified
+       * @example {
+       *       "id": "someId",
+       *       "serialNumber": "1234567890123"
+       *     }
+       */
+      machine?: Record<string, never>;
+      operators?: components['schemas']['Operator'][];
+      links?: components['schemas']['Link'][];
+    };
+    UpdateFieldOperationMachine: {
+      /**
+       * @description Doc File based Field Operation Machine erid.
+       * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
+       */
+      erid?: string;
+      /**
+       * Format: double
+       * @description The calibration factor for this machine
+       * @example 1.25
+       */
+      calibrationFactor?: number;
+    };
+    FieldOperationWorkNote: {
+      /** @example FieldOperationWorkNote */
+      '@type'?: string;
+      /**
+       * Format: guid
+       * @description eventId of the work note.
+       * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
+       */
+      id: string;
+      /** @example note1 */
+      note: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of the work note.
+       * @example 2018-08-27T08:08:08.000Z
+       */
+      timestamp?: string;
+      /** @description GPS location where the the work note was taken. */
+      gpsLocation?: components['schemas']['Point'];
+    };
+    MapRangeForIndex: {
+      /** @example MapLegendItem */
+      '@type'?: string;
+      /**
+       * @description The string label for this range. Used for images that are not based on numerical values
+       * @example Variety 1
+       */
+      label?: string;
+      /**
+       * @description The color used in the image for this rage
+       * @example #cc0000
+       */
+      hexColor?: string;
+      /**
+       * Format: double
+       * @description The proportion of the field operation matching this range (not actually a percentage).
+       * @example 0.15
+       */
+      percent?: number;
+      /**
+       * Format: int64
+       * @description This is a placeholder for various index key
+       * @example 55
+       */
+      key?: number;
+    };
+    MapRangeForMeasurement: {
+      /** @example MapLegendItem */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The inclusive minimum value included in this range
+       * @example 13.15
+       */
+      minimum?: number;
+      /**
+       * Format: double
+       * @description The exclusive maximum value included in this range
+       * @example 17.95
+       */
+      maximum?: number;
+      /**
+       * @description The color used in the image for this rage
+       * @example #cc0000
+       */
+      hexColor?: string;
+      /**
+       * Format: double
+       * @description The proportion of the field operation matching this range (not actually a percentage).
+       * @example 0.15
+       */
+      percent?: number;
+    };
+    MapRangeForGeoTiff: {
+      /** @example MapLegendItem */
+      '@type'?: string;
+      /**
+       * @description The string label for this range. Used for images that are not based on numerical values
+       * @example Variety 1
+       */
+      label?: string;
+      /**
+       * Format: int64
+       * @description This is a placeholder for GeoTiff based Index Key
+       * @example 1
+       */
+      key?: number;
+    };
+    MapRange: components['schemas']['MapRangeForGeoTiff'] &
+      components['schemas']['MapRangeForIndex'] &
+      components['schemas']['MapRangeForMeasurement'];
+    MapRangeWithLayerStatistics: Record<string, never> &
+      components['schemas']['MapRange'] & {
+        /** @example MapRangeWithLayerStatistics */
+        '@type'?: string;
+        statistics?: components['schemas']['LayerStatistics'];
+      };
+    /** @description Describes the breaks and their colors for an image */
+    MapLegend: {
+      /** @example MapLegend */
+      '@type'?: string;
+      layerName?: components['schemas']['FieldOperationLayersEnum'];
+      /**
+       * @description Units for the legend
+       * @example lb1ac-1
+       */
+      unitId?: string;
+      ranges?: components['schemas']['MapRange'][];
+    };
+    /** @description The GPS extents of a map image */
+    MapExtent: {
+      /**
+       * Format: double
+       * @example 41.66470503009207
+       */
+      minimumLatitude?: number;
+      /**
+       * Format: double
+       * @example 41.67086022030498
+       */
+      maximumLatitude?: number;
+      /**
+       * Format: double
+       * @example -93.15582275390625
+       */
+      minimumLongitude?: number;
+      /**
+       * Format: double
+       * @example -93.1475830078125
+       */
+      maximumLongitude?: number;
+    };
+    FieldOperationPNGImage: {
+      /**
+       * @description Base64 encoded PNG image
+       * @example data:image/png;base64,{base64EncodedContent}
+       */
+      image?: string;
+      mapLegend?: components['schemas']['MapLegend'];
+      extent?: components['schemas']['MapExtent'];
+    };
+    FieldOperationGeoTIFFLocation: {
+      /**
+       * Format: uri
+       * @description AWS S3 Presigned URL of Resource. Use gzip for best compression.
+       * @example https://s3.us-east-2.amazonaws.com/s3-bucket-path/49f35d8a-ff54-4b83-81c4-0f45b7b47eba
+       */
+      location?: string;
+      mapLegend?: components['schemas']['MapLegend'];
+      extent?: components['schemas']['MapExtent'];
+    };
+    /** @description Includes the summarized values for all layers on a field operation */
+    FieldOperationLayerStatistics: {
+      /** @example FieldOperationLayerStatistics */
+      '@type'?: string;
+      /** @description Links to associated data. */
+      links?: components['schemas']['Link'][];
+      layerName?: components['schemas']['FieldOperationLayersEnum'];
+      statistics?: components['schemas']['LayerStatistics'];
+    }[];
+    /** @description The statistics for a given layer context. */
+    LayerStatistics: {
+      /** @example LayerStatistics */
+      '@type'?: string;
+    } & (
+      | components['schemas']['EventMeasurementStats']
+      | components['schemas']['EventObservationStats']
+    );
+    FieldOperationLayerImageRequest: {
+      ranges?: components['schemas']['MapRange'][];
+    };
+    FieldOperationCompareStatisticsRequest: {
+      /** @description The field operation ids that we are comparing so for Yield By Variety the target is the Seeding field operation(s) */
+      compareOperationIds: string[];
+      baseLayer: components['schemas']['FieldOperationLayersEnum'];
+      compareLayer: components['schemas']['FieldOperationLayersEnum'];
+      boundary?: components['schemas']['Polygon'];
+    };
+    FieldOperationMeasurement: unknown &
+      components['schemas']['FieldOperationMeasurementInFullRelease'] &
+      components['schemas']['FieldOperationMeasurementFromAgreportsApi'];
+    /** @description The fully released portion of the FieldOperationMeasurement. */
+    FieldOperationMeasurementInFullRelease: {
+      links?: components['schemas']['Link'][];
+      /** @example FieldOperationMeasurement */
+      '@type'?: string;
+      measurementName?: components['schemas']['FieldOperationMeasurementTypesEnum'];
+      measurementCategory?: components['schemas']['FieldOperationMeasurementCategoryEnum'];
+      area?: components['schemas']['EventMeasurement'];
+      yield?: components['schemas']['EventMeasurement'];
+      averageYield?: components['schemas']['EventMeasurement'];
+      averageMoisture?: components['schemas']['EventMeasurement'];
+      wetMass?: components['schemas']['EventMeasurement'];
+      averageWetMass?: components['schemas']['EventMeasurement'];
+      harvestLabAccumulatedWetMass?: components['schemas']['EventMeasurement'];
+      averageSpeed?: components['schemas']['EventMeasurement'];
+      totalMaterial?: components['schemas']['EventMeasurement'];
+      averageMaterial?: components['schemas']['EventMeasurement'];
+      averageDepth?: components['schemas']['EventMeasurement'];
+      averagePressure?: components['schemas']['EventMeasurement'];
+      averageTrash?: components['schemas']['EventMeasurement'];
+      averageAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageStarch?: components['schemas']['EventMeasurement'];
+      averageCrudeProtein?: components['schemas']['EventMeasurement'];
+      averageSugar?: components['schemas']['EventMeasurement'];
+      maxAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxStarch?: components['schemas']['EventMeasurement'];
+      maxCrudeProtein?: components['schemas']['EventMeasurement'];
+      maxSugar?: components['schemas']['EventMeasurement'];
+      varietyTotals?: components['schemas']['VarietyTotal'][];
+      productTotals?: components['schemas']['ProductTotal'][];
+    };
+    /** @description Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints. */
+    FieldOperationMeasurementFromAgreportsApi: {
+      elevation?: components['schemas']['EventMeasurementStats'];
+      fuelRate?: components['schemas']['EventMeasurementStats'];
+      applicationHeight?: components['schemas']['EventMeasurementStats'];
+      windSpeed?: components['schemas']['EventMeasurementStats'];
+      temperature?: components['schemas']['EventMeasurementStats'];
+      temperatureDifference?: components['schemas']['EventMeasurementStats'];
+      humidity?: components['schemas']['EventMeasurementStats'];
+      windDirection?: components['schemas']['EventObservationStats'];
+      skyCondition?: components['schemas']['EventObservationStats'];
+      soilMoisture?: components['schemas']['EventObservationStats'];
+      rate?: components['schemas']['EventMeasurementStats'];
+      pressure?: components['schemas']['EventMeasurementStats'];
+      depth?: components['schemas']['EventMeasurementStats'];
+      dosing?: components['schemas']['EventMeasurementStats'];
+      cutLength?: components['schemas']['EventMeasurementStats'];
+      gaugeWheelMargin?: components['schemas']['EventMeasurementStats'];
+      downforce?: components['schemas']['EventMeasurementStats'];
+      groundContact?: components['schemas']['EventMeasurementStats'];
+      rideQuality?: components['schemas']['EventMeasurementStats'];
+      seedSpacingVariation?: components['schemas']['EventMeasurementStats'];
+      singulation?: components['schemas']['EventMeasurementStats'];
+      doubles?: components['schemas']['EventMeasurementStats'];
+      skips?: components['schemas']['EventMeasurementStats'];
+      yieldVolume?: components['schemas']['EventMeasurementStats'];
+      quality?: components['schemas']['EventMeasurementStats'];
+    };
+    /**
+     * @description A general representation of quantity and unit.
+     * @example {
+     *       "@type": "EventMeasurement",
+     *       "value": 17.13,
+     *       "unitId": "gal1ac-1"
+     *     }
+     */
+    EventMeasurement: {
+      /** @example EventMeasurement */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The quantity represented by this measurement.
+       */
+      value?: number;
+      /**
+       * @description The unit associated to the quantity measured
+       * @example gal1ac-1.
+       */
+      unitId?: string;
+      /** @example vrSolutionRateLiquid */
+      variableRepresentation?: string;
+      /**
+       * @description Indicates whether a manual data edit was directly applied to this value. If a data edit for a different layer affected this value, it *will not be set*. May not be serialized if false.
+       * @example false
+       */
+      edited?: boolean;
+    };
+    /** @description Relevant stats for a measurement recorded during the operation. */
+    EventMeasurementStats: {
+      /** @example EventMeasurementStats */
+      '@type'?: string;
+      areaRecorded?: components['schemas']['EventMeasurement'];
+      averageValue?: components['schemas']['EventMeasurement'];
+      totalValue?: components['schemas']['EventMeasurement'];
+      minValue?: components['schemas']['EventMeasurement'];
+      maxValue?: components['schemas']['EventMeasurement'];
+      firstValue?: components['schemas']['EventMeasurement'];
+      lastValue?: components['schemas']['EventMeasurement'];
+    };
+    /** @description A general representation of an observed value. */
+    EventObservation: {
+      /** @example EventObservation */
+      '@type'?: string;
+      /**
+       * @description The observed value, e.g. NW wind direction.
+       * @example NW
+       */
+      value?: string;
+    };
+    /** @description Relevant stats for the values for an observation during the operation. */
+    EventObservationStats: {
+      areaRecorded?: components['schemas']['EventMeasurement'];
+      firstObservation?: components['schemas']['EventObservation'];
+      lastObservation?: components['schemas']['EventObservation'];
+      predominantObservation?: components['schemas']['EventObservation'];
+    };
+    Operator: {
+      /**
+       * @description Identifies the class Operator
+       * @example Operator
+       */
+      '@type'?: string;
+      /** @example OPERATOR_GUID */
+      guid?: string;
+      /** @example OPERATOR_NAME */
+      name?: string;
+      /** @example OPERATOR_LICENSE */
+      license?: string;
+    };
+    Point: {
+      /**
+       * @description Identifies the class Point
+       * @example Point
+       */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 54.14
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example -88.786
+       */
+      lon?: number;
+    };
+    /** @description GeoJSon Polygon. Positions all 2D. */
+    Polygon: {
+      /**
+       * @description The type of Geometry. In this case, must be 'Polygon' per GeoJSON
+       *     spec.  Note that the "coordinates" member is validated to be be an
+       *     array of size one. This implies there are no interior rings allowed
+       *     currently.
+       * @enum {string}
+       */
+      type: 'Polygon';
+      /**
+       * @description The number of polygons allowed.  Currently 1, implying no interior rings.  If this number is changes, the maxItems should be considered.
+       *     From RFC7946: o  For type "Polygon", the "coordinates" member MUST be an array of linear ring coordinate arrays.
+       *     o  For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings.  The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface.
+       *     Again, note we only allow a single set of coordinates, implying no interior rings.
+       */
+      coordinates: number[][][];
+    };
+    /** @description The ProductTotal associated with this FieldOperation. */
+    ProductTotal: {
+      /** @example ProductTotal */
+      '@type'?: string;
+      /**
+       * Format: guid
+       * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
+       */
+      productId?: string;
+      /** @example Water */
+      name?: string;
+      /** @example --- */
+      brand?: string;
+      /** @example true */
+      carrier?: boolean;
+      area?: components['schemas']['EventMeasurement'];
+      yield?: components['schemas']['EventMeasurement'];
+      averageYield?: components['schemas']['EventMeasurement'];
+      averageMoisture?: components['schemas']['EventMeasurement'];
+      wetMass?: components['schemas']['EventMeasurement'];
+      averageWetMass?: components['schemas']['EventMeasurement'];
+      harvestLabAccumulatedWetMass?: components['schemas']['EventMeasurement'];
+      totalMaterial?: components['schemas']['EventMeasurement'];
+      averageMaterial?: components['schemas']['EventMeasurement'];
+      averageTrash?: components['schemas']['EventMeasurement'];
+      averageAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageStarch?: components['schemas']['EventMeasurement'];
+      averageCrudeProtein?: components['schemas']['EventMeasurement'];
+      averageSugar?: components['schemas']['EventMeasurement'];
+      maxAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxStarch?: components['schemas']['EventMeasurement'];
+      maxCrudeProtein?: components['schemas']['EventMeasurement'];
+      maxSugar?: components['schemas']['EventMeasurement'];
+    };
+    /** @description The VarietyTotal associated with this FieldOperation. */
+    VarietyTotal: {
+      /** @example VarietyTotal */
+      '@type'?: string;
+      /**
+       * Format: guid
+       * @example 3df13267-c5ee-4cc3-ab79-7cf013dc1e98
+       */
+      varietyId?: string;
+      /** @example 2D351 */
+      name?: string;
+      /** @example Mycogen Corp. */
+      brand?: string;
+      area?: components['schemas']['EventMeasurement'];
+      yield?: components['schemas']['EventMeasurement'];
+      averageYield?: components['schemas']['EventMeasurement'];
+      averageMoisture?: components['schemas']['EventMeasurement'];
+      wetMass?: components['schemas']['EventMeasurement'];
+      averageWetMass?: components['schemas']['EventMeasurement'];
+      harvestLabAccumulatedWetMass?: components['schemas']['EventMeasurement'];
+      totalMaterial?: components['schemas']['EventMeasurement'];
+      averageMaterial?: components['schemas']['EventMeasurement'];
+      averageTrash?: components['schemas']['EventMeasurement'];
+      averageAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      averageStarch?: components['schemas']['EventMeasurement'];
+      averageCrudeProtein?: components['schemas']['EventMeasurement'];
+      averageSugar?: components['schemas']['EventMeasurement'];
+      maxAcidDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxNeutralDetergentFiber?: components['schemas']['EventMeasurement'];
+      maxStarch?: components['schemas']['EventMeasurement'];
+      maxCrudeProtein?: components['schemas']['EventMeasurement'];
+      maxSugar?: components['schemas']['EventMeasurement'];
+    };
+    Errors: components['schemas']['Error'][];
+    Error: {
+      /**
+       * Format: guid
+       * @example 11111111-2222-3333-4444-555555555555
+       */
+      guid?: string;
+      /**
+       * @description An english description of the error
+       * @example <parameter> was invalid because <reason>
+       */
+      message?: string;
+      /**
+       * @description A string constant representing the type of error
+       * @example 400
+       */
+      code?: string;
+      /**
+       * @description The name of the property or parameter deemed invalid
+       * @example example-field
+       */
+      field?: string;
+      /**
+       * @description The value that was supplied for this field in the request
+       * @example Bad value
+       */
+      invalidValue?: string;
+    };
+    /** Format: Errors/FieldOperationContextException */
+    FieldOperationSearchErrors: {
+      /**
+       * Format: guid
+       * @example 17826sd23-e5e1-4921-8841-3c5f582e3a2e
+       */
+      guid?: string;
+      /**
+       * @description The value that was supplied for this field in the request
+       * @example invalid/unsupported geojson
+       */
+      message?: string;
+      errors?: Record<string, never>[];
+    };
+    FieldOperationsSearch: {
+      fieldIds?: string[];
+      fieldOperationTypes?: components['schemas']['FieldOperationTypesEnum'][];
+      cropTypes?: components['schemas']['CropToken'][];
+      displayTypes?: components['schemas']['DisplayTypeEnum'][];
+      /**
+       * Format: date-time
+       * @description The starting date of the operation in ISO-8601 format.
+       * @example 2018-08-27T08:08:08.000Z
+       */
+      startDate?: string;
+      /**
+       * Format: date-time
+       * @description The ending date of the operation in ISO-8601 format.
+       * @example 2019-08-27T08:08:08.000Z
+       */
+      endDate?: string;
+      embed?: ('client' | 'farm' | 'field' | 'fieldOperationMachines' | 'measurementTypes')[];
+    };
+    /**
+     * @description Recorded Product Erid.
+     * @example fa14f029-831c-456b-a76e-2d3c26207c19
+     */
+    ProductErid: string;
+    /** @description Describes an edit that should change the id of any object that matches the name */
+    NameToEridEdit: {
+      /**
+       * @description The name to match against
+       * @example Variety A
+       */
+      fromName?: string;
+      toGuid?: components['schemas']['ProductErid'];
+    };
+    /** @description Describes an edit that should change the id of any object that matches the fromGuid */
+    EridToEridEdit: {
+      fromGuid?: components['schemas']['ProductErid'];
+      toGuid?: components['schemas']['ProductErid'];
+    };
+    /** @description Describe an reponse of operaton layers */
+    FieldOperationLayers: components['schemas']['FieldOperationLayer'][];
+    FieldOperationLayer: {
+      /** @example FieldOperationLayer */
+      '@type'?: string;
+      id: components['schemas']['FieldOperationLayersEnum'];
+      links?: components['schemas']['Link'][];
+    };
+  };
+  responses: {
+    /** @description A collection of field with crop season and FieldOprationType */
+    CropSeasonSummaries: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['CropSeasonSummary'][];
+        };
+      };
+    };
+    /** @description A collection of field operations */
+    FieldOperations: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinkGETFieldOperations'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperation'][];
+        };
+      };
+    };
+    /** @description A field operation object */
+    FieldOperation: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinkGETFieldOperations'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperation'][];
+        };
+      };
+    };
+    /** @description A field operation object */
+    FieldOperationId: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinkGETFieldOperationsId'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationId'][];
+        };
+      };
+    };
+    /** @description A collection of field operation machines */
+    FieldOperationMachines: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationMachine'][];
+        };
+      };
+    };
+    /** @description A collection of field operation work notes */
+    FieldOperationWorkNotes: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 10
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationWorkNote'][];
+        };
+      };
+    };
+    /** @description A field operation work note object */
+    FieldOperationWorkNote: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationWorkNote'];
+      };
+    };
+    /** @description A collection of Field Operation Measurements */
+    FieldOperationMeasurements: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationMeasurement'][];
+        };
+      };
+    };
+    /** @description An object of Field Operation Measurements or image */
+    FieldOperationMeasurementOrImage: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationMeasurement'];
+        'application/vnd.deere.axiom.v3.image+json': components['schemas']['FieldOperationPNGImage'];
+        'application/vnd.deere.axiom.v3.location+tif+json': components['schemas']['FieldOperationGeoTIFFLocation'];
+      };
+    };
+    /** @description An Object of Field Operation Statistics */
+    FieldOperationLayerStatistics: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationLayerStatistics'];
+        };
+      };
+    };
+    /** @description Field Operation Statistics broken down according to the legend for another context. */
+    FieldOperationDataAnalysisStatistics: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['MapRangeWithLayerStatistics'][];
+        };
+      };
+    };
+    /** @description An Object of Field Operation Layers */
+    FieldOperationLayers: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['Link'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationLayers'];
+        };
+      };
+    };
+    /** @description An Object of Field Operation layer legend */
+    FieldOperationLayerLegend: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          id?: components['schemas']['FieldOperationLayersEnum'];
+          /**
+           * @description The unit associated to the quantity measured
+           * @example gal1ac-1.
+           */
+          unitId?: string;
+          /** @example vrSolutionRateLiquid */
+          variableRepresentation?: string;
+          ranges?: components['schemas']['MapRange'][];
+          /** @description embedable base64 encoded PNG image */
+          image?: {
+            /** @example data:image/png;base64,{base64EncodedContent} */
+            data?: string;
+            extent?: components['schemas']['MapExtent'];
+          };
+        };
+      };
+    };
+    /** @description An Object of Field Operation layer image */
+    FieldOperationLayerImage: {
+      headers: {
         /**
-         * @description The type of comparison to apply to the current Field Operation Layer. Rules:
-         *       * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`.
+         * @description The minimum longitude represented in the image
+         * @example -96.776622
          */
-        CompareType: "dataAnalysis";
-        /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
-        FieldOperationType: components["schemas"]["FieldOperationTypesEnum"];
-        /** @description The type of operations. If the request param is not supplied, no filtering by fieldOperationType will happen */
-        FieldOperationTypes: components["schemas"]["FieldOperationTypesEnum"][];
-        /** @description List available operation measurement types and totals. */
-        FieldEmbed: "measurementTypes";
-        /** @description Query by one or more workPlanIds(comma separated) */
-        WorkPlanIds: Record<string, never>;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature": string;
-        /** @description Set to true for standard Deere rounded measurements. Set to false for not rounded measurements. */
-        RoundMeasurements: true | false;
-        /** @description Retrieve operations for a specific crop season (year). */
-        CropSeason: components["schemas"]["CropSeason"];
-        /** @description Retrieve operations for a specific crop seasons (years). */
-        CropSeasons: components["schemas"]["CropSeasons"];
-        /** @description If true, this will download the shapefile in small 20MB pieces */
-        SplitShapeFile: boolean;
-        /** @description Choose between point-based and polygon-based shapefiles. Accepted values are "Point" and "Polygon". */
-        ShapeType: "Point" | "Polygon";
-        /** @description Choose a data resolution for the shapefile. Accepted values are "EachSection", "EachSensor", and "OneHertz". */
-        Resolution: "EachSection" | "EachSensor" | "OneHertz";
-        /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
-        "Accept-UOM-System": string;
-        /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
-        "Accept-Yield-Preference": string;
-        /** @description Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
-        StartDate: string;
-        /** @description Specify the ending date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
-        EndDate: string;
-        /** @description A percentage value representing how much smoothing/contouring will be applied to the image. Higher numbers mean more contouring. */
-        Contour: number;
-        /** @description Include additional subelements in response. */
-        FieldOperationsEmbed: ("measurementTypes" | "client" | "farm" | "field" | "fieldOperationMachines" | "workNotes" | "crops" | "refreshInProgress" | "fieldOperationWorkNotes" | "operationLayers")[];
-        /** @description Include additional subelements in response. */
-        FieldOperationMachineEmbed: "machine"[];
-        /** @description Include additional subelements in response. */
-        FieldOperationLayerLegendEmbed: "image"[];
-        /** @description The identifier(s) for Field Operation(s). Used when there is the potential for more than one Field Operation to be passed. The identifier(s) will have a different format for HDP vs. IMET Field Operations but, clients should treat this as a generic string and not parse it in any way. */
-        OperationIds: string[];
+        'x-minimum-longitude'?: number;
+        /**
+         * @description The minimum latitude represented in the image
+         * @example 40.282002
+         */
+        'x-minimum-latitude'?: number;
+        /**
+         * @description The maximum longitude represented in the image
+         * @example -90.047496
+         */
+        'x-maximum-longitude'?: number;
+        /**
+         * @description The maximum latitude represented in the image
+         * @example 43.542938
+         */
+        'x-maximum-latitude'?: number;
+        [name: string]: unknown;
+      };
+      content: {
+        'image/png': string;
+      };
     };
-    requestBodies: {
-        /** @description Request body for generating an image for a field operation layer. */
-        FieldOperationLayerImageRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationLayerImageRequest"];
-            };
-        };
-        /** @description Request to get comparison stats for field operations */
-        FieldOperationCompareStatisticsRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationCompareStatisticsRequest"];
-            };
-        };
-        /** @description See the examples for valid manual data edits. Data edits cannot be combined. Data edits may have cascading effects on layers and measurements not specified in the request. For synchronous edits, clients may fetch the Field Operation totals immediately to see the full impact. For asynchronous edits, clients may poll the Field Operation totals to wait for the specified value to be reflected. A status API may be added in the future. */
-        UpdateFieldOperationLayerStatisticsRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationLayerStatistics"];
-            };
-        };
-        /** @description Update a field operation. */
-        UpdateFieldOperationRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["UpdateFieldOperation"];
-            };
-        };
-        /** @description Update field operation machines. */
-        UpdateFieldOperationMachinesRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["UpdateFieldOperationMachine"][];
-            };
-        };
-        /** @description Payload for the FieldOperationSearch to retrive field operations for provided organization, field ids and duration. */
-        SearchFieldOperations: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldOperationsSearch"];
-            };
-        };
-        /** @description Payload for the FieldOperationWorkNote to create field operation work note. */
-        FieldOperationWorkNote: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /** @example note1 */
-                    note?: string;
-                    /**
-                     * Format: date-time
-                     * @description Timestamp of the work note.
-                     * @example 2018-08-27T08:08:08.000Z
-                     */
-                    timestamp?: string;
-                    /** @description GPS location where the the work note was taken. */
-                    gpsLocation?: components["schemas"]["Point"];
-                };
-            };
-        };
-        /** @description Payload for FieldOperationWorkNote to update field operation work note. */
-        FieldOperationWorkNoteUpdate: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /** @example note1 */
-                    note?: string;
-                };
-            };
-        };
+    /** @description Accepted */
+    RequestHasBeenAccepted: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': Record<string, never>;
+      };
     };
-    headers: never;
-    pathItems: never;
+    /** @description Updated successfully */
+    UpdatedResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Not Acceptable. Expected in case of TILLAGE operation. */
+    RequestHasNotBeenAccepted: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Temporary Redirect. The location will be a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to that URL. Do not include an Authorization header in this request, as the authorization is provided via the pre-signed nature of the URL. */
+    RedirectToPreSignedURL: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to the field operations for this organization. */
+    DoesNotHaveAccessToFieldOperations: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to the field operation specified by id. */
+    DoesNotHaveAccessToFieldOperation: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to the Field Operation Measurements for this organization. */
+    DoesNotHaveAccessToFieldOperationMeasurements: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to the Field Operation Layers for this organization. */
+    DoesNotHaveAccessToFieldOperationLayers: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified organization does not exist. */
+    InputOrgValueIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified field operation does not exist. */
+    InputFieldOperationValueIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The layer you are trying to edit cannot be edited. */
+    RequestedOperationNotSupported: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description The specified organization or field operation does not exist. */
+    InputOrganizationOrFieldOperationIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified organization or measurement Type does not exist. */
+    InputOrganizationOrMeasurementTypeIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified organization, field operation, or layer does not exist. */
+    InputOrganizationOrFieldOperationOrLayerIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified organization, field operation, or measurement name does not exist. */
+    InputOrganizationOrFieldOperationOrMeasurementIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The requested resource was not found. */
+    RequestedResourceNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Created work note */
+    CreatedWorkNote: {
+      headers: {
+        /** @description The uri of the newly created resource */
+        Location?: string;
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    /** @description Owning Organization ID */
+    OrgId: string;
+    /** @description Field ID */
+    FieldId: string;
+    /** @description Operation ID */
+    OperationId: string;
+    /** @description The identifier for a work note. The work note id will be used to identify unique work notes. */
+    WorkNoteId: string;
+    /** @description The measurementType within field operation by machine */
+    MeasurementType: components['schemas']['FieldOperationMeasurementTypesEnum'];
+    /** @description The operation layer name for a given field operation */
+    OperationLayerName: components['schemas']['FieldOperationLayersEnum'];
+    /**
+     * @description The type of comparison to apply to the current Field Operation Layer. Rules:
+     *       * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`.
+     */
+    CompareType: 'dataAnalysis';
+    /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
+    FieldOperationType: components['schemas']['FieldOperationTypesEnum'];
+    /** @description The type of operations. If the request param is not supplied, no filtering by fieldOperationType will happen */
+    FieldOperationTypes: components['schemas']['FieldOperationTypesEnum'][];
+    /** @description List available operation measurement types and totals. */
+    FieldEmbed: 'measurementTypes';
+    /** @description Query by one or more workPlanIds(comma separated) */
+    WorkPlanIds: Record<string, never>;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description Set to true for standard Deere rounded measurements. Set to false for not rounded measurements. */
+    RoundMeasurements: true | false;
+    /** @description Retrieve operations for a specific crop season (year). */
+    CropSeason: components['schemas']['CropSeason'];
+    /** @description Retrieve operations for a specific crop seasons (years). */
+    CropSeasons: components['schemas']['CropSeasons'];
+    /** @description If true, this will download the shapefile in small 20MB pieces */
+    SplitShapeFile: boolean;
+    /** @description Choose between point-based and polygon-based shapefiles. Accepted values are "Point" and "Polygon". */
+    ShapeType: 'Point' | 'Polygon';
+    /** @description Choose a data resolution for the shapefile. Accepted values are "EachSection", "EachSensor", and "OneHertz". */
+    Resolution: 'EachSection' | 'EachSensor' | 'OneHertz';
+    /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
+    'Accept-UOM-System': string;
+    /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
+    'Accept-Yield-Preference': string;
+    /** @description Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
+    StartDate: string;
+    /** @description Specify the ending date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
+    EndDate: string;
+    /** @description A percentage value representing how much smoothing/contouring will be applied to the image. Higher numbers mean more contouring. */
+    Contour: number;
+    /** @description Include additional subelements in response. */
+    FieldOperationsEmbed: (
+      | 'measurementTypes'
+      | 'client'
+      | 'farm'
+      | 'field'
+      | 'fieldOperationMachines'
+      | 'workNotes'
+      | 'crops'
+      | 'refreshInProgress'
+      | 'fieldOperationWorkNotes'
+      | 'operationLayers'
+    )[];
+    /** @description Include additional subelements in response. */
+    FieldOperationMachineEmbed: 'machine'[];
+    /** @description Include additional subelements in response. */
+    FieldOperationLayerLegendEmbed: 'image'[];
+    /** @description The identifier(s) for Field Operation(s). Used when there is the potential for more than one Field Operation to be passed. The identifier(s) will have a different format for HDP vs. IMET Field Operations but, clients should treat this as a generic string and not parse it in any way. */
+    OperationIds: string[];
+  };
+  requestBodies: {
+    /** @description Request body for generating an image for a field operation layer. */
+    FieldOperationLayerImageRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationLayerImageRequest'];
+      };
+    };
+    /** @description Request to get comparison stats for field operations */
+    FieldOperationCompareStatisticsRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationCompareStatisticsRequest'];
+      };
+    };
+    /** @description See the examples for valid manual data edits. Data edits cannot be combined. Data edits may have cascading effects on layers and measurements not specified in the request. For synchronous edits, clients may fetch the Field Operation totals immediately to see the full impact. For asynchronous edits, clients may poll the Field Operation totals to wait for the specified value to be reflected. A status API may be added in the future. */
+    UpdateFieldOperationLayerStatisticsRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationLayerStatistics'];
+      };
+    };
+    /** @description Update a field operation. */
+    UpdateFieldOperationRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['UpdateFieldOperation'];
+      };
+    };
+    /** @description Update field operation machines. */
+    UpdateFieldOperationMachinesRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['UpdateFieldOperationMachine'][];
+      };
+    };
+    /** @description Payload for the FieldOperationSearch to retrive field operations for provided organization, field ids and duration. */
+    SearchFieldOperations: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationsSearch'];
+      };
+    };
+    /** @description Payload for the FieldOperationWorkNote to create field operation work note. */
+    FieldOperationWorkNote: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /** @example note1 */
+          note?: string;
+          /**
+           * Format: date-time
+           * @description Timestamp of the work note.
+           * @example 2018-08-27T08:08:08.000Z
+           */
+          timestamp?: string;
+          /** @description GPS location where the the work note was taken. */
+          gpsLocation?: components['schemas']['Point'];
+        };
+      };
+    };
+    /** @description Payload for FieldOperationWorkNote to update field operation work note. */
+    FieldOperationWorkNoteUpdate: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /** @example note1 */
+          note?: string;
+        };
+      };
+    };
+  };
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

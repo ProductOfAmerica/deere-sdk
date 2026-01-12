@@ -29,7 +29,7 @@ export function mockJsonResponse<T>(data: T, init?: MockResponseInit): typeof fe
 export function mockErrorResponse(
   status: number,
   body?: unknown,
-  headers?: Record<string, string>,
+  headers?: Record<string, string>
 ): typeof fetch {
   return async () =>
     new Response(body ? JSON.stringify(body) : null, {
@@ -49,7 +49,7 @@ export function mockFailThenSucceed<T>(
   failures: number,
   failStatus: number,
   successData: T,
-  onAttempt?: (attempt: number) => void,
+  onAttempt?: (attempt: number) => void
 ): { fetch: typeof fetch; getAttempts: () => number } {
   let attempts = 0;
 
@@ -79,7 +79,7 @@ export function mockFailThenSucceed<T>(
  */
 export function mockWithSpy<T>(
   data: T,
-  init?: MockResponseInit,
+  init?: MockResponseInit
 ): { fetch: typeof fetch; calls: Array<{ url: string; init: RequestInit }> } {
   const calls: Array<{ url: string; init: RequestInit }> = [];
 
@@ -131,7 +131,7 @@ export function mockTimeout(): typeof fetch {
  */
 export function mockPaginatedResponse<T>(
   pages: T[][],
-  baseUrl = 'https://api.example.com',
+  baseUrl = 'https://api.example.com'
 ): typeof fetch {
   let pageIndex = 0;
 
@@ -142,9 +142,7 @@ export function mockPaginatedResponse<T>(
 
     const response = {
       values: currentPage,
-      links: hasNextPage
-        ? [{ rel: 'nextPage', uri: `${baseUrl}/page/${pageIndex + 2}` }]
-        : [],
+      links: hasNextPage ? [{ rel: 'nextPage', uri: `${baseUrl}/page/${pageIndex + 2}` }] : [],
     };
 
     pageIndex++;

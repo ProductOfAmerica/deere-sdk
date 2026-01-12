@@ -10,8 +10,8 @@
  * Usage: pnpm generate-sdk
  */
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from 'fs';
-import { join, basename } from 'path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 
 // ============================================================================
@@ -151,12 +151,12 @@ function toCamelCase(str: string): string {
 }
 
 function toClassName(specName: string): string {
-  let name = specName.replace(/-api$/, '');
-  return toPascalCase(name) + 'Api';
+  const name = specName.replace(/-api$/, '');
+  return `${toPascalCase(name)}Api`;
 }
 
 function toResourceName(specName: string): string {
-  let name = specName.replace(/-api$/, '');
+  const name = specName.replace(/-api$/, '');
   return toCamelCase(name);
 }
 
@@ -453,7 +453,7 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
     if (op.requestBodySchemaRef) {
       params.push(`data: components['schemas']['${op.requestBodySchemaRef}']`);
     } else {
-      params.push(`data: Record<string, unknown>`);
+      params.push('data: Record<string, unknown>');
     }
   }
 
@@ -474,7 +474,12 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
   params.push('options?: RequestOptions');
 
   let returnType = 'unknown';
-  if (op.method === 'delete' || op.method === 'put' || op.method === 'patch' || op.method === 'post') {
+  if (
+    op.method === 'delete' ||
+    op.method === 'put' ||
+    op.method === 'patch' ||
+    op.method === 'post'
+  ) {
     returnType = 'void';
   } else if (op.responseSchemaRef && op.method === 'get') {
     if (op.isCollection) {
@@ -499,7 +504,7 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
         `    if (params?.${qp.safeName} !== undefined) query.set('${cleanName}', String(params.${qp.safeName}));`
       );
     }
-    lines.push("    const queryString = query.toString();");
+    lines.push('    const queryString = query.toString();');
     lines.push(`    const path = \`${pathTemplate}\${queryString ? \`?\${queryString}\` : ''}\`;`);
   } else {
     lines.push(`    const path = \`${pathTemplate}\`;`);
@@ -577,7 +582,9 @@ export type { components as ${toPascalCase(api.specName)}Types } from '../types/
 }
 
 function generateApiIndex(apis: GeneratedApi[]): string {
-  const imports = apis.map((api) => `export { ${api.className} } from './${api.specName}.js';`).join('\n');
+  const imports = apis
+    .map((api) => `export { ${api.className} } from './${api.specName}.js';`)
+    .join('\n');
 
   const typeExports = apis
     .map((api) => `export type { ${toPascalCase(api.specName)}Types } from './${api.specName}.js';`)
@@ -597,7 +604,9 @@ ${typeExports}
 }
 
 function generateMainClass(apis: GeneratedApi[]): string {
-  const imports = apis.map((api) => `import { ${api.className} } from './api/${api.specName}.js';`).join('\n');
+  const imports = apis
+    .map((api) => `import { ${api.className} } from './api/${api.specName}.js';`)
+    .join('\n');
 
   const properties = apis
     .map(
@@ -663,7 +672,10 @@ export function createDeere(config: DeereClientConfig): Deere {
 
 function generateTypesIndex(apis: GeneratedApi[]): string {
   const exports = apis
-    .map((api) => `export * as ${toPascalCase(api.specName)} from './generated/${api.typesImportPath}.js';`)
+    .map(
+      (api) =>
+        `export * as ${toPascalCase(api.specName)} from './generated/${api.typesImportPath}.js';`
+    )
     .join('\n');
 
   return `/**
@@ -717,7 +729,9 @@ async function main() {
     }
   }
 
-  console.log(`\nParsed ${apis.length} APIs with ${apis.reduce((sum, a) => sum + a.operations.length, 0)} operations\n`);
+  console.log(
+    `\nParsed ${apis.length} APIs with ${apis.reduce((sum, a) => sum + a.operations.length, 0)} operations\n`
+  );
 
   console.log('Generating API wrapper classes...');
   for (const api of apis) {
@@ -743,7 +757,9 @@ async function main() {
   console.log('\nSDK generation complete!');
   console.log(`\nGenerated ${apis.length} API wrappers:`);
   for (const api of apis) {
-    console.log(`  - ${api.className} (${api.operations.length} methods) -> deere.${api.resourceName}`);
+    console.log(
+      `  - ${api.className} (${api.operations.length} methods) -> deere.${api.resourceName}`
+    );
   }
 
   console.log('\nNext: Run `pnpm build` to compile TypeScript');

@@ -59,7 +59,7 @@ export class DeereError extends Error {
     message: string,
     public readonly status: number,
     public readonly statusText: string,
-    public readonly body?: unknown,
+    public readonly body?: unknown
   ) {
     super(message);
     this.name = 'DeereError';
@@ -72,7 +72,7 @@ export class RateLimitError extends DeereError {
     status: number,
     statusText: string,
     public readonly retryAfter?: number,
-    body?: unknown,
+    body?: unknown
   ) {
     super(message, status, statusText, body);
     this.name = 'RateLimitError';
@@ -154,22 +154,14 @@ export class DeereClient {
   /**
    * Make a POST request to the John Deere API
    */
-  async post<T = unknown>(
-    path: string,
-    body?: unknown,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async post<T = unknown>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>('POST', path, body, options);
   }
 
   /**
    * Make a PUT request to the John Deere API
    */
-  async put<T = unknown>(
-    path: string,
-    body?: unknown,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async put<T = unknown>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>('PUT', path, body, options);
   }
 
@@ -183,11 +175,7 @@ export class DeereClient {
   /**
    * Make a PATCH request to the John Deere API
    */
-  async patch<T = unknown>(
-    path: string,
-    body?: unknown,
-    options?: RequestOptions,
-  ): Promise<T> {
+  async patch<T = unknown>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>('PATCH', path, body, options);
   }
 
@@ -204,21 +192,25 @@ export class DeereClient {
   /**
    * Paginate through all results following nextPage links
    */
-  async *paginate<T>(
-    path: string,
-    options?: RequestOptions,
-  ): AsyncGenerator<T[], void, unknown> {
+  async *paginate<T>(path: string, options?: RequestOptions): AsyncGenerator<T[], void, unknown> {
     let url: string | undefined = `${this.baseUrl}${path}`;
 
     while (url) {
-      const response: PaginatedResponse<T> = await this.requestUrl<PaginatedResponse<T>>('GET', url, undefined, options);
+      const response: PaginatedResponse<T> = await this.requestUrl<PaginatedResponse<T>>(
+        'GET',
+        url,
+        undefined,
+        options
+      );
 
       if (response.values && response.values.length > 0) {
         yield response.values;
       }
 
       // Find nextPage link
-      const nextPageLink: Link | undefined = response.links?.find((l: Link) => l.rel === 'nextPage');
+      const nextPageLink: Link | undefined = response.links?.find(
+        (l: Link) => l.rel === 'nextPage'
+      );
       url = nextPageLink?.uri;
     }
   }
@@ -238,7 +230,7 @@ export class DeereClient {
     method: string,
     path: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     const url = path.startsWith('http') ? path : `${this.baseUrl}${path}`;
     return this.requestUrl<T>(method, url, body, options);
@@ -248,7 +240,7 @@ export class DeereClient {
     method: string,
     url: string,
     body?: unknown,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<T> {
     const maxAttempts = this.retryConfig.maxRetries + 1; // +1 for initial attempt
     let lastError: Error | undefined;
@@ -278,12 +270,12 @@ export class DeereClient {
             // Extract retry-after for rate limits
             const retryAfter =
               response.status === 429
-                ? parseInt(response.headers.get('retry-after') ?? '', 10)
+                ? Number.parseInt(response.headers.get('retry-after') ?? '', 10)
                 : undefined;
 
             const delay = this.calculateRetryDelay(
               attempt,
-              isNaN(retryAfter as number) ? undefined : retryAfter,
+              Number.isNaN(retryAfter as number) ? undefined : retryAfter
             );
             await this.sleep(delay);
             continue;
@@ -300,7 +292,10 @@ export class DeereClient {
         }
 
         const contentType = response.headers.get('content-type');
-        if (contentType?.includes('application/json') || contentType?.includes('application/vnd.deere')) {
+        if (
+          contentType?.includes('application/json') ||
+          contentType?.includes('application/vnd.deere')
+        ) {
           return (await response.json()) as T;
         }
 
@@ -363,8 +358,7 @@ export class DeereClient {
    */
   private isNetworkError(error: unknown): boolean {
     return (
-      error instanceof TypeError ||
-      (error instanceof Error && error.message.includes('fetch'))
+      error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))
     );
   }
 
@@ -378,7 +372,7 @@ export class DeereClient {
     }
 
     // Exponential backoff: baseDelay * 2^attempt
-    const exponentialDelay = this.retryConfig.baseDelay * Math.pow(2, attempt);
+    const exponentialDelay = this.retryConfig.baseDelay * 2 ** attempt;
     const cappedDelay = Math.min(exponentialDelay, this.retryConfig.maxDelay);
 
     // Full jitter: random value between 0 and calculated delay
@@ -404,13 +398,13 @@ export class DeereClient {
     const message = this.extractErrorMessage(body) ?? response.statusText;
 
     if (response.status === 429) {
-      const retryAfter = parseInt(response.headers.get('retry-after') ?? '', 10);
+      const retryAfter = Number.parseInt(response.headers.get('retry-after') ?? '', 10);
       throw new RateLimitError(
         message,
         response.status,
         response.statusText,
-        isNaN(retryAfter) ? undefined : retryAfter,
-        body,
+        Number.isNaN(retryAfter) ? undefined : retryAfter,
+        body
       );
     }
 

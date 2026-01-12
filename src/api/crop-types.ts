@@ -5,7 +5,7 @@
  * @generated from crop-types.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/crop-types.js';
 
 export class CropTypesApi {
@@ -16,7 +16,10 @@ export class CropTypesApi {
    * @description This endpoint will return list of available crop types in the system.
    * @generated from GET /cropTypes
    */
-  async list(params?: { recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['CropType']>> {
+  async list(
+    params?: { recordFilter?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['CropType']>> {
     const query = new URLSearchParams();
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
@@ -27,7 +30,10 @@ export class CropTypesApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /cropTypes
    */
-  async listAll(params?: { recordFilter?: string }, options?: RequestOptions): Promise<components['schemas']['CropType'][]> {
+  async listAll(
+    params?: { recordFilter?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['CropType'][]> {
     const query = new URLSearchParams();
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
@@ -50,7 +56,10 @@ export class CropTypesApi {
    * @description This endpoint will return details of specific cropType.
    * @generated from GET /cropTypes/{id}
    */
-  async getCroptypes(id: string, options?: RequestOptions): Promise<components['schemas']['CropType3']> {
+  async getCroptypes(
+    id: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['CropType3']> {
     const path = `/cropTypes/${id}`;
     return this.client.get<components['schemas']['CropType3']>(path, options);
   }
@@ -60,7 +69,11 @@ export class CropTypesApi {
    * @description This endpoint will return a list of all crop types for a specific organization.
    * @generated from GET /organizations/{organizationId}/cropTypes
    */
-  async listCroptypes(organizationId: string, params?: { recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['CropType4']>> {
+  async listCroptypes(
+    organizationId: string,
+    params?: { recordFilter?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['CropType4']>> {
     const query = new URLSearchParams();
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();

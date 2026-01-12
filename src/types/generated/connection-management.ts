@@ -4,207 +4,207 @@
  */
 
 export interface paths {
-    "/connections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get list of connections
-         * @description Retrieve all of the connections for a CSC based on the client in the token
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description ISO 8601 DateTime to filter the responses to only those created after the supplied date */
-                    createdAfter?: components["parameters"]["CreatedAfter"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of Connections that can be removed */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ConnectionsResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/connections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/connections/{connectionId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The identifier of the connection */
-                connectionId: components["parameters"]["ConnectionId"];
-            };
-            cookie?: never;
+    /**
+     * Get list of connections
+     * @description Retrieve all of the connections for a CSC based on the client in the token
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description ISO 8601 DateTime to filter the responses to only those created after the supplied date */
+          createdAfter?: components['parameters']['CreatedAfter'];
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete connection by connection ID
-         * @description Remove specific connection by ID
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The identifier of the connection */
-                    connectionId: components["parameters"]["ConnectionId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                204: components["responses"]["Deleted"];
-                403: components["responses"]["Forbidden"];
-            };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of Connections that can be removed */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': components['schemas']['ConnectionsResponse'];
+          };
         };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
-    "/organizations/{orgId}/connections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization Id */
-                orgId: components["parameters"]["OrgId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete all partner connections by Org Id
-         * @description Remove all connections between the calling application and the org. This includes all partner connections.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Organization Id */
-                    orgId: components["parameters"]["OrgId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                204: components["responses"]["Deleted"];
-                403: components["responses"]["Forbidden"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/connections/{connectionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The identifier of the connection */
+        connectionId: components['parameters']['ConnectionId'];
+      };
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete connection by connection ID
+     * @description Remove specific connection by ID
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the connection */
+          connectionId: components['parameters']['ConnectionId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        204: components['responses']['Deleted'];
+        403: components['responses']['Forbidden'];
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/connections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization Id */
+        orgId: components['parameters']['OrgId'];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete all partner connections by Org Id
+     * @description Remove all connections between the calling application and the org. This includes all partner connections.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Organization Id */
+          orgId: components['parameters']['OrgId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        204: components['responses']['Deleted'];
+        403: components['responses']['Forbidden'];
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description Link to the delete action */
-        Link: {
-            /**
-             * @default Link
-             * @example Link
-             */
-            "@type": string;
-            /** @example self */
-            rel: string;
-            /** @example https://api.deere.com/platform/connections/abc123 */
-            uri: string;
-        };
-        Connection: {
-            /** @example abc123 */
-            id: string;
-            /**
-             * Format: int32
-             * @example 2551
-             */
-            orgId: number;
-            /**
-             * Format: int32
-             * @example 2101
-             */
-            partnerOrgId?: number;
-            /** @example Spahn Ranch */
-            orgName?: string;
-            /**
-             * @description ISO date the connection was created.
-             * @example 2020-01-01T00:00:00Z
-             */
-            created?: string;
-            /**
-             * @description An array of permission IDs for the connection
-             * @example [1001, 1002]
-             */
-            permissions?: unknown[];
-            /** @description Link to the delete action */
-            links?: components["schemas"]["Link"][];
-        };
-        ConnectionsResponse: {
-            links: components["schemas"]["Link"];
-            /**
-             * Format: int32
-             * @example 1
-             */
-            total: number;
-            values: components["schemas"]["Connection"][];
-        };
+  schemas: {
+    /** @description Link to the delete action */
+    Link: {
+      /**
+       * @default Link
+       * @example Link
+       */
+      '@type': string;
+      /** @example self */
+      rel: string;
+      /** @example https://api.deere.com/platform/connections/abc123 */
+      uri: string;
     };
-    responses: {
-        /** @description Requester not authorized to delete the requested connection */
-        Forbidden: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Deleted */
-        Deleted: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
+    Connection: {
+      /** @example abc123 */
+      id: string;
+      /**
+       * Format: int32
+       * @example 2551
+       */
+      orgId: number;
+      /**
+       * Format: int32
+       * @example 2101
+       */
+      partnerOrgId?: number;
+      /** @example Spahn Ranch */
+      orgName?: string;
+      /**
+       * @description ISO date the connection was created.
+       * @example 2020-01-01T00:00:00Z
+       */
+      created?: string;
+      /**
+       * @description An array of permission IDs for the connection
+       * @example [1001, 1002]
+       */
+      permissions?: unknown[];
+      /** @description Link to the delete action */
+      links?: components['schemas']['Link'][];
     };
-    parameters: {
-        /** @description The identifier of the connection */
-        ConnectionId: string;
-        /** @description Organization Id */
-        OrgId: number;
-        /** @description ISO 8601 DateTime to filter the responses to only those created after the supplied date */
-        CreatedAfter: string;
+    ConnectionsResponse: {
+      links: components['schemas']['Link'];
+      /**
+       * Format: int32
+       * @example 1
+       */
+      total: number;
+      values: components['schemas']['Connection'][];
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  };
+  responses: {
+    /** @description Requester not authorized to delete the requested connection */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Deleted */
+    Deleted: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+  };
+  parameters: {
+    /** @description The identifier of the connection */
+    ConnectionId: string;
+    /** @description Organization Id */
+    OrgId: number;
+    /** @description ISO 8601 DateTime to filter the responses to only those created after the supplied date */
+    CreatedAfter: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

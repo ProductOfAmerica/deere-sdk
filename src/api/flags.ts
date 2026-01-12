@@ -5,7 +5,7 @@
  * @generated from flags.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/flags.js';
 
 export class FlagsApi {
@@ -16,13 +16,30 @@ export class FlagsApi {
    * @description This endpoint will return a flag for a given org and Flag id.
    * @generated from GET /organizations/{orgId}/flags/{flagId}
    */
-  async get(orgId: string, flagId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<components['schemas']['ValuesFlagId']> {
+  async get(
+    orgId: string,
+    flagId: string,
+    params?: {
+      embed?: string;
+      startTime?: string;
+      endTime?: string;
+      categoryIDs?: string;
+      categoryNames?: string;
+      recordFilter?: string;
+      flagScopes?: string;
+      shapeTypes?: string;
+      simple?: boolean;
+      metadataOnly?: boolean;
+    },
+    options?: RequestOptions
+  ): Promise<components['schemas']['ValuesFlagId']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
     if (params?.endTime !== undefined) query.set('endTime', String(params.endTime));
     if (params?.categoryIDs !== undefined) query.set('categoryIDs', String(params.categoryIDs));
-    if (params?.categoryNames !== undefined) query.set('categoryNames', String(params.categoryNames));
+    if (params?.categoryNames !== undefined)
+      query.set('categoryNames', String(params.categoryNames));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.flagScopes !== undefined) query.set('flagScopes', String(params.flagScopes));
     if (params?.shapeTypes !== undefined) query.set('shapeTypes', String(params.shapeTypes));
@@ -38,7 +55,12 @@ export class FlagsApi {
    * @description This resource will update flag by Organization and Flag Id.
    * @generated from PUT /organizations/{orgId}/flags/{flagId}
    */
-  async update(orgId: string, flagId: string, data: components['schemas']['ValuesFlagIdPut'], options?: RequestOptions): Promise<void> {
+  async update(
+    orgId: string,
+    flagId: string,
+    data: components['schemas']['ValuesFlagIdPut'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/flags/${flagId}`;
     await this.client.put(path, data, options);
   }
@@ -58,13 +80,29 @@ export class FlagsApi {
    * @description This resource will return a Flags list for Organization.
    * @generated from GET /organizations/{orgId}/flags
    */
-  async getFlags(orgId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; flagScopes?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
+  async getFlags(
+    orgId: string,
+    params?: {
+      embed?: string;
+      startTime?: string;
+      endTime?: string;
+      categoryIDs?: string;
+      categoryNames?: string;
+      recordFilter?: string;
+      flagScopes?: string;
+      shapeTypes?: string;
+      simple?: boolean;
+      metadataOnly?: boolean;
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
     if (params?.endTime !== undefined) query.set('endTime', String(params.endTime));
     if (params?.categoryIDs !== undefined) query.set('categoryIDs', String(params.categoryIDs));
-    if (params?.categoryNames !== undefined) query.set('categoryNames', String(params.categoryNames));
+    if (params?.categoryNames !== undefined)
+      query.set('categoryNames', String(params.categoryNames));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.flagScopes !== undefined) query.set('flagScopes', String(params.flagScopes));
     if (params?.shapeTypes !== undefined) query.set('shapeTypes', String(params.shapeTypes));
@@ -80,7 +118,11 @@ export class FlagsApi {
    * @description This resource will create a flag in the given organization.
    * @generated from POST /organizations/{orgId}/flags
    */
-  async create(orgId: string, data: components['schemas']['ValuesFlagIdPut'], options?: RequestOptions): Promise<void> {
+  async create(
+    orgId: string,
+    data: components['schemas']['ValuesFlagIdPut'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/flags`;
     await this.client.post(path, data, options);
   }
@@ -90,13 +132,29 @@ export class FlagsApi {
    * @description This resource will return a list of flag objects associated with the field.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/flags
    */
-  async list(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
+  async list(
+    orgId: string,
+    fieldId: string,
+    params?: {
+      embed?: string;
+      startTime?: string;
+      endTime?: string;
+      categoryIDs?: string;
+      categoryNames?: string;
+      recordFilter?: string;
+      shapeTypes?: string;
+      simple?: boolean;
+      metadataOnly?: boolean;
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['ValuesFlagId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
     if (params?.endTime !== undefined) query.set('endTime', String(params.endTime));
     if (params?.categoryIDs !== undefined) query.set('categoryIDs', String(params.categoryIDs));
-    if (params?.categoryNames !== undefined) query.set('categoryNames', String(params.categoryNames));
+    if (params?.categoryNames !== undefined)
+      query.set('categoryNames', String(params.categoryNames));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.shapeTypes !== undefined) query.set('shapeTypes', String(params.shapeTypes));
     if (params?.simple !== undefined) query.set('simple', String(params.simple));
@@ -109,13 +167,29 @@ export class FlagsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/flags
    */
-  async listAll(orgId: string, fieldId: string, params?: { embed?: string; startTime?: string; endTime?: string; categoryIDs?: string; categoryNames?: string; recordFilter?: string; shapeTypes?: string; simple?: boolean; metadataOnly?: boolean }, options?: RequestOptions): Promise<components['schemas']['ValuesFlagId'][]> {
+  async listAll(
+    orgId: string,
+    fieldId: string,
+    params?: {
+      embed?: string;
+      startTime?: string;
+      endTime?: string;
+      categoryIDs?: string;
+      categoryNames?: string;
+      recordFilter?: string;
+      shapeTypes?: string;
+      simple?: boolean;
+      metadataOnly?: boolean;
+    },
+    options?: RequestOptions
+  ): Promise<components['schemas']['ValuesFlagId'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startTime !== undefined) query.set('startTime', String(params.startTime));
     if (params?.endTime !== undefined) query.set('endTime', String(params.endTime));
     if (params?.categoryIDs !== undefined) query.set('categoryIDs', String(params.categoryIDs));
-    if (params?.categoryNames !== undefined) query.set('categoryNames', String(params.categoryNames));
+    if (params?.categoryNames !== undefined)
+      query.set('categoryNames', String(params.categoryNames));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.shapeTypes !== undefined) query.set('shapeTypes', String(params.shapeTypes));
     if (params?.simple !== undefined) query.set('simple', String(params.simple));

@@ -4,402 +4,402 @@
  */
 
 export interface paths {
-    "/organizations/{orgId}/fields/{fieldId}/guidanceLines": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * View guidance lines for a field
-         * @description This endpoint will retrieve a list of guidance lines for a field. By default, the call will return only active guidance lines.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
-                    status?: components["parameters"]["Status"];
-                    /** @description Filter results based on status; Will default to active */
-                    recordFilter?: components["parameters"]["RecordFilter"];
-                    /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
-                    embed?: components["parameters"]["Embed"];
-                };
-                header?: never;
-                path: {
-                    /** @description The organization owning the guidance lines. */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description The field that the guidance lines are associated with. */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["GuidanceLinesResponse"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-            };
-        };
-        put?: never;
-        /**
-         * Create a guidance line
-         * @description This endpoint will create a guidance line and associate it to a given field. This operation currently only supports the creation of AB Lines.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The organization owning the guidance lines. */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description The field that the guidance lines are associated with. */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: components["requestBodies"]["PostRequest"];
-            responses: {
-                200: components["responses"]["Created"];
-                400: components["responses"]["BadRequest"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{orgId}/fields/{fieldId}/guidanceLines': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/fields/{fieldId}/guidanceLines/{guidanceLineId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * View guidance lines for a field
+     * @description This endpoint will retrieve a list of guidance lines for a field. By default, the call will return only active guidance lines.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
+          status?: components['parameters']['Status'];
+          /** @description Filter results based on status; Will default to active */
+          recordFilter?: components['parameters']['RecordFilter'];
+          /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+          embed?: components['parameters']['Embed'];
         };
-        /**
-         * Retrieve a specific guidance line
-         * @description This endpoint will return the subclass of guidance line represented by the specified ID.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
-                    embed?: components["parameters"]["Embed"];
-                };
-                header?: never;
-                path: {
-                    /** @description The organization owning the guidance lines. */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description The field that the guidance lines are associated with. */
-                    fieldId: components["parameters"]["FieldId"];
-                    /** @description The identifier of this guidance line. */
-                    guidanceLineId: components["parameters"]["GuidanceLineId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["GuidanceLinesRetrieve"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-            };
+        header?: never;
+        path: {
+          /** @description The organization owning the guidance lines. */
+          orgId: components['parameters']['OrgId'];
+          /** @description The field that the guidance lines are associated with. */
+          fieldId: components['parameters']['FieldId'];
         };
-        /**
-         * Update a GuidanceLine
-         * @description This endpoint will update the GuidanceLines name.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The organization owning the guidance lines. */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description The field that the guidance lines are associated with. */
-                    fieldId: components["parameters"]["FieldId"];
-                    /** @description The identifier of this guidance line. */
-                    guidanceLineId: components["parameters"]["GuidanceLineId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: components["requestBodies"]["PutRequest"];
-            responses: {
-                200: components["responses"]["NoContent"];
-                400: components["responses"]["BadRequest"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['GuidanceLinesResponse'];
+        403: components['responses']['Forbidden'];
+        404: components['responses']['NotFound'];
+      };
     };
+    put?: never;
+    /**
+     * Create a guidance line
+     * @description This endpoint will create a guidance line and associate it to a given field. This operation currently only supports the creation of AB Lines.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The organization owning the guidance lines. */
+          orgId: components['parameters']['OrgId'];
+          /** @description The field that the guidance lines are associated with. */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: components['requestBodies']['PostRequest'];
+      responses: {
+        200: components['responses']['Created'];
+        400: components['responses']['BadRequest'];
+        403: components['responses']['Forbidden'];
+        404: components['responses']['NotFound'];
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/fields/{fieldId}/guidanceLines/{guidanceLineId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a specific guidance line
+     * @description This endpoint will return the subclass of guidance line represented by the specified ID.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+          embed?: components['parameters']['Embed'];
+        };
+        header?: never;
+        path: {
+          /** @description The organization owning the guidance lines. */
+          orgId: components['parameters']['OrgId'];
+          /** @description The field that the guidance lines are associated with. */
+          fieldId: components['parameters']['FieldId'];
+          /** @description The identifier of this guidance line. */
+          guidanceLineId: components['parameters']['GuidanceLineId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['GuidanceLinesRetrieve'];
+        403: components['responses']['Forbidden'];
+        404: components['responses']['NotFound'];
+      };
+    };
+    /**
+     * Update a GuidanceLine
+     * @description This endpoint will update the GuidanceLines name.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The organization owning the guidance lines. */
+          orgId: components['parameters']['OrgId'];
+          /** @description The field that the guidance lines are associated with. */
+          fieldId: components['parameters']['FieldId'];
+          /** @description The identifier of this guidance line. */
+          guidanceLineId: components['parameters']['GuidanceLineId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: components['requestBodies']['PutRequest'];
+      responses: {
+        200: components['responses']['NoContent'];
+        400: components['responses']['BadRequest'];
+        403: components['responses']['Forbidden'];
+        404: components['responses']['NotFound'];
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        LinksArrayGet: {
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c
-             */
-            field?: unknown;
-        };
-        LinkArrayPost: {
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId
-             */
-            field?: unknown;
-        };
-        GuidanceLine: {
-            /**
-             * @description Identifies the subclass of guidance line.
-             * @example ABLine
-             */
-            "@type"?: string;
-            /**
-             * @description The common name used by an end user to identify this guidance line.
-             * @example North West
-             */
-            name?: string;
-            /**
-             * @description Archived guidance lines will not be available for use in Setup Builder.
-             * @example false
-             */
-            archived?: boolean;
-            /**
-             * @description Defines the number of tram lines in relation to the main track. Valid values are 0 - 20
-             * @example 0
-             */
-            tramOffset?: number;
-            /**
-             * @description The spacing between tram lines.
-             * @example 0
-             */
-            tramSpacing?: number;
-            /**
-             * @description The coordinate representing the A point of an AB Line.
-             * @example { "@type": "Point", "lat": 41.74557323445754, "lon": -92.41092564370683 }
-             */
-            aPoint?: Record<string, never>;
-            /**
-             * @description The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API.
-             * @example { "@type": "Point", "lat": 41.745060835194764, "lon": -92.40789413452148 }
-             */
-            bPoint?: Record<string, never>;
-            /**
-             * @description The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated.
-             * @example 122.2365
-             */
-            heading?: number;
-            /**
-             * @description The shift in the east direction.
-             * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrEastShiftComponent", "unit": "cm" }
-             */
-            eastShift?: Record<string, never>;
-            /**
-             * @description The shift in the north direction.
-             * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrNorthShiftComponent", "unit": "cm" }
-             */
-            northShift?: Record<string, never>;
-            /**
-             * @description Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values.
-             * @example { "@type": "SpatialProjection", "projectionType": "dtiProjectionDeere", "elevation": { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrElevation", "unit": "m" } }
-             */
-            spatialProjection?: Record<string, never>;
-            /**
-             * @description Client associated with farm.
-             * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d
-             */
-            fieldUri?: string;
-        };
-        GuidanceLinePut: {
-            /**
-             * @description Identifies the subclass of guidance line.
-             * @example ABLine
-             */
-            "@type"?: string;
-            /**
-             * @description The common name used by an end user to identify this guidance line.
-             * @example North West
-             */
-            name?: string;
-            /**
-             * @description Archived guidance lines will not be available for use in Setup Builder.
-             * @example false
-             */
-            archived?: boolean;
-            /**
-             * @description Defines the number of tram lines in relation to the main track. Valid values are 0 - 20
-             * @example 0
-             */
-            tramOffset?: number;
-            /**
-             * @description The spacing between tram lines.
-             * @example 0
-             */
-            tramSpacing?: number;
-            /**
-             * @description The coordinate representing the A point of an AB Line.
-             * @example { "@type": "Point", "lat": 41.74557323445754, "lon": -92.41092564370683 }
-             */
-            aPoint?: Record<string, never>;
-            /**
-             * @description The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API.
-             * @example { "@type": "Point", "lat": 41.745060835194764, "lon": -92.40789413452148 }
-             */
-            bPoint?: Record<string, never>;
-            /**
-             * @description The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated.
-             * @example 122.2365
-             */
-            heading?: number;
-            /**
-             * @description The shift in the east direction.
-             * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrEastShiftComponent", "unit": "cm" }
-             */
-            eastShift?: Record<string, never>;
-            /**
-             * @description The shift in the north direction.
-             * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrNorthShiftComponent", "unit": "cm" }
-             */
-            northShift?: Record<string, never>;
-            /**
-             * @description Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values.
-             * @example { "@type": "SpatialProjection", "projectionType": "dtiProjectionDeere", "elevation": { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrElevation", "unit": "m" } }
-             */
-            spatialProjection?: Record<string, never>;
-        };
-        /** @description Error response schema for Errors (auto-generated) */
-        Errors: {
-            message?: string;
-            errors?: Record<string, never>[];
-        };
+  schemas: {
+    LinksArrayGet: {
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c
+       */
+      field?: unknown;
     };
-    responses: {
-        /** @description A collection of guidance lines */
-        GuidanceLinesResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: unknown;
-                    /**
-                     * Format: int32
-                     * @example 1
-                     */
-                    total?: number;
-                };
-            };
-        };
-        /** @description A collection of guidance lines */
-        GuidanceLinesRetrieve: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: unknown;
-                    /**
-                     * Format: int32
-                     * @example 1
-                     */
-                    total?: number;
-                };
-            };
-        };
-        /** @description Created, with a Location header containing the URI of the newly created resource */
-        Created: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: unknown;
-                    /**
-                     * Format: int32
-                     * @example 1
-                     */
-                    total?: number;
-                };
-            };
-        };
-        /** @description No Content. Request Completed Succesfully. */
-        NoContent: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    /**
-                     * Format: int32
-                     * @example 1
-                     */
-                    total?: number;
-                };
-            };
-        };
-        /** @description Request Validation failure */
-        BadRequest: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["Errors"];
-            };
-        };
-        /** @description The user does not have sufficient privileges to access this resource. */
-        Forbidden: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified resource does not exist */
-        NotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+    LinkArrayPost: {
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId
+       */
+      field?: unknown;
     };
-    parameters: {
-        /** @description The organization owning the guidance lines. */
-        OrgId: string;
-        /** @description The field that the guidance lines are associated with. */
-        FieldId: string;
-        /** @description The identifier of this guidance line. */
-        GuidanceLineId: string;
-        /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
-        Status: string;
-        /** @description Filter results based on status; Will default to active */
-        RecordFilter: string;
-        /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
-        Embed: string;
+    GuidanceLine: {
+      /**
+       * @description Identifies the subclass of guidance line.
+       * @example ABLine
+       */
+      '@type'?: string;
+      /**
+       * @description The common name used by an end user to identify this guidance line.
+       * @example North West
+       */
+      name?: string;
+      /**
+       * @description Archived guidance lines will not be available for use in Setup Builder.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Defines the number of tram lines in relation to the main track. Valid values are 0 - 20
+       * @example 0
+       */
+      tramOffset?: number;
+      /**
+       * @description The spacing between tram lines.
+       * @example 0
+       */
+      tramSpacing?: number;
+      /**
+       * @description The coordinate representing the A point of an AB Line.
+       * @example { "@type": "Point", "lat": 41.74557323445754, "lon": -92.41092564370683 }
+       */
+      aPoint?: Record<string, never>;
+      /**
+       * @description The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API.
+       * @example { "@type": "Point", "lat": 41.745060835194764, "lon": -92.40789413452148 }
+       */
+      bPoint?: Record<string, never>;
+      /**
+       * @description The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated.
+       * @example 122.2365
+       */
+      heading?: number;
+      /**
+       * @description The shift in the east direction.
+       * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrEastShiftComponent", "unit": "cm" }
+       */
+      eastShift?: Record<string, never>;
+      /**
+       * @description The shift in the north direction.
+       * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrNorthShiftComponent", "unit": "cm" }
+       */
+      northShift?: Record<string, never>;
+      /**
+       * @description Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values.
+       * @example { "@type": "SpatialProjection", "projectionType": "dtiProjectionDeere", "elevation": { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrElevation", "unit": "m" } }
+       */
+      spatialProjection?: Record<string, never>;
+      /**
+       * @description Client associated with farm.
+       * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      fieldUri?: string;
     };
-    requestBodies: {
-        /** @description Specifies guidance line details */
-        PostRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["GuidanceLine"];
-            };
-        };
-        PutRequest: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["GuidanceLinePut"];
-            };
-        };
+    GuidanceLinePut: {
+      /**
+       * @description Identifies the subclass of guidance line.
+       * @example ABLine
+       */
+      '@type'?: string;
+      /**
+       * @description The common name used by an end user to identify this guidance line.
+       * @example North West
+       */
+      name?: string;
+      /**
+       * @description Archived guidance lines will not be available for use in Setup Builder.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Defines the number of tram lines in relation to the main track. Valid values are 0 - 20
+       * @example 0
+       */
+      tramOffset?: number;
+      /**
+       * @description The spacing between tram lines.
+       * @example 0
+       */
+      tramSpacing?: number;
+      /**
+       * @description The coordinate representing the A point of an AB Line.
+       * @example { "@type": "Point", "lat": 41.74557323445754, "lon": -92.41092564370683 }
+       */
+      aPoint?: Record<string, never>;
+      /**
+       * @description The coordinate representing the B point of an AB Line. Alternatively, the heading can be supplied instead and this value will be calculated by the API.
+       * @example { "@type": "Point", "lat": 41.745060835194764, "lon": -92.40789413452148 }
+       */
+      bPoint?: Record<string, never>;
+      /**
+       * @description The radial heading for the AB Line (with North being 0 Degrees). You cannot specify both a bPoint and a heading. The omitted value will be calculated.
+       * @example 122.2365
+       */
+      heading?: number;
+      /**
+       * @description The shift in the east direction.
+       * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrEastShiftComponent", "unit": "cm" }
+       */
+      eastShift?: Record<string, never>;
+      /**
+       * @description The shift in the north direction.
+       * @example { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrNorthShiftComponent", "unit": "cm" }
+       */
+      northShift?: Record<string, never>;
+      /**
+       * @description Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values.
+       * @example { "@type": "SpatialProjection", "projectionType": "dtiProjectionDeere", "elevation": { "@type": "MeasurementAsDouble", "valueAsDouble": 0, "vrDomainId": "vrElevation", "unit": "m" } }
+       */
+      spatialProjection?: Record<string, never>;
     };
-    headers: never;
-    pathItems: never;
+    /** @description Error response schema for Errors (auto-generated) */
+    Errors: {
+      message?: string;
+      errors?: Record<string, never>[];
+    };
+  };
+  responses: {
+    /** @description A collection of guidance lines */
+    GuidanceLinesResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description A collection of guidance lines */
+    GuidanceLinesRetrieve: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description Created, with a Location header containing the URI of the newly created resource */
+    Created: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description No Content. Request Completed Succesfully. */
+    NoContent: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description Request Validation failure */
+    BadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description The user does not have sufficient privileges to access this resource. */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified resource does not exist */
+    NotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    /** @description The organization owning the guidance lines. */
+    OrgId: string;
+    /** @description The field that the guidance lines are associated with. */
+    FieldId: string;
+    /** @description The identifier of this guidance line. */
+    GuidanceLineId: string;
+    /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
+    Status: string;
+    /** @description Filter results based on status; Will default to active */
+    RecordFilter: string;
+    /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+    Embed: string;
+  };
+  requestBodies: {
+    /** @description Specifies guidance line details */
+    PostRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GuidanceLine'];
+      };
+    };
+    PutRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GuidanceLinePut'];
+      };
+    };
+  };
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

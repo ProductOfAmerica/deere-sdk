@@ -4,394 +4,394 @@
  */
 
 export interface paths {
-    "/organizations/{orgId}/harvestIdentificationModules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve all Cotton HID modules for a given org
-         * @description This endpoint will return list of HID Cotton modules in the system for the provided organization ID (filtered by user-level access).
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
-                    embed?: components["parameters"]["Embed"];
-                    /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
-                    startDate?: components["parameters"]["WrapStartDate"];
-                    /** @description End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter. */
-                    endDate?: components["parameters"]["WrapEndDate"];
-                };
-                header?: never;
-                path: {
-                    /** @description Organization ID */
-                    orgId: components["parameters"]["OrgId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["HIDCottonModules"];
-                400: components["responses"]["BadDateRange"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["InputOrgIdInvalid"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{orgId}/harvestIdentificationModules': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/harvestIdentificationModules/{serialNumber}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * Retrieve all Cotton HID modules for a given org
+     * @description This endpoint will return list of HID Cotton modules in the system for the provided organization ID (filtered by user-level access).
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+          embed?: components['parameters']['Embed'];
+          /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
+          startDate?: components['parameters']['WrapStartDate'];
+          /** @description End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter. */
+          endDate?: components['parameters']['WrapEndDate'];
         };
-        /**
-         * Retrieve a specific HID module by serial number
-         * @description This endpoint will retrieve a specific HID module by serial number.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
-                    embed?: components["parameters"]["Embed"];
-                };
-                header?: never;
-                path: {
-                    /** @description Organization ID */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description Module Serial Number */
-                    moduleSerialNumber: components["parameters"]["ModuleSerialNumber"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["SingleHIDCottonModule"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["HidModuleIdIsInvalid"];
-            };
+        header?: never;
+        path: {
+          /** @description Organization ID */
+          orgId: components['parameters']['OrgId'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['HIDCottonModules'];
+        400: components['responses']['BadDateRange'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['InputOrgIdInvalid'];
+      };
     };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/harvestIdentificationModules/{serialNumber}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve a specific HID module by serial number
+     * @description This endpoint will retrieve a specific HID module by serial number.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+          embed?: components['parameters']['Embed'];
+        };
+        header?: never;
+        path: {
+          /** @description Organization ID */
+          orgId: components['parameters']['OrgId'];
+          /** @description Module Serial Number */
+          moduleSerialNumber: components['parameters']['ModuleSerialNumber'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['SingleHIDCottonModule'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['HidModuleIdIsInvalid'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        LinkHarvestIdentificationModules: {
-            /**
-             * @description Self Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules
-             */
-            self?: unknown;
-        };
-        LinkSerialNumber: {
-            /**
-             * @description Self Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493
-             */
-            self?: unknown;
-            /**
-             * @description Field Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das
-             */
-            field?: unknown;
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456
-             */
-            organization?: unknown;
-        };
-        /** @description A link provides a URI to access resources that are related to the response. */
-        Link: {
-            "@type"?: string;
-            /**
-             * @description The relation of the object to the linked resource.
-             * @example self
-             */
-            rel: string;
-            /**
-             * Format: uri
-             * @description The URI to the related resource.
-             * @example https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564
-             */
-            uri: string;
-        };
-        Point: {
-            /** @example Point */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @description The latitude of the point
-             * @example 43.6187
-             */
-            lat?: number;
-            /**
-             * Format: double
-             * @description The longitude of the point
-             * @example 116.2146
-             */
-            lon?: number;
-        };
-        /** @description A general representation of quantity and unit. */
-        EventMeasurement: {
-            /** @example EventMeasurement */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @description The quantity represented by this measurement.
-             * @example 5.1
-             */
-            value?: number;
-            /**
-             * @description The unit associated to the quantity measured
-             * @example gal1ac-1.
-             */
-            unitId?: string;
-        };
-        /** @description A data entity representing a single HID Cotton module */
-        HIDCottonModule: {
-            /**
-             * @description Module Serial Number
-             * @example 14404565493
-             */
-            moduleSerialNumber?: string;
-            /**
-             * @description Module RFID
-             * @example 3500B988061103035A9439F5
-             */
-            moduleId?: string;
-            /** @example See sample response below. */
-            wrapLocation?: Record<string, never>;
-            /**
-             * Format: date-time
-             * @description Datetime when the module wrap started (GMT)
-             * @example 2019-03-22T08:48:20Z
-             */
-            wrapDateTime?: string;
-            /**
-             * Format: date-time
-             * @description Datetime when the module was first processed
-             * @example 2019-03-22T08:48:20Z
-             */
-            dataIngestionDate?: string;
-            /**
-             * Format: int32
-             * @description Number of times the RFID tags were read while the module wrap was being applied
-             * @example 5
-             */
-            tagCount?: number;
-            /**
-             * @description Cotton variety inside the module
-             * @example Cotton ABC
-             */
-            varietyName?: string;
-            /**
-             * @description Machine PIN
-             * @example PCFVUGALC0067
-             */
-            machinePin?: string;
-            /**
-             * Format: name
-             * @description Machine Operator
-             * @example John Doe
-             */
-            operator?: string;
-            /**
-             * @description Gin Name
-             * @example AB123456
-             */
-            ginName?: string;
-            /**
-             * @description Producer Name
-             * @example AB123456
-             */
-            producerName?: string;
-            /** @example See sample response below. */
-            moisture?: Record<string, never>;
-            /** @example See sample response below. */
-            diameter?: Record<string, never>;
-            /** @example See sample response below. */
-            weight?: Record<string, never>;
-            /** @example See sample response below. */
-            dropLocation?: Record<string, never>;
-            /** @example See sample response below. */
-            incrementalArea?: Record<string, never>;
-            /** @example Here is a comment */
-            comment?: string;
-            /**
-             * Format: uuid
-             * @description Field Id
-             * @example qqwe524-0000-1000-4022-qsdfef23341
-             */
-            fieldId?: string;
-            /**
-             * @description Organization ID
-             * @example 1234
-             */
-            orgId?: string;
-        };
-        /** Format: Errors/DataValidationException */
-        Errors: {
-            errors?: {
-                /** @example Error */
-                "@type"?: string;
-                /**
-                 * Format: uuid
-                 * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
-                 */
-                guid?: string;
-                /**
-                 * @description An english description of the error
-                 * @example End date should not be specified without start date
-                 */
-                message?: string;
-                /**
-                 * @description A string constant representing the type of error
-                 * @example validation_constraint_operation_end_date_without_start_date
-                 */
-                code?: string;
-                /**
-                 * @description The name of the property or parameter deemed invalid
-                 * @example startDate
-                 */
-                field?: string;
-                /**
-                 * @description The value that was supplied for this field in the request
-                 * @example null
-                 */
-                invalidValue?: string;
-            }[];
-        };
+  schemas: {
+    LinkHarvestIdentificationModules: {
+      /**
+       * @description Self Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules
+       */
+      self?: unknown;
     };
-    responses: {
-        /** @description An array of HID Cotton modules */
-        HIDCottonModules: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["LinkHarvestIdentificationModules"][];
-                    /**
-                     * Format: int32
-                     * @description Number of results in the list
-                     * @example 761
-                     */
-                    total?: number;
-                    values?: components["schemas"]["HIDCottonModule"][];
-                };
-            };
-        };
-        /** @description A single HID Cotton Module */
-        SingleHIDCottonModule: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["LinkSerialNumber"][];
-                    /**
-                     * Format: int32
-                     * @description Number of results in the list
-                     * @example 761
-                     */
-                    total?: number;
-                    values?: components["schemas"]["HIDCottonModule"][];
-                };
-            };
-        };
-        /** @description A list of years */
-        Years: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": number[];
-            };
-        };
-        /** @description Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first. */
-        BadDateRange: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["Errors"];
-            };
-        };
-        /** @description The specified organization or HID Cotton module does not exist */
-        HidModuleIdIsInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified Organization ID does not exist */
-        InputOrgIdInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to data in this organization */
-        DoesNotHaveAccessToOrg: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has not been provided access to the field operation specified by id. */
-        DoesNotHaveAccessToFieldOperation: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The specified field operation does not exist. */
-        InputFieldOpGuidInvalid: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+    LinkSerialNumber: {
+      /**
+       * @description Self Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493
+       */
+      self?: unknown;
+      /**
+       * @description Field Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das
+       */
+      field?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
     };
-    parameters: {
-        AcceptJSON: "application/vnd.deere.axiom.v3+json";
-        /** @description Module Serial Number */
-        ModuleSerialNumber: string;
-        /** @description Organization ID */
-        OrgId: string;
-        /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
-        Embed: string;
-        /** @description Desired unit system. Takes ENGLISH or METRIC. */
-        "Accept-UOM-System": "ENGLISH" | "METRIC" | "MIXED";
-        /** @description Desired yield representation (unit) type. Takes VOLUME or MASS. */
-        "Accept-Yield-Preference": string;
-        /** @description Refer to https://developer.deere.com/#!help&doc=.%2Fgetstarted%2FHELPdeereTags.htm */
-        DeereTags: string;
-        /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
-        WrapStartDate: string;
-        /** @description End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter. */
-        WrapEndDate: string;
+    /** @description A link provides a URI to access resources that are related to the response. */
+    Link: {
+      '@type'?: string;
+      /**
+       * @description The relation of the object to the linked resource.
+       * @example self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The URI to the related resource.
+       * @example https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564
+       */
+      uri: string;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    Point: {
+      /** @example Point */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 43.6187
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example 116.2146
+       */
+      lon?: number;
+    };
+    /** @description A general representation of quantity and unit. */
+    EventMeasurement: {
+      /** @example EventMeasurement */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The quantity represented by this measurement.
+       * @example 5.1
+       */
+      value?: number;
+      /**
+       * @description The unit associated to the quantity measured
+       * @example gal1ac-1.
+       */
+      unitId?: string;
+    };
+    /** @description A data entity representing a single HID Cotton module */
+    HIDCottonModule: {
+      /**
+       * @description Module Serial Number
+       * @example 14404565493
+       */
+      moduleSerialNumber?: string;
+      /**
+       * @description Module RFID
+       * @example 3500B988061103035A9439F5
+       */
+      moduleId?: string;
+      /** @example See sample response below. */
+      wrapLocation?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description Datetime when the module wrap started (GMT)
+       * @example 2019-03-22T08:48:20Z
+       */
+      wrapDateTime?: string;
+      /**
+       * Format: date-time
+       * @description Datetime when the module was first processed
+       * @example 2019-03-22T08:48:20Z
+       */
+      dataIngestionDate?: string;
+      /**
+       * Format: int32
+       * @description Number of times the RFID tags were read while the module wrap was being applied
+       * @example 5
+       */
+      tagCount?: number;
+      /**
+       * @description Cotton variety inside the module
+       * @example Cotton ABC
+       */
+      varietyName?: string;
+      /**
+       * @description Machine PIN
+       * @example PCFVUGALC0067
+       */
+      machinePin?: string;
+      /**
+       * Format: name
+       * @description Machine Operator
+       * @example John Doe
+       */
+      operator?: string;
+      /**
+       * @description Gin Name
+       * @example AB123456
+       */
+      ginName?: string;
+      /**
+       * @description Producer Name
+       * @example AB123456
+       */
+      producerName?: string;
+      /** @example See sample response below. */
+      moisture?: Record<string, never>;
+      /** @example See sample response below. */
+      diameter?: Record<string, never>;
+      /** @example See sample response below. */
+      weight?: Record<string, never>;
+      /** @example See sample response below. */
+      dropLocation?: Record<string, never>;
+      /** @example See sample response below. */
+      incrementalArea?: Record<string, never>;
+      /** @example Here is a comment */
+      comment?: string;
+      /**
+       * Format: uuid
+       * @description Field Id
+       * @example qqwe524-0000-1000-4022-qsdfef23341
+       */
+      fieldId?: string;
+      /**
+       * @description Organization ID
+       * @example 1234
+       */
+      orgId?: string;
+    };
+    /** Format: Errors/DataValidationException */
+    Errors: {
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+         */
+        guid?: string;
+        /**
+         * @description An english description of the error
+         * @example End date should not be specified without start date
+         */
+        message?: string;
+        /**
+         * @description A string constant representing the type of error
+         * @example validation_constraint_operation_end_date_without_start_date
+         */
+        code?: string;
+        /**
+         * @description The name of the property or parameter deemed invalid
+         * @example startDate
+         */
+        field?: string;
+        /**
+         * @description The value that was supplied for this field in the request
+         * @example null
+         */
+        invalidValue?: string;
+      }[];
+    };
+  };
+  responses: {
+    /** @description An array of HID Cotton modules */
+    HIDCottonModules: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinkHarvestIdentificationModules'][];
+          /**
+           * Format: int32
+           * @description Number of results in the list
+           * @example 761
+           */
+          total?: number;
+          values?: components['schemas']['HIDCottonModule'][];
+        };
+      };
+    };
+    /** @description A single HID Cotton Module */
+    SingleHIDCottonModule: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinkSerialNumber'][];
+          /**
+           * Format: int32
+           * @description Number of results in the list
+           * @example 761
+           */
+          total?: number;
+          values?: components['schemas']['HIDCottonModule'][];
+        };
+      };
+    };
+    /** @description A list of years */
+    Years: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': number[];
+      };
+    };
+    /** @description Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first. */
+    BadDateRange: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description The specified organization or HID Cotton module does not exist */
+    HidModuleIdIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified Organization ID does not exist */
+    InputOrgIdInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to data in this organization */
+    DoesNotHaveAccessToOrg: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to the field operation specified by id. */
+    DoesNotHaveAccessToFieldOperation: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified field operation does not exist. */
+    InputFieldOpGuidInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    AcceptJSON: 'application/vnd.deere.axiom.v3+json';
+    /** @description Module Serial Number */
+    ModuleSerialNumber: string;
+    /** @description Organization ID */
+    OrgId: string;
+    /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+    Embed: string;
+    /** @description Desired unit system. Takes ENGLISH or METRIC. */
+    'Accept-UOM-System': 'ENGLISH' | 'METRIC' | 'MIXED';
+    /** @description Desired yield representation (unit) type. Takes VOLUME or MASS. */
+    'Accept-Yield-Preference': string;
+    /** @description Refer to https://developer.deere.com/#!help&doc=.%2Fgetstarted%2FHELPdeereTags.htm */
+    DeereTags: string;
+    /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
+    WrapStartDate: string;
+    /** @description End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter. */
+    WrapEndDate: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

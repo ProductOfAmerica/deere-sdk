@@ -1,16 +1,12 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { DeereClient } from '../src/client.js';
 import { mockPaginatedResponse } from './helpers/mock-fetch.js';
 
 describe('pagination', () => {
   describe('paginate()', () => {
     it('yields pages from paginated response', async () => {
-      const pages = [
-        [{ id: 1 }, { id: 2 }],
-        [{ id: 3 }, { id: 4 }],
-        [{ id: 5 }],
-      ];
+      const pages = [[{ id: 1 }, { id: 2 }], [{ id: 3 }, { id: 4 }], [{ id: 5 }]];
 
       const client = new DeereClient({
         accessToken: 'test',
@@ -37,7 +33,7 @@ describe('pagination', () => {
               values: [{ id: 1 }],
               links: [{ rel: 'self', uri: '/items' }], // No nextPage
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           ),
       });
 
@@ -58,7 +54,7 @@ describe('pagination', () => {
               values: [],
               links: [],
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           ),
       });
 
@@ -87,17 +83,16 @@ describe('pagination', () => {
                 values: [{ id: 1 }],
                 links: [{ rel: 'nextPage', uri: 'https://api.deere.com/page/2' }],
               }),
-              { status: 200, headers: { 'Content-Type': 'application/json' } },
-            );
-          } else {
-            return new Response(
-              JSON.stringify({
-                values: [{ id: 2 }],
-                links: [],
-              }),
-              { status: 200, headers: { 'Content-Type': 'application/json' } },
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
             );
           }
+          return new Response(
+            JSON.stringify({
+              values: [{ id: 2 }],
+              links: [],
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+          );
         },
       });
 
@@ -120,7 +115,7 @@ describe('pagination', () => {
               values: [{ id: 1 }],
               // No links property at all
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           ),
       });
 
@@ -136,11 +131,7 @@ describe('pagination', () => {
 
   describe('getAll()', () => {
     it('collects all items from all pages', async () => {
-      const pages = [
-        [{ id: 1 }, { id: 2 }],
-        [{ id: 3 }, { id: 4 }],
-        [{ id: 5 }],
-      ];
+      const pages = [[{ id: 1 }, { id: 2 }], [{ id: 3 }, { id: 4 }], [{ id: 5 }]];
 
       const client = new DeereClient({
         accessToken: 'test',
@@ -150,23 +141,17 @@ describe('pagination', () => {
       const allItems = await client.getAll<{ id: number }>('/items');
 
       assert.strictEqual(allItems.length, 5);
-      assert.deepStrictEqual(allItems, [
-        { id: 1 },
-        { id: 2 },
-        { id: 3 },
-        { id: 4 },
-        { id: 5 },
-      ]);
+      assert.deepStrictEqual(allItems, [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }]);
     });
 
     it('returns empty array for empty response', async () => {
       const client = new DeereClient({
         accessToken: 'test',
         fetch: async () =>
-          new Response(
-            JSON.stringify({ values: [], links: [] }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
-          ),
+          new Response(JSON.stringify({ values: [], links: [] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
       });
 
       const allItems = await client.getAll<{ id: number }>('/items');
@@ -183,7 +168,7 @@ describe('pagination', () => {
               values: [{ id: 1 }, { id: 2 }, { id: 3 }],
               links: [],
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           ),
       });
 
@@ -197,7 +182,7 @@ describe('pagination', () => {
       const pages = Array.from({ length: 10 }, (_, pageIndex) =>
         Array.from({ length: 100 }, (_, itemIndex) => ({
           id: pageIndex * 100 + itemIndex,
-        })),
+        }))
       );
 
       const client = new DeereClient({
@@ -231,7 +216,7 @@ describe('pagination', () => {
                 values: [{ id: 1 }],
                 links: [{ rel: 'nextPage', uri: 'https://api.deere.com/page/2' }],
               }),
-              { status: 200, headers: { 'Content-Type': 'application/json' } },
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
             );
           }
 
@@ -246,7 +231,7 @@ describe('pagination', () => {
               values: [{ id: 2 }],
               links: [],
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } },
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
           );
         },
         maxRetries: 3,

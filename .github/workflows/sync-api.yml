@@ -53,6 +53,9 @@ jobs:
       - name: Generate SDK
         run: pnpm generate-sdk
 
+      - name: Lint fix generated code
+        run: pnpm lint:fix
+
       - name: Build
         run: pnpm build
 

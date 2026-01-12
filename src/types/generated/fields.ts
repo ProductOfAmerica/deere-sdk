@@ -4,901 +4,921 @@
  */
 
 export interface paths {
-    "/organizations/{orgId}/fields": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the organization */
-                orgId: components["parameters"]["OrgId"];
-            };
-            cookie?: never;
-        };
-        /**
-         * Retrieve all of the Fields for an Organization
-         * @description Retrieve all of the Fields for an Organization
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description client name */
-                    clientName?: components["parameters"]["ClientName"];
-                    /** @description farm name */
-                    farmName?: components["parameters"]["FarmName"];
-                    /** @description field name */
-                    fieldName?: components["parameters"]["FieldName"];
-                    /** @description list of objects to include */
-                    embed?: components["parameters"]["FieldsEmbed"];
-                    /** @description Filters by resource state (whether or not the resource is archived) */
-                    recordFilter?: components["parameters"]["recordFilter"];
-                };
-                header?: {
-                    /** @description Indicates a preference for returned measurements to be in English vs Metric */
-                    "Accept-UOM-System"?: components["parameters"]["UnitOfMeasureHeader"];
-                };
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FieldsReturned"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgNotFound"];
-            };
-        };
-        put?: never;
-        /**
-         * Create field for an Organization
-         * @description This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
-         *     This is to support the following scenarios:
-         *       * adding a new field to an existing client/farm
-         *       * adding a new farm and field to an existing client
-         *       * adding a brand new client/farm/field
-         *
-         *     Client-specified identifiers:
-         *       * An identifier may be specified for the new field
-         *       * An identifier may be specified for new clients/farms
-         *       * If associating to an existing client/farm, the existing guids may be specified in place of the name
-         *
-         *     Note: All fields are created with an 'available' status.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: components["requestBodies"]["ASingleField"];
-            responses: {
-                201: components["responses"]["Created"];
-                400: components["responses"]["ValidationErrorForCreate"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgNotFound"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{orgId}/fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The ID of the organization */
+        orgId: components['parameters']['OrgId'];
+      };
+      cookie?: never;
     };
-    "/organizations/{orgId}/fields/{fieldId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the organization */
-                orgId: components["parameters"]["OrgId"];
-                /** @description field guid */
-                fieldId: components["parameters"]["FieldId"];
-            };
-            cookie?: never;
+    /**
+     * Retrieve all of the Fields for an Organization
+     * @description Retrieve all of the Fields for an Organization
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description client name */
+          clientName?: components['parameters']['ClientName'];
+          /** @description farm name */
+          farmName?: components['parameters']['FarmName'];
+          /** @description field name */
+          fieldName?: components['parameters']['FieldName'];
+          /** @description list of objects to include */
+          embed?: components['parameters']['FieldsEmbed'];
+          /** @description Filters by resource state (whether or not the resource is archived) */
+          recordFilter?: components['parameters']['recordFilter'];
         };
-        /**
-         * Get field by organization and fieldId
-         * @description Get field by organization and fieldId
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description list of objects to include */
-                    embed?: components["parameters"]["FieldEmbed"];
-                };
-                header?: {
-                    /** @description Indicates a preference for returned measurements to be in English vs Metric */
-                    "Accept-UOM-System"?: components["parameters"]["UnitOfMeasureHeader"];
-                };
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description field guid */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FieldReturned"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgOrFieldNotFound"];
-            };
+        header?: {
+          /** @description Indicates a preference for returned measurements to be in English vs Metric */
+          'Accept-UOM-System'?: components['parameters']['UnitOfMeasureHeader'];
         };
-        /**
-         * Update field
-         * @description Update the field name, the archived status, or the associated client or farm. If the client and/or farm does not exist, it will be created.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description field guid */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: components["requestBodies"]["ASingleField"];
-            responses: {
-                204: components["responses"]["Updated"];
-                400: components["responses"]["ValidationErrorForUpdate"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgOrFieldNotFound"];
-            };
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
         };
-        post?: never;
-        /**
-         * Delete Field by organization and fieldId
-         * @description Delete Field by organization and fieldId
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description field guid */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                204: components["responses"]["Deleted"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgOrFieldNotFound"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldsReturned'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgNotFound'];
+      };
     };
-    "/organizations/{orgId}/fields/{fieldId}/farms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The ID of the organization */
-                orgId: components["parameters"]["OrgId"];
-                /** @description field guid */
-                fieldId: components["parameters"]["FieldId"];
-            };
-            cookie?: never;
+    put?: never;
+    /**
+     * Create field for an Organization
+     * @description This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
+     *     This is to support the following scenarios:
+     *       * adding a new field to an existing client/farm
+     *       * adding a new farm and field to an existing client
+     *       * adding a brand new client/farm/field
+     *
+     *     Client-specified identifiers:
+     *       * An identifier may be specified for the new field
+     *       * An identifier may be specified for new clients/farms
+     *       * If associating to an existing client/farm, the existing guids may be specified in place of the name
+     *
+     *     Note: All fields are created with an 'available' status.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
         };
-        /**
-         * Get Farm by organization and fieldId
-         * @description This api is designed to get farms within an organization and for provided fieldId
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description list of objects to include */
-                    embed?: components["parameters"]["FieldEmbed"];
-                };
-                header?: never;
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description field guid */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["FarmsReturned"];
-                403: components["responses"]["DoesNotHaveAccessToOrg"];
-                404: components["responses"]["OrgOrFieldNotFound"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: components['requestBodies']['ASingleField'];
+      responses: {
+        201: components['responses']['Created'];
+        400: components['responses']['ValidationErrorForCreate'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgNotFound'];
+      };
     };
-    "/organizations/{orgID}/fields/{id}/clients": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * View Clients that Own a Field
-         * @description View details about the client that owns the field. The response will link to the following resources:<br/> <ul><li><b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farms belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the field.</li></ul>
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path: {
-                    /** @description The ID of the organization */
-                    orgId: components["parameters"]["OrgId"];
-                    /** @description field guid */
-                    fieldId: components["parameters"]["FieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["responses"]["getFieldResponse"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/fields/{fieldId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The ID of the organization */
+        orgId: components['parameters']['OrgId'];
+        /** @description field guid */
+        fieldId: components['parameters']['FieldId'];
+      };
+      cookie?: never;
     };
+    /**
+     * Get field by organization and fieldId
+     * @description Get field by organization and fieldId
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description list of objects to include */
+          embed?: components['parameters']['FieldEmbed'];
+        };
+        header?: {
+          /** @description Indicates a preference for returned measurements to be in English vs Metric */
+          'Accept-UOM-System'?: components['parameters']['UnitOfMeasureHeader'];
+        };
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldReturned'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgOrFieldNotFound'];
+      };
+    };
+    /**
+     * Update field
+     * @description Update the field name, the archived status, or the associated client or farm. If the client and/or farm does not exist, it will be created.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: components['requestBodies']['ASingleField'];
+      responses: {
+        204: components['responses']['Updated'];
+        400: components['responses']['ValidationErrorForUpdate'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgOrFieldNotFound'];
+      };
+    };
+    post?: never;
+    /**
+     * Delete Field by organization and fieldId
+     * @description Delete Field by organization and fieldId
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        204: components['responses']['Deleted'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgOrFieldNotFound'];
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/fields/{fieldId}/farms': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The ID of the organization */
+        orgId: components['parameters']['OrgId'];
+        /** @description field guid */
+        fieldId: components['parameters']['FieldId'];
+      };
+      cookie?: never;
+    };
+    /**
+     * Get Farm by organization and fieldId
+     * @description This api is designed to get farms within an organization and for provided fieldId
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description list of objects to include */
+          embed?: components['parameters']['FieldEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FarmsReturned'];
+        403: components['responses']['DoesNotHaveAccessToOrg'];
+        404: components['responses']['OrgOrFieldNotFound'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgID}/fields/{id}/clients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View Clients that Own a Field
+     * @description View details about the client that owns the field. The response will link to the following resources:<br/> <ul><li><b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farms belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the field.</li></ul>
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
+        };
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['getFieldResponse'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        FieldsResponse: {
-            links?: components["schemas"]["Link"][];
-            totals?: number;
-            values?: components["schemas"]["FieldResponse"][];
-        };
-        FieldResponse: {
-            /** @example Field */
-            "@Type"?: string;
-            /** @example --- */
-            name?: string;
-            farms?: components["schemas"]["Farms"];
-            clients?: components["schemas"]["Clients"];
-            boundaries?: components["schemas"]["Boundary"][];
-            accessPoints?: components["schemas"]["AccessPoint"][];
-            guidanceLines?: components["schemas"]["GuidanceLines"][];
-            /** @example true */
-            archived?: boolean;
-            flags?: components["schemas"]["Flag"][];
-            /**
-             * Format: uuid
-             * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        Farms: {
-            /** @example Farms */
-            "@Type"?: string;
-            farms?: components["schemas"]["Farm"][];
-        };
-        Farm: {
-            /** @example Farm */
-            "@Type"?: string;
-            /** @example --- */
-            name?: string;
-            /**
-             * Format: uri
-             * @example 1efb4de1-fe41-42bc-bbb3-d128a432cafd
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        CreateUpdateFarm: {
-            /** @example Farm */
-            "@Type"?: string;
-            /** @example SouthEast End */
-            name?: string;
-        };
-        Clients: {
-            /** @example Clients */
-            "@Type"?: string;
-            clients?: components["schemas"]["Client"][];
-        };
-        Client: {
-            /** @example Client */
-            "@Type"?: string;
-            /** @example --- */
-            name?: string;
-            /**
-             * Format: uri
-             * @example 68b887c7-1ac2-40a4-b70b-117a8ec34abf
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        /** @description Link to another resource */
-        GroupLink: {
-            /**
-             * @description Boundaries Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/boundaries
-             */
-            boundaries?: unknown;
-            /**
-             * @description Clients Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/clients
-             */
-            clients?: unknown;
-            /**
-             * @description Farms Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/farms
-             */
-            farms?: unknown;
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456
-             */
-            owningOrganization?: unknown;
-            /**
-             * @description Notes Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/notes
-             */
-            notes?: unknown;
-            /**
-             * @description Boundaries Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries?simple=true
-             */
-            simplifiedBoundaries?: unknown;
-            /**
-             * @description Field Operations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/fieldOperations
-             */
-            fieldOperation?: unknown;
-            /**
-             * @description Map Layer Summaries Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/mapLayerSummaries
-             */
-            mapLayerSummaries?: unknown;
-            /**
-             * @description Contribution Definition Link
-             * @example https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef
-             */
-            contributionDefinition?: unknown;
-        };
-        FieldsPost: {
-            /**
-             * @description New Field Name
-             * @example UniqueFieldName
-             */
-            name?: string;
-            /**
-             * @description Archived status (false = active)
-             * @example false
-             */
-            archived?: string;
-            /**
-             * @description Existing or Unique (new) farm name
-             * @example FarmName
-             */
-            "farms.name"?: string;
-            /**
-             * Format: uuid
-             * @description Farm ID
-             * @example e61b83f4-3a12-431e-8010-596f2466dc27
-             */
-            "farms.id"?: string;
-            /**
-             * @description Existing or Unique (new) client name
-             * @example ClientName
-             */
-            "clients.name"?: string;
-            /**
-             * Format: uuid
-             * @description Client ID
-             * @example e61b83f4-3a12-431e-8010-596f2466dc27
-             */
-            "clients.id"?: string;
-        };
-        GetFarms: {
-            /**
-             * Format: int32
-             * @example 1
-             */
-            total?: number;
-            links?: {
-                /** @example self */
-                rel?: string;
-                /**
-                 * @description Platform uri to fetch farm details
-                 * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/222/farms
-                 */
-                uri?: string;
-            }[];
-            values?: components["schemas"]["GetFarm"][];
-        };
-        CreateUpdateClient: {
-            /** @example Client */
-            "@Type"?: string;
-            /** @example SouthEast End_Client */
-            name?: string;
-        };
-        Boundary: {
-            /** @example Boundary */
-            "@Type"?: string;
-            /** @example Auto-Generated 2014 Harvest */
-            name?: string;
-            /** @example Auto */
-            sourceType?: string;
-            /**
-             * Format: date-time
-             * @example 2016-11-17T11:53:00.000Z
-             */
-            modifiedTime?: string;
-            area?: components["schemas"]["MeasurementAsDouble"];
-            workableArea?: components["schemas"]["MeasurementAsDouble"];
-            multipolygons?: components["schemas"]["Polygon"][];
-            extent?: components["schemas"]["Extent"];
-            /**
-             * Format: uuid
-             * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-            /** @description Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries. */
-            active?: boolean;
-            /** @description Indicates whether the contained area is irrigated */
-            irrigated?: boolean;
-        };
-        AccessPoint: {
-            /** Format: uri */
-            id?: string;
-            description?: string;
-            direction?: string;
-            isEntry?: boolean;
-            isExit?: boolean;
-            location?: components["schemas"]["Point"];
-            name?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        GuidanceLines: components["schemas"]["ABLine"] & {
-            bPoint?: components["schemas"]["Point"];
-            eastShift?: components["schemas"]["MeasurementAsDouble"];
-            northShift?: components["schemas"]["MeasurementAsDouble"];
-            /** @example 0 */
-            tramOffset?: number;
-            /** @example 0 */
-            tramSpacing?: number;
-            /** @example dtiABLineMethodBPoint */
-            savedMethod?: string;
-            /**
-             * Format: uri
-             * @example 5a62177b33df3c0e2cc85dc2
-             */
-            id?: string;
-            /**
-             * Format: uri
-             * @example c2878a14-f9f4-4eaf-b7ef-24f3da95d337
-             */
-            guid?: string;
-            /** @example Fleece */
-            name?: string;
-            /**
-             * Format: date-time
-             * @example 2018-03-05T14:56:57.295Z
-             */
-            lastModifiedTime?: string;
-            /** @example ACTIVE */
-            status?: string;
-            locked?: boolean;
-            links?: components["schemas"]["Link"][];
-        };
-        Flag: {
-            /** @example GenericNote */
-            "@Type"?: string;
-            /**
-             * Format: date-time
-             * @example 2016-08-19T18:48:48.886Z
-             */
-            createdDate?: string;
-            /**
-             * Format: date-time
-             * @example 2016-08-19T18:48:48.886Z
-             */
-            lastModifiedDate?: string;
-            /** @example some text */
-            text?: string;
-            metadata?: components["schemas"]["MetaData"][];
-            author?: components["schemas"]["Author"][];
-            geometry?: components["schemas"]["Geometry"];
-            /** @example SCOUT */
-            noteType?: string;
-            /**
-             * Format: uri
-             * @example 4e7a1fa7-9db9-45ea-94d3-e45b2fa43c2a
-             */
-            id?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        MetaData: {
-            /** @example Metadata */
-            "@Type"?: string;
-            /** @example EARLY_GROWTH_EMERGENCE */
-            name?: string;
-            /** @example 9 */
-            value?: number;
-        };
-        Author: {
-            /** @example User */
-            "@Type"?: string;
-            /** @example scoutcarla1 */
-            accountName?: string;
-            /** @example scoutcarla1 */
-            givenName?: string;
-            /** @example scoutcarla1 */
-            familyName?: string;
-        };
-        Geometry: {
-            coordinates?: string[];
-            /** @example Point */
-            type?: string;
-        };
-        ABLine: {
-            /** @example AbLine */
-            "@Type"?: string;
-            /** @example 356.5847091769351 */
-            heading?: number;
-            aPoint?: components["schemas"]["Point"];
-        };
-        Polygon: {
-            /** @example Polygon */
-            "@Type"?: string;
-            rings?: components["schemas"]["Ring"][];
-        };
-        Ring: {
-            /** @example Ring */
-            "@Type"?: string;
-            points?: components["schemas"]["Point"][];
-            /** @example exterior */
-            type?: string;
-            passable?: boolean;
-        };
-        Point: {
-            /** @example Point */
-            "@Type"?: string;
-            /**
-             * Format: double
-             * @description The latitude of the point
-             * @example 43.6187
-             */
-            lat?: number;
-            /**
-             * Format: double
-             * @description The longitude of the point
-             * @example 116.2146
-             */
-            lon?: number;
-        };
-        Extent: {
-            /** @example Extent */
-            "@Type"?: string;
-            topLeft?: components["schemas"]["Point"];
-            bottomRight?: components["schemas"]["Point"];
-        };
-        MeasurementAsDouble: {
-            /** @example MeasurementAsDouble */
-            "@Type"?: string;
-            /**
-             * Format: double
-             * @example 7.502938
-             */
-            valueAsDouble?: number;
-            /** @example vrEastShiftComponent */
-            vrDomainId?: string;
-            /**
-             * @description The unit of measure for this value
-             * @example ha
-             */
-            unit?: string;
-        };
-        /** @description Link to another resource */
-        Link: {
-            /** @example self */
-            rel: string;
-            /** @example https://apiqa.tal.deere.com/platform/users/grumpybear */
-            uri: string;
-        };
-        FieldGuidSearches: {
-            /** @example FieldGuidSearches */
-            "@Type"?: string;
-            fieldIds?: string[];
-            /** @example client */
-            clientName?: string;
-            /** @example farm */
-            farmName?: string;
-            /** @example field */
-            fieldName?: string;
-            embeds?: ("farms" | "clients" | "boundaries" | "activeBoundary" | "simplifiedBoundaries" | "metadataOnlyBoundaries" | "guidanceLines" | "shapes" | "accessPoints" | "notes")[];
-            /** @enum {string} */
-            status?: "AVAILABLE" | "ARCHIVED" | "ALL";
-        };
-        GetFarm: {
-            /** @example Farm */
-            "@type"?: string;
-            /** @example John Doe */
-            name?: string;
-            /**
-             * Format: uuid
-             * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
-             */
-            readonly id?: string;
-            /** @example false */
-            archived?: boolean;
-            /** @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c */
-            clientUri?: string;
-            readonly links?: {
-                /** @example Link */
-                "@type"?: string;
-                /** @example self */
-                rel?: string;
-                /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
-                uri?: string;
-            }[];
-        };
-        /** @description Place holder for Matt to create the field object to be created or updated. */
-        CreateUpdateField: {
-            /** @example Field */
-            "@Type"?: string;
-            /** @example Land_Demo_1 */
-            name?: string;
-            /** @example true */
-            archived?: boolean;
-            Farms?: {
-                /** @example Farms */
-                "@Type"?: string;
-                farms?: components["schemas"]["CreateUpdateFarm"][];
-            };
-            Clients?: {
-                /** @example Clients */
-                "@Type"?: string;
-                clients?: components["schemas"]["CreateUpdateClient"][];
-            };
-        };
+  schemas: {
+    FieldsResponse: {
+      links?: components['schemas']['Link'][];
+      totals?: number;
+      values?: components['schemas']['FieldResponse'][];
     };
-    responses: {
-        /** @description Array of farms */
-        FarmsReturned: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["GetFarms"];
-            };
-        };
-        /** @description Array of fields containing links related to fields */
-        FieldsReturned: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldsResponse"];
-            };
-        };
-        /** @description Get Field by client Id */
-        getFieldResponse: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": {
-                    links?: components["schemas"]["GroupLink"][];
-                    /**
-                     * Format: int32
-                     * @example 1
-                     */
-                    total?: number;
-                    values?: components["schemas"]["FieldResponse"][];
-                };
-            };
-        };
-        /** @description Array of fields with header for partial success. */
-        FieldsReturnedWithPartialSuccessHeader: {
-            headers: {
-                /** @description A string list of fieldIds requested which were not returned */
-                "FIELDS-NOT-FOUND"?: string;
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldsResponse"];
-            };
-        };
-        /** @description Success */
-        FieldReturned: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldResponse"];
-            };
-        };
-        /** @description Invalid access to organization */
-        DoesNotHaveAccessToOrg: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Organization not found */
-        OrgNotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Organization or Field not found */
-        OrgOrFieldNotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Field successfully created */
-        Created: {
-            headers: {
-                /** @description The uri of the newly created resource */
-                Location?: string;
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Field successfully updated */
-        Updated: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldsPost"];
-            };
-        };
-        /** @description Field deleted.  If the client and farm has only this field the client and farm will be deleted */
-        Deleted: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd:deere:axiom:v3+json": unknown;
-            };
-        };
+    FieldResponse: {
+      /** @example Field */
+      '@Type'?: string;
+      /** @example --- */
+      name?: string;
+      farms?: components['schemas']['Farms'];
+      clients?: components['schemas']['Clients'];
+      boundaries?: components['schemas']['Boundary'][];
+      accessPoints?: components['schemas']['AccessPoint'][];
+      guidanceLines?: components['schemas']['GuidanceLines'][];
+      /** @example true */
+      archived?: boolean;
+      flags?: components['schemas']['Flag'][];
+      /**
+       * Format: uuid
+       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    Farms: {
+      /** @example Farms */
+      '@Type'?: string;
+      farms?: components['schemas']['Farm'][];
+    };
+    Farm: {
+      /** @example Farm */
+      '@Type'?: string;
+      /** @example --- */
+      name?: string;
+      /**
+       * Format: uri
+       * @example 1efb4de1-fe41-42bc-bbb3-d128a432cafd
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    CreateUpdateFarm: {
+      /** @example Farm */
+      '@Type'?: string;
+      /** @example SouthEast End */
+      name?: string;
+    };
+    Clients: {
+      /** @example Clients */
+      '@Type'?: string;
+      clients?: components['schemas']['Client'][];
+    };
+    Client: {
+      /** @example Client */
+      '@Type'?: string;
+      /** @example --- */
+      name?: string;
+      /**
+       * Format: uri
+       * @example 68b887c7-1ac2-40a4-b70b-117a8ec34abf
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    /** @description Link to another resource */
+    GroupLink: {
+      /**
+       * @description Boundaries Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/boundaries
+       */
+      boundaries?: unknown;
+      /**
+       * @description Clients Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/clients
+       */
+      clients?: unknown;
+      /**
+       * @description Farms Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/farms
+       */
+      farms?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Notes Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/notes
+       */
+      notes?: unknown;
+      /**
+       * @description Boundaries Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/boundaries?simple=true
+       */
+      simplifiedBoundaries?: unknown;
+      /**
+       * @description Field Operations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/fieldOperations
+       */
+      fieldOperation?: unknown;
+      /**
+       * @description Map Layer Summaries Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27/mapLayerSummaries
+       */
+      mapLayerSummaries?: unknown;
+      /**
+       * @description Contribution Definition Link
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef
+       */
+      contributionDefinition?: unknown;
+    };
+    FieldsPost: {
+      /**
+       * @description New Field Name
+       * @example UniqueFieldName
+       */
+      name?: string;
+      /**
+       * @description Archived status (false = active)
+       * @example false
+       */
+      archived?: string;
+      /**
+       * @description Existing or Unique (new) farm name
+       * @example FarmName
+       */
+      'farms.name'?: string;
+      /**
+       * Format: uuid
+       * @description Farm ID
+       * @example e61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      'farms.id'?: string;
+      /**
+       * @description Existing or Unique (new) client name
+       * @example ClientName
+       */
+      'clients.name'?: string;
+      /**
+       * Format: uuid
+       * @description Client ID
+       * @example e61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      'clients.id'?: string;
+    };
+    GetFarms: {
+      /**
+       * Format: int32
+       * @example 1
+       */
+      total?: number;
+      links?: {
+        /** @example self */
+        rel?: string;
         /**
-         * @description The possible errors are:
-         *       * CFF_CLIENT_ID_ALREADY_EXISTS
-         *       * CFF_BAD_CLIENT_ID
-         *       * CFF_CLIENT_ID_NAME_CONFLICT
-         *       * CFF_CLIENT_ID_NOT_FOUND
-         *       * CFF_CLIENT_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_CLIENT_NAME
-         *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-         *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-         *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-         *       * CFF_FARM_ID_ALREADY_EXISTS
-         *       * CFF_BAD_FARM_ID
-         *       * CFF_FARM_ID_NAME_CONFLICT
-         *       * CFF_FARM_ID_NOT_FOUND
-         *       * CFF_FARM_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_FARM_NAME
-         *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
-         *       * CFF_ALREADY_EXISTS_ACTIVE
-         *       * CFF_ALREADY_EXISTS_ARCHIVED
-         *       * CFF_ALREADY_EXISTS_MERGED
-         *       * CFF_FIELD_ID_ALREADY_EXISTS
-         *       * CFF_BAD_FIELD_ID
-         *       * CFF_FIELD_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_FIELD_NAME
-         *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-         *       * CFF_MISSING_REQUEST_BODY
-         *       * CFF_OUTDATED_REQUEST
-         *       * CFF_USER_LAST_MODIFIED_CLIPPED
+         * @description Platform uri to fetch farm details
+         * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/222/farms
          */
-        ValidationErrorForUpdate: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /**
-         * @description The possible errors are:
-         *       * CFF_CLIENT_ID_ALREADY_EXISTS
-         *       * CFF_BAD_CLIENT_ID
-         *       * CFF_CLIENT_ID_NAME_CONFLICT
-         *       * CFF_CLIENT_ID_NOT_FOUND
-         *       * CFF_CLIENT_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_CLIENT_NAME
-         *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-         *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-         *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-         *       * CFF_FARM_ID_ALREADY_EXISTS
-         *       * CFF_BAD_FARM_ID
-         *       * CFF_FARM_ID_NAME_CONFLICT
-         *       * CFF_FARM_ID_NOT_FOUND
-         *       * CFF_FARM_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_FARM_NAME
-         *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
-         *       * CFF_ALREADY_EXISTS_ACTIVE
-         *       * CFF_ALREADY_EXISTS_ARCHIVED
-         *       * CFF_ALREADY_EXISTS_MERGED
-         *       * CFF_FIELD_ID_ALREADY_EXISTS
-         *       * CFF_BAD_FIELD_ID
-         *       * CFF_FIELD_NAME_ALREADY_EXISTS
-         *       * CFF_EMPTY_FIELD_NAME
-         *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-         *       * CFF_MISSING_REQUEST_BODY
-         *       * CFF_OUTDATED_REQUEST
-         *       * CFF_USER_LAST_MODIFIED_CLIPPED
-         */
-        ValidationErrorForCreate: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+        uri?: string;
+      }[];
+      values?: components['schemas']['GetFarm'][];
     };
-    parameters: {
-        /** @description The ID of the organization */
-        OrgId: number;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature": string;
-        /** @description client name */
-        ClientName: string;
-        /** @description farm name */
-        FarmName: string;
-        /** @description field name */
-        FieldName: string;
-        /** @description Filters by resource state (whether or not the resource is archived) */
-        recordFilter: "AVAILABLE" | "ARCHIVED" | "ALL";
-        /** @description list of objects to include */
-        FieldsEmbed: ("farms" | "clients" | "boundaries" | "activeBoundary" | "simplifiedBoundaries" | "guidanceLines" | "accessPoints" | "notes")[];
-        /** @description list of objects to include */
-        FieldEmbed: ("farms" | "clients" | "guidanceLines" | "accessPoints")[];
-        /** @description Context Organization ID */
-        ContextOrganizationId: string;
-        /** @description field guid */
-        FieldId: string;
-        /** @description Indicates a preference for returned measurements to be in English vs Metric */
-        UnitOfMeasureHeader: "METRIC" | "ENGLISH";
+    CreateUpdateClient: {
+      /** @example Client */
+      '@Type'?: string;
+      /** @example SouthEast End_Client */
+      name?: string;
     };
-    requestBodies: {
-        ASingleField: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["CreateUpdateField"];
-            };
-        };
-        FieldGuidSearches: {
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["FieldGuidSearches"];
-            };
-        };
+    Boundary: {
+      /** @example Boundary */
+      '@Type'?: string;
+      /** @example Auto-Generated 2014 Harvest */
+      name?: string;
+      /** @example Auto */
+      sourceType?: string;
+      /**
+       * Format: date-time
+       * @example 2016-11-17T11:53:00.000Z
+       */
+      modifiedTime?: string;
+      area?: components['schemas']['MeasurementAsDouble'];
+      workableArea?: components['schemas']['MeasurementAsDouble'];
+      multipolygons?: components['schemas']['Polygon'][];
+      extent?: components['schemas']['Extent'];
+      /**
+       * Format: uuid
+       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+      /** @description Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries. */
+      active?: boolean;
+      /** @description Indicates whether the contained area is irrigated */
+      irrigated?: boolean;
     };
-    headers: never;
-    pathItems: never;
+    AccessPoint: {
+      /** Format: uri */
+      id?: string;
+      description?: string;
+      direction?: string;
+      isEntry?: boolean;
+      isExit?: boolean;
+      location?: components['schemas']['Point'];
+      name?: string;
+      links?: components['schemas']['Link'][];
+    };
+    GuidanceLines: components['schemas']['ABLine'] & {
+      bPoint?: components['schemas']['Point'];
+      eastShift?: components['schemas']['MeasurementAsDouble'];
+      northShift?: components['schemas']['MeasurementAsDouble'];
+      /** @example 0 */
+      tramOffset?: number;
+      /** @example 0 */
+      tramSpacing?: number;
+      /** @example dtiABLineMethodBPoint */
+      savedMethod?: string;
+      /**
+       * Format: uri
+       * @example 5a62177b33df3c0e2cc85dc2
+       */
+      id?: string;
+      /**
+       * Format: uri
+       * @example c2878a14-f9f4-4eaf-b7ef-24f3da95d337
+       */
+      guid?: string;
+      /** @example Fleece */
+      name?: string;
+      /**
+       * Format: date-time
+       * @example 2018-03-05T14:56:57.295Z
+       */
+      lastModifiedTime?: string;
+      /** @example ACTIVE */
+      status?: string;
+      locked?: boolean;
+      links?: components['schemas']['Link'][];
+    };
+    Flag: {
+      /** @example GenericNote */
+      '@Type'?: string;
+      /**
+       * Format: date-time
+       * @example 2016-08-19T18:48:48.886Z
+       */
+      createdDate?: string;
+      /**
+       * Format: date-time
+       * @example 2016-08-19T18:48:48.886Z
+       */
+      lastModifiedDate?: string;
+      /** @example some text */
+      text?: string;
+      metadata?: components['schemas']['MetaData'][];
+      author?: components['schemas']['Author'][];
+      geometry?: components['schemas']['Geometry'];
+      /** @example SCOUT */
+      noteType?: string;
+      /**
+       * Format: uri
+       * @example 4e7a1fa7-9db9-45ea-94d3-e45b2fa43c2a
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    MetaData: {
+      /** @example Metadata */
+      '@Type'?: string;
+      /** @example EARLY_GROWTH_EMERGENCE */
+      name?: string;
+      /** @example 9 */
+      value?: number;
+    };
+    Author: {
+      /** @example User */
+      '@Type'?: string;
+      /** @example scoutcarla1 */
+      accountName?: string;
+      /** @example scoutcarla1 */
+      givenName?: string;
+      /** @example scoutcarla1 */
+      familyName?: string;
+    };
+    Geometry: {
+      coordinates?: string[];
+      /** @example Point */
+      type?: string;
+    };
+    ABLine: {
+      /** @example AbLine */
+      '@Type'?: string;
+      /** @example 356.5847091769351 */
+      heading?: number;
+      aPoint?: components['schemas']['Point'];
+    };
+    Polygon: {
+      /** @example Polygon */
+      '@Type'?: string;
+      rings?: components['schemas']['Ring'][];
+    };
+    Ring: {
+      /** @example Ring */
+      '@Type'?: string;
+      points?: components['schemas']['Point'][];
+      /** @example exterior */
+      type?: string;
+      passable?: boolean;
+    };
+    Point: {
+      /** @example Point */
+      '@Type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 43.6187
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example 116.2146
+       */
+      lon?: number;
+    };
+    Extent: {
+      /** @example Extent */
+      '@Type'?: string;
+      topLeft?: components['schemas']['Point'];
+      bottomRight?: components['schemas']['Point'];
+    };
+    MeasurementAsDouble: {
+      /** @example MeasurementAsDouble */
+      '@Type'?: string;
+      /**
+       * Format: double
+       * @example 7.502938
+       */
+      valueAsDouble?: number;
+      /** @example vrEastShiftComponent */
+      vrDomainId?: string;
+      /**
+       * @description The unit of measure for this value
+       * @example ha
+       */
+      unit?: string;
+    };
+    /** @description Link to another resource */
+    Link: {
+      /** @example self */
+      rel: string;
+      /** @example https://apiqa.tal.deere.com/platform/users/grumpybear */
+      uri: string;
+    };
+    FieldGuidSearches: {
+      /** @example FieldGuidSearches */
+      '@Type'?: string;
+      fieldIds?: string[];
+      /** @example client */
+      clientName?: string;
+      /** @example farm */
+      farmName?: string;
+      /** @example field */
+      fieldName?: string;
+      embeds?: (
+        | 'farms'
+        | 'clients'
+        | 'boundaries'
+        | 'activeBoundary'
+        | 'simplifiedBoundaries'
+        | 'metadataOnlyBoundaries'
+        | 'guidanceLines'
+        | 'shapes'
+        | 'accessPoints'
+        | 'notes'
+      )[];
+      /** @enum {string} */
+      status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
+    };
+    GetFarm: {
+      /** @example Farm */
+      '@type'?: string;
+      /** @example John Doe */
+      name?: string;
+      /**
+       * Format: uuid
+       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      readonly id?: string;
+      /** @example false */
+      archived?: boolean;
+      /** @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c */
+      clientUri?: string;
+      readonly links?: {
+        /** @example Link */
+        '@type'?: string;
+        /** @example self */
+        rel?: string;
+        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
+        uri?: string;
+      }[];
+    };
+    /** @description Place holder for Matt to create the field object to be created or updated. */
+    CreateUpdateField: {
+      /** @example Field */
+      '@Type'?: string;
+      /** @example Land_Demo_1 */
+      name?: string;
+      /** @example true */
+      archived?: boolean;
+      Farms?: {
+        /** @example Farms */
+        '@Type'?: string;
+        farms?: components['schemas']['CreateUpdateFarm'][];
+      };
+      Clients?: {
+        /** @example Clients */
+        '@Type'?: string;
+        clients?: components['schemas']['CreateUpdateClient'][];
+      };
+    };
+  };
+  responses: {
+    /** @description Array of farms */
+    FarmsReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarms'];
+      };
+    };
+    /** @description Array of fields containing links related to fields */
+    FieldsReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsResponse'];
+      };
+    };
+    /** @description Get Field by client Id */
+    getFieldResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['GroupLink'][];
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['FieldResponse'][];
+        };
+      };
+    };
+    /** @description Array of fields with header for partial success. */
+    FieldsReturnedWithPartialSuccessHeader: {
+      headers: {
+        /** @description A string list of fieldIds requested which were not returned */
+        'FIELDS-NOT-FOUND'?: string;
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsResponse'];
+      };
+    };
+    /** @description Success */
+    FieldReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldResponse'];
+      };
+    };
+    /** @description Invalid access to organization */
+    DoesNotHaveAccessToOrg: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Organization not found */
+    OrgNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Organization or Field not found */
+    OrgOrFieldNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Field successfully created */
+    Created: {
+      headers: {
+        /** @description The uri of the newly created resource */
+        Location?: string;
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Field successfully updated */
+    Updated: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsPost'];
+      };
+    };
+    /** @description Field deleted.  If the client and farm has only this field the client and farm will be deleted */
+    Deleted: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd:deere:axiom:v3+json': unknown;
+      };
+    };
+    /**
+     * @description The possible errors are:
+     *       * CFF_CLIENT_ID_ALREADY_EXISTS
+     *       * CFF_BAD_CLIENT_ID
+     *       * CFF_CLIENT_ID_NAME_CONFLICT
+     *       * CFF_CLIENT_ID_NOT_FOUND
+     *       * CFF_CLIENT_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_CLIENT_NAME
+     *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
+     *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
+     *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
+     *       * CFF_FARM_ID_ALREADY_EXISTS
+     *       * CFF_BAD_FARM_ID
+     *       * CFF_FARM_ID_NAME_CONFLICT
+     *       * CFF_FARM_ID_NOT_FOUND
+     *       * CFF_FARM_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_FARM_NAME
+     *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
+     *       * CFF_ALREADY_EXISTS_ACTIVE
+     *       * CFF_ALREADY_EXISTS_ARCHIVED
+     *       * CFF_ALREADY_EXISTS_MERGED
+     *       * CFF_FIELD_ID_ALREADY_EXISTS
+     *       * CFF_BAD_FIELD_ID
+     *       * CFF_FIELD_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_FIELD_NAME
+     *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
+     *       * CFF_MISSING_REQUEST_BODY
+     *       * CFF_OUTDATED_REQUEST
+     *       * CFF_USER_LAST_MODIFIED_CLIPPED
+     */
+    ValidationErrorForUpdate: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /**
+     * @description The possible errors are:
+     *       * CFF_CLIENT_ID_ALREADY_EXISTS
+     *       * CFF_BAD_CLIENT_ID
+     *       * CFF_CLIENT_ID_NAME_CONFLICT
+     *       * CFF_CLIENT_ID_NOT_FOUND
+     *       * CFF_CLIENT_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_CLIENT_NAME
+     *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
+     *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
+     *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
+     *       * CFF_FARM_ID_ALREADY_EXISTS
+     *       * CFF_BAD_FARM_ID
+     *       * CFF_FARM_ID_NAME_CONFLICT
+     *       * CFF_FARM_ID_NOT_FOUND
+     *       * CFF_FARM_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_FARM_NAME
+     *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
+     *       * CFF_ALREADY_EXISTS_ACTIVE
+     *       * CFF_ALREADY_EXISTS_ARCHIVED
+     *       * CFF_ALREADY_EXISTS_MERGED
+     *       * CFF_FIELD_ID_ALREADY_EXISTS
+     *       * CFF_BAD_FIELD_ID
+     *       * CFF_FIELD_NAME_ALREADY_EXISTS
+     *       * CFF_EMPTY_FIELD_NAME
+     *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
+     *       * CFF_MISSING_REQUEST_BODY
+     *       * CFF_OUTDATED_REQUEST
+     *       * CFF_USER_LAST_MODIFIED_CLIPPED
+     */
+    ValidationErrorForCreate: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    /** @description The ID of the organization */
+    OrgId: number;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description client name */
+    ClientName: string;
+    /** @description farm name */
+    FarmName: string;
+    /** @description field name */
+    FieldName: string;
+    /** @description Filters by resource state (whether or not the resource is archived) */
+    recordFilter: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
+    /** @description list of objects to include */
+    FieldsEmbed: (
+      | 'farms'
+      | 'clients'
+      | 'boundaries'
+      | 'activeBoundary'
+      | 'simplifiedBoundaries'
+      | 'guidanceLines'
+      | 'accessPoints'
+      | 'notes'
+    )[];
+    /** @description list of objects to include */
+    FieldEmbed: ('farms' | 'clients' | 'guidanceLines' | 'accessPoints')[];
+    /** @description Context Organization ID */
+    ContextOrganizationId: string;
+    /** @description field guid */
+    FieldId: string;
+    /** @description Indicates a preference for returned measurements to be in English vs Metric */
+    UnitOfMeasureHeader: 'METRIC' | 'ENGLISH';
+  };
+  requestBodies: {
+    ASingleField: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['CreateUpdateField'];
+      };
+    };
+    FieldGuidSearches: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldGuidSearches'];
+      };
+    };
+  };
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

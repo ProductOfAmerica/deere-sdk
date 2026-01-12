@@ -1,17 +1,7 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import {
-  DeereClient,
-  DeereError,
-  AuthError,
-  RateLimitError,
-  createClient,
-} from '../src/client.js';
-import {
-  mockJsonResponse,
-  mockErrorResponse,
-  mockWithSpy,
-} from './helpers/mock-fetch.js';
+import { describe, it } from 'node:test';
+import { AuthError, DeereClient, DeereError, RateLimitError, createClient } from '../src/client.js';
+import { mockErrorResponse, mockJsonResponse, mockWithSpy } from './helpers/mock-fetch.js';
 
 describe('DeereClient', () => {
   describe('error handling', () => {
@@ -29,7 +19,7 @@ describe('DeereClient', () => {
           assert.strictEqual(error.message, 'Invalid token');
           assert.strictEqual((error as AuthError).status, 401);
           return true;
-        },
+        }
       );
     });
 
@@ -46,7 +36,7 @@ describe('DeereClient', () => {
           assert(error instanceof AuthError);
           assert.strictEqual((error as AuthError).status, 403);
           return true;
-        },
+        }
       );
     });
 
@@ -63,7 +53,7 @@ describe('DeereClient', () => {
           assert(error instanceof RateLimitError);
           assert.strictEqual((error as RateLimitError).retryAfter, 30);
           return true;
-        },
+        }
       );
     });
 
@@ -80,7 +70,7 @@ describe('DeereClient', () => {
           assert(error instanceof RateLimitError);
           assert.strictEqual((error as RateLimitError).retryAfter, undefined);
           return true;
-        },
+        }
       );
     });
 
@@ -99,7 +89,7 @@ describe('DeereClient', () => {
           assert(!(error instanceof RateLimitError));
           assert.strictEqual((error as DeereError).status, 500);
           return true;
-        },
+        }
       );
     });
 
@@ -116,7 +106,7 @@ describe('DeereClient', () => {
           assert(error instanceof DeereError);
           assert.strictEqual((error as DeereError).status, 400);
           return true;
-        },
+        }
       );
     });
 
@@ -132,7 +122,7 @@ describe('DeereClient', () => {
         (error: Error) => {
           assert.strictEqual(error.message, 'Custom error message');
           return true;
-        },
+        }
       );
     });
 
@@ -148,7 +138,7 @@ describe('DeereClient', () => {
         (error: Error) => {
           assert.strictEqual(error.message, 'Error from error field');
           return true;
-        },
+        }
       );
     });
 
@@ -164,7 +154,7 @@ describe('DeereClient', () => {
         (error: Error) => {
           assert.strictEqual(error.message, 'OAuth error');
           return true;
-        },
+        }
       );
     });
 
@@ -180,7 +170,7 @@ describe('DeereClient', () => {
         (error: Error) => {
           assert.strictEqual(error.message, 'First error');
           return true;
-        },
+        }
       );
     });
 
@@ -197,7 +187,7 @@ describe('DeereClient', () => {
         (error: Error) => {
           assert.deepStrictEqual((error as DeereError).body, errorBody);
           return true;
-        },
+        }
       );
     });
   });
@@ -211,8 +201,8 @@ describe('DeereClient', () => {
 
       assert.strictEqual(calls.length, 1);
       assert.strictEqual(
-        (calls[0].init.headers as Record<string, string>)['Authorization'],
-        'Bearer my-secret-token',
+        (calls[0].init.headers as Record<string, string>).Authorization,
+        'Bearer my-secret-token'
       );
     });
 
@@ -223,8 +213,8 @@ describe('DeereClient', () => {
       await client.get('/test');
 
       assert.strictEqual(
-        (calls[0].init.headers as Record<string, string>)['Accept'],
-        'application/vnd.deere.axiom.v3+json',
+        (calls[0].init.headers as Record<string, string>).Accept,
+        'application/vnd.deere.axiom.v3+json'
       );
     });
 
@@ -236,7 +226,7 @@ describe('DeereClient', () => {
 
       assert.strictEqual(
         (calls[0].init.headers as Record<string, string>)['Content-Type'],
-        'application/vnd.deere.axiom.v3+json',
+        'application/vnd.deere.axiom.v3+json'
       );
     });
 
@@ -294,10 +284,7 @@ describe('DeereClient', () => {
 
       await client.get('/test');
 
-      assert.strictEqual(
-        (calls[0].init.headers as Record<string, string>)['X-Custom'],
-        'value',
-      );
+      assert.strictEqual((calls[0].init.headers as Record<string, string>)['X-Custom'], 'value');
     });
 
     it('includes custom headers from request options', async () => {
@@ -306,10 +293,7 @@ describe('DeereClient', () => {
 
       await client.get('/test', { headers: { 'X-Request': 'header' } });
 
-      assert.strictEqual(
-        (calls[0].init.headers as Record<string, string>)['X-Request'],
-        'header',
-      );
+      assert.strictEqual((calls[0].init.headers as Record<string, string>)['X-Request'], 'header');
     });
 
     it('sends JSON body for POST requests', async () => {
@@ -460,8 +444,8 @@ describe('DeereClient', () => {
       await client.get('/test');
 
       assert.strictEqual(
-        (calls[0].init.headers as Record<string, string>)['Authorization'],
-        'Bearer factory-token',
+        (calls[0].init.headers as Record<string, string>).Authorization,
+        'Bearer factory-token'
       );
     });
   });
@@ -486,7 +470,7 @@ describe('DeereClient', () => {
           // Should fall back to statusText when body can't be parsed
           assert.strictEqual(error.message, 'Bad Request');
           return true;
-        },
+        }
       );
     });
 
@@ -509,7 +493,7 @@ describe('DeereClient', () => {
           assert(error instanceof DeereError);
           assert.strictEqual(error.message, 'Bad Request');
           return true;
-        },
+        }
       );
     });
 
@@ -542,7 +526,7 @@ describe('DeereClient', () => {
           assert(error instanceof DeereError);
           assert.strictEqual(error.message, 'Request timeout');
           return true;
-        },
+        }
       );
     });
 
@@ -590,7 +574,7 @@ describe('DeereClient', () => {
           const elapsed = Date.now() - requestStartTime;
           assert(elapsed < 200, `Timeout should have triggered quickly, took ${elapsed}ms`);
           return true;
-        },
+        }
       );
     });
 
@@ -618,7 +602,7 @@ describe('DeereClient', () => {
 
       // Should still have the required Deere headers
       const headers = calls[0].init.headers as Record<string, string>;
-      assert.strictEqual(headers['Accept'], 'application/vnd.deere.axiom.v3+json');
+      assert.strictEqual(headers.Accept, 'application/vnd.deere.axiom.v3+json');
       assert.strictEqual(headers['Content-Type'], 'application/vnd.deere.axiom.v3+json');
     });
   });

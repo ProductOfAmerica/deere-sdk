@@ -5,14 +5,9 @@
  * Includes harvest, planting, and application data.
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse, Link } from '../client.js';
+import type { DeereClient, Link, PaginatedResponse, RequestOptions } from '../client.js';
 
-export type FieldOperationType =
-  | 'seeded'
-  | 'harvested'
-  | 'applied'
-  | 'tillage'
-  | 'unknown';
+export type FieldOperationType = 'seeded' | 'harvested' | 'applied' | 'tillage' | 'unknown';
 
 export interface FieldOperation {
   '@type'?: string;
@@ -60,7 +55,7 @@ export class FieldOperationsApi {
   async list(
     orgId: string,
     params?: FieldOperationsListParams,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<PaginatedResponse<FieldOperation>> {
     const query = new URLSearchParams();
     if (params?.operationType) query.set('operationType', params.operationType);
@@ -83,7 +78,7 @@ export class FieldOperationsApi {
     orgId: string,
     fieldId: string,
     params?: FieldOperationsListParams,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<PaginatedResponse<FieldOperation>> {
     const query = new URLSearchParams();
     if (params?.operationType) query.set('operationType', params.operationType);
@@ -105,7 +100,7 @@ export class FieldOperationsApi {
   async listAll(
     orgId: string,
     params?: FieldOperationsListParams,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<FieldOperation[]> {
     const query = new URLSearchParams();
     if (params?.operationType) query.set('operationType', params.operationType);
@@ -124,14 +119,10 @@ export class FieldOperationsApi {
   /**
    * Get a specific field operation
    */
-  async get(
-    orgId: string,
-    operationId: string,
-    options?: RequestOptions,
-  ): Promise<FieldOperation> {
+  async get(orgId: string, operationId: string, options?: RequestOptions): Promise<FieldOperation> {
     return this.client.get<FieldOperation>(
       `/organizations/${orgId}/fieldOperations/${operationId}`,
-      options,
+      options
     );
   }
 
@@ -144,7 +135,7 @@ export class FieldOperationsApi {
     orgId: string,
     fieldId?: string,
     params?: Omit<FieldOperationsListParams, 'operationType'>,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<FieldOperation[]> {
     const query = new URLSearchParams();
     query.set('operationType', 'harvested');
@@ -168,7 +159,7 @@ export class FieldOperationsApi {
     orgId: string,
     fieldId?: string,
     params?: Omit<FieldOperationsListParams, 'operationType'>,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<FieldOperation[]> {
     const query = new URLSearchParams();
     query.set('operationType', 'seeded');
@@ -192,7 +183,7 @@ export class FieldOperationsApi {
     orgId: string,
     fieldId?: string,
     params?: Omit<FieldOperationsListParams, 'operationType'>,
-    options?: RequestOptions,
+    options?: RequestOptions
   ): Promise<FieldOperation[]> {
     const query = new URLSearchParams();
     query.set('operationType', 'applied');

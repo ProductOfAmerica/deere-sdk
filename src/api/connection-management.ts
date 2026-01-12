@@ -5,7 +5,7 @@
  * @generated from connection-management.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/connection-management.js';
 
 export class ConnectionManagementApi {
@@ -16,18 +16,27 @@ export class ConnectionManagementApi {
    * @description Retrieve all of the connections for a CSC based on the client in the token
    * @generated from GET /connections
    */
-  async list(params?: { createdAfter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ConnectionsResponse']>> {
+  async list(
+    params?: { createdAfter?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['ConnectionsResponse']>> {
     const query = new URLSearchParams();
     if (params?.createdAfter !== undefined) query.set('createdAfter', String(params.createdAfter));
     const queryString = query.toString();
     const path = `/connections${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ConnectionsResponse']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['ConnectionsResponse']>>(
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /connections
    */
-  async listAll(params?: { createdAfter?: string }, options?: RequestOptions): Promise<components['schemas']['ConnectionsResponse'][]> {
+  async listAll(
+    params?: { createdAfter?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['ConnectionsResponse'][]> {
     const query = new URLSearchParams();
     if (params?.createdAfter !== undefined) query.set('createdAfter', String(params.createdAfter));
     const queryString = query.toString();

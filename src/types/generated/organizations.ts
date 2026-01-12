@@ -4,386 +4,386 @@
  */
 
 export interface paths {
-    "/organizations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Orgs
-         * @description This request will return a list of organizations.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Returns a list of organizations of which a particular user is a member. */
-                    userName?: components["parameters"]["UserName"];
-                    /** @description Returns the name of the organization that corresponds with the given organization ID. */
-                    orgId?: components["parameters"]["OrgId"];
-                    /** @description Returns a list of organizations that contain the given string in their name. */
-                    orgName?: components["parameters"]["OrgName"];
-                };
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Organization List */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            values?: unknown;
-                        };
-                    };
-                };
-                /** @description Not authorized */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * List Orgs
+     * @description This request will return a list of organizations.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Returns a list of organizations of which a particular user is a member. */
+          userName?: components['parameters']['UserName'];
+          /** @description Returns the name of the organization that corresponds with the given organization ID. */
+          orgId?: components['parameters']['OrgId'];
+          /** @description Returns a list of organizations that contain the given string in their name. */
+          orgName?: components['parameters']['OrgName'];
         };
-        /**
-         * View an Organization
-         * @description This request will return information about an organization, such as its name, type, and whether or not you are a member of the organization. It contains links to the following resources:
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Organization */
-                    orgId: components["parameters"]["OrgIdGet"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description View Organization List */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            values?: unknown;
-                        };
-                    };
-                };
-            };
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Organization List */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+        /** @description Not authorized */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
     };
-    "/users/{userName}/organizations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * View User Orgs
-         * @description This request will return a list of organizations. The response will ONLY contain organizations in which the user is a staff member (member=true). This response will NOT contain partner organizations in which the user is not a staff member (member=false).
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature2"];
-                };
-                path: {
-                    /** @description User Name. */
-                    userName: components["parameters"]["UserName2"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description View Organization List */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            values?: unknown;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * View an Organization
+     * @description This request will return information about an organization, such as its name, type, and whether or not you are a member of the organization. It contains links to the following resources:
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Organization */
+          orgId: components['parameters']['OrgIdGet'];
         };
-        /**
-         * List Organization Users
-         * @description Returns a list of users belonging to the specified organization.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Organization */
-                    orgId: components["parameters"]["OrgIdGet"];
-                };
-                cookie?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description View Organization List */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
             };
-            requestBody?: never;
-            responses: {
-                /** @description Organization Users List */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            links?: unknown;
-                            values?: unknown;
-                        };
-                    };
-                };
-                /** @description Not authorized */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
+          };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/users/{userName}/organizations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View User Orgs
+     * @description This request will return a list of organizations. The response will ONLY contain organizations in which the user is a staff member (member=true). This response will NOT contain partner organizations in which the user is not a staff member (member=false).
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature2'];
+        };
+        path: {
+          /** @description User Name. */
+          userName: components['parameters']['UserName2'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description View Organization List */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/users': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Organization Users
+     * @description Returns a list of users belonging to the specified organization.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Organization */
+          orgId: components['parameters']['OrgIdGet'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Organization Users List */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+        /** @description Not authorized */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        OrganizationLink: {
-            /**
-             * @description Link to organization
-             * @example https://sandboxapi.deere.com/platform/organizations/1234
-             */
-            self?: unknown;
-            /**
-             * @description Redirect link to enable organization access
-             * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/select-organizations
-             */
-            connections?: unknown;
-            /**
-             * @description Redirect link to manage organization access and permissions
-             * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234
-             */
-            manage_connections?: unknown;
-        };
-        OrganizationLink2: {
-            /**
-             * @description Link to organization
-             * @example https://sandboxapi.deere.com/platform/organizations/1234
-             */
-            self?: unknown;
-            /**
-             * @description Redirect link to enable organization access
-             * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations
-             */
-            connections?: unknown;
-            /**
-             * @description Redirect link to manage organization access and permissions
-             * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234
-             */
-            manage_connections?: unknown;
-        };
-        Organization: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 3b5392015e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description The organization ID.
-             * @example 1234
-             */
-            id?: string;
-            /**
-             * @description The organization name.
-             * @example Smith Farms
-             */
-            name?: string;
-            /**
-             * @description The organization type: customer or dealer.
-             * @example customer
-             */
-            type?: string;
-            /**
-             * @description TRUE means that the user is a member of the org.
-             * @example true
-             */
-            member?: boolean;
-        };
-        OrganizationView: {
-            /**
-             * @description The organization ID.
-             * @example 1234
-             */
-            id?: string;
-            /**
-             * @description The organization name.
-             * @example Smith Farms
-             */
-            name?: string;
-            /**
-             * @description The organization type: customer or dealer.
-             * @example customer
-             */
-            type?: string;
-            /**
-             * @description TRUE means that the user is a member of the org.
-             * @example true
-             */
-            member?: boolean;
-        };
-        OrganizationViewGet: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 3b5392015e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description Organization ID.
-             * @example 1234
-             */
-            id?: string;
-            /**
-             * @description Organization name.
-             * @example Smith Farms
-             */
-            name?: string;
-            /**
-             * @description Organization type.
-             * @example customer
-             */
-            type?: string;
-            /**
-             * @description Partners of this organization.
-             * @example Apple Farms
-             */
-            partnerships?: string;
-            /**
-             * @description Indicates whether the user is a member of the organization.
-             * @example true
-             */
-            member?: boolean;
-        };
-        OrganizationUser: {
-            /**
-             * @description User's account name.
-             * @example JohnDoe
-             */
-            accountName?: string;
-            /**
-             * @description User's first name.
-             * @example John
-             */
-            givenName?: string;
-            /**
-             * @description User's last name.
-             * @example Doe
-             */
-            familyName?: string;
-            /**
-             * @description User's type. Examples are customer, dealer, internal.
-             * @example Customer
-             */
-            userType?: string;
-        };
+  schemas: {
+    OrganizationLink: {
+      /**
+       * @description Link to organization
+       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       */
+      self?: unknown;
+      /**
+       * @description Redirect link to enable organization access
+       * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/select-organizations
+       */
+      connections?: unknown;
+      /**
+       * @description Redirect link to manage organization access and permissions
+       * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234
+       */
+      manage_connections?: unknown;
     };
-    responses: never;
-    parameters: {
-        /** @description Returns a list of organizations of which a particular user is a member. */
-        UserName: string;
-        /** @description User Name. */
-        UserName2: string;
-        /** @description Returns the name of the organization that corresponds with the given organization ID. */
-        OrgId: string;
-        /** @description Returns a list of organizations that contain the given string in their name. */
-        OrgName: string;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature": string;
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature2": string;
-        /** @description Organization */
-        OrgIdGet: string;
+    OrganizationLink2: {
+      /**
+       * @description Link to organization
+       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       */
+      self?: unknown;
+      /**
+       * @description Redirect link to enable organization access
+       * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations
+       */
+      connections?: unknown;
+      /**
+       * @description Redirect link to manage organization access and permissions
+       * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234
+       */
+      manage_connections?: unknown;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    Organization: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 3b5392015e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The organization ID.
+       * @example 1234
+       */
+      id?: string;
+      /**
+       * @description The organization name.
+       * @example Smith Farms
+       */
+      name?: string;
+      /**
+       * @description The organization type: customer or dealer.
+       * @example customer
+       */
+      type?: string;
+      /**
+       * @description TRUE means that the user is a member of the org.
+       * @example true
+       */
+      member?: boolean;
+    };
+    OrganizationView: {
+      /**
+       * @description The organization ID.
+       * @example 1234
+       */
+      id?: string;
+      /**
+       * @description The organization name.
+       * @example Smith Farms
+       */
+      name?: string;
+      /**
+       * @description The organization type: customer or dealer.
+       * @example customer
+       */
+      type?: string;
+      /**
+       * @description TRUE means that the user is a member of the org.
+       * @example true
+       */
+      member?: boolean;
+    };
+    OrganizationViewGet: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 3b5392015e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description Organization ID.
+       * @example 1234
+       */
+      id?: string;
+      /**
+       * @description Organization name.
+       * @example Smith Farms
+       */
+      name?: string;
+      /**
+       * @description Organization type.
+       * @example customer
+       */
+      type?: string;
+      /**
+       * @description Partners of this organization.
+       * @example Apple Farms
+       */
+      partnerships?: string;
+      /**
+       * @description Indicates whether the user is a member of the organization.
+       * @example true
+       */
+      member?: boolean;
+    };
+    OrganizationUser: {
+      /**
+       * @description User's account name.
+       * @example JohnDoe
+       */
+      accountName?: string;
+      /**
+       * @description User's first name.
+       * @example John
+       */
+      givenName?: string;
+      /**
+       * @description User's last name.
+       * @example Doe
+       */
+      familyName?: string;
+      /**
+       * @description User's type. Examples are customer, dealer, internal.
+       * @example Customer
+       */
+      userType?: string;
+    };
+  };
+  responses: never;
+  parameters: {
+    /** @description Returns a list of organizations of which a particular user is a member. */
+    UserName: string;
+    /** @description User Name. */
+    UserName2: string;
+    /** @description Returns the name of the organization that corresponds with the given organization ID. */
+    OrgId: string;
+    /** @description Returns a list of organizations that contain the given string in their name. */
+    OrgName: string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature2': string;
+    /** @description Organization */
+    OrgIdGet: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

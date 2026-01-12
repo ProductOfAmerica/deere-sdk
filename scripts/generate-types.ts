@@ -5,9 +5,9 @@
  * Usage: pnpm generate-types
  */
 
-import { execSync } from 'child_process';
-import { readdirSync, existsSync, writeFileSync, statSync, mkdirSync } from 'fs';
-import { join, basename } from 'path';
+import { execSync } from 'node:child_process';
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'fixed');
 const OUTPUT_DIR = join(process.cwd(), 'src', 'types', 'generated');

@@ -4,385 +4,385 @@
  */
 
 export interface paths {
-    "/partnerships": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Partners
-         * @description This request allows the client to view a list of partners. Each data point links to the following: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: {
-                    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-                    "x-deere-signature"?: components["parameters"]["X-deere-signature"];
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Partnerships */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": components["schemas"]["Partnerships"];
-                    };
-                };
-                403: components["responses"]["Forbidden"];
-            };
-        };
-        put?: never;
-        /**
-         * Request a Partnership
-         * @description This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the <a href="/dev-docs/organizations" target="_blank">/organizations</a> endpoint to discover available organizations for a user.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/vnd.deere.axiom.v3+json": unknown;
-                };
-            };
-            responses: {
-                /** @description Created Partnership */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            /**
-                             * Format: int32
-                             * @example 1
-                             */
-                            total?: number;
-                        };
-                    };
-                };
-                400: components["responses"]["BadCreateRequests"];
-                403: components["responses"]["Forbidden"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/partnerships': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/partnerships/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * List Partners
+     * @description This request allows the client to view a list of partners. Each data point links to the following: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
         };
-        /**
-         * Get Partnership Details
-         * @description This request allows the client to view partnership details. The response links to the following resources: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Token Id */
-                    token: components["parameters"]["PartnershipId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Partnerships */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": components["schemas"]["PartnershipsId"];
-                    };
-                };
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["TokenNotFound"];
-            };
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Partnerships */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Partnerships'];
+          };
         };
-        put?: never;
-        post?: never;
-        /**
-         * Delete a Partnership
-         * @description This request lets the client delete a partnership.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Token Id */
-                    token: components["parameters"]["PartnershipId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Deleted Partnership */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            /**
-                             * Format: int32
-                             * @example 1
-                             */
-                            total?: number;
-                        };
-                    };
-                };
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["TokenNotFound"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        403: components['responses']['Forbidden'];
+      };
     };
-    "/partnerships/{token}/permissions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    put?: never;
+    /**
+     * Request a Partnership
+     * @description This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the <a href="/dev-docs/organizations" target="_blank">/organizations</a> endpoint to discover available organizations for a user.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': unknown;
         };
-        /**
-         * View Permissions in a Partnership
-         * @description This request allows the client to view all the permissions that one partner has assigned the other. The response will also link to the Assign Permissions resource, which will allow the client to assign permissions to a partner.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Token Id */
-                    token: components["parameters"]["PartnershipId"];
-                };
-                cookie?: never;
+      };
+      responses: {
+        /** @description Created Partnership */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
             };
-            requestBody?: never;
-            responses: {
-                /** @description Permissions */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": components["schemas"]["Permissions"];
-                    };
-                };
-            };
+          };
         };
-        put?: never;
-        /**
-         * Request/Assign Permissions
-         * @description This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.<sup><a href="#additional-type">2</a></sup>
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Token Id */
-                    token: components["parameters"]["PartnershipId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/vnd.deere.axiom.v3+json": unknown;
-                };
-            };
-            responses: {
-                /** @description Permissions */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": components["schemas"]["PermissionsPost"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        400: components['responses']['BadCreateRequests'];
+        403: components['responses']['Forbidden'];
+      };
     };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/partnerships/{token}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Partnership Details
+     * @description This request allows the client to view partnership details. The response links to the following resources: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Token Id */
+          token: components['parameters']['PartnershipId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Partnerships */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['PartnershipsId'];
+          };
+        };
+        403: components['responses']['Forbidden'];
+        404: components['responses']['TokenNotFound'];
+      };
+    };
+    put?: never;
+    post?: never;
+    /**
+     * Delete a Partnership
+     * @description This request lets the client delete a partnership.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Token Id */
+          token: components['parameters']['PartnershipId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted Partnership */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+        403: components['responses']['Forbidden'];
+        404: components['responses']['TokenNotFound'];
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/partnerships/{token}/permissions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View Permissions in a Partnership
+     * @description This request allows the client to view all the permissions that one partner has assigned the other. The response will also link to the Assign Permissions resource, which will allow the client to assign permissions to a partner.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Token Id */
+          token: components['parameters']['PartnershipId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Permissions */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Permissions'];
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Request/Assign Permissions
+     * @description This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.<sup><a href="#additional-type">2</a></sup>
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Token Id */
+          token: components['parameters']['PartnershipId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': unknown;
+        };
+      };
+      responses: {
+        /** @description Permissions */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['PermissionsPost'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** @description A list of partnerships */
-        Partnerships: {
-            links?: components["schemas"]["PartnershipsLink"][];
-            /**
-             * Format: int64
-             * @description Number of partnerships found.
-             * @example 1
-             */
-            total?: number;
-            values?: components["schemas"]["Partnership"][];
-        };
-        /** @description A partnership object */
-        Partnership: {
-            /**
-             * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-             * @example 3b6402615e4b4e1c92013026f47109bb
-             */
-            "x-deere-signature"?: string;
-            /**
-             * @description View the status of the partnership
-             * @example REJECTED
-             */
-            "status<sup><a href=\"#additional-status\">1</a></sup>"?: string;
-        };
-        PartnershipsLink: {
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/0987
-             */
-            fromPartnership?: unknown;
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/1234
-             */
-            toPartnership?: unknown;
-            /**
-             * @description Permissions Link.
-             * @example https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
-             */
-            permissions?: unknown;
-            /**
-             * @description Partnerships Link.
-             * @example https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703
-             */
-            contactInvitation?: unknown;
-        };
-        /** @description A list of partnerships */
-        PartnershipsId: {
-            links?: components["schemas"]["PartnershipsLink"][];
-            /**
-             * Format: int64
-             * @description Number of partnerships found.
-             * @example 1
-             */
-            total?: number;
-            values?: components["schemas"]["PartnershipId"][];
-        };
-        PartnershipId: {
-            /**
-             * @description View the status of the partnership
-             * @example PENDING
-             */
-            "status<sup><a href=\"#additional-status\">1</a></sup>"?: string;
-        };
-        /** @description A list of permissions */
-        Permissions: {
-            links?: components["schemas"]["PermissionsLink"][];
-            /**
-             * Format: int64
-             * @description Number of permissions found.
-             * @example 1
-             */
-            total?: number;
-            values?: components["schemas"]["PermissionValue"][];
-        };
-        PermissionsLink: {
-            /**
-             * @description Permissions Link.
-             * @example https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
-             */
-            requestPermissions?: unknown;
-        };
-        PermissionValue: {
-            /**
-             * @description The type of permission.
-             * @example prescription Files
-             */
-            "type<sup><a href=\"#additional-type\">2</a></sup>"?: string;
-            /**
-             * @description View the status of the partnership
-             * @example PENDING
-             */
-            status?: string;
-        };
-        /** @description A list of permissions */
-        PermissionsPost: {
-            values?: components["schemas"]["PermissionPostValue"][];
-        };
-        PermissionPostValue: {
-            /**
-             * @description The type of permission.
-             * @example viewDetailsAndMapLocation
-             */
-            "type<sup><a href=\"#additional-type\">2</a></sup>"?: string;
-            /**
-             * @description Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved.
-             * @example requested
-             */
-            status?: string;
-        };
+  schemas: {
+    /** @description A list of partnerships */
+    Partnerships: {
+      links?: components['schemas']['PartnershipsLink'][];
+      /**
+       * Format: int64
+       * @description Number of partnerships found.
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['Partnership'][];
     };
-    responses: {
-        /** @description Not authorized */
-        Forbidden: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Stub response for BadCreateRequests (auto-generated) */
-        BadCreateRequests: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        /** @description Stub response for TokenNotFound (auto-generated) */
-        TokenNotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
+    /** @description A partnership object */
+    Partnership: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 3b6402615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description View the status of the partnership
+       * @example REJECTED
+       */
+      'status<sup><a href="#additional-status">1</a></sup>'?: string;
     };
-    parameters: {
-        /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-        "X-deere-signature": string;
-        /** @description Token Id */
-        PartnershipId: string;
+    PartnershipsLink: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/0987
+       */
+      fromPartnership?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       */
+      toPartnership?: unknown;
+      /**
+       * @description Permissions Link.
+       * @example https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
+       */
+      permissions?: unknown;
+      /**
+       * @description Partnerships Link.
+       * @example https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703
+       */
+      contactInvitation?: unknown;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** @description A list of partnerships */
+    PartnershipsId: {
+      links?: components['schemas']['PartnershipsLink'][];
+      /**
+       * Format: int64
+       * @description Number of partnerships found.
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['PartnershipId'][];
+    };
+    PartnershipId: {
+      /**
+       * @description View the status of the partnership
+       * @example PENDING
+       */
+      'status<sup><a href="#additional-status">1</a></sup>'?: string;
+    };
+    /** @description A list of permissions */
+    Permissions: {
+      links?: components['schemas']['PermissionsLink'][];
+      /**
+       * Format: int64
+       * @description Number of permissions found.
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['PermissionValue'][];
+    };
+    PermissionsLink: {
+      /**
+       * @description Permissions Link.
+       * @example https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
+       */
+      requestPermissions?: unknown;
+    };
+    PermissionValue: {
+      /**
+       * @description The type of permission.
+       * @example prescription Files
+       */
+      'type<sup><a href="#additional-type">2</a></sup>'?: string;
+      /**
+       * @description View the status of the partnership
+       * @example PENDING
+       */
+      status?: string;
+    };
+    /** @description A list of permissions */
+    PermissionsPost: {
+      values?: components['schemas']['PermissionPostValue'][];
+    };
+    PermissionPostValue: {
+      /**
+       * @description The type of permission.
+       * @example viewDetailsAndMapLocation
+       */
+      'type<sup><a href="#additional-type">2</a></sup>'?: string;
+      /**
+       * @description Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved.
+       * @example requested
+       */
+      status?: string;
+    };
+  };
+  responses: {
+    /** @description Not authorized */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Stub response for BadCreateRequests (auto-generated) */
+    BadCreateRequests: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+    /** @description Stub response for TokenNotFound (auto-generated) */
+    TokenNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+  };
+  parameters: {
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description Token Id */
+    PartnershipId: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

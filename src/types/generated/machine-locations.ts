@@ -4,129 +4,129 @@
  */
 
 export interface paths {
-    "/machines/{principalId}/locationHistory": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Machine Location History
-         * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the <strong>/machines</strong> resource.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Includes the last known machine location. */
-                    lastKnown?: boolean;
-                    /** @description Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard. */
-                    startDate?: string;
-                    /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z */
-                    endDate?: string;
-                };
-                header?: never;
-                path: {
-                    /** @description Principal Id of Machine/Equipment. */
-                    principalId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Location list for the machine */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            /** @description Link list */
-                            links?: components["schemas"]["MyJD_links"][];
-                            /** @description Number of results in the list */
-                            total?: number;
-                            values?: components["schemas"]["ReportedLocation"][];
-                        };
-                    };
-                };
-                /** @description The user does not have access to the machine or is not allowed to see mahcine locations */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Machine not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/machines/{principalId}/locationHistory': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * Machine Location History
+     * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the <strong>/machines</strong> resource.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Includes the last known machine location. */
+          lastKnown?: boolean;
+          /** @description Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard. */
+          startDate?: string;
+          /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z */
+          endDate?: string;
+        };
+        header?: never;
+        path: {
+          /** @description Principal Id of Machine/Equipment. */
+          principalId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Location list for the machine */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /** @description Link list */
+              links?: components['schemas']['MyJD_links'][];
+              /** @description Number of results in the list */
+              total?: number;
+              values?: components['schemas']['ReportedLocation'][];
+            };
+          };
+        };
+        /** @description The user does not have access to the machine or is not allowed to see mahcine locations */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Machine not found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        MyJD_links: {
-            /**
-             * @description Machines Link.
-             * @example https://sandboxapi.deere.com/platform/machines/4321
-             */
-            machine?: unknown;
-        };
-        ReportedLocation: {
-            /**
-             * @description Contains the <mark>&lt;lat&gt;</mark>, <mark>&lt;lon&gt;</mark>, and <mark>&lt;altitude&gt;</mark> tags.
-             * @example N/A
-             */
-            point?: Record<string, never>;
-            /**
-             * Format: float
-             * @description The latitude of the machine's location.
-             * @example <mark>41.688612</mark>
-             */
-            lat?: Record<string, never>;
-            /**
-             * Format: float
-             * @description The longitude of the machine's location.
-             * @example <mark>-93.693612</mark>
-             */
-            lon?: Record<string, never>;
-            /**
-             * @description The altitude of the machine's location. The value and unit of measurement are both included.
-             * @default ReportedLocation
-             * @example See sample response below.
-             */
-            altitude: Record<string, never>;
-            /**
-             * Format: date
-             * @description Timestamp of the machine location report. All timestamps follow the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard format.
-             * @example 2012-11-07T18:42:07.186Z
-             */
-            eventTimestamp?: string;
-            /**
-             * Format: date
-             * @description The last time the machine noted its GPS location.
-             * @example 2010-10-04T15:06:24.000Z
-             */
-            gpsFixTimestamp?: string;
-        };
+  schemas: {
+    MyJD_links: {
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/4321
+       */
+      machine?: unknown;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    ReportedLocation: {
+      /**
+       * @description Contains the <mark>&lt;lat&gt;</mark>, <mark>&lt;lon&gt;</mark>, and <mark>&lt;altitude&gt;</mark> tags.
+       * @example N/A
+       */
+      point?: Record<string, never>;
+      /**
+       * Format: float
+       * @description The latitude of the machine's location.
+       * @example <mark>41.688612</mark>
+       */
+      lat?: Record<string, never>;
+      /**
+       * Format: float
+       * @description The longitude of the machine's location.
+       * @example <mark>-93.693612</mark>
+       */
+      lon?: Record<string, never>;
+      /**
+       * @description The altitude of the machine's location. The value and unit of measurement are both included.
+       * @default ReportedLocation
+       * @example See sample response below.
+       */
+      altitude: Record<string, never>;
+      /**
+       * Format: date
+       * @description Timestamp of the machine location report. All timestamps follow the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard format.
+       * @example 2012-11-07T18:42:07.186Z
+       */
+      eventTimestamp?: string;
+      /**
+       * Format: date
+       * @description The last time the machine noted its GPS location.
+       * @example 2010-10-04T15:06:24.000Z
+       */
+      gpsFixTimestamp?: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

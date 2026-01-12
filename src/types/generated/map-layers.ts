@@ -4,693 +4,693 @@
  */
 
 export interface paths {
-    "/organizations/{orgId}/fields/{id}/mapLayerSummaries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Map Layer Summaries
-         * @description This resource will list all Map Layer Summaries for a specified field.<br/>
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
-                    includePartialSummaries?: components["parameters"]["includePartialSummaries"];
-                    /** @description Takes these values mapLayers. */
-                    embed?: components["parameters"]["embed"];
-                };
-                header?: never;
-                path: {
-                    /** @description Organization ID */
-                    orgId: components["parameters"]["OrganizationId"];
-                    /** @description Field ID */
-                    fieldId: components["parameters"]["fieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: components["schemas"]["MapLayerSummaryCollection"];
-            };
-        };
-        put?: never;
-        /**
-         * Create a map layer summary
-         * @description Creates a new Map Layer Summary resource.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Organization ID */
-                    orgId: components["parameters"]["OrganizationId"];
-                    /** @description Field ID */
-                    fieldId: components["parameters"]["fieldId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/vnd.deere.axiom.v3+json": components["schemas"]["PostRequest"];
-                    "Create Map Layer Summary": unknown;
-                };
-            };
-            responses: {
-                /** @description Created */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": unknown;
-                    };
-                };
-                400: components["responses"]["400"];
-                401: components["responses"]["401"];
-                403: components["responses"]["403"];
-                404: components["responses"]["404"];
-                406: components["responses"]["406"];
-                415: components["responses"]["415"];
-                429: components["responses"]["429"];
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/organizations/{orgId}/fields/{id}/mapLayerSummaries': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/mapLayerSummaries/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    /**
+     * List Map Layer Summaries
+     * @description This resource will list all Map Layer Summaries for a specified field.<br/>
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
+          includePartialSummaries?: components['parameters']['includePartialSummaries'];
+          /** @description Takes these values mapLayers. */
+          embed?: components['parameters']['embed'];
         };
-        /**
-         * View a Map Layer Summary
-         * @description Returns a specific Map Layer Summary resource.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Map Layer Summary ID */
-                    id: components["parameters"]["id"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description View a specific Map Layer Summary */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            values?: unknown;
-                            links?: unknown;
-                        };
-                    };
-                };
-                401: components["responses"]["401"];
-                403: components["responses"]["403"];
-                404: components["responses"]["404"];
-                406: components["responses"]["406"];
-                429: components["responses"]["429"];
-            };
+        header?: never;
+        path: {
+          /** @description Organization ID */
+          orgId: components['parameters']['OrganizationId'];
+          /** @description Field ID */
+          fieldId: components['parameters']['fieldId'];
         };
-        put?: never;
-        post?: never;
-        /**
-         * Delete a Map Layer Summary
-         * @description Deletes a Map Layer Summary and its underlying Map Layer and File Resource resources.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Map Layer Summary ID */
-                    id: components["parameters"]["id"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Deleted */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/vnd.deere.axiom.v3+json": {
-                            /**
-                             * Format: int32
-                             * @example 1
-                             */
-                            total?: number;
-                        };
-                    };
-                };
-                401: components["responses"]["401"];
-                403: components["responses"]["403"];
-                404: components["responses"]["404"];
-                406: components["responses"]["406"];
-                429: components["responses"]["429"];
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['schemas']['MapLayerSummaryCollection'];
+      };
     };
+    put?: never;
+    /**
+     * Create a map layer summary
+     * @description Creates a new Map Layer Summary resource.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Organization ID */
+          orgId: components['parameters']['OrganizationId'];
+          /** @description Field ID */
+          fieldId: components['parameters']['fieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostRequest'];
+          'Create Map Layer Summary': unknown;
+        };
+      };
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': unknown;
+          };
+        };
+        400: components['responses']['400'];
+        401: components['responses']['401'];
+        403: components['responses']['403'];
+        404: components['responses']['404'];
+        406: components['responses']['406'];
+        415: components['responses']['415'];
+        429: components['responses']['429'];
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mapLayerSummaries/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a Map Layer Summary
+     * @description Returns a specific Map Layer Summary resource.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer Summary ID */
+          id: components['parameters']['id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description View a specific Map Layer Summary */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+              links?: unknown;
+            };
+          };
+        };
+        401: components['responses']['401'];
+        403: components['responses']['403'];
+        404: components['responses']['404'];
+        406: components['responses']['406'];
+        429: components['responses']['429'];
+      };
+    };
+    put?: never;
+    post?: never;
+    /**
+     * Delete a Map Layer Summary
+     * @description Deletes a Map Layer Summary and its underlying Map Layer and File Resource resources.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer Summary ID */
+          id: components['parameters']['id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+        401: components['responses']['401'];
+        403: components['responses']['403'];
+        404: components['responses']['404'];
+        406: components['responses']['406'];
+        429: components['responses']['429'];
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        CollectionBase: {
-            links?: {
-                /**
-                 * @description Links relavent to exploring the collection.
-                 * @example self
-                 */
-                rel?: string;
-                /**
-                 * Format: uri
-                 * @description The URI to the related resource.
-                 * @example https://api.deere.com/platform/organizations/61265/fields/42849709-5d54-473a-9eba-adab6f4bc8a8/mapLayerSummaries
-                 */
-                uri?: string;
-            }[];
-            /** @example 1 */
-            total?: number;
-        };
-        MapLayerSummaryCollection: unknown;
-        ContributedMapLayerSummary: {
-            /**
-             * @description Links to other objects in the Deere ecosystem.
-             * @example See "Available Links" below
-             */
-            links?: unknown[];
-            /**
-             * @description Count of Map Layer Summaries in response.
-             * @example 3
-             */
-            total?: number;
-            /** @description The primary resource listing. */
-            values?: Record<string, never>;
-            "<span id='map-layer-summary-details'>Map Layer Summary Details</span>"?: {
-                /**
-                 * @description Links to other objects in the Deere ecosystem.
-                 * @example See "Available Links" below
-                 */
-                links?: unknown[];
-                /**
-                 * Format: uuid
-                 * @description Map Layer Summary ID
-                 * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
-                 */
-                id?: string;
-                /**
-                 * @description Top level name of the Map Layer Summary
-                 * @example Summary of Map Layers
-                 */
-                title?: string;
-                /**
-                 * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href='#markdown'>Markdown</a>
-                 * @example My summary of agronomic image data
-                 */
-                text?: string;
-                /**
-                 * @description The type of data represented by the summary<sup><a href='#map-layer-summaries-map-types'>1</a></sup>.
-                 * @example PRESCRIPTION
-                 */
-                mapType?: string;
-                /**
-                 * @description An array of key value pair items about the Map Layer Summary.
-                 * @example See sample response below
-                 */
-                metadata?: Record<string, never>;
-                /**
-                 * Format: date-time
-                 * @description ISO 8601 Date and time in UTC this resource was created.
-                 * @example 2016-01-02T16:14:23.421Z
-                 */
-                dateCreated?: string;
-                /**
-                 * Format: date-time
-                 * @description ISO 8601 Date and time in UTC this resource was last modified.
-                 * @example 2016-01-02T16:14:23.421Z
-                 */
-                lastModifiedDate?: string;
-            };
-        };
-        PostContributedMapLayerSummary: {
-            /**
-             * @description Links to other objects in the Deere ecosystem.
-             * @example See "Available Links" below
-             */
-            links?: unknown[];
-            /**
-             * Format: uuid
-             * @description Map Layer Summary ID
-             * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
-             */
-            id?: string;
-            /**
-             * @description Top level name of the Map Layer Summary
-             * @example Summary of Map Layers
-             */
-            title?: string;
-            /**
-             * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
-             * @example My summary of agronomic image data
-             */
-            text?: string;
-            /**
-             * @description The type of data represented by the summary.<sup><a href="#map-layer-summaries-map-types">1</a></sup>
-             * @example PRESCRIPTION
-             */
-            mapType?: string;
-            /**
-             * @description An array of key value pair items about the Map Layer Summary.
-             * @example See sample response below
-             */
-            metadata?: Record<string, never>;
-            /**
-             * Format: date-time
-             * @description ISO 8601 Date and time in UTC this resource was created.
-             * @example 2016-01-02T16:14:23.421Z
-             */
-            dateCreated?: string;
-            /**
-             * Format: date-time
-             * @description ISO 8601 Date and time in UTC this resource was last modified.
-             * @example 2016-01-02T16:14:23.421Z
-             */
-            lastModifiedDate?: string;
-        };
-        AvailableLinks: {
-            /**
-             * @description This Map Layer List Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID/mapLayerSummaries
-             */
-            "self (map layer summaries list)"?: unknown;
-            /**
-             * @description This Map Layer Summary Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
-             */
-            "self (map layer summary)"?: unknown;
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
-             */
-            owningOrganization?: unknown;
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID
-             */
-            targetResource?: unknown;
-            /**
-             * @description Map Layers Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
-             */
-            mapLayers?: unknown;
-            /**
-             * @description Create Map Layers Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
-             */
-            createMapLayer?: unknown;
-        };
-        PostRequest: {
-            /**
-             * @description Links to other objects in the Deere ecosystem.
-             * @example See "Request Links" below <br/>Readonly: No
-             */
-            links?: unknown[];
-            /**
-             * @description Top level name of the Map Layer Summary
-             * @example Summary of Map Layers <br/>Readonly: No
-             */
-            title?: string;
-            /**
-             * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
-             * @example My summary of agronomic image data <br/>Readonly: No
-             */
-            text?: string;
-            /**
-             * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
-             * @example PRESCRIPTION <br/>Readonly: No
-             */
-            mapType?: string;
-            /**
-             * @description An array of key value pair items about the Map Layer Summary.
-             * @example See sample request below <br/>Readonly: No
-             */
-            metadata?: Record<string, never>;
-            /**
-             * Format: date-time
-             * @description ISO 8601 Date and time in UTC this resource was created.
-             * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
-             */
-            dateCreated?: string;
-        };
-        PostResponse: {
-            /**
-             * @description Links to other objects in the Deere ecosystem.
-             * @example See "Request Links" below <br/>Readonly: No
-             */
-            links?: unknown[];
-            /**
-             * @description Top level name of the Map Layer Summary
-             * @example Summary of Map Layers <br/>Readonly: No
-             */
-            title?: string;
-            /**
-             * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
-             * @example My summary of agronomic image data <br/>Readonly: No
-             */
-            text?: string;
-            /**
-             * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
-             * @example PRESCRIPTION <br/>Readonly: No
-             */
-            mapType?: string;
-            /**
-             * @description An array of key value pair items about the Map Layer Summary.
-             * @example See sample request below <br/>Readonly: No
-             */
-            metadata?: Record<string, never>;
-            /**
-             * Format: date-time
-             * @description ISO 8601 Date and time in UTC this resource was created.
-             * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
-             */
-            dateCreated?: string;
-        };
-        PostAvailableLinks: {
-            /**
-             * @description Organizations Link
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
-             */
-            owningOrganization?: unknown;
-            /**
-             * @description Contribution Definitions Link.
-             * @example https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
-             */
-            contributionDefinition?: unknown;
-        };
-        GetMapLayerSummaryAvailableLinks: {
-            /**
-             * @description This Map Layer Summary Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
-             */
-            self?: unknown;
-            /**
-             * @description Organizations Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
-             */
-            owningOrganization?: unknown;
-            /**
-             * @description Fields Link.
-             * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID
-             */
-            targetResource?: unknown;
-            /**
-             * @description Map Layers Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
-             */
-            mapLayers?: unknown;
-            /**
-             * @description Create Map Layers Link.
-             * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
-             */
-            createMapLayer?: unknown;
-        };
-        Metadata: {
-            /** @example Metadata */
-            "@type"?: string;
-            /** @example Location */
-            name: string;
-            /** @example Moline, IL */
-            value: string;
-        };
-        MapLayerCollection: components["schemas"]["CollectionBase"] & {
-            values?: components["schemas"]["ContributedMapLayer"][];
-        };
-        ContributedMapLayer: {
-            /** @example ContributedMapLayer */
-            "@type"?: string;
-            /**
-             * @description The title on the map layer.
-             * @example Drone Flyover
-             */
-            title: string;
-            extent?: components["schemas"]["MapExtent"];
-            /**
-             * @description A value to sort the Map Layer by in Field Analyzer Beta. Defaults to `title` if not provided.
-             * @example 1
-             */
-            sortName?: string;
-            legends: components["schemas"]["MapLegend"];
-            /**
-             * @description Map layer status.
-             * @enum {string}
-             */
-            readonly status?: "VALID" | "INVALID" | "QUEUED" | "NO_FILE_RESOURCE";
-            /**
-             * @description Description of the map layer.
-             * @example An aerial view of the building.
-             */
-            text?: string;
-            metadata?: components["schemas"]["Metadata"][];
-            /**
-             * @description The primary identifier for the operation.
-             * @example 8a0011f1-297e-48c2-a030-91a21287e721
-             */
-            readonly id?: string;
-            links?: components["schemas"]["Link"][];
-        };
-        /** @description Extents of the field. If not provided, the FileResource must be of type `image/tiff` or `application/zip` and contain the extents. */
-        MapExtent: {
-            /** @example MapExtent */
-            "@type"?: string;
-            /**
-             * Format: double
-             * @example 41.47187948123269
-             */
-            minimumLatitude: number;
-            /**
-             * Format: double
-             * @example 41.48192734153501
-             */
-            maximumLatitude: number;
-            /**
-             * Format: double
-             * @example -90.43179946950056
-             */
-            minimumLongitude: number;
-            /**
-             * Format: double
-             * @example -90.4157062154112
-             */
-            maximumLongitude: number;
-        };
-        MapLegend: {
-            /** @example MapLegend */
-            "@type"?: string;
-            /**
-             * @description The unit of Legand
-             * @example seeds1ha-1
-             */
-            unitId?: string;
-            ranges?: components["schemas"]["MapLegendItem"][];
-        };
-        MapLegendItem: {
-            /** @example MapLegendItem */
-            "@type"?: string;
-            /**
-             * @description A label for the color
-             * @example Most profitable
-             */
-            label?: string;
-            /**
-             * Format: double
-             * @example 10.09
-             */
-            minimum?: number;
-            /**
-             * Format: double
-             * @example 30.18
-             */
-            maximum?: number;
-            /**
-             * @description The hex color code corresponding to a color in the map layer image
-             * @example #0BA74A
-             */
-            hexColor?: string;
-            /**
-             * Format: double
-             * @example 3.5
-             */
-            percent?: number;
-        };
-        FileResource: {
-            /** @example FileResource */
-            "@type"?: string;
-            /**
-             * @description The mimeType of the FileResource.
-             * @enum {string}
-             */
-            mimeType?: "image/png" | "image/tif" | "image/tiff" | "application/zip";
-            /** @description The name of the file */
-            metadata: {
-                /** @example filename */
-                name?: string;
-                /** @example a_green_tractor.png */
-                value?: string;
-            }[];
-            /**
-             * @description The primary identifier for the FileResource.
-             * @example 888d97c6-cd87-48de-88d5-3c2721250a5e
-             */
-            readonly id?: string;
-            /** @description Links for self, targetResource, and owningOrganization */
-            links: components["schemas"]["Link"][];
-        };
-        "400Errors": {
-            /** @example Errors */
-            "@type"?: string;
-            errors?: {
-                /** @example Error */
-                "@type"?: string;
-                /**
-                 * Format: uuid
-                 * @example ed292512-1f3c-4285-83c3-1fb084423f9b
-                 */
-                guid?: string;
-                /** @example This field is required. */
-                message?: string;
-                /** @example validation_constraint_required_field */
-                code?: string;
-                /** @example title */
-                field?: string;
-            }[];
-            otherAttributes?: Record<string, never>;
-        };
-        GenericErrors: {
-            /** @example Errors */
-            "@type"?: string;
-            errors?: {
-                /** @example Error */
-                "@type"?: string;
-                /**
-                 * Format: uuid
-                 * @example ed292512-1f3c-4285-83c3-1fb084423f9b
-                 */
-                guid?: string;
-                /** @example The requested resource was not found */
-                message?: string;
-            }[];
-            otherAttributes?: Record<string, never>;
-        };
-        /** @description Link schema for Link (auto-generated) */
-        Link: {
-            "@type"?: string;
-            rel?: string;
-            /** Format: uri */
-            uri?: string;
-        };
+  schemas: {
+    CollectionBase: {
+      links?: {
+        /**
+         * @description Links relavent to exploring the collection.
+         * @example self
+         */
+        rel?: string;
+        /**
+         * Format: uri
+         * @description The URI to the related resource.
+         * @example https://api.deere.com/platform/organizations/61265/fields/42849709-5d54-473a-9eba-adab6f4bc8a8/mapLayerSummaries
+         */
+        uri?: string;
+      }[];
+      /** @example 1 */
+      total?: number;
     };
-    responses: {
-        /** @description The request body was missing a required field or supplied a read-only value. */
-        400: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["400Errors"];
-            };
-        };
-        /** @description The user's OAuth credentials are not recognized by the server. */
-        401: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user does not have access to the requested resource. */
-        403: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["GenericErrors"];
-            };
-        };
-        /** @description The specified resource was not found on the server. */
-        404: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/vnd.deere.axiom.v3+json": components["schemas"]["GenericErrors"];
-            };
-        };
-        /** @description The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. */
-        406: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. */
-        409: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The server refuses to accept the request because the payload format is in an unsupported format. */
-        415: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
-        /** @description The user has sent too many requests in a given amount of time. */
-        429: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content?: never;
-        };
+    MapLayerSummaryCollection: unknown;
+    ContributedMapLayerSummary: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below
+       */
+      links?: unknown[];
+      /**
+       * @description Count of Map Layer Summaries in response.
+       * @example 3
+       */
+      total?: number;
+      /** @description The primary resource listing. */
+      values?: Record<string, never>;
+      "<span id='map-layer-summary-details'>Map Layer Summary Details</span>"?: {
+        /**
+         * @description Links to other objects in the Deere ecosystem.
+         * @example See "Available Links" below
+         */
+        links?: unknown[];
+        /**
+         * Format: uuid
+         * @description Map Layer Summary ID
+         * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
+         */
+        id?: string;
+        /**
+         * @description Top level name of the Map Layer Summary
+         * @example Summary of Map Layers
+         */
+        title?: string;
+        /**
+         * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href='#markdown'>Markdown</a>
+         * @example My summary of agronomic image data
+         */
+        text?: string;
+        /**
+         * @description The type of data represented by the summary<sup><a href='#map-layer-summaries-map-types'>1</a></sup>.
+         * @example PRESCRIPTION
+         */
+        mapType?: string;
+        /**
+         * @description An array of key value pair items about the Map Layer Summary.
+         * @example See sample response below
+         */
+        metadata?: Record<string, never>;
+        /**
+         * Format: date-time
+         * @description ISO 8601 Date and time in UTC this resource was created.
+         * @example 2016-01-02T16:14:23.421Z
+         */
+        dateCreated?: string;
+        /**
+         * Format: date-time
+         * @description ISO 8601 Date and time in UTC this resource was last modified.
+         * @example 2016-01-02T16:14:23.421Z
+         */
+        lastModifiedDate?: string;
+      };
     };
-    parameters: {
-        /** @description Organization ID */
-        OrganizationId: string;
-        /** @description Field ID */
-        fileId: string;
-        /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
-        includePartialSummaries: boolean;
-        /** @description Takes these values mapLayers. */
-        embed: string;
-        /** @description Field ID */
-        fieldId: string;
-        /** @description Map Layer Summary ID */
-        id: string;
+    PostContributedMapLayerSummary: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below
+       */
+      links?: unknown[];
+      /**
+       * Format: uuid
+       * @description Map Layer Summary ID
+       * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
+       */
+      id?: string;
+      /**
+       * @description Top level name of the Map Layer Summary
+       * @example Summary of Map Layers
+       */
+      title?: string;
+      /**
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
+       * @example My summary of agronomic image data
+       */
+      text?: string;
+      /**
+       * @description The type of data represented by the summary.<sup><a href="#map-layer-summaries-map-types">1</a></sup>
+       * @example PRESCRIPTION
+       */
+      mapType?: string;
+      /**
+       * @description An array of key value pair items about the Map Layer Summary.
+       * @example See sample response below
+       */
+      metadata?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2016-01-02T16:14:23.421Z
+       */
+      dateCreated?: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was last modified.
+       * @example 2016-01-02T16:14:23.421Z
+       */
+      lastModifiedDate?: string;
     };
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    AvailableLinks: {
+      /**
+       * @description This Map Layer List Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID/mapLayerSummaries
+       */
+      'self (map layer summaries list)'?: unknown;
+      /**
+       * @description This Map Layer Summary Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
+       */
+      'self (map layer summary)'?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID
+       */
+      targetResource?: unknown;
+      /**
+       * @description Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
+       */
+      mapLayers?: unknown;
+      /**
+       * @description Create Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
+       */
+      createMapLayer?: unknown;
+    };
+    PostRequest: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Request Links" below <br/>Readonly: No
+       */
+      links?: unknown[];
+      /**
+       * @description Top level name of the Map Layer Summary
+       * @example Summary of Map Layers <br/>Readonly: No
+       */
+      title?: string;
+      /**
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
+       * @example My summary of agronomic image data <br/>Readonly: No
+       */
+      text?: string;
+      /**
+       * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
+       * @example PRESCRIPTION <br/>Readonly: No
+       */
+      mapType?: string;
+      /**
+       * @description An array of key value pair items about the Map Layer Summary.
+       * @example See sample request below <br/>Readonly: No
+       */
+      metadata?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
+       */
+      dateCreated?: string;
+    };
+    PostResponse: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Request Links" below <br/>Readonly: No
+       */
+      links?: unknown[];
+      /**
+       * @description Top level name of the Map Layer Summary
+       * @example Summary of Map Layers <br/>Readonly: No
+       */
+      title?: string;
+      /**
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
+       * @example My summary of agronomic image data <br/>Readonly: No
+       */
+      text?: string;
+      /**
+       * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
+       * @example PRESCRIPTION <br/>Readonly: No
+       */
+      mapType?: string;
+      /**
+       * @description An array of key value pair items about the Map Layer Summary.
+       * @example See sample request below <br/>Readonly: No
+       */
+      metadata?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
+       */
+      dateCreated?: string;
+    };
+    PostAvailableLinks: {
+      /**
+       * @description Organizations Link
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Contribution Definitions Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+       */
+      contributionDefinition?: unknown;
+    };
+    GetMapLayerSummaryAvailableLinks: {
+      /**
+       * @description This Map Layer Summary Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
+       */
+      self?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELD_ID
+       */
+      targetResource?: unknown;
+      /**
+       * @description Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
+       */
+      mapLayers?: unknown;
+      /**
+       * @description Create Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
+       */
+      createMapLayer?: unknown;
+    };
+    Metadata: {
+      /** @example Metadata */
+      '@type'?: string;
+      /** @example Location */
+      name: string;
+      /** @example Moline, IL */
+      value: string;
+    };
+    MapLayerCollection: components['schemas']['CollectionBase'] & {
+      values?: components['schemas']['ContributedMapLayer'][];
+    };
+    ContributedMapLayer: {
+      /** @example ContributedMapLayer */
+      '@type'?: string;
+      /**
+       * @description The title on the map layer.
+       * @example Drone Flyover
+       */
+      title: string;
+      extent?: components['schemas']['MapExtent'];
+      /**
+       * @description A value to sort the Map Layer by in Field Analyzer Beta. Defaults to `title` if not provided.
+       * @example 1
+       */
+      sortName?: string;
+      legends: components['schemas']['MapLegend'];
+      /**
+       * @description Map layer status.
+       * @enum {string}
+       */
+      readonly status?: 'VALID' | 'INVALID' | 'QUEUED' | 'NO_FILE_RESOURCE';
+      /**
+       * @description Description of the map layer.
+       * @example An aerial view of the building.
+       */
+      text?: string;
+      metadata?: components['schemas']['Metadata'][];
+      /**
+       * @description The primary identifier for the operation.
+       * @example 8a0011f1-297e-48c2-a030-91a21287e721
+       */
+      readonly id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    /** @description Extents of the field. If not provided, the FileResource must be of type `image/tiff` or `application/zip` and contain the extents. */
+    MapExtent: {
+      /** @example MapExtent */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @example 41.47187948123269
+       */
+      minimumLatitude: number;
+      /**
+       * Format: double
+       * @example 41.48192734153501
+       */
+      maximumLatitude: number;
+      /**
+       * Format: double
+       * @example -90.43179946950056
+       */
+      minimumLongitude: number;
+      /**
+       * Format: double
+       * @example -90.4157062154112
+       */
+      maximumLongitude: number;
+    };
+    MapLegend: {
+      /** @example MapLegend */
+      '@type'?: string;
+      /**
+       * @description The unit of Legand
+       * @example seeds1ha-1
+       */
+      unitId?: string;
+      ranges?: components['schemas']['MapLegendItem'][];
+    };
+    MapLegendItem: {
+      /** @example MapLegendItem */
+      '@type'?: string;
+      /**
+       * @description A label for the color
+       * @example Most profitable
+       */
+      label?: string;
+      /**
+       * Format: double
+       * @example 10.09
+       */
+      minimum?: number;
+      /**
+       * Format: double
+       * @example 30.18
+       */
+      maximum?: number;
+      /**
+       * @description The hex color code corresponding to a color in the map layer image
+       * @example #0BA74A
+       */
+      hexColor?: string;
+      /**
+       * Format: double
+       * @example 3.5
+       */
+      percent?: number;
+    };
+    FileResource: {
+      /** @example FileResource */
+      '@type'?: string;
+      /**
+       * @description The mimeType of the FileResource.
+       * @enum {string}
+       */
+      mimeType?: 'image/png' | 'image/tif' | 'image/tiff' | 'application/zip';
+      /** @description The name of the file */
+      metadata: {
+        /** @example filename */
+        name?: string;
+        /** @example a_green_tractor.png */
+        value?: string;
+      }[];
+      /**
+       * @description The primary identifier for the FileResource.
+       * @example 888d97c6-cd87-48de-88d5-3c2721250a5e
+       */
+      readonly id?: string;
+      /** @description Links for self, targetResource, and owningOrganization */
+      links: components['schemas']['Link'][];
+    };
+    '400Errors': {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
+         */
+        guid?: string;
+        /** @example This field is required. */
+        message?: string;
+        /** @example validation_constraint_required_field */
+        code?: string;
+        /** @example title */
+        field?: string;
+      }[];
+      otherAttributes?: Record<string, never>;
+    };
+    GenericErrors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
+         */
+        guid?: string;
+        /** @example The requested resource was not found */
+        message?: string;
+      }[];
+      otherAttributes?: Record<string, never>;
+    };
+    /** @description Link schema for Link (auto-generated) */
+    Link: {
+      '@type'?: string;
+      rel?: string;
+      /** Format: uri */
+      uri?: string;
+    };
+  };
+  responses: {
+    /** @description The request body was missing a required field or supplied a read-only value. */
+    400: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['400Errors'];
+      };
+    };
+    /** @description The user's OAuth credentials are not recognized by the server. */
+    401: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user does not have access to the requested resource. */
+    403: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GenericErrors'];
+      };
+    };
+    /** @description The specified resource was not found on the server. */
+    404: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GenericErrors'];
+      };
+    };
+    /** @description The requested resource is only capable of generating content not acceptable according to the Accept headers sent in the request. */
+    406: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Indicates that the request could not be processed because of conflict in the request, such as an edit conflict. */
+    409: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The server refuses to accept the request because the payload format is in an unsupported format. */
+    415: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has sent too many requests in a given amount of time. */
+    429: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+  };
+  parameters: {
+    /** @description Organization ID */
+    OrganizationId: string;
+    /** @description Field ID */
+    fileId: string;
+    /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
+    includePartialSummaries: boolean;
+    /** @description Takes these values mapLayers. */
+    embed: string;
+    /** @description Field ID */
+    fieldId: string;
+    /** @description Map Layer Summary ID */
+    id: string;
+  };
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;
