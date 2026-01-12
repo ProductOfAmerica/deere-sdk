@@ -3,8 +3,24 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.nvmrc'
+      - '.github/badges/**'
+      - '.github/dependabot.yml'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.nvmrc'
+      - '.github/badges/**'
+      - '.github/dependabot.yml'
 
 permissions:
   contents: write
