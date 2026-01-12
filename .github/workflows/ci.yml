@@ -44,7 +44,7 @@ jobs:
         run: pnpm test
 
       - name: Run tests with coverage
-        if: matrix.node-version == '22.x'
+        if: matrix.node-version == '24.x'
         run: |
           pnpm test:coverage 2>&1 | tee coverage-output.txt
 
@@ -68,7 +68,7 @@ jobs:
           echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${COVERAGE}%\",\"color\":\"${COLOR}\"}" > .github/badges/coverage.json
 
       - name: Upload coverage badge
-        if: matrix.node-version == '22.x' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: matrix.node-version == '24.x' && github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update coverage badge [skip ci]"
