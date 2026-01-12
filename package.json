@@ -55,7 +55,9 @@
     "generate-types": "tsx scripts/generate-types.ts",
     "generate-sdk": "tsx scripts/generate-sdk.ts",
     "generate": "pnpm fetch-specs && pnpm fix-specs && pnpm generate-types && pnpm generate-sdk",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test:coverage": "node --import tsx --test --experimental-test-coverage tests/**/*.test.ts"
   },
   "dependencies": {},
   "devDependencies": {

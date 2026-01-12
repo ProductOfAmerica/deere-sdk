@@ -13,6 +13,8 @@
   <a href="https://www.npmjs.com/package/deere-sdk"><img src="https://img.shields.io/npm/dm/deere-sdk?style=flat-square" alt="npm downloads"></a>
   <a href="https://github.com/ProductOfAmerica/deere-sdk/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license"></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.0+-3178c6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"></a>
+  <a href="https://github.com/ProductOfAmerica/deere-sdk/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ProductOfAmerica/deere-sdk/ci.yml?style=flat-square&label=tests" alt="Tests"></a>
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/coverage.json&style=flat-square" alt="Coverage">
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/api-health.json&style=flat-square" alt="API Health">
 </p>
 
