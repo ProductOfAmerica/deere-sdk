@@ -5,7 +5,7 @@
  * @generated from map-layers.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/map-layers.js';
 
 export class MapLayersApi {

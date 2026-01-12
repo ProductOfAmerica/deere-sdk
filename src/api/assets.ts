@@ -143,7 +143,7 @@ export class AssetsApi {
   async getAssetcatalog(
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
-    const path = '/assetCatalog';
+    const path = `/assetCatalog`;
     return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(
       path,
       options

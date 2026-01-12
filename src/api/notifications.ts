@@ -33,7 +33,7 @@ export class NotificationsApi {
     data: components['schemas']['PostNotifications'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = '/notificationEvents';
+    const path = `/notificationEvents`;
     await this.client.post(path, data, options);
   }
 

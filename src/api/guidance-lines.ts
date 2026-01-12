@@ -5,7 +5,7 @@
  * @generated from guidance-lines.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/guidance-lines.js';
 
 export class GuidanceLinesApi {

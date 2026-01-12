@@ -5,7 +5,7 @@
  * @generated from users.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/users.js';
 
 export class UsersApi {

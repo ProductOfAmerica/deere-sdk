@@ -10,7 +10,7 @@
  * Usage: pnpm generate-sdk
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 
@@ -560,6 +560,26 @@ function generateApiClass(api: GeneratedApi): string {
 
   const methods = api.operations.map((op) => generateMethod(op, usedMethodNames)).join('\n\n');
 
+  // Determine which imports are actually used
+  const usesPaginatedResponse = api.operations.some(
+    (op) => op.isCollection && op.method === 'get' && op.responseSchemaRef
+  );
+  const usesComponents = api.operations.some(
+    (op) => op.requestBodySchemaRef || op.responseSchemaRef
+  );
+
+  // Build client imports (only include what's used)
+  const clientImports = ['DeereClient', 'RequestOptions'];
+  if (usesPaginatedResponse) {
+    clientImports.push('PaginatedResponse');
+  }
+
+  // Build import lines
+  const imports = [`import type { ${clientImports.join(', ')} } from '../client.js';`];
+  if (usesComponents) {
+    imports.push(`import type { components } from '../types/generated/${api.typesImportPath}.js';`);
+  }
+
   return `/**
  * ${api.className}
  *
@@ -567,8 +587,7 @@ function generateApiClass(api: GeneratedApi): string {
  * @generated from ${api.specName}.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
-import type { components } from '../types/generated/${api.typesImportPath}.js';
+${imports.join('\n')}
 
 export class ${api.className} {
   constructor(private readonly client: DeereClient) {}

@@ -1,12 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { DeereClient, DeereError, RateLimitError } from '../src/client.js';
-import {
-  mockErrorResponse,
-  mockFailThenSucceed,
-  mockNetworkError,
-  mockTimeout,
-} from './helpers/mock-fetch.js';
+import { DeereClient, DeereError } from '../src/client.js';
+import { mockFailThenSucceed, mockTimeout } from './helpers/mock-fetch.js';
 
 describe('retry behavior', () => {
   describe('retryable status codes', () => {

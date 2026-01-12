@@ -19,7 +19,7 @@ export class PartnershipsApi {
   async list(
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Partnerships']>> {
-    const path = '/partnerships';
+    const path = `/partnerships`;
     return this.client.get<PaginatedResponse<components['schemas']['Partnerships']>>(path, options);
   }
   /**
@@ -27,7 +27,7 @@ export class PartnershipsApi {
    * @generated from GET /partnerships
    */
   async listAll(options?: RequestOptions): Promise<components['schemas']['Partnerships'][]> {
-    const path = '/partnerships';
+    const path = `/partnerships`;
     return this.client.getAll<components['schemas']['Partnerships']>(path, options);
   }
 
@@ -37,7 +37,7 @@ export class PartnershipsApi {
    * @generated from POST /partnerships
    */
   async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
-    const path = '/partnerships';
+    const path = `/partnerships`;
     await this.client.post(path, data, options);
   }
 

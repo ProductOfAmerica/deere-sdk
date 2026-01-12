@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { AuthError, DeereClient, DeereError, RateLimitError, createClient } from '../src/client.js';
+import { AuthError, createClient, DeereClient, DeereError, RateLimitError } from '../src/client.js';
 import { mockErrorResponse, mockJsonResponse, mockWithSpy } from './helpers/mock-fetch.js';
 
 describe('DeereClient', () => {
@@ -570,7 +570,7 @@ describe('DeereClient', () => {
 
       await assert.rejects(
         () => client.get('/test', { timeout: 50 }), // Override to 50ms
-        (error: Error) => {
+        (_error: Error) => {
           const elapsed = Date.now() - requestStartTime;
           assert(elapsed < 200, `Timeout should have triggered quickly, took ${elapsed}ms`);
           return true;

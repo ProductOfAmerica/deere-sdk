@@ -55,7 +55,7 @@ async function main() {
       execSync(`npx openapi-typescript "${inputPath}" -o "${outputPath}"`, { stdio: 'pipe' });
       console.log(' OK');
       generated.push({ name: yamlFile, module: moduleName, file: outputFile });
-    } catch (error) {
+    } catch (_error) {
       console.log(' FAILED');
     }
   }

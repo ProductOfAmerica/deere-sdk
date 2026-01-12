@@ -29,28 +29,25 @@
  * @packageDocumentation
  */
 
-// Main SDK class
-export { Deere, createDeere } from './deere.js';
-
-// Low-level client
-export {
-  DeereClient,
-  createClient,
-  DeereError,
-  RateLimitError,
-  AuthError,
-} from './client.js';
-
+// API modules
+export * from './api/index.js';
 export type {
   DeereClientConfig,
   Environment,
-  RequestOptions,
-  PaginatedResponse,
   Link,
+  PaginatedResponse,
+  RequestOptions,
 } from './client.js';
-
-// API modules
-export * from './api/index.js';
+// Low-level client
+export {
+  AuthError,
+  createClient,
+  DeereClient,
+  DeereError,
+  RateLimitError,
+} from './client.js';
+// Main SDK class
+export { createDeere, Deere } from './deere.js';
 
 // OpenAPI Types (for advanced usage)
 export * as Types from './types/index.js';

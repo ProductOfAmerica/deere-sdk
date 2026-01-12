@@ -11,8 +11,8 @@
  * Usage: pnpm fix-specs
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import * as yaml from 'yaml';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');

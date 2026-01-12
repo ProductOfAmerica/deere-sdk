@@ -62,9 +62,8 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:coverage": "node --import tsx --test --experimental-test-coverage tests/*.test.ts"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.3.11",
     "@types/node": "^20.10.0",
     "openapi-typescript": "^7.0.0",
     "rimraf": "^5.0.0",
@@ -72,6 +71,5 @@
     "typescript": "^5.3.0",
     "yaml": "^2.3.0"
   },
-  "peerDependencies": {},
   "sideEffects": false
 }

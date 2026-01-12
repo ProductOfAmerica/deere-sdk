@@ -5,7 +5,7 @@
  * @generated from webhook.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/webhook.js';
 
 export class WebhookApi {
@@ -17,7 +17,7 @@ export class WebhookApi {
    * @generated from GET /eventSubscriptions
    */
   async list(options?: RequestOptions): Promise<unknown> {
-    const path = '/eventSubscriptions';
+    const path = `/eventSubscriptions`;
     return this.client.get<unknown>(path, options);
   }
   /**
@@ -25,7 +25,7 @@ export class WebhookApi {
    * @generated from GET /eventSubscriptions
    */
   async listAll(options?: RequestOptions): Promise<unknown[]> {
-    const path = '/eventSubscriptions';
+    const path = `/eventSubscriptions`;
     return this.client.getAll<unknown>(path, options);
   }
 
@@ -35,7 +35,7 @@ export class WebhookApi {
    * @generated from POST /eventSubscriptions
    */
   async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
-    const path = '/eventSubscriptions';
+    const path = `/eventSubscriptions`;
     await this.client.post(path, data, options);
   }
 

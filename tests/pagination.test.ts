@@ -200,13 +200,13 @@ describe('pagination', () => {
 
   describe('pagination with retries', () => {
     it('retries failed page requests', async () => {
-      let callCount = 0;
+      let _callCount = 0;
       let page2Attempts = 0;
 
       const client = new DeereClient({
         accessToken: 'test',
         fetch: async (input) => {
-          callCount++;
+          _callCount++;
           const url = typeof input === 'string' ? input : input.toString();
 
           // First page always succeeds

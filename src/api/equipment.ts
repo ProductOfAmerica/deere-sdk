@@ -116,7 +116,7 @@ export class EquipmentApi {
   async list(
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['equipment-make']>> {
-    const path = '/equipmentMakes';
+    const path = `/equipmentMakes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-make']>>(
       path,
       options
@@ -127,7 +127,7 @@ export class EquipmentApi {
    * @generated from GET /equipmentMakes
    */
   async listAll(options?: RequestOptions): Promise<components['schemas']['equipment-make'][]> {
-    const path = '/equipmentMakes';
+    const path = `/equipmentMakes`;
     return this.client.getAll<components['schemas']['equipment-make']>(path, options);
   }
 
@@ -168,7 +168,7 @@ export class EquipmentApi {
   async listEquipmenttypes(
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
-    const path = '/equipmentTypes';
+    const path = `/equipmentTypes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
       path,
       options

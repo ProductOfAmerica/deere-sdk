@@ -5,7 +5,7 @@
  * @generated from equipment-measurement.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/equipment-measurement.js';
 
 export class EquipmentMeasurementApi {

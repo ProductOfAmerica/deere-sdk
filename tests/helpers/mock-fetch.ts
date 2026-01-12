@@ -136,7 +136,7 @@ export function mockPaginatedResponse<T>(
   let pageIndex = 0;
 
   return async (input) => {
-    const url = typeof input === 'string' ? input : input.toString();
+    const _url = typeof input === 'string' ? input : input.toString();
     const currentPage = pages[pageIndex];
     const hasNextPage = pageIndex < pages.length - 1;
 
