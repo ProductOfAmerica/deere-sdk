@@ -96,3 +96,8 @@ jobs:
             *.sig
             *.pem
             checksums-sha256.txt
+
+  publish:
+    needs: release
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
