@@ -12,28 +12,30 @@ on:
         default: false
         type: boolean
 
-permissions:
-  contents: write
-  actions: write
+permissions: read-all
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      actions: write
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
         with:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24.x'
           cache: 'pnpm'
@@ -191,7 +193,7 @@ jobs:
 
       - name: Create release
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: v${{ steps.version.outputs.new_version }}
           name: v${{ steps.version.outputs.new_version }}

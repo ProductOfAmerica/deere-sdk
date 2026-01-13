@@ -22,27 +22,29 @@ on:
       - '.github/badges/**'
       - '.github/dependabot.yml'
 
-permissions:
-  contents: write
+permissions: read-all
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x, 23.x, 24.x, 25.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
         with:
           version: 10
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
@@ -88,7 +90,7 @@ jobs:
 
       - name: Upload coverage badge
         if: matrix.node-version == '24.x' && github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: "chore: update coverage badge [skip ci]"
           file_pattern: ".github/badges/coverage.json"
