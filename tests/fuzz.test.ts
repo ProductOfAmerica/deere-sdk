@@ -90,27 +90,21 @@ describe('Fuzz Tests', () => {
 
     it('handles arbitrary custom headers', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          fc.dictionary(fc.string(), fc.string()),
-          async (headers) => {
-            const client = new DeereClient({
-              accessToken: 'test-token',
-              fetch: mockFetch({ data: 'test' }),
-              maxRetries: 0,
-            });
+        fc.asyncProperty(fc.dictionary(fc.string(), fc.string()), async (headers) => {
+          const client = new DeereClient({
+            accessToken: 'test-token',
+            fetch: mockFetch({ data: 'test' }),
+            maxRetries: 0,
+          });
 
-            // Should not crash with arbitrary headers
-            try {
-              await client.get('/test', { headers });
-            } catch (error) {
-              // Header validation errors are acceptable
-              assert(
-                error instanceof Error,
-                'Should throw an Error instance if it fails'
-              );
-            }
+          // Should not crash with arbitrary headers
+          try {
+            await client.get('/test', { headers });
+          } catch (error) {
+            // Header validation errors are acceptable
+            assert(error instanceof Error, 'Should throw an Error instance if it fails');
           }
-        ),
+        }),
         { numRuns: 100 }
       );
     });
@@ -168,7 +162,9 @@ describe('Fuzz Tests', () => {
         fc.record({ message: fc.string() }),
         fc.record({ error: fc.string() }),
         fc.record({ error_description: fc.string() }),
-        fc.record({ errors: fc.array(fc.record({ message: fc.string() }), { minLength: 1, maxLength: 3 }) }),
+        fc.record({
+          errors: fc.array(fc.record({ message: fc.string() }), { minLength: 1, maxLength: 3 }),
+        }),
         fc.dictionary(fc.string(), fc.jsonValue())
       );
 
@@ -195,24 +191,21 @@ describe('Fuzz Tests', () => {
 
     it('handles arbitrary HTTP status codes', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          fc.integer({ min: 400, max: 599 }),
-          async (status) => {
-            const client = new DeereClient({
-              accessToken: 'test-token',
-              fetch: mockErrorFetch(status, { message: 'Error' }),
-              maxRetries: 0,
-            });
+        fc.asyncProperty(fc.integer({ min: 400, max: 599 }), async (status) => {
+          const client = new DeereClient({
+            accessToken: 'test-token',
+            fetch: mockErrorFetch(status, { message: 'Error' }),
+            maxRetries: 0,
+          });
 
-            try {
-              await client.get('/test');
-              assert.fail('Should have thrown');
-            } catch (error) {
-              assert(error instanceof DeereError);
-              assert.strictEqual(error.status, status);
-            }
+          try {
+            await client.get('/test');
+            assert.fail('Should have thrown');
+          } catch (error) {
+            assert(error instanceof DeereError);
+            assert.strictEqual(error.status, status);
           }
-        ),
+        }),
         { numRuns: 100 }
       );
     });
@@ -240,10 +233,7 @@ describe('Fuzz Tests', () => {
             await client.followLink(link);
           } catch (error) {
             // URL parsing errors are acceptable
-            assert(
-              error instanceof Error,
-              'Should throw an Error instance if it fails'
-            );
+            assert(error instanceof Error, 'Should throw an Error instance if it fails');
           }
         }),
         { numRuns: 100 }
@@ -263,10 +253,7 @@ describe('Fuzz Tests', () => {
             await client.followLink(url);
           } catch (error) {
             // URL parsing errors are acceptable
-            assert(
-              error instanceof Error,
-              'Should throw an Error instance if it fails'
-            );
+            assert(error instanceof Error, 'Should throw an Error instance if it fails');
           }
         }),
         { numRuns: 100 }
