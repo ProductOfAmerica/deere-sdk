@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/coverage.json&style=flat-square" alt="Coverage">
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/api-health.json&style=flat-square" alt="API Health">
   <a href="https://securityscorecards.dev/viewer/?uri=github.com/ProductOfAmerica/deere-sdk"><img src="https://api.securityscorecards.dev/projects/github.com/ProductOfAmerica/deere-sdk/badge?style=flat-square" alt="OpenSSF Scorecard"></a>
+  <a href="https://www.bestpractices.dev/projects/11771"><img src="https://www.bestpractices.dev/projects/11771/badge?style=flat-square" alt="OpenSSF Best Practices"></a>
 </p>
 
 <p align="center">
