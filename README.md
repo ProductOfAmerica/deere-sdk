@@ -597,6 +597,30 @@ pnpm build
 pnpm test
 ```
 
+### Releasing
+
+**Normal development** – just commit and push as usual. No release happens:
+
+```bash
+git add -A
+git commit -m "fix: whatever you fixed"
+git push
+```
+
+**When ready to release** a new version:
+
+```bash
+# 1. Update CHANGELOG.md with what changed
+
+# 2. Bump version (auto-commits + auto-creates tag)
+npm version patch   # or: minor, major
+
+# 3. Push commit and tag together
+git push --follow-tags
+```
+
+CI sees the tag → creates GitHub Release → publishes to npm.
+
 ---
 
 ## Disclaimer
