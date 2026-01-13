@@ -34,7 +34,7 @@ jobs:
       - name: Check API availability
         id: check
         run: |
-          node scripts/check-api-health.js > health-report.json
+          npx tsx scripts/check-api-health.ts > health-report.json
           cat health-report.json
 
       - name: Update health badge

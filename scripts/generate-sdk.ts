@@ -161,7 +161,7 @@ function toResourceName(specName: string): string {
 }
 
 function extractPathParams(path: string): string[] {
-  const matches = path.match(/\{([^}]+)\}/g) || [];
+  const matches = path.match(/\{([^}]+)}/g) || [];
   return matches.map((m) => m.slice(1, -1));
 }
 
