@@ -25,7 +25,7 @@
 
 ## Highlights
 
-- **28 APIs** with **123 operations** — Full coverage of John Deere agricultural APIs
+- **28 APIs** with **146 operations** — Full coverage of John Deere agricultural APIs
 - **Fully typed** — Auto-generated TypeScript types from OpenAPI specs
 - **Auto-pagination** — `listAll()` methods handle pagination automatically
 - **HAL support** — Built-in link following for John Deere's HAL-style responses
