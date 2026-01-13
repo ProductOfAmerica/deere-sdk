@@ -86,9 +86,9 @@ export class PartnershipsApi {
     token: string,
     data: Record<string, unknown>,
     options?: RequestOptions
-  ): Promise<void> {
+  ): Promise<components['schemas']['PermissionsPost']> {
     const path = `/partnerships/${token}/permissions`;
-    await this.client.post(path, data, options);
+    return this.client.post<components['schemas']['PermissionsPost']>(path, data, options);
   }
 }
 

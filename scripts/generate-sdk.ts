@@ -249,6 +249,7 @@ function getSchemaType(schema: SchemaObject | undefined): string {
 /**
  * Extracts schema reference from response/requestBody content.
  * Handles both direct schema refs and nested values.items refs (for collections).
+ * Only returns refs that point to actual schemas (not responses or other components).
  */
 function extractSchemaFromContent(
   content?: Record<string, { schema?: SchemaObject }>
@@ -256,13 +257,13 @@ function extractSchemaFromContent(
   const c = content?.['application/vnd.deere.axiom.v3+json'] || content?.['application/json'];
   if (!c?.schema) return undefined;
 
-  // Direct $ref to schema
-  if (c.schema.$ref) {
+  // Direct $ref to schema - only accept refs to components/schemas
+  if (c.schema.$ref?.includes('/schemas/')) {
     return resolveRef(c.schema.$ref);
   }
 
   // Nested values.items.$ref pattern (common for collections)
-  if (c.schema.properties?.values?.items?.$ref) {
+  if (c.schema.properties?.values?.items?.$ref?.includes('/schemas/')) {
     return resolveRef(c.schema.properties.values.items.$ref);
   }
 
@@ -474,19 +475,19 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
   params.push('options?: RequestOptions');
 
   let returnType = 'unknown';
-  if (
-    op.method === 'delete' ||
-    op.method === 'put' ||
-    op.method === 'patch' ||
-    op.method === 'post'
-  ) {
+  if (op.method === 'delete') {
+    // DELETE typically returns 204 No Content
     returnType = 'void';
-  } else if (op.responseSchemaRef && op.method === 'get') {
-    if (op.isCollection) {
+  } else if (op.responseSchemaRef) {
+    // Use response schema for GET, POST, PUT, PATCH when available
+    if (op.isCollection && op.method === 'get') {
       returnType = `PaginatedResponse<components['schemas']['${op.responseSchemaRef}']>`;
     } else {
       returnType = `components['schemas']['${op.responseSchemaRef}']`;
     }
+  } else if (op.method === 'post' || op.method === 'put' || op.method === 'patch') {
+    // No response schema defined - return void
+    returnType = 'void';
   }
 
   let pathTemplate = op.path;

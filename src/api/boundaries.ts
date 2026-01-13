@@ -80,9 +80,9 @@ export class BoundariesApi {
     fieldId: string,
     data: Record<string, unknown>,
     options?: RequestOptions
-  ): Promise<void> {
+  ): Promise<components['schemas']['PostBoundary']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries`;
-    await this.client.post(path, data, options);
+    return this.client.post<components['schemas']['PostBoundary']>(path, data, options);
   }
 
   /**

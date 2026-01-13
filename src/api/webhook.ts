@@ -34,9 +34,16 @@ export class WebhookApi {
    * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The created subscription.</li> </ul>
    * @generated from POST /eventSubscriptions
    */
-  async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async create(
+    data: Record<string, unknown>,
+    options?: RequestOptions
+  ): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions`;
-    await this.client.post(path, data, options);
+    return this.client.post<components['schemas']['CreatedSubscriptionValues']>(
+      path,
+      data,
+      options
+    );
   }
 
   /**
