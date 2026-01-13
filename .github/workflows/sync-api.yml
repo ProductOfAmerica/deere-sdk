@@ -21,6 +21,8 @@ jobs:
     permissions:
       contents: write
       actions: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout repository
@@ -63,6 +65,9 @@ jobs:
 
       - name: Type check
         run: pnpm typecheck
+
+      - name: Create tarball
+        run: pnpm pack
 
       - name: Check for changes
         id: changes
@@ -191,6 +196,12 @@ jobs:
           git tag v${{ steps.version.outputs.new_version }}
           git push origin v${{ steps.version.outputs.new_version }}
 
+      - name: Attest build provenance
+        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        uses: actions/attest-build-provenance@00014ed6ed5efc5b1ab7f7f34a39eb55d41aa4f8 # v3.1.0
+        with:
+          subject-path: '*.tgz'
+
       - name: Create release
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
@@ -208,6 +219,7 @@ jobs:
             *This release was created automatically by the [Sync John Deere API](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow.*
           draft: false
           prerelease: false
+          files: '*.tgz'
 
       - name: Trigger publish workflow
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
