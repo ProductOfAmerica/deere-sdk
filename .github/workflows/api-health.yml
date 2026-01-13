@@ -2,8 +2,8 @@ name: API Health Check
 
 on:
   schedule:
-    # Run daily at 6 AM UTC
-    - cron: '0 6 * * *'
+    # Run daily at 5 AM UTC (staggered from sync-api at 6 AM)
+    - cron: '0 5 * * *'
   workflow_dispatch: # Allow manual trigger
 
 permissions: read-all

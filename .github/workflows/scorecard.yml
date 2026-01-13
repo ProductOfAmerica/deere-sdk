@@ -3,6 +3,15 @@ name: OpenSSF Scorecard
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.nvmrc'
+      - '.github/badges/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
   schedule:
     # Run weekly on Monday at 6:00 UTC
     - cron: '0 6 * * 1'

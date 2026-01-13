@@ -3,14 +3,33 @@ name: CodeQL
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.nvmrc'
+      - '.github/badges/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
+      - '.nvmrc'
+      - '.github/badges/**'
+      - '.github/CODEOWNERS'
+      - '.github/dependabot.yml'
+      - '.github/workflows/**'
   schedule:
     # Run weekly on Monday at 7:00 UTC
     - cron: '0 7 * * 1'
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   analyze:

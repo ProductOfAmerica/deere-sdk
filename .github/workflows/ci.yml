@@ -11,6 +11,8 @@ on:
       - '.nvmrc'
       - '.github/badges/**'
       - '.github/dependabot.yml'
+      - '.github/CODEOWNERS'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
     paths-ignore:
@@ -21,6 +23,8 @@ on:
       - '.nvmrc'
       - '.github/badges/**'
       - '.github/dependabot.yml'
+      - '.github/CODEOWNERS'
+      - '.github/workflows/**'
 
 permissions: read-all
 
