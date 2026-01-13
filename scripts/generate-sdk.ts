@@ -647,7 +647,7 @@ function generateMainClass(apis: GeneratedApi[]): string {
 import { DeereClient, type DeereClientConfig } from './client.js';
 import {
   ${classNames},
-} from './api';
+} from './api/index.js';
 
 /**
  * John Deere SDK

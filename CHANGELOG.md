@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-01-13
+
+### Added
+
+- Universal ESM compatibility (Deno, Bun, browsers, Node.js)
+
+### Changed
+
+- Use explicit `.js` file extensions in all imports
+- Switch to `"NodeNext"` module resolution for strict ESM compliance
+- Update SDK generator to output explicit file extensions
+
 ## [1.0.1] - 2026-01-12
 
 ### Fixed

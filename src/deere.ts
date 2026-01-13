@@ -34,7 +34,7 @@ import {
   ProductsApi,
   UsersApi,
   WebhookApi,
-} from './api';
+} from './api/index.js';
 import { DeereClient, type DeereClientConfig } from './client.js';
 
 /**
