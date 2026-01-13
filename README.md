@@ -12,6 +12,7 @@
   <a href="https://github.com/ProductOfAmerica/deere-sdk/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ProductOfAmerica/deere-sdk/ci.yml?style=flat-square&label=tests" alt="Tests"></a>
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/coverage.json&style=flat-square" alt="Coverage">
   <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ProductOfAmerica/deere-sdk/main/.github/badges/api-health.json&style=flat-square" alt="API Health">
+  <a href="https://securityscorecards.dev/viewer/?uri=github.com/ProductOfAmerica/deere-sdk"><img src="https://api.securityscorecards.dev/projects/github.com/ProductOfAmerica/deere-sdk/badge?style=flat-square" alt="OpenSSF Scorecard"></a>
 </p>
 
 <p align="center">
