@@ -293,7 +293,7 @@ const ops = await deere.fieldOperations.list('org-id', 'field-id');
 
 // Filter by type and season
 const harvests = await deere.fieldOperations.list('org-id', 'field-id', {
-    cropSeason: '2024',
+    cropSeason: '2026',
     fieldOperationType: 'harvest'
 });
 
@@ -315,8 +315,8 @@ const shapefile = await deere.fieldOperations.getFieldops('operation-id', {
 ```typescript
 // Machine locations
 const locations = await deere.machineLocations.get('principal-id', {
-    startDate: '2024-01-01T00:00:00Z',
-    endDate: '2024-01-31T23:59:59Z'
+    startDate: '2026-01-01T00:00:00Z',
+    endDate: '2026-01-31T23:59:59Z'
 });
 
 // Machine alerts
@@ -378,12 +378,12 @@ await deere.assets.create('org-id', {
 
 // Asset locations
 const locations = await deere.assets.listLocations('asset-id', {
-    startDate: '2024-01-01T00:00:00Z',
-    endDate: '2024-12-31T23:59:59Z'
+    startDate: '2026-01-01T00:00:00Z',
+    endDate: '2026-01-31T23:59:59Z'
 });
 
 await deere.assets.createLocations('asset-id', {
-    timestamp: '2024-06-15T12:00:00Z',
+    timestamp: '2026-01-15T12:00:00Z',
     geometry: {type: 'Point', coordinates: [-93.5, 42.5]}
 });
 ```
