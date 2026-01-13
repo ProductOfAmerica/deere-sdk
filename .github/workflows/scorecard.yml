@@ -34,6 +34,8 @@ jobs:
           results_format: sarif
           # Publish results to OpenSSF API (enables the badge)
           publish_results: true
+          # Fine-grained PAT with Administration:read to read branch protection rules
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
       - name: Upload results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
