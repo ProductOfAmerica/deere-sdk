@@ -69,10 +69,30 @@ jobs:
         with:
           subject-path: '*.tgz'
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+
+      - name: Sign artifacts with Sigstore
+        run: |
+          for file in *.tgz; do
+            cosign sign-blob --yes --output-signature "${file}.sig" --output-certificate "${file}.pem" "$file"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+
+      - name: Generate checksums
+        run: |
+          sha256sum *.tgz > checksums-sha256.txt
+          cosign sign-blob --yes --output-signature checksums-sha256.txt.sig --output-certificate checksums-sha256.txt.pem checksums-sha256.txt
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           name: v${{ steps.version.outputs.VERSION }}
           body: ${{ steps.changelog.outputs.NOTES }}
           generate_release_notes: false
-          files: '*.tgz'
+          files: |
+            *.tgz
+            *.sig
+            *.pem
+            checksums-sha256.txt
