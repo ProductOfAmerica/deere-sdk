@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-13
+
+### Fixed
+
+- SDK generator now returns typed responses for POST/PUT/PATCH methods when OpenAPI spec defines a response schema
+- Filter out invalid `$ref` pointers that reference responses instead of schemas (fixes TypeScript compilation errors)
+
+### Changed
+
+- `boundaries.create()` now returns `PostBoundary` instead of `void`
+- `partnerships.createPermissions()` now returns `PermissionsPost` instead of `void`
+- `webhook.create()` now returns `CreatedSubscriptionValues` instead of `void`
+
 ## [1.0.2] - 2026-01-13
 
 ### Added
