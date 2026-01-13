@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-01-13
+
+### Added
+
+- Property-based fuzz testing with `fast-check` for input validation
+- `CONTRIBUTING.md` with coding standards and contribution guidelines
+- Sigstore cosign signing for release artifacts (`.sig`, `.pem` files)
+- SHA256 checksums file for releases
+- OpenSSF Best Practices badge
+
+### Changed
+
+- Convert `scripts/check-api-health.js` to TypeScript
+- Add `scripts/tsconfig.json` for IDE support
+- Update API health workflow to use `tsx`
+- Add fuzz tests to CI pipeline
+
 ## [1.0.3] - 2026-01-13
 
 ### Fixed
@@ -89,8 +106,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Synced with latest John Deere API specifications
-
-## [Unreleased]
 
 ## [0.1.0] - 2026-01-11
 
