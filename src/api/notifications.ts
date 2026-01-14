@@ -26,7 +26,10 @@ export class NotificationsApi {
 
   /**
    * Create Notification Event
-   * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to source, which will define the event.
+   * @description This resource creates an event that Operations Center will use
+   * to generate notifications. These notifications will be received by anyone
+   * who is subscribed to your services. Each notification event will include a
+   * link to source, which will define the event.
    * @generated from POST /notificationEvents
    */
   async create(
@@ -39,7 +42,8 @@ export class NotificationsApi {
 
   /**
    * Delete a Notification Event
-   * @description This resource deletes a notification event that was previously posted to MJD as well as any generated notifications.
+   * @description This resource deletes a notification event that was previously
+   * posted to MJD as well as any generated notifications.
    * @generated from DELETE /notificationEvents/{sourceEvent}
    */
   async delete(sourceEvent: string, options?: RequestOptions): Promise<void> {
@@ -49,7 +53,17 @@ export class NotificationsApi {
 
   /**
    * Search Notifications for an Organization
-   * @description This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: targetResource: View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example. contributionDefinition: View the definition of "notification".
+   * @description This endpoint will let you search Notifications based on
+   * criteria specified in request parameters. The return value is the list of
+   * notifications that exist only in the user’s staff organization(s). This API
+   * cannot be used with a partner organization ID in the path. If partnership
+   * permissions are set up properly in Operations Center, partner notifications
+   * for shared resources will be available in the users staff organization
+   * which holds the partnership. Each data point will include links to:
+   * targetResource: View the target (like file) associated with this
+   * notification within each MinimizedNotification object. Please refer to
+   * sample response below to see the example. contributionDefinition: View the
+   * definition of "notification".
    * @generated from GET /organizations/{orgId}/notifications/events
    */
   async list(

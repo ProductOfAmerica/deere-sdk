@@ -13,7 +13,10 @@ export class FilesApi {
 
   /**
    * List Files
-   * @description This resource retrieves the list of available files. For each file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partners this file is shared with.
+   * @description This resource retrieves the list of available files. For each
+   * file, the response will link to the following resources:
+   * owningOrganization: View the org that owns the file. partnerships: View the
+   * partners this file is shared with.
    * @generated from GET /files
    */
   async list(
@@ -47,7 +50,20 @@ export class FilesApi {
 
   /**
    * View/Download A File
-   * @description This resource allows the client to view or download a file. Note: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the Range request header, or the offset and size request parameters. If both are used, the request header will take precedence. To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources: owningOrganization: View the org that owns the file. partnerships: View a list of the partnerships through which the file is shared, if applicable. initiateFileTransfer: Request to send this file to a specified machine. wdtCapableMachines: View a list of machines in the org which can receive this file.
+   * @description This resource allows the client to view or download a file.
+   * Note: Only files smaller than 50 MB can be downloaded at once. Larger files
+   * will need to be downloaded in chunks. To download in chunks, you can use
+   * the Range request header, or the offset and size request parameters. If
+   * both are used, the request header will take precedence. To view a file's
+   * metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To
+   * download the file to the client software, choose a /zip or octet-stream
+   * Accept Header. The following example will show a GET call to view a files
+   * metadata. The response will contain links to the following resources:
+   * owningOrganization: View the org that owns the file. partnerships: View a
+   * list of the partnerships through which the file is shared, if applicable.
+   * initiateFileTransfer: Request to send this file to a specified machine.
+   * wdtCapableMachines: View a list of machines in the org which can receive
+   * this file.
    * @generated from GET /files/{fileId}
    */
   async get(fileId: string, options?: RequestOptions): Promise<unknown> {
@@ -57,7 +73,8 @@ export class FilesApi {
 
   /**
    * Upload/Update A File
-   * @description This resource allows the client to upload or update a file. The client must before uploading a file.
+   * @description This resource allows the client to upload or update a file.
+   * The client must before uploading a file.
    * @generated from PUT /files/{fileId}
    */
   async update(
@@ -71,7 +88,15 @@ export class FilesApi {
 
   /**
    * List an Org's Files
-   * @description View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partnerships through which the file is shared, if applicable. initiateFileTransfer: Submit a transfer request for the specified file. machinesEligibleToReceiveFile: List of WDT-capable machines that the specified file can be sent to. sendFileToMachine: The same as "initiateFileTransfer." wdtCapableMachines: The same as "machinesEligibleToReceiveFile."
+   * @description View a list of an org's files. This resource allows for
+   * pagination. For each returned file, the response will link to the following
+   * resources: owningOrganization: View the org that owns the file.
+   * partnerships: View the partnerships through which the file is shared, if
+   * applicable. initiateFileTransfer: Submit a transfer request for the
+   * specified file. machinesEligibleToReceiveFile: List of WDT-capable machines
+   * that the specified file can be sent to. sendFileToMachine: The same as
+   * "initiateFileTransfer." wdtCapableMachines: The same as
+   * "machinesEligibleToReceiveFile."
    * @generated from GET /organizations/{orgId}/files
    */
   async listFiles(
@@ -100,7 +125,10 @@ export class FilesApi {
 
   /**
    * Create A File ID
-   * @description The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to
+   * @description The POST call below shows the creation of file id "55" in
+   * organization "73" in Operation Center. The response "location" header will
+   * return the new file ID in the link returned. The client software will then
+   * use the new file ID, to
    * @generated from POST /organizations/{orgId}/files
    */
   async create(

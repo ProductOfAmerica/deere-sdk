@@ -13,7 +13,8 @@ export class MapLayersApi {
 
   /**
    * List Map Layer Summaries
-   * @description This resource will list all Map Layer Summaries for a specified field.
+   * @description This resource will list all Map Layer Summaries for a
+   * specified field.
    * @generated from GET /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
   async list(
@@ -79,7 +80,8 @@ export class MapLayersApi {
 
   /**
    * Delete a Map Layer Summary
-   * @description Deletes a Map Layer Summary and its underlying Map Layer and File Resource resources.
+   * @description Deletes a Map Layer Summary and its underlying Map Layer and
+   * File Resource resources.
    * @generated from DELETE /mapLayerSummaries/{id}
    */
   async delete(id: string, options?: RequestOptions): Promise<void> {

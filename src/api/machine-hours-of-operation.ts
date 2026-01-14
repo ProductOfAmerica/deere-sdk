@@ -13,7 +13,12 @@ export class MachineHoursOfOperationApi {
 
   /**
    * Hours of Operation
-   * @description The Hours of Operation service allows the user to view the durations for which the engine was on or off during a specified time period. You will also be able to view the last known state of the machine's engine. Each request returns a link to machine, which will return a state report for the specified machine. Note: When the terminal is powered off, hours of operation are not recorded.
+   * @description The Hours of Operation service allows the user to view the
+   * durations for which the engine was on or off during a specified time
+   * period. You will also be able to view the last known state of the machine's
+   * engine. Each request returns a link to machine, which will return a state
+   * report for the specified machine. Note: When the terminal is powered off,
+   * hours of operation are not recorded.
    * @generated from GET /machines/{principalId}/hoursOfOperation
    */
   async list(

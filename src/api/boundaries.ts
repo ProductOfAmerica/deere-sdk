@@ -13,7 +13,9 @@ export class BoundariesApi {
 
   /**
    * View Boundaries in an Org
-   * @description View boundaries in an organization. fields: View the field associated with these boundaries. owningOrganizations: View the organization that owns the field.
+   * @description View boundaries in an organization. fields: View the field
+   * associated with these boundaries. owningOrganizations: View the
+   * organization that owns the field.
    * @generated from GET /organizations/{orgId}/boundaries
    */
   async list(
@@ -87,7 +89,17 @@ export class BoundariesApi {
 
   /**
    * Generate a Boundary from a FieldOperation
-   * @description Given a , this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before back into Operations Center. There are two cases where this API will return an HTTP 400 - Bad Request: If the field already has an active boundary. In this case, please use the existing boundary - it is likely more accurate than a generated boundary. If the field has been merged. In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.
+   * @description Given a , this endpoint will generate and return a boundary
+   * that surrounds the area worked by that field operation. Any gaps in that
+   * field operation will be treated as interior rings. This endpoint returns
+   * the generated boundary, giving you the opportunity to change the boundary
+   * name, clean up any unwanted interiors, etc. before back into Operations
+   * Center. There are two cases where this API will return an HTTP 400 - Bad
+   * Request: If the field already has an active boundary. In this case, please
+   * use the existing boundary - it is likely more accurate than a generated
+   * boundary. If the field has been merged. In this case, a FieldOperation may
+   * only cover one part of the merged field, resulting in an inaccurate
+   * boundary.
    * @generated from GET /fieldOperations/{operationId}/boundary
    */
   async get(
@@ -118,7 +130,11 @@ export class BoundariesApi {
 
   /**
    * Update a boundary
-   * @description This endpoint will update a boundary. The shape of the object must include name, active, irrigated, sourceType, and multipolygons. All these fields can be updated, however a license is required to set sourceType to a value other than "External". If the boundary is set to active, it will mark all other boundaries in this field inactive.
+   * @description This endpoint will update a boundary. The shape of the object
+   * must include name, active, irrigated, sourceType, and multipolygons. All
+   * these fields can be updated, however a license is required to set
+   * sourceType to a value other than "External". If the boundary is set to
+   * active, it will mark all other boundaries in this field inactive.
    * @generated from PUT /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
   async update(

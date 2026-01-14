@@ -160,6 +160,27 @@ function toResourceName(specName: string): string {
   return toCamelCase(name);
 }
 
+function wrapJsDocText(text: string, prefix: string, maxWidth = 80): string[] {
+  const words = text.replace(/\s+/g, ' ').trim().split(' ');
+  const lines: string[] = [];
+  let currentLine = prefix;
+
+  for (const word of words) {
+    if (currentLine.length + word.length + 1 > maxWidth && currentLine !== prefix) {
+      lines.push(currentLine);
+      currentLine = `   * ${word}`;
+    } else {
+      currentLine += (currentLine === prefix ? '' : ' ') + word;
+    }
+  }
+
+  if (currentLine !== prefix) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
 function extractPathParams(path: string): string[] {
   const matches = path.match(/\{([^}]+)}/g) || [];
   return matches.map((m) => m.slice(1, -1));
@@ -524,7 +545,7 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
     jsdoc.push(`   * ${op.summary}`);
   }
   if (op.description && op.description !== op.summary) {
-    jsdoc.push(`   * @description ${op.description.split('\n')[0]}`);
+    jsdoc.push(...wrapJsDocText(op.description, '   * @description '));
   }
   jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${op.path}`);
   jsdoc.push('   */');

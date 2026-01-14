@@ -13,7 +13,8 @@ export class GuidanceLinesApi {
 
   /**
    * View guidance lines for a field
-   * @description This endpoint will retrieve a list of guidance lines for a field. By default, the call will return only active guidance lines.
+   * @description This endpoint will retrieve a list of guidance lines for a
+   * field. By default, the call will return only active guidance lines.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/guidanceLines
    */
   async list(
@@ -51,7 +52,9 @@ export class GuidanceLinesApi {
 
   /**
    * Create a guidance line
-   * @description This endpoint will create a guidance line and associate it to a given field. This operation currently only supports the creation of AB Lines.
+   * @description This endpoint will create a guidance line and associate it to
+   * a given field. This operation currently only supports the creation of AB
+   * Lines.
    * @generated from POST /organizations/{orgId}/fields/{fieldId}/guidanceLines
    */
   async create(
@@ -66,7 +69,8 @@ export class GuidanceLinesApi {
 
   /**
    * Retrieve a specific guidance line
-   * @description This endpoint will return the subclass of guidance line represented by the specified ID.
+   * @description This endpoint will return the subclass of guidance line
+   * represented by the specified ID.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/guidanceLines/{guidanceLineId}
    */
   async get(

@@ -13,7 +13,8 @@ export class OperatorsApi {
 
   /**
    * Retrieve all Operators for a given org
-   * @description This endpoint will return list of operators in the system for the provided organization ID
+   * @description This endpoint will return list of operators in the system for
+   * the provided organization ID
    * @generated from GET /organizations/{orgId}/operators
    */
   async list(
@@ -54,7 +55,8 @@ export class OperatorsApi {
 
   /**
    * Create an Operator
-   * @description This endpoint will create a new Operator in the system for the provided organization ID
+   * @description This endpoint will create a new Operator in the system for the
+   * provided organization ID
    * @generated from POST /organizations/{orgId}/operators
    */
   async create(
@@ -68,7 +70,8 @@ export class OperatorsApi {
 
   /**
    * Delete all Operators for a given org
-   * @description This endpoint will delete every operator in the system for the provided organization ID
+   * @description This endpoint will delete every operator in the system for the
+   * provided organization ID
    * @generated from DELETE /organizations/{orgId}/operators
    */
   async delete(orgId: string, options?: RequestOptions): Promise<void> {
@@ -78,7 +81,9 @@ export class OperatorsApi {
 
   /**
    * Retrieve a specific Operator in an org by Operator ID
-   * @description This endpoint will return a specific operator in the system in an org for the provided Operator ID to the data of an operator in the request body
+   * @description This endpoint will return a specific operator in the system in
+   * an org for the provided Operator ID to the data of an operator in the
+   * request body
    * @generated from GET /organizations/{orgId}/operators/{id}
    */
   async get(
@@ -96,7 +101,9 @@ export class OperatorsApi {
 
   /**
    * Update a specific Operator in an org by Operator ID
-   * @description This endpoint will update a specific operator in the system in an org for the provided Operator ID to the data of an operator in the request body
+   * @description This endpoint will update a specific operator in the system in
+   * an org for the provided Operator ID to the data of an operator in the
+   * request body
    * @generated from PUT /organizations/{orgId}/operators/{id}
    */
   async update(
@@ -111,7 +118,8 @@ export class OperatorsApi {
 
   /**
    * Delete a specific Operator in an org by Operator ID
-   * @description This endpoint will delete a specific operator in the system in an org for the provided Operator ID
+   * @description This endpoint will delete a specific operator in the system in
+   * an org for the provided Operator ID
    * @generated from DELETE /organizations/{orgId}/operators/{id}
    */
   async deleteOperators(

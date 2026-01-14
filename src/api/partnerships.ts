@@ -13,7 +13,14 @@ export class PartnershipsApi {
 
   /**
    * List Partners
-   * @description This request allows the client to view a list of partners. Each data point links to the following: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request.
+   * @description This request allows the client to view a list of partners.
+   * Each data point links to the following: fromPartnership: View the
+   * organization that initiated the partnership. toPartnership: View the
+   * organization that the partner request was sent to. If the partnership has
+   * not been accepted, only the invited users email address will be returned.
+   * delete: Use this link to delete the partnership. permissions: View the
+   * permissions assigned within the partnership. contactInvitation: The ID
+   * specific to the partnership request.
    * @generated from GET /partnerships
    */
   async list(
@@ -33,7 +40,10 @@ export class PartnershipsApi {
 
   /**
    * Request a Partnership
-   * @description This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the endpoint to discover available organizations for a user.
+   * @description This will send an email request to create a partnership from
+   * an organization identified in the request. To discover an organization ID
+   * to send the request from, you must first query the endpoint to discover
+   * available organizations for a user.
    * @generated from POST /partnerships
    */
   async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
@@ -43,7 +53,14 @@ export class PartnershipsApi {
 
   /**
    * Get Partnership Details
-   * @description This request allows the client to view partnership details. The response links to the following resources: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request.
+   * @description This request allows the client to view partnership details.
+   * The response links to the following resources: fromPartnership: View the
+   * organization that initiated the partnership. toPartnership: View the
+   * organization that the partner request was sent to. If the partnership has
+   * not been accepted, only the invited users email address will be returned.
+   * delete: Use this link to delete the partnership. permissions: View the
+   * permissions assigned within the partnership. contactInvitation: The ID
+   * specific to the partnership request.
    * @generated from GET /partnerships/{token}
    */
   async get(
@@ -66,7 +83,10 @@ export class PartnershipsApi {
 
   /**
    * View Permissions in a Partnership
-   * @description This request allows the client to view all the permissions that one partner has assigned the other. The response will also link to the Assign Permissions resource, which will allow the client to assign permissions to a partner.
+   * @description This request allows the client to view all the permissions
+   * that one partner has assigned the other. The response will also link to the
+   * Assign Permissions resource, which will allow the client to assign
+   * permissions to a partner.
    * @generated from GET /partnerships/{token}/permissions
    */
   async listPermissions(
@@ -79,7 +99,9 @@ export class PartnershipsApi {
 
   /**
    * Request/Assign Permissions
-   * @description This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.
+   * @description This request allows the client to update a partner permission
+   * or request a permission from a partner. To enable file sharing within this
+   * partnership, assign or request the relevant permission type.
    * @generated from POST /partnerships/{token}/permissions
    */
   async createPermissions(

@@ -103,7 +103,9 @@ export class AssetsApi {
 
   /**
    * Get all locations for an asset
-   * @description This endpoint will retrieve all locations for an asset. If you provide startDate and endDate then it will retrieve all the results of the given time range.
+   * @description This endpoint will retrieve all locations for an asset. If you
+   * provide startDate and endDate then it will retrieve all the results of the
+   * given time range.
    * @generated from GET /assets/{assetId}/locations
    */
   async listLocations(
@@ -123,7 +125,11 @@ export class AssetsApi {
 
   /**
    * Create new asset location
-   * @description This endpoint will create a new Asset Location. We provide for measurementData name. Please Note: Only links are supported for a measurementData name. Additionally, Asset Locations do not honor fractional seconds in their timestamps. So 2019-01-01T12:34:56.900Z and 2019-01-01T12:34:56Z are considered equivalent.
+   * @description This endpoint will create a new Asset Location. We provide for
+   * measurementData name. Please Note: Only links are supported for a
+   * measurementData name. Additionally, Asset Locations do not honor fractional
+   * seconds in their timestamps. So 2019-01-01T12:34:56.900Z and
+   * 2019-01-01T12:34:56Z are considered equivalent.
    * @generated from POST /assets/{assetId}/locations
    */
   async createLocations(

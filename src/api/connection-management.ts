@@ -13,7 +13,8 @@ export class ConnectionManagementApi {
 
   /**
    * Get list of connections
-   * @description Retrieve all of the connections for a CSC based on the client in the token
+   * @description Retrieve all of the connections for a CSC based on the client
+   * in the token
    * @generated from GET /connections
    */
   async list(
@@ -56,7 +57,8 @@ export class ConnectionManagementApi {
 
   /**
    * Delete all partner connections by Org Id
-   * @description Remove all connections between the calling application and the org. This includes all partner connections.
+   * @description Remove all connections between the calling application and the
+   * org. This includes all partner connections.
    * @generated from DELETE /organizations/{orgId}/connections
    */
   async deleteConnections(orgId: string, options?: RequestOptions): Promise<void> {

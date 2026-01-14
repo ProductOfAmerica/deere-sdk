@@ -13,7 +13,11 @@ export class MachineEngineHoursApi {
 
   /**
    * Engine Hours
-   * @description The engine hours service returns the last reported number of hours that a machine's engine has recorded.Each response includes a timestamp for the report and the source of the report.For each returned engine hours report, the response will include a link to the machine's information.
+   * @description The engine hours service returns the last reported number of
+   * hours that a machine's engine has recorded.Each response includes a
+   * timestamp for the report and the source of the report.For each returned
+   * engine hours report, the response will include a link to the machine's
+   * information.
    * @generated from GET /machines/{principalId}/engineHours
    */
   async list(

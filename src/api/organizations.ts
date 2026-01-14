@@ -47,7 +47,9 @@ export class OrganizationsApi {
 
   /**
    * View an Organization
-   * @description This request will return information about an organization, such as its name, type, and whether or not you are a member of the organization. It contains links to the following resources:
+   * @description This request will return information about an organization,
+   * such as its name, type, and whether or not you are a member of the
+   * organization. It contains links to the following resources:
    * @generated from GET /organizations/{orgId}
    */
   async get(
@@ -60,7 +62,10 @@ export class OrganizationsApi {
 
   /**
    * View User Orgs
-   * @description This request will return a list of organizations. The response will ONLY contain organizations in which the user is a staff member (member=true). This response will NOT contain partner organizations in which the user is not a staff member (member=false).
+   * @description This request will return a list of organizations. The response
+   * will ONLY contain organizations in which the user is a staff member
+   * (member=true). This response will NOT contain partner organizations in
+   * which the user is not a staff member (member=false).
    * @generated from GET /users/{userName}/organizations
    */
   async listOrganizations(
@@ -76,7 +81,8 @@ export class OrganizationsApi {
 
   /**
    * List Organization Users
-   * @description Returns a list of users belonging to the specified organization.
+   * @description Returns a list of users belonging to the specified
+   * organization.
    * @generated from GET /organizations/{orgId}/users
    */
   async listUsers(

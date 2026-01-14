@@ -13,7 +13,9 @@ export class WebhookApi {
 
   /**
    * Get Event Subscriptions
-   * @description This resource will return a paged list of event subscriptions for the user. The endpoint will return all Active, Expired, and Terminated subscriptions.
+   * @description This resource will return a paged list of event subscriptions
+   * for the user. The endpoint will return all Active, Expired, and Terminated
+   * subscriptions.
    * @generated from GET /eventSubscriptions
    */
   async list(options?: RequestOptions): Promise<unknown> {
@@ -31,7 +33,11 @@ export class WebhookApi {
 
   /**
    * Create an Event Subscription
-   * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- user: The subscribed user provided by the current authorization context. self: The created subscription.
+   * @description This resource will create an event subscription for a user. It
+   * returns a list of event subscriptions. To create a subscription for an
+   * event, your client must have access to the event's associated api. The
+   * response will include links to:- user: The subscribed user provided by the
+   * current authorization context. self: The created subscription.
    * @generated from POST /eventSubscriptions
    */
   async create(
@@ -48,7 +54,9 @@ export class WebhookApi {
 
   /**
    * Get an Event Subscription
-   * @description This resource will get a single event subscription by id. The response will include links to: user: The subscribed user provided by the current authorization context. self: The subscription itself.
+   * @description This resource will get a single event subscription by id. The
+   * response will include links to: user: The subscribed user provided by the
+   * current authorization context. self: The subscription itself.
    * @generated from GET /eventSubscriptions/{id}
    */
   async get(
@@ -61,7 +69,8 @@ export class WebhookApi {
 
   /**
    * Update an Event Subscription
-   * @description This resource will update an event subscription for a user. Only certain fields are editable.
+   * @description This resource will update an event subscription for a user.
+   * Only certain fields are editable.
    * @generated from PUT /eventSubscriptions/{id}
    */
   async update(

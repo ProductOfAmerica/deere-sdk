@@ -67,7 +67,8 @@ export class FlagsApi {
 
   /**
    * Delete a flag for a given org
-   * @description This resource will delete a single flag based on its Id and org id
+   * @description This resource will delete a single flag based on its Id and
+   * org id
    * @generated from DELETE /organizations/{orgId}/flags/{flagId}
    */
   async delete(orgId: string, flagId: string, options?: RequestOptions): Promise<void> {
@@ -129,7 +130,8 @@ export class FlagsApi {
 
   /**
    * List flags for the field
-   * @description This resource will return a list of flag objects associated with the field.
+   * @description This resource will return a list of flag objects associated
+   * with the field.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/flags
    */
   async list(

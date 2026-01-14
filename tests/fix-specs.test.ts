@@ -39,7 +39,9 @@ describe('fix-specs utilities', () => {
         'type'
       );
       assert.strictEqual(
-        sanitizePropertyKey("fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"),
+        sanitizePropertyKey(
+          "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"
+        ),
         'fieldOperationType'
       );
     });
@@ -58,17 +60,11 @@ describe('fix-specs utilities', () => {
     });
 
     it('handles multiple sup tags (edge case)', () => {
-      assert.strictEqual(
-        sanitizePropertyKey('field<sup>1</sup><sup>2</sup>'),
-        'field'
-      );
+      assert.strictEqual(sanitizePropertyKey('field<sup>1</sup><sup>2</sup>'), 'field');
     });
 
     it('strips standalone tags after sup removal', () => {
-      assert.strictEqual(
-        sanitizePropertyKey('field<b>bold</b>'),
-        'fieldbold'
-      );
+      assert.strictEqual(sanitizePropertyKey('field<b>bold</b>'), 'fieldbold');
     });
   });
 });

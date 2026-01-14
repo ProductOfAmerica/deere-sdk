@@ -13,7 +13,8 @@ export class CropTypesApi {
 
   /**
    * Retrieve all crop types
-   * @description This endpoint will return list of available crop types in the system.
+   * @description This endpoint will return list of available crop types in the
+   * system.
    * @generated from GET /cropTypes
    */
   async list(
@@ -66,7 +67,8 @@ export class CropTypesApi {
 
   /**
    * Retrieve all crop types for a specific organization
-   * @description This endpoint will return a list of all crop types for a specific organization.
+   * @description This endpoint will return a list of all crop types for a
+   * specific organization.
    * @generated from GET /organizations/{organizationId}/cropTypes
    */
   async listCroptypes(

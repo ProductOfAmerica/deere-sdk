@@ -13,7 +13,8 @@ export class HarvestIdApi {
 
   /**
    * Retrieve all Cotton HID modules for a given org
-   * @description This endpoint will return list of HID Cotton modules in the system for the provided organization ID (filtered by user-level access).
+   * @description This endpoint will return list of HID Cotton modules in the
+   * system for the provided organization ID (filtered by user-level access).
    * @generated from GET /organizations/{orgId}/harvestIdentificationModules
    */
   async list(
@@ -52,7 +53,8 @@ export class HarvestIdApi {
 
   /**
    * Retrieve a specific HID module by serial number
-   * @description This endpoint will retrieve a specific HID module by serial number.
+   * @description This endpoint will retrieve a specific HID module by serial
+   * number.
    * @generated from GET /organizations/{orgId}/harvestIdentificationModules/{serialNumber}
    */
   async get(

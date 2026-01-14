@@ -13,7 +13,14 @@ export class FieldOperationsApi {
 
   /**
    * List Field Operations
-   * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation.
+   * @description This resource returns logical data structures representing the
+   * agronomic operations performed in a field. Supported field operation types
+   * include Seeding, Application, and Harvest. A single field operation may
+   * potentially span consecutive days depending on the type of operation. Each
+   * field operation may have one or more measurements, listed as links from the
+   * field operation itself. Each field operation will include links to:
+   * organization: The organization which owns this data. field: The field in
+   * which this operation was performed. self: The field operation.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/fieldOperations
    */
   async list(
@@ -76,7 +83,9 @@ export class FieldOperationsApi {
 
   /**
    * View a Field Operation
-   * @description View a single field operation. The response will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation.
+   * @description View a single field operation. The response will include links
+   * to: organization: The organization which owns this data. field: The field
+   * in which this operation was performed. self: The field operation.
    * @generated from GET /fieldOperations/{operationId}
    */
   async get(
@@ -93,7 +102,24 @@ export class FieldOperationsApi {
 
   /**
    * Asynchronous Shapefile Download
-   * @description An ESRI Shapefile is available for each Field Operation. Please see the for details on the shapefile format and how to consume it. The expected response codes are: 202 Accepted – The request was received and is being processed. Call back later to check for completion. This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307. Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1) 307 Temporary Redirect – The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. 406 Not Acceptable - A shapefile cannot be generated. Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. For a sample integration, see our .
+   * @description An ESRI Shapefile is available for each Field Operation.
+   * Please see the for details on the shapefile format and how to consume it.
+   * The expected response codes are: 202 Accepted – The request was received
+   * and is being processed. Call back later to check for completion. This API
+   * does not currently support webhooks. To check for completion, repeat the
+   * same API call until you get an HTTP 307. Processing may take up to 30
+   * minutes, depending on the size of data. Applications should poll the API
+   * using a backoff loop. Polling intervals should start at 5 seconds and
+   * double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)
+   * 307 Temporary Redirect – The shapefile is ready to download. This response
+   * contains a location header. The location is a pre-signed URL that is valid
+   * for no less than one hour. To download the file, perform a GET request to
+   * the URL in the location header. Do not apply OAuth signing or other
+   * authorization to this request - it will cause the call to fail. 406 Not
+   * Acceptable - A shapefile cannot be generated. Note the initial call for a
+   * shapefile may receive either a 202 or a 307 response, depending upon
+   * whether an up-to-date file already exists for the specified field
+   * operation. For a sample integration, see our .
    * @generated from GET /fieldOps/{operationId}
    */
   async getFieldops(

@@ -67,7 +67,17 @@ export class FieldsApi {
 
   /**
    * Create field for an Organization
-   * @description This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names. This is to support the following scenarios: * adding a new field to an existing client/farm * adding a new farm and field to an existing client * adding a brand new client/farm/field Client-specified identifiers: * An identifier may be specified for the new field * An identifier may be specified for new clients/farms * If associating to an existing client/farm, the existing guids may be specified in place of the name Note: All fields are created with an 'available' status.
+   * @description This API is used to create a new field resource within the
+   * target organization. In order to do this, the authenticated user must have
+   * Locations Level 3 permission within the target organization. The client and
+   * farm names in the request body may be either new or existing names. This is
+   * to support the following scenarios: * adding a new field to an existing
+   * client/farm * adding a new farm and field to an existing client * adding a
+   * brand new client/farm/field Client-specified identifiers: * An identifier
+   * may be specified for the new field * An identifier may be specified for new
+   * clients/farms * If associating to an existing client/farm, the existing
+   * guids may be specified in place of the name Note: All fields are created
+   * with an 'available' status.
    * @generated from POST /organizations/{orgId}/fields
    */
   async create(
@@ -98,7 +108,9 @@ export class FieldsApi {
 
   /**
    * Update field
-   * @description Update the field name, the archived status, or the associated client or farm. If the client and/or farm does not exist, it will be created.
+   * @description Update the field name, the archived status, or the associated
+   * client or farm. If the client and/or farm does not exist, it will be
+   * created.
    * @generated from PUT /organizations/{orgId}/fields/{fieldId}
    */
   async update(
@@ -122,7 +134,8 @@ export class FieldsApi {
 
   /**
    * Get Farm by organization and fieldId
-   * @description This api is designed to get farms within an organization and for provided fieldId
+   * @description This api is designed to get farms within an organization and
+   * for provided fieldId
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/farms
    */
   async listFarms(
@@ -140,7 +153,10 @@ export class FieldsApi {
 
   /**
    * View Clients that Own a Field
-   * @description View details about the client that owns the field. The response will link to the following resources: fields: View the field the client belongs to. farms: View the farms belonging to the client. owningOrganization: View the org that owns the field.
+   * @description View details about the client that owns the field. The
+   * response will link to the following resources: fields: View the field the
+   * client belongs to. farms: View the farms belonging to the client.
+   * owningOrganization: View the org that owns the field.
    * @generated from GET /organizations/{orgID}/fields/{id}/clients
    */
   async listClients(

@@ -13,7 +13,19 @@ export class MachineDeviceStateReportsApi {
 
   /**
    * Terminal Device State Reports
-   * @description A device state report is generated from a terminal at a specified time. The report contains the following information: Engine State Power State Model State RSSI Value (signal strength of the terminal) Local Information GPS State/Error WIFI Info/Error GSM/WIFI Antenna Type Wifi SSID BatteryVoltage LastBootType LastBootTimestamp VehiclePowerState This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to Machine: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear. Terminal: Request a Device State Report from the specified terminal.
+   * @description A device state report is generated from a terminal at a
+   * specified time. The report contains the following information: Engine State
+   * Power State Model State RSSI Value (signal strength of the terminal) Local
+   * Information GPS State/Error WIFI Info/Error GSM/WIFI Antenna Type Wifi SSID
+   * BatteryVoltage LastBootType LastBootTimestamp VehiclePowerState This report
+   * is specific to, and identified by, the terminal, regardless of which
+   * machine it is connected to. Device state report information is collected
+   * from the machine terminal. A device state report is created for each
+   * machine call-in. Each requested DSR (one report for a single terminal
+   * request, and two or more for a multiple terminal request) links to Machine:
+   * Request a Device State Report from the specified machine. If the terminal
+   * is not linked to a machine, this link will not appear. Terminal: Request a
+   * Device State Report from the specified terminal.
    * @generated from GET /machines/{principalId}/deviceStateReports
    */
   async get(
