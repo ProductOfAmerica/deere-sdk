@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-01-14
+
+### Added
+
+- `wrapJsDocText` utility for improved JSDoc formatting in generated SDK code
+- Test-specific TypeScript config (`tsconfig.test.json`)
+- Shared spec utilities library (`scripts/lib/spec-utils.ts`)
+- Unit tests for spec fixing (`tests/fix-specs.test.ts`)
+- `CODEOWNERS` file with default ownership rules
+
+### Changed
+
+- Consolidate workflows by linking release workflow to publish workflow
+- Update CI workflows to ignore non-essential files (docs, configs)
+- Adjust API health workflow schedule
+- Refactor `fix-specs.ts` and `generate-types.ts` to use shared spec utilities
+- Regenerate SDK with improved JSDoc formatting (line wrapping)
+
+### Fixed
+
+- OpenSSF Scorecard branch protection check now uses fine-grained PAT with `repo_token` parameter
+
 ## [1.0.4] - 2026-01-13
 
 ### Added
