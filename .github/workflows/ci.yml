@@ -102,3 +102,4 @@ jobs:
         with:
           commit_message: "chore: update coverage badge [skip ci]"
           file_pattern: ".github/badges/coverage.json"
+          token: ${{ secrets.PAT_WITH_BYPASS }}
