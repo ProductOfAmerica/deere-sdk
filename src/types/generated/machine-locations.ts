@@ -13,16 +13,16 @@ export interface paths {
     };
     /**
      * Machine Location History
-     * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the <strong>/machines</strong> resource.
+     * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the /machines resource.
      */
     get: {
       parameters: {
         query?: {
           /** @description Includes the last known machine location. */
           lastKnown?: boolean;
-          /** @description Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard. */
+          /** @description Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the Standard. */
           startDate?: string;
-          /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z */
+          /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z */
           endDate?: string;
         };
         header?: never;
@@ -86,20 +86,20 @@ export interface components {
     };
     ReportedLocation: {
       /**
-       * @description Contains the <mark>&lt;lat&gt;</mark>, <mark>&lt;lon&gt;</mark>, and <mark>&lt;altitude&gt;</mark> tags.
+       * @description Contains the &lt;lat&gt;, &lt;lon&gt;, and &lt;altitude&gt; tags.
        * @example N/A
        */
       point?: Record<string, never>;
       /**
        * Format: float
        * @description The latitude of the machine's location.
-       * @example <mark>41.688612</mark>
+       * @example 41.688612
        */
       lat?: Record<string, never>;
       /**
        * Format: float
        * @description The longitude of the machine's location.
-       * @example <mark>-93.693612</mark>
+       * @example -93.693612
        */
       lon?: Record<string, never>;
       /**
@@ -110,7 +110,7 @@ export interface components {
       altitude: Record<string, never>;
       /**
        * Format: date
-       * @description Timestamp of the machine location report. All timestamps follow the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard format.
+       * @description Timestamp of the machine location report. All timestamps follow the standard format.
        * @example 2012-11-07T18:42:07.186Z
        */
       eventTimestamp?: string;

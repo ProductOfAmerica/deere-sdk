@@ -75,7 +75,7 @@ export interface paths {
     put?: never;
     /**
      * Create Notification Event
-     * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event.
+     * @description This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to source, which will define the event.
      */
     post: {
       parameters: {
@@ -171,7 +171,7 @@ export interface paths {
     };
     /**
      * Search Notifications for an Organization
-     * @description This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: <ul> <li><b>targetResource:</b> View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example.</li> <li><b>contributionDefinition:</b> View the definition of "notification".</li> </ul>
+     * @description This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: targetResource: View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example. contributionDefinition: View the definition of "notification".
      */
     get: {
       parameters: {
@@ -238,7 +238,7 @@ export interface components {
        * @description Event status code.
        * @example SUCCESS
        */
-      'eventStatusCode<sup><a href="#event-status-code">4</a></sup>'?: string;
+      eventStatusCode?: string;
       /**
        * @description Number of notifications expected to generate from this event.
        * @example 2
@@ -265,12 +265,12 @@ export interface components {
        * @description Event severity.
        * @example HIGH
        */
-      'severity<sup><a href="#event-severity">1</a></sup>'?: string;
+      severity?: string;
       /**
        * @description Event type.
        * @example AGRONOMY
        */
-      'eventType<sup><a href="#event-type">2</a></sup>'?: string;
+      eventType?: string;
       /**
        * Format: date-time
        * @description Event creation time (UTC). This value is only valid for Machine Alert types and is optional.
@@ -283,10 +283,10 @@ export interface components {
        */
       additionalDetails?: unknown;
       /**
-       * @description <sup>DEPRECATED</sup>Time range of the event
+       * @description Time range of the event
        * @example See sample request below.
        */
-      'timeRange<sup>DEPRECATED</sup>'?: unknown;
+      timeRange?: unknown;
       /**
        * @description Instructions on how to associate the resulting Notifications with resources.
        * @example See sample request below.
@@ -320,19 +320,19 @@ export interface components {
        * @description Event severity.
        * @example HIGH
        */
-      'severity<sup><a href="#event-severity">1</a></sup>'?: string;
+      severity?: string;
       /**
        * @description Event type.
        * @example AGRONOMY
        */
-      'eventType<sup><a href="#event-type">2</a></sup>'?: string;
+      eventType?: string;
       /**
        * @description Notification Event GUID
        * @example 2acf8953-8eaf-4487-9cd0-391059fcbfcf
        */
       sourceEvent?: Record<string, never>;
       /**
-       * @description Minimized version of notification having additionalDetails, notificationState<sup><a href="#notification-state">5</a></sup>, targetResourceOrgId, dateCreated and link to targetResource.
+       * @description Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource.
        * @example See sample response below.
        */
       minimizedNotifications?: Record<string, never>;

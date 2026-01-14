@@ -22,7 +22,7 @@ export interface paths {
           status?: components['parameters']['Status'];
           /** @description Filter results based on status; Will default to active */
           recordFilter?: components['parameters']['RecordFilter'];
-          /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+          /** @description Whether to return the track geometry for AB and Adaptive Curves. See */
           embed?: components['parameters']['Embed'];
         };
         header?: never;
@@ -86,7 +86,7 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+          /** @description Whether to return the track geometry for AB and Adaptive Curves. See */
           embed?: components['parameters']['Embed'];
         };
         header?: never;
@@ -382,7 +382,7 @@ export interface components {
     Status: string;
     /** @description Filter results based on status; Will default to active */
     RecordFilter: string;
-    /** @description Whether to return the track geometry for AB and Adaptive Curves. See <a href="#shapes-array">Shapes Array</a> */
+    /** @description Whether to return the track geometry for AB and Adaptive Curves. See */
     Embed: string;
   };
   requestBodies: {

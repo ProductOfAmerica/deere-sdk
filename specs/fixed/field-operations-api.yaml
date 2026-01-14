@@ -23,7 +23,7 @@ paths:
   /organizations/{orgId}/fields/{fieldId}/fieldOperations:
     get:
       summary: "List Field Operations"
-      description: "This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> </ul>"
+      description: "This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation."
       parameters:
         - $ref: "#/components/parameters/OrgId"
         - $ref: "#/components/parameters/FieldId"
@@ -47,7 +47,7 @@ paths:
   /fieldOperations/{operationId}:
     get:
       summary: "View a Field Operation"
-      description: "View a single field operation. The response will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> <ul>"
+      description: "View a single field operation. The response will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation."
       parameters:
         - $ref: "#/components/parameters/OperationId"
         - $ref: "#/components/parameters/FieldEmbed"
@@ -64,7 +64,7 @@ paths:
   /fieldOps/{operationId}:
     get:
       summary: "Asynchronous Shapefile Download"
-      description: "An ESRI Shapefile is available for each Field Operation. <b>Please see the <a href=/dev-docs/field-operations#shapefile-overview>shapefiles overview</a> for details</b> on the shapefile format and how to consume it.<p>The expected response codes are:</p> <ul> <li><b>202 Accepted – </b>The request was received and is being processed. Call back later to check for completion. <ul> <li>This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307.</li> <li>Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: <mark>secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)</mark></li> </ul> </li> <li><b>307 Temporary Redirect – </b>The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. </li> <li><b>406 Not Acceptable - </b>A shapefile cannot be generated. </li> </ul> Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. <br/><br/>For a sample integration, see our <a href=https://github.com/JohnDeere/MyJohnDeereAPI-OAuth2-Java-Example>Java sample code</a>."
+      description: "An ESRI Shapefile is available for each Field Operation. Please see the for details on the shapefile format and how to consume it. The expected response codes are: 202 Accepted – The request was received and is being processed. Call back later to check for completion. This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307. Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1) 307 Temporary Redirect – The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. 406 Not Acceptable - A shapefile cannot be generated. Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. For a sample integration, see our ."
       parameters:
         - $ref: "#/components/parameters/OperationId"
         - $ref: "#/components/parameters/SplitShapeFile"
@@ -99,6 +99,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Owning Organization ID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "int64"
@@ -106,6 +107,7 @@ components:
     FieldId:
       name: "fieldId"
       in: "path"
+      x-required-boolean: true
       description: "Field ID"
       schema:
         type: "string"
@@ -114,6 +116,7 @@ components:
     OperationId:
       name: "operationId"
       in: "path"
+      x-required-boolean: true
       description: "Operation ID"
       schema:
         type: "string"
@@ -121,6 +124,7 @@ components:
     WorkNoteId:
       name: "workNoteId"
       in: "path"
+      x-required-boolean: true
       description: "The identifier for a work note. The work note id will be used to identify unique work notes."
       schema:
         type: "string"
@@ -130,20 +134,21 @@ components:
       name: "measurementType"
       in: "path"
       description: "The measurementType within field operation by machine"
+      x-required-boolean: true
       schema:
         $ref: "#/components/schemas/FieldOperationMeasurementTypesEnum"
     OperationLayerName:
       name: "layerName"
       in: "path"
       description: "The operation layer name for a given field operation"
+      x-required-boolean: true
       schema:
         $ref: "#/components/schemas/FieldOperationLayersEnum"
     CompareType:
       in: "path"
+      x-required-boolean: true
       name: "compareType"
-      description: "The type of comparison to apply to the current Field Operation Layer. Rules:
-
-        \  * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`."
+      description: "The type of comparison to apply to the current Field Operation Layer. Rules: * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`."
       schema:
         type: "string"
         enum:
@@ -176,6 +181,7 @@ components:
       name: "workPlanIds"
       in: "query"
       description: "Query by one or more workPlanIds(comma separated)"
+      x-required-boolean: false
       schema:
         type: "List Of GUID"
         example: "[\"d6166574-4ede-404e-8a68-85d4284b869d\"]"
@@ -183,6 +189,7 @@ components:
       name: "x-deere-signature"
       in: "header"
       description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "520122365ebb4870a344784570d202c7"
@@ -239,7 +246,7 @@ components:
     Accept-UOM-System:
       name: "Accept-UOM-System"
       in: "header"
-      description: "Unit of measure system to use for numeric values in the shapefiles. Accepted values are \"METRIC\", \"ENGLISH\", and \"MIXED\".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target=\"_blank\">ADAPT's unit system</a>."
+      description: "Unit of measure system to use for numeric values in the shapefiles. Accepted values are \"METRIC\", \"ENGLISH\", and \"MIXED\".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with ."
       schema:
         type: "string"
         example: "METRIC"
@@ -247,6 +254,7 @@ components:
       name: "Accept-Yield-Preference"
       in: "header"
       description: "Desired yield representation (unit) type. Accepted values are VOLUME or MASS."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "VOLUME"
@@ -279,6 +287,7 @@ components:
       name: "embed"
       in: "query"
       description: "Include additional subelements in response."
+      x-required-boolean: false
       schema:
         type: "array"
         items:
@@ -317,6 +326,7 @@ components:
     OperationIds:
       name: "operationIds"
       in: "query"
+      x-required-boolean: true
       description: "The identifier(s) for Field Operation(s). Used when there is the potential for more than one Field Operation to be passed. The identifier(s) will have a different format for HDP vs. IMET Field Operations but, clients should treat this as a generic string and not parse it in any way."
       schema:
         type: "array"
@@ -325,6 +335,7 @@ components:
           example: "306d497f-e5e1-4921-8841-3c5f582e3a2e"
   requestBodies:
     FieldOperationLayerImageRequest:
+      x-required-boolean: true
       description: "Request body for generating an image for a field operation layer."
       content:
         application/vnd.deere.axiom.v3+json:
@@ -344,6 +355,7 @@ components:
                     hexColor: "#cc00aa"
                     percent: 0.85
     FieldOperationCompareStatisticsRequest:
+      x-required-boolean: true
       description: "Request to get comparison stats for field operations"
       content:
         application/vnd.deere.axiom.v3+json:
@@ -369,6 +381,7 @@ components:
                         - - -10
                           - -10
     UpdateFieldOperationLayerStatisticsRequest:
+      x-required-boolean: true
       description: "See the examples for valid manual data edits. Data edits cannot be combined. Data edits may have cascading effects on layers and measurements not specified in the request. For synchronous edits, clients may fetch the Field Operation totals immediately to see the full impact. For asynchronous edits, clients may poll the Field Operation totals to wait for the specified value to be reflected. A status API may be added in the future."
       content:
         application/vnd.deere.axiom.v3+json:
@@ -418,12 +431,14 @@ components:
                     averageValue:
                       edited: false
     UpdateFieldOperationRequest:
+      x-required-boolean: true
       description: "Update a field operation."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/UpdateFieldOperation"
     UpdateFieldOperationMachinesRequest:
+      x-required-boolean: true
       description: "Update field operation machines."
       content:
         application/vnd.deere.axiom.v3+json:
@@ -441,12 +456,14 @@ components:
                 - GUID: "6117580e-0222-4c06-96df-76a53451e69c"
                   calibrationFactor: 1.05
     SearchFieldOperations:
+      x-required-boolean: true
       description: "Payload for the FieldOperationSearch to retrive field operations for provided organization, field ids and duration."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/FieldOperationsSearch"
     FieldOperationWorkNote:
+      x-required-boolean: true
       description: "Payload for the FieldOperationWorkNote to create field operation work note."
       content:
         application/vnd.deere.axiom.v3+json:
@@ -465,6 +482,7 @@ components:
                 description: "GPS location where the the work note was taken."
                 $ref: "#/components/schemas/Point"
     FieldOperationWorkNoteUpdate:
+      x-required-boolean: true
       description: "Payload for FieldOperationWorkNote to update field operation work note."
       content:
         application/vnd.deere.axiom.v3+json:
@@ -517,7 +535,7 @@ components:
                   $ref: "#/components/schemas/FieldOperation"
           examples:
             No Header:
-              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 520122365ebb4870a344784570d202c7"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 520122365ebb4870a344784570d202c7"
               value:
                 links:
                   - rel: "self"
@@ -670,7 +688,7 @@ components:
                   $ref: "#/components/schemas/FieldOperationId"
           examples:
             No Header:
-              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "FieldOperation"
                 fieldOperationType: "tillage"
@@ -1177,7 +1195,7 @@ components:
       example: "HARVEST"
     Client:
       type: "object"
-      description: "The client associated with this FieldOperation.  Populated only when the associated embed is requested."
+      description: "The client associated with this FieldOperation. Populated only when the associated embed is requested."
       properties:
         id:
           type: "string"
@@ -1196,7 +1214,7 @@ components:
           example: false
     Farm:
       type: "object"
-      description: "The farm associated with this FieldOperation.  Populated only when the associated embed is requested."
+      description: "The farm associated with this FieldOperation. Populated only when the associated embed is requested."
       properties:
         id:
           type: "string"
@@ -1215,7 +1233,7 @@ components:
           example: false
     Field:
       type: "object"
-      description: "The field associated with this FieldOperation.  Populated only when the associated embed is requested."
+      description: "The field associated with this FieldOperation. Populated only when the associated embed is requested."
       properties:
         id:
           type: "string"
@@ -1270,9 +1288,7 @@ components:
           $ref: "#/components/schemas/FieldOperationProductTypesEnum"
         name:
           type: "string"
-          description: "The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier,
-
-            for APPLICATION operations.\n"
+          description: "The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier, for APPLICATION operations."
           example: "Priaxor"
         brand:
           type: "string"
@@ -1305,7 +1321,7 @@ components:
           $ref: "#/components/schemas/EventMeasurement"
     AgencyRegistrationNumber:
       type: "string"
-      description: "The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency\n"
+      description: "The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency"
       example: "0084229-00011-AA-0000000"
     JohnDeereDisplayTypeEnum:
       type: "string"
@@ -1339,11 +1355,7 @@ components:
         - $ref: "#/components/schemas/ThirdPartyDisplayTypeEnum"
     CropToken:
       type: "string"
-      description: "- A unique textual identifier for a type of Crop
-
-        - EnumList is based on ISG_Shared/blob/master/crops/crops.xml
-
-        - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids.\n"
+      description: "- A unique textual identifier for a type of Crop - EnumList is based on ISG_Shared/blob/master/crops/crops.xml - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids."
       example: "ALFALFA"
     CropSeason:
       type: "integer"
@@ -1527,7 +1539,7 @@ components:
           type: "string"
           example: "520122365ebb4870a344784570d202c7"
           description: "A new x-deere-signature response header will be included if the response has changed since last api call."
-        fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>:
+        fieldOperationType:
           type: "string"
           example: "application"
           description: "Field Operation type."
@@ -1576,12 +1588,12 @@ components:
           description: "Boolean flag as to whether the application operation was for a tank mix or not."
         rate:
           example: "See sample response below."
-          description: "Rate of the application. Includes value and unitId<sup><a href='#field-operation-additional'>2</a></sup> data."
+          description: "Rate of the application. Includes value and unitId data."
         value:
           type: "number"
           example: 10
           description: "Numeric value."
-        unitId<sup><a href='#field-operation-additional'>2</a></sup>:
+        unitId:
           type: "string"
           example: "gal1ac-1"
           description: "Unit of value."
@@ -1605,7 +1617,7 @@ components:
           type: "string"
           example: 2015
           description: "The year in which the grower logically assigned this operation. Note that operational activity may occur outside this calendar year."
-        fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>:
+        fieldOperationType:
           type: "string"
           example: "Harvest"
           description: "A string indicating the type of operation (valid values include: seeding, application, harvest, or tillage)."
@@ -1662,7 +1674,7 @@ components:
           type: "string"
           format: "guid"
           example: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
-          description: "Doc File based Field Operation Machine GUID.  Deprecated, use erid instead."
+          description: "Doc File based Field Operation Machine GUID. Deprecated, use erid instead."
         make:
           type: "string"
           example: "JOHN DEERE"
@@ -2206,59 +2218,23 @@ components:
         url: "https://tools.ietf.org/html/rfc7946#section-3.1.6"
       properties:
         type:
-          description: "The type of Geometry. In this case, must be 'Polygon' per GeoJSON
-
-            spec.  Note that the \"coordinates\" member is validated to be be an
-
-            array of size one. This implies there are no interior rings allowed
-
-            currently.\n"
+          description: "The type of Geometry. In this case, must be 'Polygon' per GeoJSON spec. Note that the \"coordinates\" member is validated to be be an array of size one. This implies there are no interior rings allowed currently."
           type: "string"
           enum:
             - "Polygon"
         coordinates:
           type: "array"
-          description: "The number of polygons allowed.  Currently 1, implying no interior rings.  If this number is changes, the maxItems should be considered.
-
-            From RFC7946: o  For type \"Polygon\", the \"coordinates\" member MUST be an array of linear ring coordinate arrays.
-
-            o  For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings.  The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface.
-
-            Again, note we only allow a single set of coordinates, implying no interior rings."
+          description: "The number of polygons allowed. Currently 1, implying no interior rings. If this number is changes, the maxItems should be considered. From RFC7946: o For type \"Polygon\", the \"coordinates\" member MUST be an array of linear ring coordinate arrays. o For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings. The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface. Again, note we only allow a single set of coordinates, implying no interior rings."
           minItems: 1
           maxItems: 1
           items:
             type: "array"
-            description: "The number of vertices in this polygon. From RFC7946:
-
-              \  o  A linear ring is a closed LineString with four or more positions.
-
-
-              \  o  The first and last positions are equivalent, and they MUST contain
-
-              \  identical values; their representation SHOULD also be identical.
-
-
-              \  o  A linear ring is the boundary of a surface or the boundary of a
-
-              \  hole in a surface.
-
-
-              \  o  A linear ring MUST follow the right-hand rule with respect to the
-
-              \  area it bounds, i.e., exterior rings are counterclockwise, and
-
-              \  holes are clockwise.  (also in the spec:  parsers SHOULD NOT reject
-
-              \  Polygons that do not follow the right-hand rule.)
-
-
-              \  https://tools.ietf.org/html/rfc7946#section-3.1.6"
+            description: "The number of vertices in this polygon. From RFC7946: o A linear ring is a closed LineString with four or more positions. o The first and last positions are equivalent, and they MUST contain identical values; their representation SHOULD also be identical. o A linear ring is the boundary of a surface or the boundary of a hole in a surface. o A linear ring MUST follow the right-hand rule with respect to the area it bounds, i.e., exterior rings are counterclockwise, and holes are clockwise. (also in the spec: parsers SHOULD NOT reject Polygons that do not follow the right-hand rule.) https://tools.ietf.org/html/rfc7946#section-3.1.6"
             minItems: 4
             maxItems: 100
             items:
               type: "array"
-              description: "The actual coordinates for a vertex of the linear ring.  Note that UTM does not allow additional elements other than long and lat in this array."
+              description: "The actual coordinates for a vertex of the linear ring. Note that UTM does not allow additional elements other than long and lat in this array."
               maxItems: 2
               minItems: 2
               items:
@@ -2398,7 +2374,7 @@ components:
         message:
           type: "string"
           description: "An english description of the error"
-          example: "<parameter> was invalid because <reason>"
+          example: "was invalid because"
         code:
           type: "string"
           description: "A string constant representing the type of error"

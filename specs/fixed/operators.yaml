@@ -2,7 +2,7 @@ openapi: "3.0.3"
 x-zally-ignore:
   - "D013"
 info:
-  description: "These are the endpoints for managing equipment operators\n"
+  description: "These are the endpoints for managing equipment operators"
   version: "1.0.0"
   contact:
     name: "SOUP Team"
@@ -46,7 +46,7 @@ paths:
                       $ref: "#/components/schemas/GetAvailableLinks"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -89,7 +89,7 @@ paths:
                     format: "int32"
               examples:
                 Headers:
-                  description: "201 Created<br/>Location: https://sandboxapi.deere.com/platform/operators/4r539261-5e4b-4e1c-9201-8026f47109bb"
+                  description: "201 Created Location: https://sandboxapi.deere.com/platform/operators/4r539261-5e4b-4e1c-9201-8026f47109bb"
     delete:
       description: "This endpoint will delete every operator in the system for the provided organization ID"
       summary: "Delete all Operators for a given org"
@@ -138,7 +138,7 @@ paths:
                       $ref: "#/components/schemas/GetOperatorAvailableLinks"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -205,6 +205,7 @@ components:
       in: "path"
       name: "orgId"
       description: "Organization ID"
+      x-required-boolean: true
       schema:
         type: "string"
         example: 123456
@@ -213,6 +214,7 @@ components:
       in: "path"
       name: "id"
       description: "Operator ID"
+      x-required-boolean: true
       schema:
         type: "string"
         example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
@@ -221,6 +223,7 @@ components:
       in: "query"
       name: "embed"
       description: "Include operator metadata in the response."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "showRecordMetadata"
@@ -228,7 +231,8 @@ components:
     recordFilter:
       in: "query"
       name: "recordFilter"
-      description: "Filter operators by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark>"
+      description: "Filter operators by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "ACTIVE"
@@ -237,6 +241,7 @@ components:
       in: "query"
       name: "lastModifiedTime"
       description: "Start of the range for timestamp filtering"
+      x-required-boolean: false
       schema:
         type: "dateTime"
         example: "2019-01-01T00:00:00Z"
@@ -301,18 +306,14 @@ components:
           description: "Operator Name"
           type: "string"
     ContentType:
-      properties:
-        Content-Type:
-          type: "string"
-          enum:
-            - "application/vnd.deere.axiom.v3+json"
-          description: "Fixed from invalid string value: application/vnd.deere.axiom.v3+json"
+      properties: {}
     PutOperator:
       properties:
         name:
           example: "John Doe"
           description: "Operator Name"
           type: "string"
+          x-required-boolean: true
         archived:
           example: "false"
           type: "string"

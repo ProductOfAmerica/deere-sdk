@@ -32,6 +32,7 @@ paths:
         - name: "principalId"
           in: "path"
           description: "Principal ID of the machine/equipment."
+          x-required-boolean: true
           schema:
             type: "string"
             example: 5432
@@ -39,6 +40,7 @@ paths:
         - name: "startDate"
           in: "query"
           description: "Start date."
+          x-required-boolean: false
           schema:
             type: "string"
             format: "date-time"
@@ -47,6 +49,7 @@ paths:
         - name: "endDate"
           in: "query"
           description: "End date."
+          x-required-boolean: false
           schema:
             type: "string"
             format: "date-time"
@@ -55,6 +58,7 @@ paths:
         - name: "lastKnown"
           in: "query"
           description: "If true, returned only the last known engine hour reading. startDate and endDate are ignored."
+          x-required-boolean: false
           style: "form"
           explode: true
           schema:
@@ -71,7 +75,7 @@ paths:
                 $ref: "#/components/schemas/EngineHours_Response"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -148,14 +152,14 @@ components:
       properties:
         reading:
           description: "The number of hours the engine has been running."
-          example: "<mark>&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;</mark>"
+          example: "&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;"
           type: "measurementAsDouble"
         reportTime:
           description: "Timestamp at which the report was created."
           type: "string"
           format: "date-time"
           example: "2010-10-04T14:35:05.000Z"
-        source<sup><a href='#additional'>1</a></sup>:
+        source:
           type: "string"
           description: "Device which collected the data."
           example: "CI"

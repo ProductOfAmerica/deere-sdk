@@ -52,7 +52,7 @@ export interface components {
     EngineHours: {
       /**
        * @description The number of hours the engine has been running.
-       * @example <mark>&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;</mark>
+       * @example &lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;
        */
       reading: Record<string, never>;
       /**
@@ -65,7 +65,7 @@ export interface components {
        * @description Device which collected the data.
        * @example CI
        */
-      "source<sup><a href='#additional'>1</a></sup>"?: string;
+      source?: string;
     };
   };
   responses: never;

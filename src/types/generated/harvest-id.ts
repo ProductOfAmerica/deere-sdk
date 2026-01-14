@@ -18,7 +18,7 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+          /** @description Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.) */
           embed?: components['parameters']['Embed'];
           /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
           startDate?: components['parameters']['WrapStartDate'];
@@ -62,7 +62,7 @@ export interface paths {
     get: {
       parameters: {
         query?: {
-          /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+          /** @description Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.) */
           embed?: components['parameters']['Embed'];
         };
         header?: never;
@@ -376,7 +376,7 @@ export interface components {
     ModuleSerialNumber: string;
     /** @description Organization ID */
     OrgId: string;
-    /** @description Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.) */
+    /** @description Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.) */
     Embed: string;
     /** @description Desired unit system. Takes ENGLISH or METRIC. */
     'Accept-UOM-System': 'ENGLISH' | 'METRIC' | 'MIXED';

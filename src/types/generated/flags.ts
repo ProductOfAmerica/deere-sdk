@@ -131,13 +131,7 @@ export interface components {
        */
       field?: unknown;
     };
-    ContentType: {
-      /**
-       * @description Fixed from invalid string value: application/vnd.deere.axiom.v3+json
-       * @enum {string}
-       */
-      'Content-Type'?: 'application/vnd.deere.axiom.v3+json';
-    };
+    ContentType: unknown;
     ValuesFlagId: {
       /**
        * @description Currently only three geometries types (Point, LineString and Polygon) are supported.
@@ -372,10 +366,7 @@ export interface operations {
           'application/vnd.deere.axiom.v3+json': unknown;
         };
       };
-      /**
-       * @description - No contributionDefinition link specified
-       *     - No category link specified
-       */
+      /** @description - No contributionDefinition link specified - No category link specified */
       400: {
         headers: {
           [name: string]: unknown;
@@ -427,10 +418,7 @@ export interface operations {
           };
         };
       };
-      /**
-       * @description Forbidden.
-       *     - The user has no permission to delete the flag.
-       */
+      /** @description Forbidden. - The user has no permission to delete the flag. */
       403: {
         headers: {
           [name: string]: unknown;
@@ -524,11 +512,7 @@ export interface operations {
         };
         content?: never;
       };
-      /**
-       * @description Entity Not found.
-       *     - No contributon definition ID is found
-       *     - Field link cannot be resolved (field not found)
-       */
+      /** @description Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found) */
       404: {
         headers: {
           [name: string]: unknown;

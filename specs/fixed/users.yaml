@@ -18,11 +18,12 @@ paths:
   /users/{username}:
     get:
       summary: "View User Info"
-      description: "This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information.<br/> The response also contains links to the following resources: <ul><li><b>organizations:</b> View a list of organizations to which the user belongs.</li> <li><b>files:</b> View a list of files belonging to the user.</li></ul>"
+      description: "This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information. The response also contains links to the following resources: organizations: View a list of organizations to which the user belongs. files: View a list of files belonging to the user."
       parameters:
         - name: "username"
           in: "path"
           description: "Filter by username."
+          x-required-boolean: true
           schema:
             type: "string"
             default: "N/A"
@@ -30,6 +31,7 @@ paths:
         - name: "embed"
           in: "query"
           description: "Add user's staff organizations and available links to response."
+          x-required-boolean: false
           schema:
             type: "string"
             default: "N/A"
@@ -50,7 +52,7 @@ paths:
                       $ref: "#/components/schemas/UsersValue"
               examples:
                 No Header:
-                  description: "200 OK<br/> Content-Type:application/vnd.deere.axiom.v3+jso"
+                  description: "200 OK Content-Type:application/vnd.deere.axiom.v3+jso"
                   value:
                     "@type": "User"
                     accountName: "johndoe"
@@ -60,11 +62,11 @@ paths:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: " https://sandboxapi.deere.com/platform/users/johndoe"
+                        uri: "https://sandboxapi.deere.com/platform/users/johndoe"
                         followable: true
                       - "@type": "Link"
                         rel: "organizations"
-                        uri: " https://sandboxapi.deere.com/platform/users/johndoe/organizations"
+                        uri: "https://sandboxapi.deere.com/platform/users/johndoe/organizations"
                         followable: true
 components:
   schemas:

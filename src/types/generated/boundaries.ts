@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * View Boundaries in an Org
-     * @description View boundaries in an organization. <ul> <li><b>fields</b>: View the field associated with these boundaries.</li> <li><b>owningOrganizations</b>: View the organization that owns the field.</li> </ul>
+     * @description View boundaries in an organization. fields: View the field associated with these boundaries. owningOrganizations: View the organization that owns the field.
      */
     get: {
       parameters: {
@@ -124,7 +124,7 @@ export interface paths {
     };
     /**
      * Generate a Boundary from a FieldOperation
-     * @description Given a <a href='/dev-docs/field-operations#overviews' target='_blank'>field operation</a>, this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before <a href='/dev-docs/boundaries#/organizations/{orgId}/fields/{fieldId}/boundaries/post' target='_blank'>POST'ing the generated boundary</a> back into Operations Center. <p>There are two cases where this API will return an HTTP 400 - Bad Request:</p> <ul> <li><b>If the field already has an active boundary.</b> In this case, please use the existing boundary - it is likely more accurate than a generated boundary.</li> <li><b>If the field has been merged.</b> In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.</li> </ul>
+     * @description Given a , this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before back into Operations Center. There are two cases where this API will return an HTTP 400 - Bad Request: If the field already has an active boundary. In this case, please use the existing boundary - it is likely more accurate than a generated boundary. If the field has been merged. In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.
      */
     get: {
       parameters: {
@@ -277,7 +277,7 @@ export interface components {
        * @description Boundary type
        * @example exterior
        */
-      "type<sup><a href='#additional'>1</a></sup>"?: string;
+      type?: string;
       /**
        * @description "True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).
        * @example true
@@ -347,7 +347,7 @@ export interface components {
        * @description Boundary type
        * @example exterior
        */
-      "type<sup><a href='#additional'>1</a></sup>"?: string;
+      type?: string;
       /**
        * @description "True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).
        * @example true
@@ -453,7 +453,7 @@ export interface components {
        * @description Boundary type
        * @example exterior
        */
-      "type<sup><a href='#additional'>1</a></sup>"?: string;
+      type?: string;
       /**
        * @description "True" indicates that the boundary can be crossed (Ex: a waterway). "False" indicates that the boundary cannot be crossed (ex: a boulder).
        * @example true
@@ -546,7 +546,7 @@ export interface components {
        */
       owningOrganization?: unknown;
     };
-    /** @description Stub schema for Boundary (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for Boundary. Original definition missing from Deere spec. */
     Boundary: {
       [key: string]: unknown;
     };
@@ -692,7 +692,7 @@ export interface components {
     OrgId: string;
     /** @description Organization */
     OrgId3: string;
-    /** @description Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system. */
+    /** @description Takes METRIC and ENGLISH. Converts measurements to the chosen system. */
     'Accept-UOM-System': string;
     /** @description Organization ID */
     OrgId2: string;
@@ -708,7 +708,7 @@ export interface components {
     FieldId2: string;
     /** @description Boundary Id */
     BoundaryId: string;
-    /** @description Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system. */
+    /** @description Takes METRIC and ENGLISH. Converts measurements to the chosen system. */
     AcceptUOMSystem: 'ENGLISH' | 'METRIC';
     /** @description Allows filtering based on active boundaries */
     Active: boolean;

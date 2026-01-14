@@ -13,18 +13,18 @@ export class MachineDeviceStateReportsApi {
 
   /**
    * Terminal Device State Reports
-   * @description A device state report is generated from a terminal at a specified time. The report contains the following information: <ul> <li>Engine State</li> <li>Power State</li> <li>Model State</li> <li>RSSI Value (signal strength of the terminal)</li> <li>Local Information</li> <li>GPS State/Error</li> <li>WIFI Info/Error</li> <li>GSM/WIFI Antenna Type</li> <li>Wifi SSID</li> <li>BatteryVoltage</li> <li>LastBootType</li> <li>LastBootTimestamp</li> <li>VehiclePowerState</li> </ul> This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. </br></br> Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to </br> <ul> <li><b>Machine</b>: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear.</li> <li><b>Terminal</b>: Request a Device State Report from the specified terminal.</li> </ul>
+   * @description A device state report is generated from a terminal at a specified time. The report contains the following information: Engine State Power State Model State RSSI Value (signal strength of the terminal) Local Information GPS State/Error WIFI Info/Error GSM/WIFI Antenna Type Wifi SSID BatteryVoltage LastBootType LastBootTimestamp VehiclePowerState This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to Machine: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear. Terminal: Request a Device State Report from the specified terminal.
    * @generated from GET /machines/{principalId}/deviceStateReports
    */
   async get(
     principalId: string,
-    params?: { lastKnown?: boolean; startDate1?: string; endDate1?: string },
+    params?: { lastKnown?: boolean; startDate?: string; endDate?: string },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['DeviceStateReport']>> {
     const query = new URLSearchParams();
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
-    if (params?.startDate1 !== undefined) query.set('startDate1', String(params.startDate1));
-    if (params?.endDate1 !== undefined) query.set('endDate1', String(params.endDate1));
+    if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
+    if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
     const path = `/machines/${principalId}/deviceStateReports${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['DeviceStateReport']>>(

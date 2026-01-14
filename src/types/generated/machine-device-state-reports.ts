@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * Terminal Device State Reports
-     * @description A device state report is generated from a terminal at a specified time. The report contains the following information: <ul> <li>Engine State</li> <li>Power State</li> <li>Model State</li> <li>RSSI Value (signal strength of the terminal)</li> <li>Local Information</li> <li>GPS State/Error</li> <li>WIFI Info/Error</li> <li>GSM/WIFI Antenna Type</li> <li>Wifi SSID</li> <li>BatteryVoltage</li> <li>LastBootType</li> <li>LastBootTimestamp</li> <li>VehiclePowerState</li> </ul> This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. </br></br> Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to </br> <ul> <li><b>Machine</b>: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear.</li> <li><b>Terminal</b>: Request a Device State Report from the specified terminal.</li> </ul>
+     * @description A device state report is generated from a terminal at a specified time. The report contains the following information: Engine State Power State Model State RSSI Value (signal strength of the terminal) Local Information GPS State/Error WIFI Info/Error GSM/WIFI Antenna Type Wifi SSID BatteryVoltage LastBootType LastBootTimestamp VehiclePowerState This report is specific to, and identified by, the terminal, regardless of which machine it is connected to. Device state report information is collected from the machine terminal. A device state report is created for each machine call-in. Each requested DSR (one report for a single terminal request, and two or more for a multiple terminal request) links to Machine: Request a Device State Report from the specified machine. If the terminal is not linked to a machine, this link will not appear. Terminal: Request a Device State Report from the specified terminal.
      */
     get: operations['getDeviceStateReportbyMachineId'];
     put?: never;
@@ -49,15 +49,15 @@ export interface components {
        * @description This number identifies the type of gateway the report traveled through.
        * @example 2
        */
-      "gatewayType<sup><a href='#gateway-types'>1</a></sup>"?: Record<string, never>;
+      gatewayType?: Record<string, never>;
       /**
        * @description Shows the latitude, longitude, and altitude at the time of this report.
-       * @example <mark>See sample response below.</mark>
+       * @example See sample response below.
        */
       location?: Record<string, never>;
       /**
        * @description The minimum signal strength of the machine at the time of the report.
-       * @example <mark>See sample response below.</mark>
+       * @example See sample response below.
        */
       minRSSI?: Record<string, never>;
       /**
@@ -73,7 +73,7 @@ export interface components {
       /**
        * Format: date-time
        * @description UTC Timestamp, of the GPS position of the Machine.
-       * @example <mark>2025-04-04T14:35:05.000Z</mark>
+       * @example 2025-04-04T14:35:05.000Z
        */
       gpsFixTimestamp?: string;
       /**
@@ -239,7 +239,7 @@ export interface components {
       /**
        * Format: date-time
        * @description UTC Timestamp, when the device was booted up last time
-       * @example <mark>2005-04-04T14:35:05.000Z</mark>
+       * @example 2005-04-04T14:35:05.000Z
        */
       lastBootTimestamp?: string;
       /**
@@ -279,9 +279,9 @@ export interface operations {
         /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
         lastKnown?: components['parameters']['lastKnown'];
         /** @description Return DSR from the specified startDate. */
-        "startDate<sup><a href='#parameters-note'>1</a></sup>"?: components['parameters']['startDate'];
+        startDate?: components['parameters']['startDate'];
         /** @description Return DSR till the specified endDate. */
-        "endDate<sup><a href='#parameters-note'>1</a></sup>"?: components['parameters']['endDate'];
+        endDate?: components['parameters']['endDate'];
       };
       header?: never;
       path: {

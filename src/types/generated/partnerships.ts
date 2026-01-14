@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * List Partners
-     * @description This request allows the client to view a list of partners. Each data point links to the following: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
+     * @description This request allows the client to view a list of partners. Each data point links to the following: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request.
      */
     get: {
       parameters: {
@@ -42,7 +42,7 @@ export interface paths {
     put?: never;
     /**
      * Request a Partnership
-     * @description This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the <a href="/dev-docs/organizations" target="_blank">/organizations</a> endpoint to discover available organizations for a user.
+     * @description This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the endpoint to discover available organizations for a user.
      */
     post: {
       parameters: {
@@ -91,7 +91,7 @@ export interface paths {
     };
     /**
      * Get Partnership Details
-     * @description This request allows the client to view partnership details. The response links to the following resources: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>
+     * @description This request allows the client to view partnership details. The response links to the following resources: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request.
      */
     get: {
       parameters: {
@@ -197,7 +197,7 @@ export interface paths {
     put?: never;
     /**
      * Request/Assign Permissions
-     * @description This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.<sup><a href="#additional-type">2</a></sup>
+     * @description This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.
      */
     post: {
       parameters: {
@@ -258,7 +258,7 @@ export interface components {
        * @description View the status of the partnership
        * @example REJECTED
        */
-      'status<sup><a href="#additional-status">1</a></sup>'?: string;
+      status?: string;
     };
     PartnershipsLink: {
       /**
@@ -298,7 +298,7 @@ export interface components {
        * @description View the status of the partnership
        * @example PENDING
        */
-      'status<sup><a href="#additional-status">1</a></sup>'?: string;
+      status?: string;
     };
     /** @description A list of permissions */
     Permissions: {
@@ -323,7 +323,7 @@ export interface components {
        * @description The type of permission.
        * @example prescription Files
        */
-      'type<sup><a href="#additional-type">2</a></sup>'?: string;
+      type?: string;
       /**
        * @description View the status of the partnership
        * @example PENDING
@@ -339,7 +339,7 @@ export interface components {
        * @description The type of permission.
        * @example viewDetailsAndMapLocation
        */
-      'type<sup><a href="#additional-type">2</a></sup>'?: string;
+      type?: string;
       /**
        * @description Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved.
        * @example requested

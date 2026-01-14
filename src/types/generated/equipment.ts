@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * Get equipment
-     * @description This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation <a  href='#oAuth2' target='_blank'>here</a> for more details on obtaining a user token and connecting the user’s organizations to your application..
+     * @description This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation for more details on obtaining a user token and connecting the user’s organizations to your application..
      */
     get: {
       parameters: {
@@ -61,12 +61,7 @@ export interface paths {
             'application/json': components['schemas']['Errors'];
           };
         };
-        /**
-         * @description Authorization Error
-         *     - user/applications does not have access to api or resource
-         *     or
-         *     - user does not have required permissions/BusinessActivities for the org.
-         */
+        /** @description Authorization Error - user/applications does not have access to api or resource or - user does not have required permissions/BusinessActivities for the org. */
         403: {
           headers: {
             [name: string]: unknown;
@@ -94,7 +89,7 @@ export interface paths {
     put?: never;
     /**
      * Create equipment
-     * @description This resource allows the client to create a piece of equipment within a user’s organization. <br><br> <b>Getting Started</b><br>The process of contributing equipment to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s model IDs</li> <li> Create the Equipment</li> <li> Contribute Measurements. Please see the <a  href='/dev-docs/equipment-measurement' target='_blank'>Equipment Measurements (POST) API</a> for more information on uploading measurements for the created equipment.</li> </ol> <b>Determining the Equipment’s model</b> <ol> <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li> <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”.</li> </ol> <b>Creating the Equipment</b><br/> Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. <ul> <li>In this request you will provide the type of the equipment, a serialNumber  (optional), name (displayed to the user in Operations Center), and the equipment model IDs.</li> <ul> <li><b>type:</b> Machine or Implement</li> <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li> <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li> <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li> </ul> <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345).</li> <li>If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li> </ul>
+     * @description This resource allows the client to create a piece of equipment within a user’s organization. Getting Started The process of contributing equipment to John Deere can be broken down into three primary steps. Determine the Equipment’s model IDs Create the Equipment Contribute Measurements. Please see the for more information on uploading measurements for the created equipment. Determining the Equipment’s model Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require. Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”. Creating the Equipment Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment model IDs. type: Machine or Implement serialNumber: A string identifier that is 30 characters or fewer. Must be unique within an organization. name: The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization. model: The id for the Model of the vehicle, found from the API in the previous step of this document. A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345). If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.
      */
     post: operations['createEquipment'];
     delete?: never;
@@ -131,12 +126,7 @@ export interface paths {
       responses: {
         /** @description Equipment found by Id or Serial Number */
         200: components['responses']['GetEquipmentById'];
-        /**
-         * @description Authorization Error
-         *     - user/applications does not have access to api or resource
-         *     or
-         *     - user does not have required permissions/BusinessActivities for the org.
-         */
+        /** @description Authorization Error - user/applications does not have access to api or resource or - user does not have required permissions/BusinessActivities for the org. */
         403: {
           headers: {
             [name: string]: unknown;
@@ -319,7 +309,7 @@ export interface paths {
     };
     /**
      * Get equipment ISG types by make id
-     * @description This operation retrieves a list of Equipment ISG Types for given makeId. <br/>
+     * @description This operation retrieves a list of Equipment ISG Types for given makeId.
      */
     get: operations['getEquipmentISGTypesByMakeId'];
     put?: never;
@@ -339,7 +329,7 @@ export interface paths {
     };
     /**
      * Get equipment ISG type by make id and ISG type id
-     * @description This operation retrieves a single Equipment ISG Type for given makeId and isgTypeId.. <br/>
+     * @description This operation retrieves a single Equipment ISG Type for given makeId and isgTypeId..
      */
     get: operations['getEquipmentISGTypeByMakeIdAndISGTypeId'];
     put?: never;
@@ -355,11 +345,7 @@ export interface paths {
       query?: {
         /** @description Whether to filter isg types by the deprecated flag */
         deprecated?: components['parameters']['deprecated'];
-        /**
-         * @description The organization ids to get Equipment Models for.
-         *     If provided, then only non-certified models will be returned.
-         *     If not provided, then only certified models will be returned.
-         */
+        /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
         organizationIds?: components['parameters']['organizationIds'];
       };
       header?: never;
@@ -418,7 +404,7 @@ export interface components {
     Error: {
       /**
        * @description An english description of the error
-       * @example <parameter> was invalid because <reason>
+       * @example was invalid because
        */
       message?: string;
       /**
@@ -514,13 +500,7 @@ export interface components {
        */
       deprecated?: boolean;
     });
-    /**
-     * @description Data structure for record metadata capturing information about the creation and last update of an entity.
-     *     For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg).
-     *     NOTES
-     *     * Some attributes are only visible if the API Client has the required license.
-     *     * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.)
-     */
+    /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
     RecordMetadata: {
       /**
        * @default RecordMetadata
@@ -528,12 +508,12 @@ export interface components {
        */
       '@type': string;
       /**
-       * @description User involved in creating the entity.  Only viewable with the RECORD_METADATA license
+       * @description User involved in creating the entity. Only viewable with the RECORD_METADATA license
        * @example XYZ_USER
        */
       createdByUser?: string;
       /**
-       * @description User involved in modifying the entity.  Only viewable with the RECORD_METADATA license
+       * @description User involved in modifying the entity. Only viewable with the RECORD_METADATA license
        * @example XYZ_USER
        */
       lastModifiedByUser?: string;
@@ -549,29 +529,23 @@ export interface components {
       readonly userLastModifiedTimestamp?: string;
       /**
        * Format: uuid
-       * @description This is the specific instance of an application that created the entity.  At this time, it only applies
-       *     to Displays.  Only viewable with the RECORD_METADATA license.
+       * @description This is the specific instance of an application that created the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license.
        * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
        */
       readonly createdBySourceNode?: string;
       /**
        * Format: uuid
-       * @description This is the specific instance of an application that modified the entity.  At this time, it only applies
-       *     to Displays.  Only viewable with the RECORD_METADATA license
+       * @description This is the specific instance of an application that modified the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license
        * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
        */
       readonly lastModifiedSourceNode?: string;
       /**
-       * @description Derived off of a client key (application that created) via Application Registry lookup. The
-       *     Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
-       *     will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+       * @description Derived off of a client key (application that created) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
        * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
        */
       readonly createdBySourceSystemUri?: string;
       /**
-       * @description Derived off of a client key (application that did last modification) via Application Registry lookup. The
-       *     Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
-       *     will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+       * @description Derived off of a client key (application that did last modification) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
        * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
        */
       readonly lastModifiedBySourceSystemUri?: string;
@@ -1888,12 +1862,7 @@ export interface components {
       operation?: 'UPDATE';
       /** @enum {string} */
       path?: '/organization' | '/archived' | '/organizationRole/type' | '/name';
-      /**
-       * @description - For transfer request : value={organizationId}
-       *     - For archive/unarchive request : value=true/false
-       *     - For role update request : value={Controlling}
-       *     - For name update request : value={name}
-       */
+      /** @description - For transfer request : value={organizationId} - For archive/unarchive request : value=true/false - For role update request : value={Controlling} - For name update request : value={name} */
       value?: string;
     };
     /** Equipment Creation */
@@ -2116,11 +2085,7 @@ export interface components {
   parameters: {
     /** @description List of embed data for the Equipment ISG Type */
     embed: 'equipmentModels' | 'recordMetadata';
-    /**
-     * @description Optional query parameter that controls which records are returned based on the record's deprecated flag:
-     *     parameter set to false:  Return only non-deprecated records
-     *     query parameter not present: both deprecated and non-deprecated records returned.
-     */
+    /** @description Optional query parameter that controls which records are returned based on the record's deprecated flag: parameter set to false: Return only non-deprecated records query parameter not present: both deprecated and non-deprecated records returned. */
     deprecatedForEquipmentModels: boolean;
     /** @description Whether to filter isg types by the deprecated flag */
     deprecated: false | true | 'all';
@@ -2148,11 +2113,7 @@ export interface components {
     id: number;
     /** @example 1234, */
     organizationId: number;
-    /**
-     * @description The organization ids to get Equipment Models for.
-     *     If provided, then only non-certified models will be returned.
-     *     If not provided, then only certified models will be returned.
-     */
+    /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
     organizationIds: number[];
     /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
     EmbedForList: 'devices' | 'equipment' | 'icon' | 'pairingDetails';
@@ -2566,11 +2527,7 @@ export interface operations {
       query?: {
         /** @description Whether to filter isg types by the deprecated flag */
         deprecated?: components['parameters']['deprecated'];
-        /**
-         * @description The organization ids to get Equipment Models for.
-         *     If provided, then only non-certified models will be returned.
-         *     If not provided, then only certified models will be returned.
-         */
+        /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
         organizationIds?: components['parameters']['organizationIds'];
       };
       header?: never;

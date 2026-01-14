@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * List Field Operations
-     * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> </ul>
+     * @description This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation.
      */
     get: {
       parameters: {
@@ -67,7 +67,7 @@ export interface paths {
     };
     /**
      * View a Field Operation
-     * @description View a single field operation. The response will include links to: <br/> <ul> <li><b>organization:</b> The organization which owns this data.</li> <li><b>field:</b> The field in which this operation was performed.</li> <li><b>self:</b> The field operation.</li> <ul>
+     * @description View a single field operation. The response will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation.
      */
     get: {
       parameters: {
@@ -106,7 +106,7 @@ export interface paths {
     };
     /**
      * Asynchronous Shapefile Download
-     * @description An ESRI Shapefile is available for each Field Operation. <b>Please see the <a href=/dev-docs/field-operations#shapefile-overview>shapefiles overview</a> for details</b> on the shapefile format and how to consume it.<p>The expected response codes are:</p> <ul> <li><b>202 Accepted – </b>The request was received and is being processed. Call back later to check for completion. <ul> <li>This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307.</li> <li>Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: <mark>secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)</mark></li> </ul> </li> <li><b>307 Temporary Redirect – </b>The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. </li> <li><b>406 Not Acceptable - </b>A shapefile cannot be generated. </li> </ul> Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. <br/><br/>For a sample integration, see our <a href=https://github.com/JohnDeere/MyJohnDeereAPI-OAuth2-Java-Example>Java sample code</a>.
+     * @description An ESRI Shapefile is available for each Field Operation. Please see the for details on the shapefile format and how to consume it. The expected response codes are: 202 Accepted – The request was received and is being processed. Call back later to check for completion. This API does not currently support webhooks. To check for completion, repeat the same API call until you get an HTTP 307. Processing may take up to 30 minutes, depending on the size of data. Applications should poll the API using a backoff loop. Polling intervals should start at 5 seconds and double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1) 307 Temporary Redirect – The shapefile is ready to download. This response contains a location header. The location is a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to the URL in the location header. Do not apply OAuth signing or other authorization to this request - it will cause the call to fail. 406 Not Acceptable - A shapefile cannot be generated. Note the initial call for a shapefile may receive either a 202 or a 307 response, depending upon whether an up-to-date file already exists for the specified field operation. For a sample integration, see our .
      */
     get: {
       parameters: {
@@ -119,7 +119,7 @@ export interface paths {
           resolution?: components['parameters']['Resolution'];
         };
         header?: {
-          /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
+          /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with . */
           'Accept-UOM-System'?: components['parameters']['Accept-UOM-System'];
           /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
           'Accept-Yield-Preference'?: components['parameters']['Accept-Yield-Preference'];
@@ -283,7 +283,7 @@ export interface components {
      * @example HARVEST
      */
     FieldOperationTypesEnum: string;
-    /** @description The client associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    /** @description The client associated with this FieldOperation. Populated only when the associated embed is requested. */
     Client: {
       /**
        * @description Globally unique identifier for this client.
@@ -299,7 +299,7 @@ export interface components {
       /** @example false */
       archived?: boolean;
     };
-    /** @description The farm associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    /** @description The farm associated with this FieldOperation. Populated only when the associated embed is requested. */
     Farm: {
       /**
        * @description Globally unique identifier for this farm.
@@ -315,7 +315,7 @@ export interface components {
       /** @example false */
       archived?: boolean;
     };
-    /** @description The field associated with this FieldOperation.  Populated only when the associated embed is requested. */
+    /** @description The field associated with this FieldOperation. Populated only when the associated embed is requested. */
     Field: {
       /**
        * @description Globally unique identifier for this field.
@@ -359,8 +359,7 @@ export interface components {
       guid?: components['schemas']['ProductErid'];
       productType?: components['schemas']['FieldOperationProductTypesEnum'];
       /**
-       * @description The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier,
-       *     for APPLICATION operations.
+       * @description The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier, for APPLICATION operations.
        * @example Priaxor
        */
       name?: string;
@@ -427,9 +426,7 @@ export interface components {
       components['schemas']['ConnectMobileEnum'] &
       components['schemas']['ThirdPartyDisplayTypeEnum'];
     /**
-     * @description - A unique textual identifier for a type of Crop
-     *     - EnumList is based on ISG_Shared/blob/master/crops/crops.xml
-     *     - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids.
+     * @description - A unique textual identifier for a type of Crop - EnumList is based on ISG_Shared/blob/master/crops/crops.xml - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids.
      * @example ALFALFA
      */
     CropToken: string;
@@ -605,7 +602,7 @@ export interface components {
        * @description Field Operation type.
        * @example application
        */
-      "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
+      fieldOperationType?: string;
       /**
        * @description Crop season year.
        * @example 2015
@@ -661,7 +658,7 @@ export interface components {
        */
       tankMix?: boolean;
       /**
-       * @description Rate of the application. Includes value and unitId<sup><a href='#field-operation-additional'>2</a></sup> data.
+       * @description Rate of the application. Includes value and unitId data.
        * @example See sample response below.
        */
       rate?: unknown;
@@ -674,7 +671,7 @@ export interface components {
        * @description Unit of value.
        * @example gal1ac-1
        */
-      "unitId<sup><a href='#field-operation-additional'>2</a></sup>"?: string;
+      unitId?: string;
       /**
        * @description Data on the product carrier. Includes name and rate.
        * @example See sample response below.
@@ -702,7 +699,7 @@ export interface components {
        * @description A string indicating the type of operation (valid values include: seeding, application, harvest, or tillage).
        * @example Harvest
        */
-      "fieldOperationType<sup><a href='#field-operation-additional'>1</a></sup>"?: string;
+      fieldOperationType?: string;
       /**
        * Format: string
        * @description A string indicating the type of crop used during this operation. Can be omitted based on operation type and original data source. Only available on harvest and seeding operation types.
@@ -748,7 +745,7 @@ export interface components {
       erid?: string;
       /**
        * Format: guid
-       * @description Doc File based Field Operation Machine GUID.  Deprecated, use erid instead.
+       * @description Doc File based Field Operation Machine GUID. Deprecated, use erid instead.
        * @example t48a7dd0-as35-44e1-81b4-435d494f7cd5
        */
       GUID?: string;
@@ -1165,19 +1162,11 @@ export interface components {
     /** @description GeoJSon Polygon. Positions all 2D. */
     Polygon: {
       /**
-       * @description The type of Geometry. In this case, must be 'Polygon' per GeoJSON
-       *     spec.  Note that the "coordinates" member is validated to be be an
-       *     array of size one. This implies there are no interior rings allowed
-       *     currently.
+       * @description The type of Geometry. In this case, must be 'Polygon' per GeoJSON spec. Note that the "coordinates" member is validated to be be an array of size one. This implies there are no interior rings allowed currently.
        * @enum {string}
        */
       type: 'Polygon';
-      /**
-       * @description The number of polygons allowed.  Currently 1, implying no interior rings.  If this number is changes, the maxItems should be considered.
-       *     From RFC7946: o  For type "Polygon", the "coordinates" member MUST be an array of linear ring coordinate arrays.
-       *     o  For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings.  The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface.
-       *     Again, note we only allow a single set of coordinates, implying no interior rings.
-       */
+      /** @description The number of polygons allowed. Currently 1, implying no interior rings. If this number is changes, the maxItems should be considered. From RFC7946: o For type "Polygon", the "coordinates" member MUST be an array of linear ring coordinate arrays. o For Polygons with more than one of these rings, the first MUST be the exterior ring, and any others MUST be interior rings. The exterior ring bounds the surface, and the interior rings (if present) bound holes within the surface. Again, note we only allow a single set of coordinates, implying no interior rings. */
       coordinates: number[][][];
     };
     /** @description The ProductTotal associated with this FieldOperation. */
@@ -1259,7 +1248,7 @@ export interface components {
       guid?: string;
       /**
        * @description An english description of the error
-       * @example <parameter> was invalid because <reason>
+       * @example was invalid because
        */
       message?: string;
       /**
@@ -1733,10 +1722,7 @@ export interface components {
     MeasurementType: components['schemas']['FieldOperationMeasurementTypesEnum'];
     /** @description The operation layer name for a given field operation */
     OperationLayerName: components['schemas']['FieldOperationLayersEnum'];
-    /**
-     * @description The type of comparison to apply to the current Field Operation Layer. Rules:
-     *       * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`.
-     */
+    /** @description The type of comparison to apply to the current Field Operation Layer. Rules: * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`. */
     CompareType: 'dataAnalysis';
     /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
     FieldOperationType: components['schemas']['FieldOperationTypesEnum'];
@@ -1760,7 +1746,7 @@ export interface components {
     ShapeType: 'Point' | 'Polygon';
     /** @description Choose a data resolution for the shapefile. Accepted values are "EachSection", "EachSensor", and "OneHertz". */
     Resolution: 'EachSection' | 'EachSensor' | 'OneHertz';
-    /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with <a href=https://github.com/ADAPT/ADAPT/blob/master/source/Representation/Resources/UnitSystem.xml target="_blank">ADAPT's unit system</a>. */
+    /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with . */
     'Accept-UOM-System': string;
     /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
     'Accept-Yield-Preference': string;

@@ -12,7 +12,7 @@ export class AempApi {
 
   /**
    * Get Fleet List
-   * @description Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the "next" link within the response to retrieve all the fleets. <br/> <br/> <b>Note:</b> The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. <br/> <b>Note:</b> Not all vehicles will supply all data points.
+   * @description Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the "next" link within the response to retrieve all the fleets. Note: The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. Note: Not all vehicles will supply all data points.
    * @generated from GET /Fleet/{pageNumber}
    */
   async get(pageNumber: string, options?: RequestOptions): Promise<unknown> {

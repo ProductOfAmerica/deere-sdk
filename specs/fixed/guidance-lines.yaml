@@ -105,6 +105,7 @@ components:
       name: "orgId"
       in: "path"
       description: "The organization owning the guidance lines."
+      x-required-boolean: true
       schema:
         example: 127856
         type: "string"
@@ -113,6 +114,7 @@ components:
       name: "fieldId"
       in: "path"
       description: "The field that the guidance lines are associated with."
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -121,6 +123,7 @@ components:
       name: "guidanceLineId"
       in: "path"
       description: "The identifier of this guidance line."
+      x-required-boolean: true
       schema:
         type: "string"
         example: "2fda92b1-7517-4b2a-8166-7616eb20eb02"
@@ -129,6 +132,7 @@ components:
       name: "status"
       in: "query"
       description: "Whether to include archived guidance lines. Valid values are \"archived\", \"available\", or \"all\". Default is \"available\"."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "archived"
@@ -142,7 +146,8 @@ components:
     Embed:
       name: "embed"
       in: "query"
-      description: "Whether to return the track geometry for AB and Adaptive Curves. See <a href=\"#shapes-array\">Shapes Array</a>"
+      description: "Whether to return the track geometry for AB and Adaptive Curves. See"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "shapes"
@@ -200,6 +205,7 @@ components:
                     rel: "field"
                     uri: "https://sandboxapi.deere.com/platform/organizations/orgId/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
       description: "Specifies guidance line details"
+      x-required-boolean: true
     PutRequest:
       content:
         application/vnd.deere.axiom.v3+json:
@@ -256,7 +262,7 @@ components:
                 example: 1
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 links:
                   - rel: "self"
@@ -321,7 +327,7 @@ components:
                 example: 1
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "ABLine"
                 heading: 0
@@ -382,7 +388,7 @@ components:
                 example: 1
           examples:
             Headers:
-              description: "201 Created <br/><br/> Location: https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
     NoContent:
       description: "No Content. Request Completed Succesfully."
       content:
@@ -518,6 +524,7 @@ components:
     Errors:
       type: "object"
       description: "Error response schema for Errors (auto-generated)"
+      x-generated: true
       properties:
         message:
           type: "string"

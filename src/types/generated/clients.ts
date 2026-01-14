@@ -19,7 +19,7 @@ export interface paths {
     put?: never;
     /**
      * Create a Client
-     * @description This API is used to create a new client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization. <br/><br/>Note: All clients are created with an "active" status.
+     * @description This API is used to create a new client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. Note: All clients are created with an "active" status.
      */
     post: operations['createClient'];
     delete?: never;
@@ -42,18 +42,18 @@ export interface paths {
     };
     /**
      * View a Client
-     * @description View a clients details. For each client, the response will link to the following resources:<br/> <ul><li> <b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farm belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the client.</li></ul>
+     * @description View a clients details. For each client, the response will link to the following resources: fields: View the field the client belongs to. farms: View the farm belonging to the client. owningOrganization: View the org that owns the client.
      */
     get: operations['getClient'];
     /**
      * Update a Client
-     * @description This API is used to update an existing client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization.
+     * @description This API is used to update an existing client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization.
      */
     put: operations['updateClient'];
     post?: never;
     /**
      * Delete a Client
-     * @description This API is used to delete a client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization.
+     * @description This API is used to delete a client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization.
      */
     delete: operations['deleteClient'];
     options?: never;
@@ -78,7 +78,7 @@ export interface paths {
     };
     /**
      * View a Client's Farms
-     * @description View a list of farms belonging to a specified client. For each farm, the response will link to the following resources: <ul> <li><b>fields:</b> View the fields in this farm</li> <li><b>farms:</b> View the clients that own this farm.</li> <li><b>owningOrganization:</b> View the Organization that owns the farm.</li> </ul>
+     * @description View a list of farms belonging to a specified client. For each farm, the response will link to the following resources: fields: View the fields in this farm farms: View the clients that own this farm. owningOrganization: View the Organization that owns the farm.
      */
     get: operations['getAllFarms'];
     put?: never;
@@ -98,7 +98,7 @@ export interface paths {
     };
     /**
      * View a Client's Field
-     * @description View the field to which a specific client belongs. For the client, the response links to the following resources: <ul> <li><b>boundaries:</b> View the boundaries that belong to this field.</li> <li><b>clients:</b> View the client that belongs to this field.</li> <li><b>farms:</b> View the farms within this field.</li> <li><b>owningOrganization:</b> View the organization that owns the field.</li> </ul>
+     * @description View the field to which a specific client belongs. For the client, the response links to the following resources: boundaries: View the boundaries that belong to this field. clients: View the client that belongs to this field. farms: View the farms within this field. owningOrganization: View the organization that owns the field.
      */
     get: {
       parameters: {
@@ -209,13 +209,7 @@ export interface components {
        */
       name?: string;
     };
-    ContentType: {
-      /**
-       * @description Fixed from invalid string value: application/vnd.deere.axiom.v3+json
-       * @enum {string}
-       */
-      'Content-Type'?: 'application/vnd.deere.axiom.v3+json';
-    };
+    ContentType: unknown;
     /** @description Link to another resource */
     Link: {
       /** @example Link */
@@ -433,7 +427,7 @@ export interface components {
     ClientName: string;
     /** @description farm name */
     FarmName: string;
-    /** @description Filter clients by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark> */
+    /** @description Filter clients by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
     RecordFilter: string;
     /** @description Populates response with data lineage information */
     Embed: string;
@@ -479,7 +473,7 @@ export interface operations {
       query?: {
         /** @description Populates response with data lineage information */
         embed?: components['parameters']['Embed'];
-        /** @description Filter clients by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark> */
+        /** @description Filter clients by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
         recordFilter?: components['parameters']['RecordFilter'];
       };
       header?: never;

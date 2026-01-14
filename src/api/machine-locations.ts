@@ -13,7 +13,7 @@ export class MachineLocationsApi {
 
   /**
    * Machine Location History
-   * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the <strong>/machines</strong> resource.
+   * @description The machine location service allows the client to view a list of location reports for a machine.A location report will include the machine's longitude, latitude, and altitude.For each location report, the response will link to the /machines resource.
    * @generated from GET /machines/{principalId}/locationHistory
    */
   async get(

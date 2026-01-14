@@ -10,7 +10,7 @@ paths:
     get:
       tags:
         - "Equipment"
-      description: "This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation <a  href='#oAuth2' target='_blank'>here</a> for more details on obtaining a user token and connecting the user’s organizations to your application.."
+      description: "This resource allows the client to view the list of a user's equipment. It can be called with a filter for specific organizations, machine or implement types, but can also be called without a filter to provide a list of all equipment accessible by the user across each organization the user has access to. Equipment will only be returned from organizations the user has access to and are connected to the calling application. If the client requests multiple organizations in the filter, and a user or the client does not have access to that organization, the entire response will be a 403 Forbidden. Please see the OAuth 2 documentation for more details on obtaining a user token and connecting the user’s organizations to your application.."
       summary: "Get equipment"
       parameters:
         - $ref: "#/components/parameters/OrganizationEquipmentIds"
@@ -38,18 +38,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/Errors"
         "403":
-          description: "Authorization Error
-
-            - user/applications does not have access to api or resource
-
-            or
-
-            - user does not have required permissions/BusinessActivities for the org.\n"
+          description: "Authorization Error - user/applications does not have access to api or resource or - user does not have required permissions/BusinessActivities for the org."
   /organizations/{organizationId}/equipment:
     post:
       tags:
         - "Equipment"
-      description: "This resource allows the client to create a piece of equipment within a user’s organization. <br><br> <b>Getting Started</b><br>The process of contributing equipment to John Deere can be broken down into three primary steps. <ol> <li> Determine the Equipment’s model IDs</li> <li> Create the Equipment</li> <li> Contribute Measurements. Please see the <a  href='/dev-docs/equipment-measurement' target='_blank'>Equipment Measurements (POST) API</a> for more information on uploading measurements for the created equipment.</li> </ol> <b>Determining the Equipment’s model</b> <ol> <li> Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require.</li> <li> Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require.</li> <li> Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”.</li> </ol> <b>Creating the Equipment</b><br/> Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. <ul> <li>In this request you will provide the type of the equipment, a serialNumber  (optional), name (displayed to the user in Operations Center), and the equipment model IDs.</li> <ul> <li><b>type:</b> Machine or Implement</li> <li><b>serialNumber:</b> A string identifier that is 30 characters or fewer. Must be unique within an organization.</li> <li><b>name:</b> The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization.</li> <li><b>model:</b> The id for the Model of the vehicle, found from the API in the previous step of this document. </li> </ul> <li> A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345).</li> <li>If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.</li> </ul>"
+      description: "This resource allows the client to create a piece of equipment within a user’s organization. Getting Started The process of contributing equipment to John Deere can be broken down into three primary steps. Determine the Equipment’s model IDs Create the Equipment Contribute Measurements. Please see the for more information on uploading measurements for the created equipment. Determining the Equipment’s model Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require. Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”. Creating the Equipment Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment model IDs. type: Machine or Implement serialNumber: A string identifier that is 30 characters or fewer. Must be unique within an organization. name: The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization. model: The id for the Model of the vehicle, found from the API in the previous step of this document. A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345). If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information."
       summary: "Create equipment"
       operationId: "createEquipment"
       parameters:
@@ -103,13 +97,7 @@ paths:
           description: "Equipment found by Id or Serial Number"
           $ref: "#/components/responses/GetEquipmentById"
         "403":
-          description: "Authorization Error
-
-            - user/applications does not have access to api or resource
-
-            or
-
-            - user does not have required permissions/BusinessActivities for the org.\n"
+          description: "Authorization Error - user/applications does not have access to api or resource or - user does not have required permissions/BusinessActivities for the org."
         "404":
           description: "Equipment not found"
     put:
@@ -373,7 +361,7 @@ paths:
     get:
       tags:
         - "Equipment ISG Type Resource"
-      description: "This operation retrieves a list of Equipment ISG Types for given makeId. <br/>"
+      description: "This operation retrieves a list of Equipment ISG Types for given makeId."
       operationId: "getEquipmentISGTypesByMakeId"
       parameters:
         - $ref: "#/components/parameters/EquipmentMakeId"
@@ -415,7 +403,7 @@ paths:
     get:
       tags:
         - "Equipment ISG Type Resource"
-      description: "This operation retrieves a single Equipment ISG Type for given makeId and isgTypeId.. <br/>"
+      description: "This operation retrieves a single Equipment ISG Type for given makeId and isgTypeId.."
       operationId: "getEquipmentISGTypeByMakeIdAndISGTypeId"
       parameters:
         - $ref: "#/components/parameters/EquipmentMakeId"
@@ -536,7 +524,7 @@ components:
         message:
           type: "string"
           description: "An english description of the error"
-          example: "<parameter> was invalid because <reason>"
+          example: "was invalid because"
         code:
           type: "string"
           description: "A string constant representing the type of error"
@@ -628,15 +616,7 @@ components:
               example: false
     RecordMetadata:
       type: "object"
-      description: "Data structure for record metadata capturing information about the creation and last update of an entity.
-
-        For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg).
-
-        NOTES
-
-        * Some attributes are only visible if the API Client has the required license.
-
-        * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.)\n"
+      description: "Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.)"
       properties:
         "@type":
           type: "string"
@@ -644,11 +624,11 @@ components:
           example: "RecordMetadata"
         createdByUser:
           type: "string"
-          description: "User involved in creating the entity.  Only viewable with the RECORD_METADATA license\n"
+          description: "User involved in creating the entity. Only viewable with the RECORD_METADATA license"
           example: "XYZ_USER"
         lastModifiedByUser:
           type: "string"
-          description: "User involved in modifying the entity.  Only viewable with the RECORD_METADATA license\n"
+          description: "User involved in modifying the entity. Only viewable with the RECORD_METADATA license"
           example: "XYZ_USER"
         userCreationTimestamp:
           type: "string"
@@ -663,35 +643,23 @@ components:
         createdBySourceNode:
           type: "string"
           format: "uuid"
-          description: "This is the specific instance of an application that created the entity.  At this time, it only applies
-
-            to Displays.  Only viewable with the RECORD_METADATA license.\n"
+          description: "This is the specific instance of an application that created the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license."
           readOnly: true
           example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
         lastModifiedSourceNode:
           type: "string"
           format: "uuid"
-          description: "This is the specific instance of an application that modified the entity.  At this time, it only applies
-
-            to Displays.  Only viewable with the RECORD_METADATA license\n"
+          description: "This is the specific instance of an application that modified the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license"
           readOnly: true
           example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
         createdBySourceSystemUri:
           type: "string"
-          description: "Derived off of a client key (application that created) via Application Registry lookup. The
-
-            Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
-
-            will be used if no source application exists. Only viewable with the RECORD_METADATA license.\n"
+          description: "Derived off of a client key (application that created) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license."
           readOnly: true
           example: "https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5"
         lastModifiedBySourceSystemUri:
           type: "string"
-          description: "Derived off of a client key (application that did last modification) via Application Registry lookup. The
-
-            Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973)
-
-            will be used if no source application exists. Only viewable with the RECORD_METADATA license.\n"
+          description: "Derived off of a client key (application that did last modification) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license."
           readOnly: true
           example: "https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5"
     resourcewithoutLinks:
@@ -704,6 +672,7 @@ components:
           example: "363997 | fcdc83cb-8840-4215-84b5-1769889db932"
         "@type":
           type: "string"
+          x-required-boolean: true
           description: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
       discriminator:
@@ -724,6 +693,7 @@ components:
           type: "string"
           description: "Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
+          x-required-boolean: true
       discriminator:
         propertyName: "@type"
     resource-embed:
@@ -736,6 +706,7 @@ components:
           example: "363997 | fcdc83cb-8840-4215-84b5-1769889db932"
         "@type":
           type: "string"
+          x-required-boolean: true
           description: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
       discriminator:
@@ -750,6 +721,7 @@ components:
           example: "363997 | fcdc83cb-8840-4215-84b5-1769889db932"
         "@type":
           type: "string"
+          x-required-boolean: true
           description: "Resource"
           example: "Resource"
       discriminator:
@@ -2036,13 +2008,7 @@ components:
             - "/name"
         value:
           type: "string"
-          description: "- For transfer request : value={organizationId}
-
-            - For archive/unarchive request : value=true/false
-
-            - For role update request : value={Controlling}
-
-            - For name update request : value={name}\n"
+          description: "- For transfer request : value={organizationId} - For archive/unarchive request : value=true/false - For role update request : value={Controlling} - For name update request : value={name}"
     createEquipment:
       type: "object"
       title: "Equipment Creation"
@@ -2055,7 +2021,9 @@ components:
           type: "string"
           description: "Serial Number of the Equipment and passed on the query parameter"
           example: "Must be unique string. Max character count is 30."
+          x-required-boolean: true
         model:
+          x-required-boolean: true
           type: "object"
           title: "Model of the equipment."
           description: "Model of the equipment."
@@ -2064,14 +2032,17 @@ components:
               type: "string"
               description: "Unique id"
               example: "3 | 158df9ff-334a-4e0d-86cc-3adca17a9686"
+              x-required-boolean: true
             "@type":
               type: "string"
               description: "EquipmentModel"
               example: "EquipmentModel"
+              x-required-boolean: true
   parameters:
     embed:
       name: "embed"
       in: "query"
+      x-required-boolean: false
       description: "List of embed data for the Equipment ISG Type"
       schema:
         type: "array"
@@ -2086,17 +2057,15 @@ components:
     deprecatedForEquipmentModels:
       name: "deprecated"
       in: "query"
-      description: "Optional query parameter that controls which records are returned based on the record's deprecated flag:
-
-        parameter set to false:  Return only non-deprecated records
-
-        query parameter not present: both deprecated and non-deprecated records returned.\n"
+      x-required-boolean: false
+      description: "Optional query parameter that controls which records are returned based on the record's deprecated flag: parameter set to false: Return only non-deprecated records query parameter not present: both deprecated and non-deprecated records returned."
       schema:
         type: "boolean"
         example: false
     deprecated:
       name: "deprecated"
       in: "query"
+      x-required-boolean: false
       description: "Whether to filter isg types by the deprecated flag"
       schema:
         type: "string"
@@ -2109,6 +2078,7 @@ components:
     originator:
       name: "X-Deere-Originator"
       in: "header"
+      x-required-boolean: false
       description: "Originating system of the request"
       schema:
         type: "string"
@@ -2116,6 +2086,7 @@ components:
     OrganizationEquipmentIds:
       name: "ids"
       in: "query"
+      x-required-boolean: false
       description: "List of OrganizationEquipment Ids (these ids are unique across all orgs)"
       schema:
         type: "array"
@@ -2128,6 +2099,7 @@ components:
     EquipmentSerialNumbers:
       name: "serialNumbers"
       in: "query"
+      x-required-boolean: false
       description: "List of serial numbers of the equipment"
       schema:
         type: "array"
@@ -2139,6 +2111,7 @@ components:
     OrganizationIds:
       name: "organizationIds"
       in: "query"
+      x-required-boolean: false
       description: "List of OrganizationIds"
       schema:
         type: "array"
@@ -2151,6 +2124,7 @@ components:
     PrincipalIds:
       name: "principalIds"
       in: "query"
+      x-required-boolean: false
       description: "List of PrincipalIds"
       schema:
         type: "array"
@@ -2163,6 +2137,7 @@ components:
     PageOffset:
       name: "pageOffset"
       in: "query"
+      x-required-boolean: false
       description: "Refers to starting record value"
       schema:
         type: "integer"
@@ -2172,6 +2147,7 @@ components:
     ItemLimit:
       name: "itemLimit"
       in: "query"
+      x-required-boolean: false
       description: "Refers to number of items per page(default 100 max 5000)"
       schema:
         type: "integer"
@@ -2182,6 +2158,7 @@ components:
     id:
       name: "id"
       in: "path"
+      x-required-boolean: true
       schema:
         type: "integer"
         format: "int32"
@@ -2189,6 +2166,7 @@ components:
     organizationId:
       name: "organizationId"
       in: "path"
+      x-required-boolean: true
       schema:
         type: "integer"
         format: "int32"
@@ -2196,11 +2174,8 @@ components:
     organizationIds:
       name: "organizationIds"
       in: "query"
-      description: "The organization ids to get Equipment Models for.
-
-        If provided, then only non-certified models will be returned.
-
-        If not provided, then only certified models will be returned.\n"
+      x-required-boolean: false
+      description: "The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned."
       schema:
         type: "array"
         items:
@@ -2213,6 +2188,7 @@ components:
     EmbedForList:
       name: "embed"
       in: "query"
+      x-required-boolean: false
       description: "embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds"
       schema:
         type: "string"
@@ -2224,6 +2200,7 @@ components:
     Embed:
       name: "embed"
       in: "query"
+      x-required-boolean: false
       description: "embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds"
       schema:
         type: "string"
@@ -2237,6 +2214,7 @@ components:
     Categories:
       name: "categories"
       in: "query"
+      x-required-boolean: false
       schema:
         type: "array"
         items:
@@ -2250,6 +2228,7 @@ components:
     CapableOf:
       name: "capableOf"
       in: "query"
+      x-required-boolean: false
       schema:
         type: "string"
         enum:
@@ -2258,6 +2237,7 @@ components:
     Role:
       name: "organizationRole.type"
       in: "query"
+      x-required-boolean: false
       schema:
         type: "string"
         enum:
@@ -2266,18 +2246,21 @@ components:
     Archived:
       name: "archived"
       in: "query"
+      x-required-boolean: false
       schema:
         type: "boolean"
       description: "true or false"
     SerialNumber:
       name: "serialNumber"
       in: "path"
+      x-required-boolean: true
       schema:
         type: "string"
       example: "VIN1234"
     EquipmentMakeId:
       name: "equipmentMakeId"
       in: "path"
+      x-required-boolean: true
       description: "ID for Equipment Make"
       schema:
         type: "integer"
@@ -2286,6 +2269,7 @@ components:
     EquipmentISGTypeId:
       name: "equipmentISGTypeId"
       in: "path"
+      x-required-boolean: true
       description: "ID for Equipment ISG Type"
       schema:
         type: "integer"
@@ -2294,6 +2278,7 @@ components:
     Deprecated:
       name: "deprecated"
       in: "path"
+      x-required-boolean: true
       description: "Deprecated value should be false"
       schema:
         type: "boolean"
@@ -2301,6 +2286,7 @@ components:
     EmbedV1:
       name: "embed"
       in: "query"
+      x-required-boolean: false
       description: "Embed additional attributes if required."
       schema:
         type: "string"
@@ -2314,6 +2300,7 @@ components:
     EquipmentModelName:
       name: "equipmentModelName"
       in: "query"
+      x-required-boolean: false
       description: "It should be equipment model name"
       schema:
         type: "string"
@@ -2325,6 +2312,7 @@ components:
     EquipmentTypeId:
       name: "equipmentTypeId"
       in: "path"
+      x-required-boolean: true
       description: "ID for Equipment Type"
       schema:
         type: "integer"
@@ -2333,6 +2321,7 @@ components:
     EquipmentModelId:
       name: "equipmentModelId"
       in: "path"
+      x-required-boolean: true
       description: "ID for Equipment Model"
       schema:
         type: "integer"
@@ -2341,6 +2330,7 @@ components:
     category:
       name: "category"
       in: "query"
+      x-required-boolean: false
       description: "List of type categories for the Equipment Model"
       schema:
         type: "array"
@@ -2355,6 +2345,7 @@ components:
     EquipmentTypeName:
       name: "equipmentTypeName"
       in: "query"
+      x-required-boolean: false
       description: "Name for Equipment Type"
       schema:
         type: "string"
@@ -2362,6 +2353,7 @@ components:
     EquipmentMakeName:
       name: "equipmentTypeId"
       in: "query"
+      x-required-boolean: false
       description: "Name for Equipment Make"
       schema:
         type: "string"
@@ -2824,6 +2816,7 @@ components:
                 type: "string"
                 description: "Unique id"
                 example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
+                x-required-boolean: true
               name:
                 type: "string"
                 description: "Equipment Name."
@@ -2832,6 +2825,7 @@ components:
                 type: "string"
                 description: "Serial Number of the Equipment and passed on the query parameter"
                 example: "Must be unique string. Max character count is 30."
+                x-required-boolean: true
               make:
                 type: "object"
                 title: "Make of the equipment."

@@ -13,7 +13,7 @@ export class MapLayersApi {
 
   /**
    * List Map Layer Summaries
-   * @description This resource will list all Map Layer Summaries for a specified field.<br/>
+   * @description This resource will list all Map Layer Summaries for a specified field.
    * @generated from GET /organizations/{orgId}/fields/{id}/mapLayerSummaries
    */
   async list(

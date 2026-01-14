@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * Get Fleet List
-     * @description Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the "next" link within the response to retrieve all the fleets. <br/> <br/> <b>Note:</b> The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. <br/> <b>Note:</b> Not all vehicles will supply all data points.
+     * @description Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the "next" link within the response to retrieve all the fleets. Note: The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. Note: Not all vehicles will supply all data points.
      */
     get: {
       parameters: {
@@ -44,11 +44,6 @@ export interface components {
   schemas: {
     FleetValue: {
       /**
-       * @description See sample response below. This field includes: OEMName, Model, EquipmentID, SerialNumber, & PIN.
-       * @example ---
-       */
-      '<b>equipmentHeader</b>'?: Record<string, never>;
-      /**
        * @description Name of equipment manufacturer.
        * @example JOHN DEERE
        */
@@ -74,11 +69,6 @@ export interface components {
        */
       Pin?: string;
       /**
-       * @description See below. The Location object includes: datetime, latitude, & longitude.
-       * @example ---
-       */
-      '<b>Location</b>'?: Record<string, never>;
-      /**
        * @description The last time Location was updated.
        * @example 2017-03-22T18:35:45.000Z
        */
@@ -94,11 +84,6 @@ export interface components {
        */
       Longitude?: Record<string, never>;
       /**
-       * @description See below. The CumulativeIdleHours object includes datetime, & Hour.
-       * @example ---
-       */
-      '<b>CumulativeIdleHours</b>'?: Record<string, never>;
-      /**
        * @description The last time CumulativeIdleHours was updated.
        * @example 2017-03-22T18:35:45.000Z
        */
@@ -108,11 +93,6 @@ export interface components {
        * @example 180.60
        */
       'CumulativeIdleHours-Hour'?: Record<string, never>;
-      /**
-       * @description See below. The CumulativeLoadCount object includes datetime, & Load.
-       * @example ---
-       */
-      '<b>CumulativeLoadCount</b>'?: Record<string, never>;
       /**
        * @description The last time CumulativeLoadCount was updated.
        * @example 2017-03-22T18:35:45.000Z
@@ -124,11 +104,6 @@ export interface components {
        */
       'CumulativeLoadCount-Count'?: number;
       /**
-       * @description See below. The CumulativeOperatingHours object includes datetime, & Hour.
-       * @example ---
-       */
-      '<b>CumulativeOperatingHours</b>'?: Record<string, never>;
-      /**
        * @description The last time CumulativeOperatingHours was updated.
        * @example 2017-03-24T09:01:00.000Z
        */
@@ -138,11 +113,6 @@ export interface components {
        * @example 428.70
        */
       'CumulativeOperatingHours-Hour'?: Record<string, never>;
-      /**
-       * @description See below. The CumulativePayloadTotals object includes datetime, PayloadUnits, & Payload.
-       * @example ---
-       */
-      '<b>CumulativePayloadTotals</b>'?: Record<string, never>;
       /**
        * @description The last time CumulativePayloadTotals was updated.
        * @example 2017-03-22T18:35:45.000Z
@@ -159,11 +129,6 @@ export interface components {
        */
       Payload?: number;
       /**
-       * @description See below. The Distance object includes datetime, OdometerUnits, & Odometer.
-       * @example ---
-       */
-      '<b>Distance</b>'?: Record<string, never>;
-      /**
        * @description The last time Distance was updated.
        * @example 2017-03-22T18:35:45.000Z
        */
@@ -179,11 +144,6 @@ export interface components {
        */
       Odometer?: Record<string, never>;
       /**
-       * @description See below. The DEFRemaining object includes datetime, & Percent.
-       * @example ---
-       */
-      '<b>DEFRemaining</b>'?: Record<string, never>;
-      /**
        * @description The last time DEFRemaining was updated.
        * @example 2017-03-22T18:35:45.000Z
        */
@@ -194,11 +154,6 @@ export interface components {
        */
       'DEFRemaining-Percent'?: Record<string, never>;
       /**
-       * @description See below. The FuelRemaining object includes datetime, & Percent.
-       * @example ---
-       */
-      '<b>FuelRemaining</b>'?: Record<string, never>;
-      /**
        * @description The last time FuelRemaining was updated.
        * @example 2017-03-22T18:35:45.000Z
        */
@@ -208,11 +163,6 @@ export interface components {
        * @example 48.80
        */
       'FuelRemaining-Percent'?: Record<string, never>;
-      /**
-       * @description See below. The FuelUsed object includes datetime, FuelUnits & FuelConsumed.
-       * @example ---
-       */
-      '<b>FuelUsed</b>'?: Record<string, never>;
       /**
        * @description The last time FuelUsed was updated.
        * @example 2017-03-22T18:35:45.000Z

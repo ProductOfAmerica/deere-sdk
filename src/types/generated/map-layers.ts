@@ -13,12 +13,12 @@ export interface paths {
     };
     /**
      * List Map Layer Summaries
-     * @description This resource will list all Map Layer Summaries for a specified field.<br/>
+     * @description This resource will list all Map Layer Summaries for a specified field.
      */
     get: {
       parameters: {
         query?: {
-          /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
+          /** @description Set includePartialSummaries to true to include Map Layer Summaries without File Resources. */
           includePartialSummaries?: components['parameters']['includePartialSummaries'];
           /** @description Takes these values mapLayers. */
           embed?: components['parameters']['embed'];
@@ -206,52 +206,7 @@ export interface components {
        */
       total?: number;
       /** @description The primary resource listing. */
-      values?: Record<string, never>;
-      "<span id='map-layer-summary-details'>Map Layer Summary Details</span>"?: {
-        /**
-         * @description Links to other objects in the Deere ecosystem.
-         * @example See "Available Links" below
-         */
-        links?: unknown[];
-        /**
-         * Format: uuid
-         * @description Map Layer Summary ID
-         * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
-         */
-        id?: string;
-        /**
-         * @description Top level name of the Map Layer Summary
-         * @example Summary of Map Layers
-         */
-        title?: string;
-        /**
-         * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href='#markdown'>Markdown</a>
-         * @example My summary of agronomic image data
-         */
-        text?: string;
-        /**
-         * @description The type of data represented by the summary<sup><a href='#map-layer-summaries-map-types'>1</a></sup>.
-         * @example PRESCRIPTION
-         */
-        mapType?: string;
-        /**
-         * @description An array of key value pair items about the Map Layer Summary.
-         * @example See sample response below
-         */
-        metadata?: Record<string, never>;
-        /**
-         * Format: date-time
-         * @description ISO 8601 Date and time in UTC this resource was created.
-         * @example 2016-01-02T16:14:23.421Z
-         */
-        dateCreated?: string;
-        /**
-         * Format: date-time
-         * @description ISO 8601 Date and time in UTC this resource was last modified.
-         * @example 2016-01-02T16:14:23.421Z
-         */
-        lastModifiedDate?: string;
-      };
+      values?: unknown[];
     };
     PostContributedMapLayerSummary: {
       /**
@@ -271,12 +226,12 @@ export interface components {
        */
       title?: string;
       /**
-       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited
        * @example My summary of agronomic image data
        */
       text?: string;
       /**
-       * @description The type of data represented by the summary.<sup><a href="#map-layer-summaries-map-types">1</a></sup>
+       * @description The type of data represented by the summary.
        * @example PRESCRIPTION
        */
       mapType?: string;
@@ -284,7 +239,7 @@ export interface components {
        * @description An array of key value pair items about the Map Layer Summary.
        * @example See sample response below
        */
-      metadata?: Record<string, never>;
+      metadata?: unknown[];
       /**
        * Format: date-time
        * @description ISO 8601 Date and time in UTC this resource was created.
@@ -333,66 +288,66 @@ export interface components {
     PostRequest: {
       /**
        * @description Links to other objects in the Deere ecosystem.
-       * @example See "Request Links" below <br/>Readonly: No
+       * @example See "Request Links" below Readonly: No
        */
       links?: unknown[];
       /**
        * @description Top level name of the Map Layer Summary
-       * @example Summary of Map Layers <br/>Readonly: No
+       * @example Summary of Map Layers Readonly: No
        */
       title?: string;
       /**
-       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
-       * @example My summary of agronomic image data <br/>Readonly: No
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited
+       * @example My summary of agronomic image data Readonly: No
        */
       text?: string;
       /**
-       * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
-       * @example PRESCRIPTION <br/>Readonly: No
+       * @description The type of data represented by the summary
+       * @example PRESCRIPTION Readonly: No
        */
       mapType?: string;
       /**
        * @description An array of key value pair items about the Map Layer Summary.
-       * @example See sample request below <br/>Readonly: No
+       * @example See sample request below Readonly: No
        */
-      metadata?: Record<string, never>;
+      metadata?: unknown[];
       /**
        * Format: date-time
        * @description ISO 8601 Date and time in UTC this resource was created.
-       * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
+       * @example 2016-01-02T16:14:23.421Z Readonly: No
        */
       dateCreated?: string;
     };
     PostResponse: {
       /**
        * @description Links to other objects in the Deere ecosystem.
-       * @example See "Request Links" below <br/>Readonly: No
+       * @example See "Request Links" below Readonly: No
        */
       links?: unknown[];
       /**
        * @description Top level name of the Map Layer Summary
-       * @example Summary of Map Layers <br/>Readonly: No
+       * @example Summary of Map Layers Readonly: No
        */
       title?: string;
       /**
-       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited <a href="/dev-docs/map-layers#markdown">Markdown</a>
-       * @example My summary of agronomic image data <br/>Readonly: No
+       * @description Describes Map Layer Summary giving a better idea of what the data is about, supports limited
+       * @example My summary of agronomic image data Readonly: No
        */
       text?: string;
       /**
-       * @description The type of data represented by the summary<sup><a href="#map-layer-summaries-map-types">1</a></sup>
-       * @example PRESCRIPTION <br/>Readonly: No
+       * @description The type of data represented by the summary
+       * @example PRESCRIPTION Readonly: No
        */
       mapType?: string;
       /**
        * @description An array of key value pair items about the Map Layer Summary.
-       * @example See sample request below <br/>Readonly: No
+       * @example See sample request below Readonly: No
        */
-      metadata?: Record<string, never>;
+      metadata?: unknown[];
       /**
        * Format: date-time
        * @description ISO 8601 Date and time in UTC this resource was created.
-       * @example 2016-01-02T16:14:23.421Z <br/>Readonly: No
+       * @example 2016-01-02T16:14:23.421Z Readonly: No
        */
       dateCreated?: string;
     };
@@ -679,7 +634,7 @@ export interface components {
     OrganizationId: string;
     /** @description Field ID */
     fileId: string;
-    /** @description Set <mark>includePartialSummaries</mark> to true to include Map Layer Summaries without File Resources. */
+    /** @description Set includePartialSummaries to true to include Map Layer Summaries without File Resources. */
     includePartialSummaries: boolean;
     /** @description Takes these values mapLayers. */
     embed: string;

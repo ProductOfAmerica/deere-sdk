@@ -52,18 +52,7 @@ export interface paths {
     put?: never;
     /**
      * Create field for an Organization
-     * @description This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
-     *     This is to support the following scenarios:
-     *       * adding a new field to an existing client/farm
-     *       * adding a new farm and field to an existing client
-     *       * adding a brand new client/farm/field
-     *
-     *     Client-specified identifiers:
-     *       * An identifier may be specified for the new field
-     *       * An identifier may be specified for new clients/farms
-     *       * If associating to an existing client/farm, the existing guids may be specified in place of the name
-     *
-     *     Note: All fields are created with an 'available' status.
+     * @description This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names. This is to support the following scenarios: * adding a new field to an existing client/farm * adding a new farm and field to an existing client * adding a brand new client/farm/field Client-specified identifiers: * An identifier may be specified for the new field * An identifier may be specified for new clients/farms * If associating to an existing client/farm, the existing guids may be specified in place of the name Note: All fields are created with an 'available' status.
      */
     post: {
       parameters: {
@@ -238,7 +227,7 @@ export interface paths {
     };
     /**
      * View Clients that Own a Field
-     * @description View details about the client that owns the field. The response will link to the following resources:<br/> <ul><li><b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farms belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the field.</li></ul>
+     * @description View details about the client that owns the field. The response will link to the following resources: fields: View the field the client belongs to. farms: View the farms belonging to the client. owningOrganization: View the org that owns the field.
      */
     get: {
       parameters: {
@@ -790,7 +779,7 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsPost'];
       };
     };
-    /** @description Field deleted.  If the client and farm has only this field the client and farm will be deleted */
+    /** @description Field deleted. If the client and farm has only this field the client and farm will be deleted */
     Deleted: {
       headers: {
         [name: string]: unknown;
@@ -799,72 +788,14 @@ export interface components {
         'application/vnd:deere:axiom:v3+json': unknown;
       };
     };
-    /**
-     * @description The possible errors are:
-     *       * CFF_CLIENT_ID_ALREADY_EXISTS
-     *       * CFF_BAD_CLIENT_ID
-     *       * CFF_CLIENT_ID_NAME_CONFLICT
-     *       * CFF_CLIENT_ID_NOT_FOUND
-     *       * CFF_CLIENT_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_CLIENT_NAME
-     *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-     *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-     *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-     *       * CFF_FARM_ID_ALREADY_EXISTS
-     *       * CFF_BAD_FARM_ID
-     *       * CFF_FARM_ID_NAME_CONFLICT
-     *       * CFF_FARM_ID_NOT_FOUND
-     *       * CFF_FARM_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_FARM_NAME
-     *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
-     *       * CFF_ALREADY_EXISTS_ACTIVE
-     *       * CFF_ALREADY_EXISTS_ARCHIVED
-     *       * CFF_ALREADY_EXISTS_MERGED
-     *       * CFF_FIELD_ID_ALREADY_EXISTS
-     *       * CFF_BAD_FIELD_ID
-     *       * CFF_FIELD_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_FIELD_NAME
-     *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-     *       * CFF_MISSING_REQUEST_BODY
-     *       * CFF_OUTDATED_REQUEST
-     *       * CFF_USER_LAST_MODIFIED_CLIPPED
-     */
+    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
     ValidationErrorForUpdate: {
       headers: {
         [name: string]: unknown;
       };
       content?: never;
     };
-    /**
-     * @description The possible errors are:
-     *       * CFF_CLIENT_ID_ALREADY_EXISTS
-     *       * CFF_BAD_CLIENT_ID
-     *       * CFF_CLIENT_ID_NAME_CONFLICT
-     *       * CFF_CLIENT_ID_NOT_FOUND
-     *       * CFF_CLIENT_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_CLIENT_NAME
-     *       * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-     *       * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-     *       * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-     *       * CFF_FARM_ID_ALREADY_EXISTS
-     *       * CFF_BAD_FARM_ID
-     *       * CFF_FARM_ID_NAME_CONFLICT
-     *       * CFF_FARM_ID_NOT_FOUND
-     *       * CFF_FARM_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_FARM_NAME
-     *       * CFF_FARM_NAME_EXCEEDS_255_CHARS
-     *       * CFF_ALREADY_EXISTS_ACTIVE
-     *       * CFF_ALREADY_EXISTS_ARCHIVED
-     *       * CFF_ALREADY_EXISTS_MERGED
-     *       * CFF_FIELD_ID_ALREADY_EXISTS
-     *       * CFF_BAD_FIELD_ID
-     *       * CFF_FIELD_NAME_ALREADY_EXISTS
-     *       * CFF_EMPTY_FIELD_NAME
-     *       * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-     *       * CFF_MISSING_REQUEST_BODY
-     *       * CFF_OUTDATED_REQUEST
-     *       * CFF_USER_LAST_MODIFIED_CLIPPED
-     */
+    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
     ValidationErrorForCreate: {
       headers: {
         [name: string]: unknown;

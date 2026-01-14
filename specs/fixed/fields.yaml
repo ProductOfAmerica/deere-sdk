@@ -39,27 +39,7 @@ paths:
           $ref: "#/components/responses/OrgNotFound"
     post:
       summary: "Create field for an Organization"
-      description: "This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
-
-        This is to support the following scenarios:
-
-        \  * adding a new field to an existing client/farm
-
-        \  * adding a new farm and field to an existing client
-
-        \  * adding a brand new client/farm/field
-
-
-        Client-specified identifiers:
-
-        \  * An identifier may be specified for the new field
-
-        \  * An identifier may be specified for new clients/farms
-
-        \  * If associating to an existing client/farm, the existing guids may be specified in place of the name
-
-
-        Note: All fields are created with an 'available' status.\n"
+      description: "This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names. This is to support the following scenarios: * adding a new field to an existing client/farm * adding a new farm and field to an existing client * adding a brand new client/farm/field Client-specified identifiers: * An identifier may be specified for the new field * An identifier may be specified for new clients/farms * If associating to an existing client/farm, the existing guids may be specified in place of the name Note: All fields are created with an 'available' status."
       requestBody:
         $ref: "#/components/requestBodies/ASingleField"
       responses:
@@ -118,7 +98,7 @@ paths:
       - $ref: "#/components/parameters/FieldId"
     get:
       summary: "Get Farm by organization and fieldId"
-      description: "This api is designed to get farms within an organization and for provided fieldId\n"
+      description: "This api is designed to get farms within an organization and for provided fieldId"
       parameters:
         - $ref: "#/components/parameters/FieldEmbed"
       responses:
@@ -130,7 +110,7 @@ paths:
           $ref: "#/components/responses/OrgOrFieldNotFound"
   /organizations/{orgID}/fields/{id}/clients:
     get:
-      description: "View details about the client that owns the field. The response will link to the following resources:<br/> <ul><li><b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farms belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the field.</li></ul>"
+      description: "View details about the client that owns the field. The response will link to the following resources: fields: View the field the client belongs to. farms: View the farms belonging to the client. owningOrganization: View the org that owns the field."
       summary: "View Clients that Own a Field"
       security:
         - OAuth2:
@@ -148,6 +128,7 @@ components:
       in: "path"
       name: "orgId"
       description: "The ID of the organization"
+      x-required-boolean: true
       schema:
         type: "integer"
         format: "int64"
@@ -162,24 +143,28 @@ components:
       in: "query"
       name: "clientName"
       description: "client name"
+      x-required-boolean: false
       schema:
         type: "string"
     FarmName:
       in: "query"
       name: "farmName"
       description: "farm name"
+      x-required-boolean: false
       schema:
         type: "string"
     FieldName:
       in: "query"
       name: "fieldName"
       description: "field name"
+      x-required-boolean: false
       schema:
         type: "string"
     recordFilter:
       in: "query"
       name: "recordFilter"
       description: "Filters by resource state (whether or not the resource is archived)"
+      x-required-boolean: false
       schema:
         type: "string"
         enum:
@@ -191,6 +176,7 @@ components:
       in: "query"
       name: "embed"
       description: "list of objects to include"
+      x-required-boolean: false
       schema:
         type: "array"
         items:
@@ -208,6 +194,7 @@ components:
       in: "query"
       name: "embed"
       description: "list of objects to include"
+      x-required-boolean: false
       schema:
         type: "array"
         items:
@@ -221,18 +208,21 @@ components:
       in: "query"
       name: "contextOrganizationId"
       description: "Context Organization ID"
+      x-required-boolean: false
       schema:
         type: "string"
     FieldId:
       in: "path"
       name: "fieldId"
       description: "field guid"
+      x-required-boolean: true
       schema:
         type: "string"
     UnitOfMeasureHeader:
       in: "header"
       name: "Accept-UOM-System"
       description: "Indicates a preference for returned measurements to be in English vs Metric"
+      x-required-boolean: false
       schema:
         type: "string"
         enum:
@@ -241,6 +231,7 @@ components:
         default: "METRIC"
   requestBodies:
     ASingleField:
+      x-required-boolean: true
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
@@ -277,6 +268,7 @@ components:
                   clients:
                     - name: "UniqueClientName"
     FieldGuidSearches:
+      x-required-boolean: true
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
@@ -290,7 +282,7 @@ components:
             $ref: "#/components/schemas/GetFarms"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -319,7 +311,7 @@ components:
             $ref: "#/components/schemas/FieldsResponse"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -385,7 +377,7 @@ components:
                   $ref: "#/components/schemas/FieldResponse"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -426,7 +418,7 @@ components:
             $ref: "#/components/schemas/FieldResponse"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "Field"
                 name: "01"
@@ -519,124 +511,16 @@ components:
                   clients:
                     - name: "UniqueClientName"
     Deleted:
-      description: "Field deleted.  If the client and farm has only this field the client and farm will be deleted"
+      description: "Field deleted. If the client and farm has only this field the client and farm will be deleted"
       content:
         application/vnd:deere:axiom:v3+json:
           examples:
             Headers:
               description: "204 No Content"
     ValidationErrorForUpdate:
-      description: "The possible errors are:
-
-        \  * CFF_CLIENT_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_CLIENT_ID
-
-        \  * CFF_CLIENT_ID_NAME_CONFLICT
-
-        \  * CFF_CLIENT_ID_NOT_FOUND
-
-        \  * CFF_CLIENT_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_CLIENT_NAME
-
-        \  * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-
-        \  * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-
-        \  * CFF_FARM_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_FARM_ID
-
-        \  * CFF_FARM_ID_NAME_CONFLICT
-
-        \  * CFF_FARM_ID_NOT_FOUND
-
-        \  * CFF_FARM_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_FARM_NAME
-
-        \  * CFF_FARM_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_ALREADY_EXISTS_ACTIVE
-
-        \  * CFF_ALREADY_EXISTS_ARCHIVED
-
-        \  * CFF_ALREADY_EXISTS_MERGED
-
-        \  * CFF_FIELD_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_FIELD_ID
-
-        \  * CFF_FIELD_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_FIELD_NAME
-
-        \  * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_MISSING_REQUEST_BODY
-
-        \  * CFF_OUTDATED_REQUEST
-
-        \  * CFF_USER_LAST_MODIFIED_CLIPPED\n"
+      description: "The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED"
     ValidationErrorForCreate:
-      description: "The possible errors are:
-
-        \  * CFF_CLIENT_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_CLIENT_ID
-
-        \  * CFF_CLIENT_ID_NAME_CONFLICT
-
-        \  * CFF_CLIENT_ID_NOT_FOUND
-
-        \  * CFF_CLIENT_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_CLIENT_NAME
-
-        \  * CFF_CLIENT_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT
-
-        \  * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT
-
-        \  * CFF_FARM_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_FARM_ID
-
-        \  * CFF_FARM_ID_NAME_CONFLICT
-
-        \  * CFF_FARM_ID_NOT_FOUND
-
-        \  * CFF_FARM_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_FARM_NAME
-
-        \  * CFF_FARM_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_ALREADY_EXISTS_ACTIVE
-
-        \  * CFF_ALREADY_EXISTS_ARCHIVED
-
-        \  * CFF_ALREADY_EXISTS_MERGED
-
-        \  * CFF_FIELD_ID_ALREADY_EXISTS
-
-        \  * CFF_BAD_FIELD_ID
-
-        \  * CFF_FIELD_NAME_ALREADY_EXISTS
-
-        \  * CFF_EMPTY_FIELD_NAME
-
-        \  * CFF_FIELD_NAME_EXCEEDS_255_CHARS
-
-        \  * CFF_MISSING_REQUEST_BODY
-
-        \  * CFF_OUTDATED_REQUEST
-
-        \  * CFF_USER_LAST_MODIFIED_CLIPPED\n"
+      description: "The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED"
   schemas:
     FieldsResponse:
       type: "object"
@@ -1236,179 +1120,7 @@ components:
                 $ref: "#/components/schemas/CreateUpdateClient"
   examples:
     getFieldsNoEmbed:
-      value: "{
-
-        \ \"links\":[
-
-        \  {
-
-        \   \"rel\":\"self\",
-
-        \   \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields\"
-
-        \  },
-
-        \  {
-
-        \   \"rel\":\"nextPage\",
-
-        \   \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields;start=10;count=10\"
-
-        \  }
-
-        \ ],
-
-        \ \"total\":1,
-
-        \ \"values\":[
-
-        \  {
-
-        \   \"@type\":\"Field\",
-
-        \   \"name\":\"---\",
-
-        \   \"id\":\"9369f3f6-2428-4bba-bf64-0a19cdaf007d\",
-
-        \   \"links\":[
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"self\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"clients\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/clients\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"notes\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/notes\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"farms\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/farms\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"owningOrganization\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"boundaries\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"simplifiedBoundaries\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries?simple=true\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"addBoundary\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"fieldOperation\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/fieldOperations\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"guidanceLines\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"addGuidanceTrack\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"deleteField\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
-
-        \    },
-
-        \    {
-
-        \     \"@type\":\"Link\",
-
-        \     \"rel\":\"editField\",
-
-        \     \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\"
-
-        \    }
-
-        \   ]
-
-        \  }
-
-        \ ]
-
-        }\n"
+      value: "{ \"links\":[ { \"rel\":\"self\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields\" }, { \"rel\":\"nextPage\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields;start=10;count=10\" } ], \"total\":1, \"values\":[ { \"@type\":\"Field\", \"name\":\"---\", \"id\":\"9369f3f6-2428-4bba-bf64-0a19cdaf007d\", \"links\":[ { \"@type\":\"Link\", \"rel\":\"self\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\" }, { \"@type\":\"Link\", \"rel\":\"clients\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/clients\" }, { \"@type\":\"Link\", \"rel\":\"notes\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/notes\" }, { \"@type\":\"Link\", \"rel\":\"farms\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/farms\" }, { \"@type\":\"Link\", \"rel\":\"owningOrganization\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457\" }, { \"@type\":\"Link\", \"rel\":\"boundaries\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\" }, { \"@type\":\"Link\", \"rel\":\"simplifiedBoundaries\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries?simple=true\" }, { \"@type\":\"Link\", \"rel\":\"addBoundary\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/boundaries\" }, { \"@type\":\"Link\", \"rel\":\"fieldOperation\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/fieldOperations\" }, { \"@type\":\"Link\", \"rel\":\"guidanceLines\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\" }, { \"@type\":\"Link\", \"rel\":\"addGuidanceTrack\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d/guidanceLines\" }, { \"@type\":\"Link\", \"rel\":\"deleteField\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\" }, { \"@type\":\"Link\", \"rel\":\"editField\", \"uri\":\"https://apiqa.tal.deere.com/platform/organizations/251457/fields/9369f3f6-2428-4bba-bf64-0a19cdaf007d\" } ] } ] }"
     getFieldNoEmbed:
       value:
         "@type": "Field"

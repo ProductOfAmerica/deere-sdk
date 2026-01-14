@@ -6,7 +6,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'fixed');
@@ -53,10 +53,18 @@ async function main() {
 
     try {
       execSync(`npx openapi-typescript "${inputPath}" -o "${outputPath}"`, { stdio: 'pipe' });
+      const generatedSource = readFileSync(outputPath, 'utf-8');
+      // Check for any HTML tags leaked into property names (not just <b>)
+      const htmlInPropertyMatch = generatedSource.match(/"[^"]*<(b|sup|span|a|\/\w+)[^"]*":/);
+      if (htmlInPropertyMatch) {
+        throw new Error(
+          `HTML leaked into property name in ${outputFile}: ${htmlInPropertyMatch[0]}`
+        );
+      }
       console.log(' OK');
       generated.push({ name: yamlFile, module: moduleName, file: outputFile });
-    } catch (_error) {
-      console.log(' FAILED');
+    } catch (error) {
+      console.error(`Failed generating ${moduleName}:`, error);
     }
   }
 

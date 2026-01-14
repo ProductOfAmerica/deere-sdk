@@ -118,7 +118,7 @@ export class FarmsApi {
 
   /**
    * View a Farm's Field
-   * @description View details on the field to which a specified farm belongs. The response will link to the following resources: <ul> <li><b>boundaries:</b> View the boundaries of this field.</li> <li><b>clients:</b> View the clients associated with this field.</li> <li><b>farms:</b> View the farms belonging to this field.</li> <li><b>owningOrganization:</b> View the organization that owns the field.</li> <li><b>activeBoundary:</b> View the active boundary of this field.</li> </ul>
+   * @description View details on the field to which a specified farm belongs. The response will link to the following resources: boundaries: View the boundaries of this field. clients: View the clients associated with this field. farms: View the farms belonging to this field. owningOrganization: View the organization that owns the field. activeBoundary: View the active boundary of this field.
    * @generated from GET /organizations/{orgID}/farms/{id}/fields
    */
   async listFields(

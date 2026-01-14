@@ -123,7 +123,7 @@ export interface paths {
     put?: never;
     /**
      * Create new asset location
-     * @description This endpoint will create a new Asset Location.<br/><br/><b>We provide <a href="#markdown">Markdown support</a> for measurementData name.</b><br/><br/> <b>Please Note:</b> Only <i>links</i> are supported for a measurementData name.<br/><br/>Additionally, Asset Locations do not honor fractional seconds in their <mark>timestamps</mark>. So <mark>2019-01-01T12:34:56.900Z</mark> and <mark>2019-01-01T12:34:56Z</mark> are considered equivalent.
+     * @description This endpoint will create a new Asset Location. We provide for measurementData name. Please Note: Only links are supported for a measurementData name. Additionally, Asset Locations do not honor fractional seconds in their timestamps. So 2019-01-01T12:34:56.900Z and 2019-01-01T12:34:56Z are considered equivalent.
      */
     post: operations['postAssetLocations'];
     delete?: never;
@@ -307,7 +307,7 @@ export interface components {
          */
         lastModifiedDate?: string;
         /**
-         * @description The Asset Location with the most recent <mark>timestamp</mark>. Included if embed is requested.
+         * @description The Asset Location with the most recent timestamp. Included if embed is requested.
          * @example See sample response below
          */
         lastKnownLocation?: Record<string, never>;
@@ -452,23 +452,23 @@ export interface components {
     AssetCatalogCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['AssetCatalogItem'][];
     };
-    /** @description Stub schema for MeasurementData (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for MeasurementData. Original definition missing from Deere spec. */
     MeasurementData: {
       [key: string]: unknown;
     };
-    /** @description Stub schema for AssetCategory (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for AssetCategory. Original definition missing from Deere spec. */
     AssetCategory: {
       [key: string]: unknown;
     };
-    /** @description Stub schema for AssetType (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for AssetType. Original definition missing from Deere spec. */
     AssetType: {
       [key: string]: unknown;
     };
-    /** @description Stub schema for AssetSubType (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for AssetSubType. Original definition missing from Deere spec. */
     AssetSubType: {
       [key: string]: unknown;
     };
-    /** @description Stub schema for AssetCatalogItem (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for AssetCatalogItem. Original definition missing from Deere spec. */
     AssetCatalogItem: {
       [key: string]: unknown;
     };
@@ -644,23 +644,23 @@ export interface components {
   parameters: {
     /** @description The ID of the organization */
     OrgId: string;
-    /** @description Additional data to embed in the response. For example <mark>embed=lastKnownLocation</mark> will return assets with their <mark>lastKnownLocation</mark> included. */
+    /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
     Embed: string;
-    /** @description See <a href="#eTags">eTags</a> for more information. */
+    /** @description See for more information. */
     'X-deere-sign': string;
-    /** @description See <a href="#eTags">eTags</a> for more information. */
+    /** @description See for more information. */
     'x-deere-sign': string;
-    /** @description See <a href="#eTags">eTags</a> for more information. */
+    /** @description See for more information. */
     'x-deere-sign2': string;
     /** @description The ID of the asset */
     AssetId: string;
     /** @description The ID associated with the asset. */
     AssetId2: string;
-    /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time. */
+    /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
     StartDate: string;
-    /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time. */
+    /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
     EndDate: string;
-    /** @description A query param returned by the server in the <mark>nextPage</mark> link if there are more results for your query than were returned in the response. */
+    /** @description A query param returned by the server in the nextPage link if there are more results for your query than were returned in the response. */
     PageKey: string;
     /** @description The number of results to include in the response. Must be a positive value greater than or equal to 1. Max 500. Default 500. */
     Count: string;
@@ -680,11 +680,11 @@ export interface operations {
   getOrgAssets: {
     parameters: {
       query?: {
-        /** @description Additional data to embed in the response. For example <mark>embed=lastKnownLocation</mark> will return assets with their <mark>lastKnownLocation</mark> included. */
+        /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
         embed?: components['parameters']['Embed'];
       };
       header?: {
-        /** @description See <a href="#eTags">eTags</a> for more information. */
+        /** @description See for more information. */
         'x-deere-signature'?: components['parameters']['X-deere-sign'];
       };
       path: {
@@ -732,7 +732,7 @@ export interface operations {
   getAsset: {
     parameters: {
       query?: {
-        /** @description Additional data to embed in the response. For example <mark>embed=lastKnownLocation</mark> will return assets with their <mark>lastKnownLocation</mark> included. */
+        /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
         embed?: components['parameters']['Embed'];
       };
       header?: never;
@@ -755,13 +755,13 @@ export interface operations {
   getAssetLocations: {
     parameters: {
       query?: {
-        /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time. */
+        /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
         startDate?: components['parameters']['StartDate'];
-        /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time. */
+        /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
         endDate?: components['parameters']['EndDate'];
         /** @description The number of results to include in the response. Must be a positive value greater than or equal to 1. Max 500. Default 500. */
         count?: components['parameters']['Count'];
-        /** @description A query param returned by the server in the <mark>nextPage</mark> link if there are more results for your query than were returned in the response. */
+        /** @description A query param returned by the server in the nextPage link if there are more results for your query than were returned in the response. */
         pageKey?: components['parameters']['PageKey'];
       };
       header?: never;
@@ -815,7 +815,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: {
-        /** @description See <a href="#eTags">eTags</a> for more information. */
+        /** @description See for more information. */
         'x-deere-signature'?: components['parameters']['x-deere-sign'];
       };
       path?: never;

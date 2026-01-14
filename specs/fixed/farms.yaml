@@ -113,7 +113,7 @@ paths:
           $ref: "#/components/responses/OrgNotFound"
   /organizations/{orgID}/farms/{id}/fields:
     get:
-      description: "View details on the field to which a specified farm belongs. The response will link to the following resources: <ul> <li><b>boundaries:</b> View the boundaries of this field.</li> <li><b>clients:</b> View the clients associated with this field.</li> <li><b>farms:</b> View the farms belonging to this field.</li> <li><b>owningOrganization:</b> View the organization that owns the field.</li> <li><b>activeBoundary:</b> View the active boundary of this field.</li> </ul>"
+      description: "View details on the field to which a specified farm belongs. The response will link to the following resources: boundaries: View the boundaries of this field. clients: View the clients associated with this field. farms: View the farms belonging to this field. owningOrganization: View the organization that owns the field. activeBoundary: View the active boundary of this field."
       summary: "View a Farm's Field"
       security:
         - OAuth2:
@@ -143,7 +143,7 @@ paths:
                       $ref: "#/components/schemas/FieldResponse2"
               examples:
                 No Header:
-                  description: "20O OK<br/>Content-Type: application/vnd.deere.axiom.v3+json</br>x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+                  description: "20O OK Content-Type: application/vnd.deere.axiom.v3+jsonx-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
                   value:
                     links:
                       - rel: "self"
@@ -166,13 +166,14 @@ paths:
                           - rel: "owningOrganization"
                             uri: "https://sandboxapi.deere.com/platform/organizations/1234"
                           - rel: "contributionDefinition"
-                            uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef                            "
+                            uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
 components:
   parameters:
     OrgId:
       in: "path"
       name: "orgId"
       description: "The id of the organization"
+      x-required-boolean: true
       schema:
         type: "integer"
         format: "int64"
@@ -188,6 +189,7 @@ components:
       name: "id"
       in: "path"
       description: "Farm ID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -196,6 +198,7 @@ components:
       in: "path"
       name: "farmId"
       description: "Farm id"
+      x-required-boolean: true
       schema:
         type: "string"
         example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
@@ -203,6 +206,7 @@ components:
       in: "query"
       name: "embed"
       description: "Embed additional traceability record metadata to response"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "showRecordMetadata"
@@ -210,6 +214,7 @@ components:
       name: "recordFilter"
       in: "query"
       description: "Allows filtering based on archived status"
+      x-required-boolean: false
       example: "archived"
       schema:
         type: "string"
@@ -243,7 +248,7 @@ components:
             $ref: "#/components/schemas/Clients"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -282,7 +287,7 @@ components:
             $ref: "#/components/schemas/GetFarms"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -310,7 +315,7 @@ components:
             $ref: "#/components/schemas/GetFarm"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
               value:
                 values:
                   - name: "FarmName"

@@ -4,12 +4,12 @@ info:
   title: "Fleet endpoints"
   version: "1.0.0"
 servers:
-  - url: "https://sandboxaemp.deere.com/Fleet/{pageNumber} (sandbox)<br/>GET https://partneraemp.deere.com/Fleet/{pageNumber} (live)"
+  - url: "https://sandboxaemp.deere.com/Fleet/{pageNumber} (sandbox) GET https://partneraemp.deere.com/Fleet/{pageNumber} (live)"
     description: "url"
 paths:
   /Fleet/{pageNumber}:
     get:
-      description: "Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the \"next\" link within the response to retrieve all the fleets. <br/> <br/> <b>Note:</b> The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. <br/> <b>Note:</b> Not all vehicles will supply all data points."
+      description: "Retrieve a snapshot view of an equipment owner’s fleet. The API response is paginated with a page size of 100. If the response is large, it will be chunked into multiple pages. Please follow the \"next\" link within the response to retrieve all the fleets. Note: The API response is cached on our servers for an hour. Hence, polling frequency of at least one hour is recommended. Note: Not all vehicles will supply all data points."
       summary: "Get Fleet List"
       parameters:
         - $ref: "#/components/parameters/PageNumber"
@@ -22,6 +22,7 @@ components:
       name: "pageNumber"
       description: "Navigation to a page. Links to the current, previous, next and last pages will be provided for easy navigation"
       in: "path"
+      x-required-boolean: true
       schema:
         example: "1"
         default: "100 records per page."
@@ -86,10 +87,6 @@ components:
   schemas:
     FleetValue:
       properties:
-        <b>equipmentHeader</b>:
-          type: "object"
-          example: "---"
-          description: "See sample response below. This field includes: OEMName, Model, EquipmentID, SerialNumber, & PIN."
         OEMName:
           type: "string"
           description: "Name of equipment manufacturer."
@@ -110,10 +107,6 @@ components:
           type: "string"
           example: "1DW260EXJEF001076"
           description: "Assigned PIN."
-        <b>Location</b>:
-          type: "object"
-          description: "See below. The Location object includes: datetime, latitude, & longitude."
-          example: "---"
         Location-datetime:
           type: "dateTime"
           example: "2017-03-22T18:35:45.000Z"
@@ -126,10 +119,6 @@ components:
           type: "double"
           example: "-90.709778"
           description: "Longitude of the machine."
-        <b>CumulativeIdleHours</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The CumulativeIdleHours object includes datetime, & Hour."
         CumulativeIdleHours-datetime:
           type: "dateTime"
           example: "2017-03-22T18:35:45.000Z"
@@ -138,10 +127,6 @@ components:
           type: "double"
           description: "Count of total idle hours at the given date time."
           example: "180.60"
-        <b>CumulativeLoadCount</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The CumulativeLoadCount object includes datetime, & Load."
         CumulativeLoadCount-datetime:
           type: "dateTime"
           description: "The last time CumulativeLoadCount was updated."
@@ -150,10 +135,6 @@ components:
           type: "integer"
           description: "Total count of loads."
           example: "496"
-        <b>CumulativeOperatingHours</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The CumulativeOperatingHours object includes datetime, & Hour."
         CumulativeOperatingHours-datetime:
           type: "dateTime"
           description: "The last time CumulativeOperatingHours was updated."
@@ -162,10 +143,6 @@ components:
           type: "double"
           example: "428.70"
           description: "Count of total operating hours at the given date time."
-        <b>CumulativePayloadTotals</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The CumulativePayloadTotals object includes datetime, PayloadUnits, & Payload."
         CumulativePayloadTotals-datetime:
           type: "dateTime"
           description: "The last time CumulativePayloadTotals was updated."
@@ -178,10 +155,6 @@ components:
           type: "integer"
           example: "499900"
           description: "Total cumulative payload weight."
-        <b>Distance</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The Distance object includes datetime, OdometerUnits, & Odometer."
         Distance-datetime:
           type: "dateTime"
           example: "2017-03-22T18:35:45.000Z"
@@ -194,10 +167,6 @@ components:
           type: "double"
           example: "18871.799"
           description: "Total distance from Odometer."
-        <b>DEFRemaining</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The DEFRemaining object includes datetime, & Percent."
         DEFRemaining-datetime:
           type: "dateTime"
           description: "The last time DEFRemaining was updated."
@@ -206,10 +175,6 @@ components:
           type: "double"
           example: "34.40"
           description: "Percentage of the tank with DEF remaining."
-        <b>FuelRemaining</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The FuelRemaining object includes datetime, & Percent."
         FuelRemaining-datetime:
           type: "dateTime"
           example: "2017-03-22T18:35:45.000Z"
@@ -218,10 +183,6 @@ components:
           type: "double"
           description: "Percentage of tank with fuel."
           example: "48.80"
-        <b>FuelUsed</b>:
-          type: "object"
-          example: "---"
-          description: "See below. The FuelUsed object includes datetime, FuelUnits & FuelConsumed."
         FuelUsed-datetime:
           type: "dateTime"
           example: "2017-03-22T18:35:45.000Z"

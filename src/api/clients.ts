@@ -47,7 +47,7 @@ export class ClientsApi {
 
   /**
    * Create a Client
-   * @description This API is used to create a new client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization. <br/><br/>Note: All clients are created with an "active" status.
+   * @description This API is used to create a new client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. Note: All clients are created with an "active" status.
    * @generated from POST /organizations/{orgId}/clients
    */
   async create(
@@ -61,7 +61,7 @@ export class ClientsApi {
 
   /**
    * View a Client
-   * @description View a clients details. For each client, the response will link to the following resources:<br/> <ul><li> <b>fields:</b> View the field the client belongs to.</li> <li><b>farms:</b> View the farm belonging to the client.</li> <li><b>owningOrganization:</b> View the org that owns the client.</li></ul>
+   * @description View a clients details. For each client, the response will link to the following resources: fields: View the field the client belongs to. farms: View the farm belonging to the client. owningOrganization: View the org that owns the client.
    * @generated from GET /organizations/{orgId}/clients/{clientId}
    */
   async get(
@@ -79,7 +79,7 @@ export class ClientsApi {
 
   /**
    * Update a Client
-   * @description This API is used to update an existing client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization.
+   * @description This API is used to update an existing client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization.
    * @generated from PUT /organizations/{orgId}/clients/{clientId}
    */
   async update(
@@ -94,7 +94,7 @@ export class ClientsApi {
 
   /**
    * Delete a Client
-   * @description This API is used to delete a client resource within the target organization. In order to do this, the authenticated user must have <b>Locations Level 3</b> permission within the target organization.
+   * @description This API is used to delete a client resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization.
    * @generated from DELETE /organizations/{orgId}/clients/{clientId}
    */
   async delete(orgId: string, clientId: string, options?: RequestOptions): Promise<void> {
@@ -104,7 +104,7 @@ export class ClientsApi {
 
   /**
    * View a Client's Farms
-   * @description View a list of farms belonging to a specified client. For each farm, the response will link to the following resources: <ul> <li><b>fields:</b> View the fields in this farm</li> <li><b>farms:</b> View the clients that own this farm.</li> <li><b>owningOrganization:</b> View the Organization that owns the farm.</li> </ul>
+   * @description View a list of farms belonging to a specified client. For each farm, the response will link to the following resources: fields: View the fields in this farm farms: View the clients that own this farm. owningOrganization: View the Organization that owns the farm.
    * @generated from GET /organizations/{orgId}/clients/{id}/farms
    */
   async listFarms(
@@ -122,7 +122,7 @@ export class ClientsApi {
 
   /**
    * View a Client's Field
-   * @description View the field to which a specific client belongs. For the client, the response links to the following resources: <ul> <li><b>boundaries:</b> View the boundaries that belong to this field.</li> <li><b>clients:</b> View the client that belongs to this field.</li> <li><b>farms:</b> View the farms within this field.</li> <li><b>owningOrganization:</b> View the organization that owns the field.</li> </ul>
+   * @description View the field to which a specific client belongs. For the client, the response links to the following resources: boundaries: View the boundaries that belong to this field. clients: View the client that belongs to this field. farms: View the farms within this field. owningOrganization: View the organization that owns the field.
    * @generated from GET /organizations/{orgID}/clients/{id}/fields
    */
   async listFields(

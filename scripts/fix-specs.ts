@@ -14,19 +14,26 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
+import { isDocumentationKey, sanitizePropertyKey } from './lib/spec-utils.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'fixed');
 
 // Map invalid types to valid OpenAPI types
-const TYPE_FIXES: Record<string, { type: string; format?: string }> = {
+const TYPE_FIXES: Record<
+  string,
+  { type: string; format?: string; items?: Record<string, unknown> }
+> = {
   GUID: { type: 'string', format: 'uuid' },
   guid: { type: 'string', format: 'uuid' },
   datetime: { type: 'string', format: 'date-time' },
   'date-time': { type: 'string', format: 'date-time' },
-  'Asset array': { type: 'array' },
+  'Asset array': { type: 'array', items: { type: 'object' } },
   'Location object': { type: 'object' },
-  '<a href= "#measurement-data">Measurement Data</a> array': { type: 'array' },
+  '<a href= "#measurement-data">Measurement Data</a> array': {
+    type: 'array',
+    items: { type: 'object' },
+  },
 };
 
 // Invalid fields that should be removed from their contexts
@@ -92,6 +99,7 @@ function createStubSchema(refPath: string): Record<string, unknown> {
     return {
       type: 'object',
       description: `Stub schema for ${name} (auto-generated)`,
+      'x-generated': true,
       properties: {
         values: { type: 'array', items: { type: 'object' } },
         links: { type: 'array', items: { type: 'object' } },
@@ -104,6 +112,7 @@ function createStubSchema(refPath: string): Record<string, unknown> {
     return {
       type: 'object',
       description: `Error response schema for ${name} (auto-generated)`,
+      'x-generated': true,
       properties: {
         message: { type: 'string' },
         errors: { type: 'array', items: { type: 'object' } },
@@ -115,6 +124,7 @@ function createStubSchema(refPath: string): Record<string, unknown> {
     return {
       type: 'object',
       description: `Link schema for ${name} (auto-generated)`,
+      'x-generated': true,
       properties: {
         '@type': { type: 'string' },
         rel: { type: 'string' },
@@ -125,7 +135,8 @@ function createStubSchema(refPath: string): Record<string, unknown> {
 
   return {
     type: 'object',
-    description: `Stub schema for ${name} (auto-generated - original was missing)`,
+    description: `AUTO-GENERATED STUB SCHEMA for ${name}. Original definition missing from Deere spec.`,
+    'x-generated': true,
     additionalProperties: true,
   };
 }
@@ -157,22 +168,34 @@ function fixTypes(obj: unknown): unknown {
       }
 
       if (key === 'required' && typeof value === 'boolean') {
+        result['x-required-boolean'] = value;
         continue;
       }
 
       if (key === 'properties' && value && typeof value === 'object') {
         const fixedProps: Record<string, unknown> = {};
+
         for (const [propKey, propValue] of Object.entries(value as Record<string, unknown>)) {
-          if (typeof propValue === 'string') {
-            fixedProps[propKey] = {
-              type: 'string',
-              enum: [propValue],
-              description: `Fixed from invalid string value: ${propValue}`,
-            };
-          } else {
-            fixedProps[propKey] = fixTypes(propValue);
+          // Drop documentation-only grouping keys like "<b>Location</b>"
+          if (isDocumentationKey(propKey)) {
+            continue;
           }
+
+          // Drop invalid string-only properties instead of inventing enums
+          if (typeof propValue === 'string') {
+            console.warn(`  Dropping invalid property "${propKey}" (string value)`);
+            continue;
+          }
+
+          // Sanitize property keys containing HTML (e.g., "referenceId<sup>DEPRECATED</sup>")
+          const sanitizedKey = sanitizePropertyKey(propKey);
+          if (sanitizedKey !== propKey) {
+            console.log(`  Sanitizing property key: "${propKey}" → "${sanitizedKey}"`);
+          }
+
+          fixedProps[sanitizedKey] = fixTypes(propValue);
         }
+
         result[key] = fixedProps;
         continue;
       }
@@ -181,6 +204,16 @@ function fixTypes(obj: unknown): unknown {
     }
 
     return result;
+  }
+
+  if (typeof obj === 'string') {
+    // Strip HTML tags
+    return obj
+      .replace(/<br\s*\/?>|<\/?p>/gi, '\n') // Turn <br> into newlines for better readability
+      .replace(/<sup>.*?<\/sup>|<a[^>]*>.*?<\/a>|<span[^>]*>.*?<\/span>/gi, '') // Drop superscripts/links/spans entirely
+      .replace(/<[^>]*>/g, '') // Remove any remaining tags
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .trim();
   }
 
   return obj;

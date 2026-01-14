@@ -13,7 +13,7 @@ export interface paths {
     };
     /**
      * List Files
-     * @description This resource retrieves the list of available files. For each file, the response will link to the following resources: <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partners this file is shared with.</li> </ul>
+     * @description This resource retrieves the list of available files. For each file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partners this file is shared with.
      */
     get: {
       parameters: {
@@ -21,7 +21,7 @@ export interface paths {
           /** @description Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host. */
           filter: components['parameters']['FilterOptional'];
           /** @description Takes the file type number. */
-          'fileType<sup><a href="#additional">1</a></sup>': components['parameters']['FileTypeOptional'];
+          fileType: components['parameters']['FileTypeOptional'];
           /** @description Filters by whether a file is transferable */
           transferable: components['parameters']['Transferable'];
         };
@@ -68,8 +68,7 @@ export interface paths {
     };
     /**
      * View/Download A File
-     * @description This resource allows the client to view or download a file. <p><strong>Note</strong>: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the <strong>Range</strong> request header, or the <strong>offset</strong> and <strong>size</strong> request parameters. If both are used, the request header will take precedence.</p>
-     *     <p>To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources: <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View a list of the partnerships through which the file is shared, if applicable.</li> <li><strong>initiateFileTransfer</strong>: Request to send this file to a specified machine.</li> <li><strong>wdtCapableMachines</strong>: View a list of machines in the org which can receive this file.</li> </ul> </p>
+     * @description This resource allows the client to view or download a file. Note: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the Range request header, or the offset and size request parameters. If both are used, the request header will take precedence. To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources: owningOrganization: View the org that owns the file. partnerships: View a list of the partnerships through which the file is shared, if applicable. initiateFileTransfer: Request to send this file to a specified machine. wdtCapableMachines: View a list of machines in the org which can receive this file.
      */
     get: {
       parameters: {
@@ -102,7 +101,7 @@ export interface paths {
     };
     /**
      * Upload/Update A File
-     * @description This resource allows the client to upload or update a file. The client must <a href="/dev-docs/files#/organizations/{orgId}/files/post" target="_blank">create a file ID</a> before uploading a file.
+     * @description This resource allows the client to upload or update a file. The client must before uploading a file.
      */
     put: {
       parameters: {
@@ -183,19 +182,19 @@ export interface paths {
     };
     /**
      * List an Org's Files
-     * @description View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: <p> <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partnerships through which the file is shared, if applicable.</li> <li><strong>initiateFileTransfer</strong>: Submit a transfer request for the specified file.</li> <li><strong>machinesEligibleToReceiveFile</strong>: List of WDT-capable machines that the specified file can be sent to.</li> <li><strong>sendFileToMachine</strong>: The same as "initiateFileTransfer."</li> <li><strong>wdtCapableMachines</strong>: The same as "machinesEligibleToReceiveFile."</li> </ul> </p>
+     * @description View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partnerships through which the file is shared, if applicable. initiateFileTransfer: Submit a transfer request for the specified file. machinesEligibleToReceiveFile: List of WDT-capable machines that the specified file can be sent to. sendFileToMachine: The same as "initiateFileTransfer." wdtCapableMachines: The same as "machinesEligibleToReceiveFile."
      */
     get: {
       parameters: {
         query?: {
           /** @description Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host. */
           filter?: components['parameters']['Filter'];
-          /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard. */
+          /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard. */
           startDate?: components['parameters']['StartDate'];
-          /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard */
+          /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard */
           endDate?: components['parameters']['EndDate'];
           /** @description Takes a number that identifies the file type. */
-          'fileType<sup><a href="#additional">1</a></sup>'?: components['parameters']['FileType'];
+          fileType?: components['parameters']['FileType'];
           /** @description Allows client to filter files according to whether they have been archived. TRUE returns only archived files. */
           archived?: components['parameters']['Archived'];
           /** @description Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE. */
@@ -240,7 +239,7 @@ export interface paths {
     put?: never;
     /**
      * Create A File ID
-     * @description The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to <a href="/dev-docs/files#/files/{fileId}/put" target="_blank">upload the file.</a>
+     * @description The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to
      */
     post: {
       parameters: {
@@ -274,16 +273,7 @@ export interface paths {
             };
           };
         };
-        /**
-         * @description Invalid file name. File name must be 5-69 characters:
-         *     + alphanumeric
-         *     + .
-         *     + ,
-         *     + \-
-         *     + _
-         *
-         *     Also when invalid file type.
-         */
+        /** @description Invalid file name. File name must be 5-69 characters: + alphanumeric + . + , + \- + _ Also when invalid file type. */
         400: {
           headers: {
             [name: string]: unknown;
@@ -348,19 +338,19 @@ export interface components {
        * @description The type of the file.
        * @example SETUP
        */
-      "type<sup><a href='#additional-type'>1</a></sup>"?: string;
+      type?: string;
       /**
        * Format: date-time
        * @description Time at which the file was created.
        * @example 2015-02-03T10:42:24.282Z
        */
-      "createdTime<sup><a href='#additional-date-time'>2</a></sup>"?: string;
+      createdTime?: string;
       /**
        * Format: date-time
        * @description Time at which the file was last modified.
        * @example 2015-02-03T10:42:24.282Z
        */
-      "modifiedTime<sup><a href='#additional-date-time'>2</a></sup>"?: string;
+      modifiedTime?: string;
       /**
        * Format: int64
        * @description Size of the file.
@@ -401,7 +391,7 @@ export interface components {
        * @description Indicates whether the file is new.
        * @example false
        */
-      'new<sup>DEPRECATED</sup>'?: boolean;
+      new?: boolean;
       /**
        * @description Indicates the plugin type.
        * @example IntegraVersaPlugin
@@ -428,19 +418,19 @@ export interface components {
        * @description The type of the file.
        * @example SETUP
        */
-      "type<sup><a href='#additional-type'>1</a></sup>"?: string;
+      type?: string;
       /**
        * Format: date-time
        * @description Time at which the file was created.
        * @example 2015-02-03T10:42:24.282Z
        */
-      "createdTime<sup><a href='#additional-date-time'>2</a></sup>"?: string;
+      createdTime?: string;
       /**
        * Format: date-time
        * @description Time at which the file was last modified.
        * @example 2015-02-03T10:42:24.282Z
        */
-      "modifiedTime<sup><a href='#additional-date-time'>2</a></sup>"?: string;
+      modifiedTime?: string;
       /**
        * Format: int64
        * @description Size of the file.
@@ -481,7 +471,7 @@ export interface components {
        * @description Indicates whether the file is new.
        * @example false
        */
-      'new<sup>DEPRECATED</sup>'?: boolean;
+      new?: boolean;
     };
     PostFiles: {
       /**
@@ -491,7 +481,7 @@ export interface components {
       201?: unknown;
       /**
        * @description File names must be between 5 and 69 characters and may only contain international alphanumeric characters, spaces, and any of the following: ".,-_". Specifically, it must match the following Unicode regular expression: ^[\p{N}\p{L}.,_ \-]+$
-       * @example <ul> <li>Must be between 5 and 69 characters</li> <li>Should not contain invalid characters.</li> </ul>
+       * @example Must be between 5 and 69 characters Should not contain invalid characters.
        */
       400?: unknown;
     };
@@ -503,15 +493,15 @@ export interface components {
       204?: unknown;
       /**
        * @description File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: ".,-_". Specifically, it must match the following Unicode regular expression: ^[\p{N}\p{L}.,_ \-]+$
-       * @example <ul> <li>Must be between 1 and 45 characters</li> <li>Should not contain invalid characters.</li> </ul>
+       * @example Must be between 1 and 45 characters Should not contain invalid characters.
        */
       400?: unknown;
     };
-    /** @description Stub schema for EditableFileDetails (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for EditableFileDetails. Original definition missing from Deere spec. */
     EditableFileDetails: {
       [key: string]: unknown;
     };
-    /** @description Stub schema for PostableFileDetails (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for PostableFileDetails. Original definition missing from Deere spec. */
     PostableFileDetails: {
       [key: string]: unknown;
     };
@@ -575,9 +565,9 @@ export interface components {
     Size: number;
     /** @description File Id. */
     FileId: string;
-    /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard. */
+    /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard. */
     StartDate: string;
-    /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard */
+    /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard */
     EndDate: Record<string, never>;
     /** @description Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE. */
     Status: string;

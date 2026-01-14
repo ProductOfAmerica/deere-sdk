@@ -20,7 +20,7 @@ export interface paths {
         query?: {
           /** @description Include operator metadata in the response. */
           embed?: components['parameters']['embed'];
-          /** @description Filter operators by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark> */
+          /** @description Filter operators by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
           recordFilter?: components['parameters']['recordFilter'];
           /** @description Start of the range for timestamp filtering */
           lastModifiedTime?: components['parameters']['lastModifiedTime'];
@@ -304,13 +304,7 @@ export interface components {
        */
       name?: string;
     };
-    ContentType: {
-      /**
-       * @description Fixed from invalid string value: application/vnd.deere.axiom.v3+json
-       * @enum {string}
-       */
-      'Content-Type'?: 'application/vnd.deere.axiom.v3+json';
-    };
+    ContentType: unknown;
     PutOperator: {
       /**
        * @description Operator Name
@@ -346,7 +340,7 @@ export interface components {
     id: string;
     /** @description Include operator metadata in the response. */
     embed: string;
-    /** @description Filter operators by status. Possible values <mark>ACTIVE</mark> or <mark>ALL</mark> or <mark>ARCHIVED</mark> Default - <mark>ACTIVE</mark> */
+    /** @description Filter operators by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
     recordFilter: string;
     /** @description Start of the range for timestamp filtering */
     lastModifiedTime: Record<string, never>;

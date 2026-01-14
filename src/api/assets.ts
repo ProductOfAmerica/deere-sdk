@@ -123,7 +123,7 @@ export class AssetsApi {
 
   /**
    * Create new asset location
-   * @description This endpoint will create a new Asset Location.<br/><br/><b>We provide <a href="#markdown">Markdown support</a> for measurementData name.</b><br/><br/> <b>Please Note:</b> Only <i>links</i> are supported for a measurementData name.<br/><br/>Additionally, Asset Locations do not honor fractional seconds in their <mark>timestamps</mark>. So <mark>2019-01-01T12:34:56.900Z</mark> and <mark>2019-01-01T12:34:56Z</mark> are considered equivalent.
+   * @description This endpoint will create a new Asset Location. We provide for measurementData name. Please Note: Only links are supported for a measurementData name. Additionally, Asset Locations do not honor fractional seconds in their timestamps. So 2019-01-01T12:34:56.900Z and 2019-01-01T12:34:56Z are considered equivalent.
    * @generated from POST /assets/{assetId}/locations
    */
   async createLocations(

@@ -24,7 +24,7 @@ paths:
   /organizations/{orgId}/boundaries:
     get:
       summary: "View Boundaries in an Org"
-      description: "View boundaries in an organization. <ul> <li><b>fields</b>: View the field associated with these boundaries.</li> <li><b>owningOrganizations</b>: View the organization that owns the field.</li> </ul>"
+      description: "View boundaries in an organization. fields: View the field associated with these boundaries. owningOrganizations: View the organization that owns the field."
       parameters:
         - $ref: "#/components/parameters/OrgId"
         - $ref: "#/components/parameters/Embed"
@@ -117,7 +117,7 @@ paths:
   /fieldOperations/{operationId}/boundary:
     get:
       summary: "Generate a Boundary from a FieldOperation"
-      description: "Given a <a href='/dev-docs/field-operations#overviews' target='_blank'>field operation</a>, this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before <a href='/dev-docs/boundaries#/organizations/{orgId}/fields/{fieldId}/boundaries/post' target='_blank'>POST'ing the generated boundary</a> back into Operations Center. <p>There are two cases where this API will return an HTTP 400 - Bad Request:</p> <ul> <li><b>If the field already has an active boundary.</b> In this case, please use the existing boundary - it is likely more accurate than a generated boundary.</li> <li><b>If the field has been merged.</b> In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.</li> </ul>"
+      description: "Given a , this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before back into Operations Center. There are two cases where this API will return an HTTP 400 - Bad Request: If the field already has an active boundary. In this case, please use the existing boundary - it is likely more accurate than a generated boundary. If the field has been merged. In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary."
       security:
         - OAuth2:
             - "ag2"
@@ -199,6 +199,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "int64"
@@ -207,13 +208,15 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "int64"
         example: 654321
     Accept-UOM-System:
       name: "Accept-UOM-System"
-      description: "Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system."
+      description: "Takes METRIC and ENGLISH. Converts measurements to the chosen system."
+      x-required-boolean: false
       in: "METRIC"
       schema:
         type: "string"
@@ -222,6 +225,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization ID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "int64"
@@ -230,6 +234,7 @@ components:
       name: "embed"
       in: "query"
       description: "Populates response with data lineage information"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "showRecordMetadata"
@@ -245,6 +250,7 @@ components:
       name: "id"
       in: "path"
       description: "Field ID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -253,6 +259,7 @@ components:
       name: "fieldId"
       in: "path"
       description: "Field GUID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -261,6 +268,7 @@ components:
       name: "fieldId"
       in: "path"
       description: "Field Id"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -269,6 +277,7 @@ components:
       name: "boundaryId"
       in: "path"
       description: "Boundary Id"
+      x-required-boolean: true
       schema:
         example: "e7ab3a06-06ca-4d34-8cb7-6fd2a3640a3d"
         type: "string"
@@ -276,7 +285,8 @@ components:
     AcceptUOMSystem:
       name: "Accept-UOM-System"
       in: "header"
-      description: "Takes <b>METRIC</b> and <b>ENGLISH</b>. Converts measurements to the chosen system."
+      description: "Takes METRIC and ENGLISH. Converts measurements to the chosen system."
+      x-required-boolean: false
       schema:
         type: "string"
         enum:
@@ -287,6 +297,7 @@ components:
       name: "activeOnly"
       in: "query"
       description: "Allows filtering based on active boundaries"
+      x-required-boolean: false
       schema:
         type: "boolean"
         default: false
@@ -297,12 +308,14 @@ components:
           schema:
             $ref: "#/components/schemas/Boundary"
       description: "Specifies Boundary details"
+      x-required-boolean: true
     PutRequest:
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/PutBoundary"
       description: "The desired Boundary to be updated"
+      x-required-boolean: true
   responses:
     BoundariesResponse:
       description: "A collection of boundaries"
@@ -324,7 +337,7 @@ components:
                   $ref: "#/components/schemas/BoundaryOrgId"
           examples:
             No Header:
-              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -435,7 +448,7 @@ components:
                   $ref: "#/components/schemas/BoundaryOrgId2"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "Boundary"
                 name: "Unique_Boundary_name"
@@ -533,7 +546,7 @@ components:
                   $ref: "#/components/schemas/PostBoundaryGet"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "Boundary"
                 name: "Unique_Boundary_name"
@@ -636,7 +649,7 @@ components:
                   $ref: "#/components/schemas/PostBoundary"
           examples:
             Headers:
-              description: "201 Created<br/> Location: https://sandboxapi.deere.com/platform/organizations/123456/fields/109b3c20-f33a-4c96-9a2c-613def198e0c/boundaries/96d79d34-89be-4f2b-b041-6b0181bc65db"
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/123456/fields/109b3c20-f33a-4c96-9a2c-613def198e0c/boundaries/96d79d34-89be-4f2b-b041-6b0181bc65db"
     Create:
       description: "Created, with a Location header containing the URI of the newly created resource"
       content:
@@ -707,7 +720,7 @@ components:
         multipolygons:
           description: "Boundary shape and exact location."
           example: "See sample response below"
-        type<sup><a href='#additional'>1</a></sup>:
+        type:
           description: "Boundary type"
           type: "string"
           example: "exterior"
@@ -763,7 +776,7 @@ components:
         multipolygons:
           description: "Boundary shape and exact location."
           example: "See sample response below"
-        type<sup><a href='#additional'>1</a></sup>:
+        type:
           description: "Boundary type"
           type: "string"
           example: "exterior"
@@ -846,7 +859,7 @@ components:
           type: "boolean"
           example: "false"
           description: "Indicates whether the contained area is irrigated."
-        type<sup><a href='#additional'>1</a></sup>:
+        type:
           description: "Boundary type"
           type: "string"
           example: "exterior"
@@ -922,11 +935,13 @@ components:
           description: "Organizations Link."
     Boundary:
       type: "object"
-      description: "Stub schema for Boundary (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for Boundary. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     Errors:
       type: "object"
       description: "Error response schema for Errors (auto-generated)"
+      x-generated: true
       properties:
         message:
           type: "string"

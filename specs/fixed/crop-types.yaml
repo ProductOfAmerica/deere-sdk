@@ -101,6 +101,7 @@ components:
       name: "recordFilter"
       in: "query"
       description: "Filter results based on status"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "active, all"
@@ -108,6 +109,7 @@ components:
       in: "header"
       name: "x-deere-signature"
       description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "9r8392615e4b4e1c12458026f47109bb"
@@ -115,6 +117,7 @@ components:
       in: "header"
       name: "x-deere-signature"
       description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time."
+      x-required-boolean: false
       schema:
         type: "string"
         format: "uuid"
@@ -123,6 +126,7 @@ components:
       in: "path"
       name: "name"
       description: "This is the crop type name"
+      x-required-boolean: true
       schema:
         type: "string"
         example: "ENERGY_CANE"
@@ -130,6 +134,7 @@ components:
       in: "path"
       name: "id"
       description: "This is the crop type Id"
+      x-required-boolean: true
       schema:
         type: "string"
         example: 173
@@ -137,6 +142,7 @@ components:
       in: "path"
       name: "organizationId"
       description: "This is the organization Id"
+      x-required-boolean: true
       schema:
         type: "string"
         example: 123456
@@ -158,13 +164,13 @@ components:
                   $ref: "#/components/schemas/CropType"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
-                    uri: " https://sandboxapi.deere.com/platform/cropTypes"
+                    uri: "https://sandboxapi.deere.com/platform/cropTypes"
                   - rel: "nextPage"
-                    uri: " https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10"
+                    uri: "https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10"
                 total: 216
                 values:
                   - "@type": "CropType"
@@ -194,7 +200,7 @@ components:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: " https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
+                        uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
     CropTypeNameResponse:
       description: "A collection of crop types"
       content:
@@ -212,7 +218,7 @@ components:
                   $ref: "#/components/schemas/CropType2"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
               value:
                 "@type": "CropType"
                 name: "CORN_WET"
@@ -259,7 +265,7 @@ components:
                   $ref: "#/components/schemas/CropType3"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
               value:
                 "@type": "CropType"
                 name: "CORN_WET"
@@ -306,13 +312,13 @@ components:
                   $ref: "#/components/schemas/CropType4"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
-                    uri: " https://sandboxapi.deere.com/platform/cropTypes"
+                    uri: "https://sandboxapi.deere.com/platform/cropTypes"
                   - rel: "nextPage"
-                    uri: " https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10"
+                    uri: "https://sandboxapi.deere.com/platform/cropTypes;start=10;count=10"
                 total: 216
                 values:
                   - "@type": "CropType"
@@ -342,7 +348,7 @@ components:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: " https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
+                        uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
     CropTypeMethodNotAllowed:
       description: "The requested method is not allowed"
     CropTypeNotFound:

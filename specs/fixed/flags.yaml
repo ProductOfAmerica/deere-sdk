@@ -1,58 +1,6 @@
 openapi: "3.0.0"
 info:
-  description: "This set of endpoints is dealing with flags, which are pointers to a geographical location in a field or around a field which are marked for attention or treatment in a specific way.
-
-    Flag resource is uniquely identified by its id, the endpoint /flags/{id} will be used to work with individual flag instances.
-
-
-    The following flag types are supported by this API:
-
-    - FLAG - Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data which can be exported to machine displays. Flags created on machine displays are represented as FLAG-type flags.
-
-    - SCOUT - Scouting note which is a geo-referenced observation of certain facts within a field or outside of it. Scouting notes are essentially documentation, just as Gen4 log data is documentation. It is the what happened, and what was observed.
-
-
-    Flags do support three geometry types encoded in GeoJson format (all other geometry types will be rejected by the API):
-
-
-    - Point
-
-    - LineString
-
-    - Polygon
-
-
-    Code of conduct for the API:
-
-    1. All flags are equal and can be routed from any app to all apps supporting flags API.
-
-    2. Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data in its own right, and not intended to model any more concrete thing than a digital marker.
-
-    3. Because of 1) and 2), flags are NOT intended to be a mechanism for easily adding new entity types into our system.
-
-    4. Flag categories are meaningless to the system.
-
-    5. The system shall not do any automatic decisions based on flag data besides considering:
-
-    \  - flag type (FLAG vs SCOUT)
-
-    \  - geometry type (e.g., points only).
-
-    \  - creation date/last modification date
-
-    \  - global vs field-related
-
-    6. User makes decision what flag categories to show in each app based on manually filtering flag categories.
-
-    7. Clients SHALL not rely on the certain metadata key-values are present in the flags object or not.
-
-    8. Clients SHOULD not display any metadata they cannot interpret.
-
-    9. Clients SHALL not delete, update any metadata they cannot interpret.
-
-    10. Metadata array is updated/patched as a whole. I.e., if client needs to update/delete a certain key, all other key-values SHALL be contained unchanged in the PUT or PATCH request.
-
-    11. Clients SHALL ignore geometries they cannot interpret/process/display or use request parameters to exclude those.\n"
+  description: "This set of endpoints is dealing with flags, which are pointers to a geographical location in a field or around a field which are marked for attention or treatment in a specific way. Flag resource is uniquely identified by its id, the endpoint /flags/{id} will be used to work with individual flag instances. The following flag types are supported by this API: - FLAG - Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data which can be exported to machine displays. Flags created on machine displays are represented as FLAG-type flags. - SCOUT - Scouting note which is a geo-referenced observation of certain facts within a field or outside of it. Scouting notes are essentially documentation, just as Gen4 log data is documentation. It is the what happened, and what was observed. Flags do support three geometry types encoded in GeoJson format (all other geometry types will be rejected by the API): - Point - LineString - Polygon Code of conduct for the API: 1. All flags are equal and can be routed from any app to all apps supporting flags API. 2. Flags are digital markers the user places at a location marking it for (future) attention or treatment in a specific way. It is \"setup\" master data in its own right, and not intended to model any more concrete thing than a digital marker. 3. Because of 1) and 2), flags are NOT intended to be a mechanism for easily adding new entity types into our system. 4. Flag categories are meaningless to the system. 5. The system shall not do any automatic decisions based on flag data besides considering: - flag type (FLAG vs SCOUT) - geometry type (e.g., points only). - creation date/last modification date - global vs field-related 6. User makes decision what flag categories to show in each app based on manually filtering flag categories. 7. Clients SHALL not rely on the certain metadata key-values are present in the flags object or not. 8. Clients SHOULD not display any metadata they cannot interpret. 9. Clients SHALL not delete, update any metadata they cannot interpret. 10. Metadata array is updated/patched as a whole. I.e., if client needs to update/delete a certain key, all other key-values SHALL be contained unchanged in the PUT or PATCH request. 11. Clients SHALL ignore geometries they cannot interpret/process/display or use request parameters to exclude those."
   version: "1.0.0"
   contact:
     name: "Oleg Rostanin"
@@ -141,9 +89,7 @@ paths:
                 Headers:
                   description: "204 No Content"
         "400":
-          description: "- No contributionDefinition link specified
-
-            - No category link specified\n"
+          description: "- No contributionDefinition link specified - No category link specified"
         "403":
           description: "Forbidden Access"
         "404":
@@ -175,9 +121,7 @@ paths:
                 Headers:
                   description: "204 No Content"
         "403":
-          description: "Forbidden.
-
-            - The user has no permission to delete the flag.\n"
+          description: "Forbidden. - The user has no permission to delete the flag."
         "404":
           description: "Entity Not found. Given flag id does not exist or given orgId does not present."
   /organizations/{orgId}/flags:
@@ -193,7 +137,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/OrgId3"
       requestBody:
-        description: "The flag data to add. The new uuid will be assigned as ID of the newly created flag.\n"
+        description: "The flag data to add. The new uuid will be assigned as ID of the newly created flag."
+        x-required-boolean: true
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
@@ -221,15 +166,11 @@ paths:
         "200":
           $ref: "#/components/responses/PostFlags"
         "400":
-          description: "- Not all data specified\n"
+          description: "- Not all data specified"
         "403":
           description: "Access forbidden. The user has no access to the org or is not allowed to create flags in the org."
         "404":
-          description: "Entity Not found.
-
-            - No contributon definition ID is found
-
-            - Field link cannot be resolved (field not found)\n"
+          description: "Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found)"
     get:
       summary: "View flags list"
       parameters:
@@ -301,6 +242,7 @@ components:
       name: "fieldId"
       in: "path"
       description: "Fields guid of the field."
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -310,6 +252,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Org Id to query for Flag"
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
@@ -318,6 +261,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization Id"
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
@@ -326,6 +270,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization Id where the Flag belongs to"
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
@@ -334,6 +279,7 @@ components:
       name: "flagId"
       in: "path"
       description: "flagId to query for flag"
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
@@ -441,7 +387,7 @@ components:
                   $ref: "#/components/schemas/ValuesFlagId"
           examples:
             No Header:
-              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b539261-5e4b-4e1c-9201-3026f47109bb"
               value:
                 "@type": "Flag"
                 geometry: "{\"type\": \"Point\", \"coordinates\": [-93.14959274063109, 41.66881548411553] }"
@@ -476,7 +422,7 @@ components:
                   $ref: "#/components/schemas/ValuesFlagId"
           examples:
             No Header:
-              description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 links:
                   - rel: "self"
@@ -516,7 +462,7 @@ components:
                   $ref: "#/components/schemas/ValuesFlagId"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 links:
                   - rel: "self"
@@ -553,7 +499,7 @@ components:
                   $ref: "#/components/schemas/LinkFlagIdPost"
           examples:
             Headers:
-              description: "201 Created<br/>Location: https://sandboxapi.deere.com/platform/flags/3e4f37a4-5667-49ae-9f6b-5a13e446dee6"
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/flags/3e4f37a4-5667-49ae-9f6b-5a13e446dee6"
   schemas:
     LinkFlagId:
       properties:
@@ -583,6 +529,7 @@ components:
         flagCategory:
           example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/flagCategories/CATEGORYID"
           description: "Flag Category Link."
+          x-required-boolean: true
         owningOrganization:
           example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID"
           description: "Organization Link."
@@ -590,12 +537,7 @@ components:
           example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELDS_ID"
           description: "Field Link."
     ContentType:
-      properties:
-        Content-Type:
-          type: "string"
-          enum:
-            - "application/vnd.deere.axiom.v3+json"
-          description: "Fixed from invalid string value: application/vnd.deere.axiom.v3+json"
+      properties: {}
     ValuesFlagId:
       properties:
         geometry:
@@ -633,6 +575,7 @@ components:
           description: "Currently only three geometries types (Point, LineString and Polygon) are supported."
           type: "object"
           example: "See sample request below"
+          x-required-boolean: true
         notes:
           type: "string"
           description: "Free text notes."

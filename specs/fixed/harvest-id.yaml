@@ -35,7 +35,7 @@ paths:
       security:
         - OAuth2:
             - "files"
-            - " ag2"
+            - "ag2"
       responses:
         "200":
           $ref: "#/components/responses/HIDCottonModules"
@@ -58,7 +58,7 @@ paths:
       security:
         - OAuth2:
             - "files"
-            - " ag2"
+            - "ag2"
       responses:
         "200":
           $ref: "#/components/responses/SingleHIDCottonModule"
@@ -71,6 +71,7 @@ components:
     AcceptJSON:
       name: "Accept"
       in: "header"
+      x-required-boolean: true
       schema:
         type: "string"
         enum:
@@ -79,6 +80,7 @@ components:
       name: "moduleSerialNumber"
       in: "path"
       description: "Module Serial Number"
+      x-required-boolean: true
       schema:
         type: "string"
         example: 14404565493
@@ -86,6 +88,7 @@ components:
       name: "orgId"
       in: "path"
       description: "Organization ID"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "int64"
@@ -93,7 +96,8 @@ components:
     Embed:
       name: "embed"
       in: "query"
-      description: "Related entities to embed. Possible values include <mark>clients</mark>, <mark>farms</mark> and <mark>field</mark>. (<b>Note</b>: embedding of <mark>clients</mark> and <mark>farms</mark> requires <mark>field</mark> to be embedded as well.)"
+      description: "Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.)"
+      x-required-boolean: false
       schema:
         type: "string"
         example: "clients,farms,field"
@@ -113,6 +117,7 @@ components:
       name: "Accept-Yield-Preference"
       in: "VOLUME"
       description: "Desired yield representation (unit) type. Takes VOLUME or MASS."
+      x-required-boolean: false
       schema:
         type: "string"
         example: "MASS"
@@ -171,7 +176,7 @@ components:
                   $ref: "#/components/schemas/HIDCottonModule"
           examples:
             No Header:
-              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -246,7 +251,7 @@ components:
                   $ref: "#/components/schemas/HIDCottonModule"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b539261-5e4b-4e1c-9201-3026f47109bb"
               value:
                 links:
                   - "@type": "Link"

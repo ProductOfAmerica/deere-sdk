@@ -11,7 +11,7 @@ paths:
   /partnerships:
     get:
       summary: "List Partners"
-      description: "This request allows the client to view a list of partners. Each data point links to the following: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>"
+      description: "This request allows the client to view a list of partners. Each data point links to the following: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request."
       tags:
         - "Partnership Endpoints"
       security:
@@ -28,7 +28,7 @@ paths:
                 $ref: "#/components/schemas/Partnerships"
               examples:
                 No Header:
-                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 3b6402615e4b4e1c92013026f47109bb"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b6402615e4b4e1c92013026f47109bb"
                   value:
                     links:
                       - rel: "self"
@@ -63,7 +63,7 @@ paths:
           $ref: "#/components/responses/Forbidden"
     post:
       summary: "Request a Partnership"
-      description: "This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the <a href=\"/dev-docs/organizations\" target=\"_blank\">/organizations</a> endpoint to discover available organizations for a user."
+      description: "This will send an email request to create a partnership from an organization identified in the request. To discover an organization ID to send the request from, you must first query the endpoint to discover available organizations for a user."
       tags:
         - "Partnership Endpoints"
       security:
@@ -93,7 +93,7 @@ paths:
                     format: "int32"
               examples:
                 Headers:
-                  description: "201 Created<br/> <br/> Date: Mon, 17 Mar 2014 15:56:13 GMT<br/> Server: Apache-Coyote/1.1<br/> X-Deere-Handling-Server: ldxtc2<br/> X-Deere-Elapsed-Ms: 2300<br/> Content-Type: text/plain<br/> Location: https://sandboxapi.deere.com/platform/partnerships/6076f729-d3b0-4297-bfb4-8f88b99420ac<br/> Connection: Keep-Alive<br/> Keep-Alive: timeout=5, max=99<br/> Content-Length: 0"
+                  description: "201 Created Date: Mon, 17 Mar 2014 15:56:13 GMT Server: Apache-Coyote/1.1 X-Deere-Handling-Server: ldxtc2 X-Deere-Elapsed-Ms: 2300 Content-Type: text/plain Location: https://sandboxapi.deere.com/platform/partnerships/6076f729-d3b0-4297-bfb4-8f88b99420ac Connection: Keep-Alive Keep-Alive: timeout=5, max=99 Content-Length: 0"
         "400":
           $ref: "#/components/responses/BadCreateRequests"
         "403":
@@ -101,7 +101,7 @@ paths:
   /partnerships/{token}:
     get:
       summary: "Get Partnership Details"
-      description: "This request allows the client to view partnership details. The response links to the following resources: <ul><li><b>fromPartnership:</b> View the organization that initiated the partnership.</li> <li><b>toPartnership:</b> View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned.</li> <li><b>delete:</b> Use this link to delete the partnership.</li> <li><b>permissions:</b> View the permissions assigned within the partnership.</li> <li><b>contactInvitation:</b> The ID specific to the partnership request.</li></ul>"
+      description: "This request allows the client to view partnership details. The response links to the following resources: fromPartnership: View the organization that initiated the partnership. toPartnership: View the organization that the partner request was sent to. If the partnership has not been accepted, only the invited users email address will be returned. delete: Use this link to delete the partnership. permissions: View the permissions assigned within the partnership. contactInvitation: The ID specific to the partnership request."
       security:
         - OAuth2:
             - "org1"
@@ -118,7 +118,7 @@ paths:
                 $ref: "#/components/schemas/PartnershipsId"
               examples:
                 No Header:
-                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -159,7 +159,7 @@ paths:
                     format: "int32"
               examples:
                 Headers:
-                  description: "204 No Content<br/> <br/> Date: Mon, 17 Mar 2014 16:01:32 GMT<br/> Server: Apache-Coyote/1.1<br/> X-Deere-Handling-Server: ldxtc4<br/> X-Deere-Elapsed-Ms: 856<br/> Content-Type: text/plain<br/> Connection: Keep-Alive<br/> Keep-Alive: timeout=5, max=100<br/> Content-Length: 0"
+                  description: "204 No Content Date: Mon, 17 Mar 2014 16:01:32 GMT Server: Apache-Coyote/1.1 X-Deere-Handling-Server: ldxtc4 X-Deere-Elapsed-Ms: 856 Content-Type: text/plain Connection: Keep-Alive Keep-Alive: timeout=5, max=100 Content-Length: 0"
         "403":
           $ref: "#/components/responses/Forbidden"
         "404":
@@ -182,7 +182,7 @@ paths:
                 $ref: "#/components/schemas/Permissions"
               examples:
                 No Header:
-                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -202,7 +202,7 @@ paths:
                         status: "notGiven"
     post:
       summary: "Request/Assign Permissions"
-      description: "This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type.<sup><a href=\"#additional-type\">2</a></sup>"
+      description: "This request allows the client to update a partner permission or request a permission from a partner. To enable file sharing within this partnership, assign or request the relevant permission type."
       parameters:
         - $ref: "#/components/parameters/PartnershipId"
       security:
@@ -213,7 +213,7 @@ paths:
           application/vnd.deere.axiom.v3+json:
             examples:
               No Header:
-                description: "Accept: application/vnd.deere.axiom.v3+json<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+                description: "Accept: application/vnd.deere.axiom.v3+json Content-Type: application/vnd.deere.axiom.v3+json"
                 value:
                   permissions:
                     - type: "viewDetailsAndMapLocation"
@@ -241,6 +241,7 @@ components:
       name: "token"
       in: "path"
       description: "Token Id"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -294,7 +295,7 @@ components:
           type: "string"
           description: "A new x-deere-signature response header will be included if the response has changed since last api call."
           example: "3b6402615e4b4e1c92013026f47109bb"
-        status<sup><a href="#additional-status">1</a></sup>:
+        status:
           type: "string"
           example: "REJECTED"
           description: "View the status of the partnership"
@@ -331,7 +332,7 @@ components:
             $ref: "#/components/schemas/PartnershipId"
     PartnershipId:
       properties:
-        status<sup><a href="#additional-status">1</a></sup>:
+        status:
           type: "string"
           example: "PENDING"
           description: "View the status of the partnership"
@@ -359,7 +360,7 @@ components:
           description: "Permissions Link."
     PermissionValue:
       properties:
-        type<sup><a href="#additional-type">2</a></sup>:
+        type:
           type: "string"
           example: "prescription Files"
           description: "The type of permission."
@@ -377,7 +378,7 @@ components:
             $ref: "#/components/schemas/PermissionPostValue"
     PermissionPostValue:
       properties:
-        type<sup><a href="#additional-type">2</a></sup>:
+        type:
           type: "string"
           example: "viewDetailsAndMapLocation"
           description: "The type of permission."

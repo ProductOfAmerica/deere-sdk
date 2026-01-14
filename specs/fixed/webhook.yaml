@@ -23,7 +23,7 @@ paths:
   /eventSubscriptions:
     post:
       summary: "Create an Event Subscription"
-      description: "This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The created subscription.</li> </ul>"
+      description: "This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- user: The subscribed user provided by the current authorization context. self: The created subscription."
       operationId: "createSubscription"
       parameters:
         - $ref: "#/components/parameters/EventTypeId"
@@ -78,7 +78,7 @@ paths:
   /eventSubscriptions/{id}:
     get:
       summary: "Get an Event Subscription"
-      description: "This resource will get a single event subscription by id. The response will include links to: <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The subscription itself.</li> </ul>"
+      description: "This resource will get a single event subscription by id. The response will include links to: user: The subscribed user provided by the current authorization context. self: The subscription itself."
       operationId: "getSubscriptionById"
       parameters:
         - $ref: "#/components/parameters/Id"
@@ -112,6 +112,7 @@ components:
       in: "path"
       name: "id"
       description: "Event Subscription ID as a GUID."
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
@@ -119,16 +120,17 @@ components:
     EventTypeId:
       in: "request"
       name: "eventTypeId"
-      description: "See <a href=\"#events\" target=\"_blank\">Event Types</a> for valid event type names."
+      description: "See for valid event type names."
+      x-required-boolean: true
       schema:
         type: "string"
         default: "N/A"
         example: "heartbeat"
     Filters:
       in: "request"
-      name: "filters<sup><a href='#filters'>1</a></sup>"
+      name: "filters"
       description: "List of MetadataFilters to filter events on metadata."
-      required: "Depends on eventType<sup><a href='#event-type'>2</a></sup>"
+      required: "Depends on eventType"
       schema:
         type: "array"
         default: "N/A"
@@ -137,14 +139,16 @@ components:
       in: "request"
       name: "targetEndpoint"
       description: "The postback endpoint that receives the event(s)."
+      x-required-boolean: true
       schema:
         type: "---"
         default: "N/A"
         example: "See sample request below"
     Status:
       in: "request"
-      name: "status<sup><a href='#status'>4</a></sup>"
+      name: "status"
       description: "The status of the event subscription. Only a status of Active can be specified on subscription creation."
+      x-required-boolean: false
       schema:
         type: "string"
         default: "Active"
@@ -153,6 +157,7 @@ components:
       in: "request"
       name: "displayName"
       description: "Human-readable name to easily identify the event subscription."
+      x-required-boolean: false
       schema:
         type: "string"
         default: "N/A"
@@ -161,6 +166,7 @@ components:
       in: "request"
       name: "token"
       description: "A string that was sent with each delivery to validate the sender."
+      x-required-boolean: false
       schema:
         type: "string"
         default: "N/A"
@@ -169,15 +175,18 @@ components:
       name: "Authorization"
       in: "header"
       description: "If set via the eventSubscriptionDelivery endpoint, we will include an Authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
+      x-required-boolean: false
       schema:
         $ref: "#/components/schemas/AuthorizationHeader"
   requestBodies:
     SubscriptionRequest:
+      x-required-boolean: true
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/SubscriptionRequestContent"
     SubscriptionUpdateRequest:
+      x-required-boolean: true
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
@@ -206,11 +215,13 @@ components:
                   - rel: "self"
                     uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
     DeliveryUpdateRequest:
+      x-required-boolean: true
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/DeliveryContent"
     HTTPTargetEndpointRequest:
+      x-required-boolean: true
       content:
         application/json:
           schema:
@@ -410,17 +421,17 @@ components:
           description: "Event Subscription ID as a GUID."
         eventTypeId:
           type: "string"
-          description: "See <a href=\"#events\" target=\"_blank\">Event Types</a> for valid event names"
+          description: "See for valid event names"
           example: "heartbeat"
-        filters<sup><a href='#filters'>1</a></sup>:
+        filters:
           type: "array"
           description: "List of MetadataFilters to filter events on metadata."
           example: "See the sample response below"
-        targetEndpoint<sup><a href='#target-endpoint'>3</a></sup>:
+        targetEndpoint:
           example: "See the sample response below"
           type: "---"
           description: "The postback endpoint that receives the event(s)."
-        status<sup><a href='#status'>4</a></sup>:
+        status:
           type: "string"
           example: "Active"
           description: "The status of the event subscription."
@@ -451,7 +462,7 @@ components:
         message:
           type: "string"
           description: "An english description of the error"
-          example: "<parameter> was invalid because <reason>"
+          example: "was invalid because"
         code:
           type: "string"
           description: "A string constant representing the type of error"
@@ -542,22 +553,22 @@ components:
       description: "A subscription response"
       type: "object"
       properties:
-        targetEndpoint<sup><a href='#target-endpoint'>3</a></sup>:
+        targetEndpoint:
           type: "---"
           description: "The postback endpoint that receives the event(s)."
-          example: "See the sample request below<br/>Editable: Yes"
-        status<sup><a href='#status'>4</a></sup>:
+          example: "See the sample request below Editable: Yes"
+        status:
           description: "The status of the event subscription."
           type: "string"
-          example: "active<br/>Editable: Yes"
+          example: "active Editable: Yes"
         displayName:
           type: "string"
           description: "Human-readable name to easily identify the event subscription."
-          example: "My Data Subscription<br/>Editable: Yes"
+          example: "My Data Subscription Editable: Yes"
         token:
           type: "string"
           description: "A string that was sent with each delivery to validate the sender."
-          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$'<br/>Editable: Yes"
+          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes"
     HttpsSubscription:
       description: "A HTTPS subscription"
       type: "object"
@@ -611,9 +622,10 @@ components:
       type: "string"
       maxLength: 4096
       nullable: true
-      example: "Bearer <token>"
+      example: "Bearer"
       description: "If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
     HTTPTargetEndpointEventsContent:
       type: "object"
-      description: "Stub schema for HTTPTargetEndpointEventsContent (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for HTTPTargetEndpointEventsContent. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true

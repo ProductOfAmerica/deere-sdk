@@ -1,7 +1,7 @@
 openapi: "3.0.1"
 info:
   title: "Contributed Assets API"
-  description: "A collection of APIs to contribute Assets and Asset data to MyJohnDeere. Learn more at [developer.deere.com](https://developer.deere.com)\n"
+  description: "A collection of APIs to contribute Assets and Asset data to MyJohnDeere. Learn more at [developer.deere.com](https://developer.deere.com)"
   contact:
     name: "Peder Kopperud & Patrick O'Connell"
     email: "OConnellPatrickD@JohnDeere.com"
@@ -74,6 +74,7 @@ paths:
                   assetCategory: "DEVICE"
                   assetType: "SENSOR"
                   assetSubType: "OTHER"
+        x-required-boolean: true
       responses:
         "201":
           $ref: "#/components/responses/CreatePost"
@@ -140,6 +141,7 @@ paths:
                   assetCategory: "DEVICE"
                   assetType: "SENSOR"
                   assetSubType: "OTHER"
+        x-required-boolean: true
       responses:
         "204":
           $ref: "#/components/responses/AssetPut"
@@ -222,7 +224,7 @@ paths:
       security:
         - OAuth2:
             - "eq2"
-      description: "This endpoint will create a new Asset Location.<br/><br/><b>We provide <a href=\"#markdown\">Markdown support</a> for measurementData name.</b><br/><br/> <b>Please Note:</b> Only <i>links</i> are supported for a measurementData name.<br/><br/>Additionally, Asset Locations do not honor fractional seconds in their <mark>timestamps</mark>. So <mark>2019-01-01T12:34:56.900Z</mark> and <mark>2019-01-01T12:34:56Z</mark> are considered equivalent."
+      description: "This endpoint will create a new Asset Location. We provide for measurementData name. Please Note: Only links are supported for a measurementData name. Additionally, Asset Locations do not honor fractional seconds in their timestamps. So 2019-01-01T12:34:56.900Z and 2019-01-01T12:34:56Z are considered equivalent."
       parameters:
         - $ref: "#/components/parameters/AssetId2"
       requestBody:
@@ -246,6 +248,7 @@ paths:
                         name: "a measurement name"
                         value: "V2.3"
                         unit: "u2"
+        x-required-boolean: true
       responses:
         "201":
           $ref: "#/components/responses/201"
@@ -291,7 +294,7 @@ paths:
                       $ref: "#/components/schemas/AssetCatalogGet"
               examples:
                 No Header:
-                  description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5b5392615e4b4e1c92013026f47109bb"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5b5392615e4b4e1c92013026f47109bb"
                   value:
                     links:
                       - rel: "self"
@@ -491,7 +494,7 @@ components:
               type: "string"
               format: "date-time"
             lastKnownLocation:
-              description: "The Asset Location with the most recent <mark>timestamp</mark>. Included if embed is requested."
+              description: "The Asset Location with the most recent timestamp. Included if embed is requested."
               example: "See sample response below"
               type: "object"
     CreatePostLink:
@@ -618,27 +621,33 @@ components:
                 $ref: "#/components/schemas/AssetCatalogItem"
     MeasurementData:
       type: "object"
-      description: "Stub schema for MeasurementData (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for MeasurementData. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     AssetCategory:
       type: "object"
-      description: "Stub schema for AssetCategory (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for AssetCategory. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     AssetType:
       type: "object"
-      description: "Stub schema for AssetType (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for AssetType. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     AssetSubType:
       type: "object"
-      description: "Stub schema for AssetSubType (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for AssetSubType. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     AssetCatalogItem:
       type: "object"
-      description: "Stub schema for AssetCatalogItem (auto-generated - original was missing)"
+      description: "AUTO-GENERATED STUB SCHEMA for AssetCatalogItem. Original definition missing from Deere spec."
+      x-generated: true
       additionalProperties: true
     400Errors:
       type: "object"
       description: "Error response schema for 400Errors (auto-generated)"
+      x-generated: true
       properties:
         message:
           type: "string"
@@ -649,6 +658,7 @@ components:
     GenericErrors:
       type: "object"
       description: "Error response schema for GenericErrors (auto-generated)"
+      x-generated: true
       properties:
         message:
           type: "string"
@@ -663,7 +673,7 @@ components:
         application/vnd.deere.axiom.v3+json:
           examples:
             Headers:
-              description: "201 Created<br/> Location: https://sandboxapi.deere.com/platform/assets/beb295d0-48ec-47f9-9fce-0dd52107c662/locations"
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/assets/beb295d0-48ec-47f9-9fce-0dd52107c662/locations"
     "400":
       description: "The request body was malformed or the given query parameters were invalid. For example, it was missing a required field or supplied a read-only value."
       content:
@@ -709,7 +719,7 @@ components:
                   $ref: "#/components/schemas/AssetCollectionGetValue"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/> x-deere-signature: 5b5392615e4b4e1c92013026f47109bb"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5b5392615e4b4e1c92013026f47109bb"
               value:
                 links:
                   - rel: "self"
@@ -742,7 +752,7 @@ components:
             properties: null
           examples:
             Headers:
-              description: "201 Created<br/>Location: https://sandboxapi.deere.com/platform/assets/abx6f24c-2d91-40bd-70e6-0137e6ccbfb0"
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/assets/abx6f24c-2d91-40bd-70e6-0137e6ccbfb0"
     AssetGet:
       description: "The Asset."
       content:
@@ -758,7 +768,7 @@ components:
                   $ref: "#/components/schemas/AssetGetValues"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json"
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
               value:
                 "@type": "ContributedAsset"
                 title: "AgThing Water Device"
@@ -786,7 +796,7 @@ components:
             properties: null
           examples:
             Headers:
-              description: "204 No Content<br/> <br/> Date: Tue, 31 May 2016 08:49:20 GMT<br/> Content-Encoding: gzip<br/> Server: Apache-Coyote/1.1 ADRUM_0: g:ec9c31ed-7102-4117-832e-f6986dc31665<br/> X-Deere-Elapsed-Ms: 449<br/> X-Frame-Options: SAMEORIGIN<br/> ADRUM_1: i:3472<br/> Content-Type: text/plain<br/> ADRUM_2: e:129<br/> ADRUM_3: d:467<br/> Connection: Keep-Alive<br/> Keep-Alive: timeout=5, max=98<br/> Content-Length: 0<br/> X-Deere-Handling-Server: ldxx90tc5"
+              description: "204 No Content Date: Tue, 31 May 2016 08:49:20 GMT Content-Encoding: gzip Server: Apache-Coyote/1.1 ADRUM_0: g:ec9c31ed-7102-4117-832e-f6986dc31665 X-Deere-Elapsed-Ms: 449 X-Frame-Options: SAMEORIGIN ADRUM_1: i:3472 Content-Type: text/plain ADRUM_2: e:129 ADRUM_3: d:467 Connection: Keep-Alive Keep-Alive: timeout=5, max=98 Content-Length: 0 X-Deere-Handling-Server: ldxx90tc5"
     AssetIdGet:
       description: "The Asset Locations"
       content:
@@ -799,7 +809,7 @@ components:
                   $ref: "#/components/schemas/AssetIdValue"
           examples:
             No Header:
-              description: "200 OK<br/> Content-Type: application/vnd.deere.axiom.v3+json<br/><br/>Note: By default, all location data for the asset is returned."
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json Note: By default, all location data for the asset is returned."
               value:
                 links:
                   - rel: "self"
@@ -898,6 +908,7 @@ components:
       name: "orgId"
       in: "path"
       description: "The ID of the organization"
+      x-required-boolean: true
       schema:
         example: 1234
         type: "string"
@@ -906,27 +917,27 @@ components:
     Embed:
       name: "embed"
       in: "query"
-      description: "Additional data to embed in the response. For example <mark>embed=lastKnownLocation</mark> will return assets with their <mark>lastKnownLocation</mark> included."
+      description: "Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included."
       schema:
         type: "string"
         example: "lastKnownLocation"
     X-deere-sign:
       name: "x-deere-signature"
       in: "header"
-      description: "See <a href=\"#eTags\">eTags</a> for more information."
+      description: "See for more information."
       schema:
         type: "string"
         example: "927392615e4b4e1c12458026f47109bb"
     x-deere-sign:
       name: "x-deere-signature"
       in: "header"
-      description: "See <a href=\"#eTags\">eTags</a> for more information."
+      description: "See for more information."
       schema:
         type: "string"
         example: "abc392615e4b4e1c1245-8026f47109bb"
     x-deere-sign2:
       name: "x-deere-signature"
-      description: "See <a href=\"#eTags\">eTags</a> for more information."
+      description: "See for more information."
       schema:
         type: "string"
         example: "5b5392615e4b4e1c92013026f47109bb"
@@ -934,6 +945,7 @@ components:
       name: "assetId"
       in: "path"
       description: "The ID of the asset"
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -942,6 +954,7 @@ components:
       name: "assetId"
       in: "path"
       description: "The ID associated with the asset."
+      x-required-boolean: true
       schema:
         type: "string"
         format: "uuid"
@@ -949,7 +962,8 @@ components:
     StartDate:
       name: "startDate"
       in: "query"
-      description: "Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time."
+      x-required-boolean: false
+      description: "Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time."
       schema:
         example: "2017-09-18T20:29:59.000Z"
         type: "string"
@@ -957,7 +971,7 @@ components:
     EndDate:
       name: "endDate"
       in: "query"
-      description: "Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard.<br/><b>Note:</b> When including <mark>startDate</mark> without <mark>endDate</mark> or vice versa the missing parameter will default. <mark>startDate</mark> will default to the beginning of time and <mark>endDate</mark> will default to the current time."
+      description: "Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time."
       schema:
         example: "2017-09-18T20:29:59.000Z"
         type: "string"
@@ -965,7 +979,7 @@ components:
     PageKey:
       name: "pageKey"
       in: "query"
-      description: "A query param returned by the server in the <mark>nextPage</mark> link if there are more results for your query than were returned in the response."
+      description: "A query param returned by the server in the nextPage link if there are more results for your query than were returned in the response."
       schema:
         type: "string"
         format: "string"

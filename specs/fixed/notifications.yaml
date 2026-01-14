@@ -2,7 +2,7 @@ openapi: "3.0.0"
 info:
   version: "0.0.1"
   title: "Notification API"
-  description: "APIs for creating, monitoring the creation of, as well as the viewing of Notifications\n"
+  description: "APIs for creating, monitoring the creation of, as well as the viewing of Notifications"
   contact:
     name: "Notifications Team"
     email: "ISGDataPlatformNotifications@JohnDeere.com"
@@ -15,6 +15,7 @@ paths:
         - in: "path"
           name: "sourceEvent"
           description: "Source event of the notification"
+          x-required-boolean: true
           schema:
             type: "string"
             example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
@@ -34,25 +35,13 @@ paths:
                       $ref: "#/components/schemas/GetAvailableLinks"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     notificationsEvents:
                       - geometries: "[{\"type\":\"Point\",\"coordinates\":[-90.1805376,41.4475633]}]"
                         contributionDefinition: "/contributionDefinitions/148e6f00-6389-49b3-86ee-c37fc27929d6"
                         title: "Andy Fence - Enter"
-                        text: "This machine entered the defined Geofence boundaries.  \r
-
-                          \r
-
-                          \ **GEOFENCE**  \r
-
-                          Enter  \r
-
-                          \r
-
-                          **LAT/LONG LOCATION AT THE TIME OF ALERT**  \r
-
-                          41.4475633, -90.1805376"
+                        text: "This machine entered the defined Geofence boundaries. **GEOFENCE** Enter **LAT/LONG LOCATION AT THE TIME OF ALERT** 41.4475633, -90.1805376"
                         severity: "HIGH"
                         sourceEvent: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
                         eventType: "CURFENCE_ALERT"
@@ -114,7 +103,7 @@ paths:
           description: "Not Found"
   /notificationEvents:
     post:
-      description: "This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to <b>source</b>, which will define the event."
+      description: "This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to source, which will define the event."
       summary: "Create Notification Event"
       requestBody:
         content:
@@ -154,7 +143,7 @@ paths:
                     format: "int32"
               examples:
                 Headers:
-                  description: "201 Created<br/>Location: https://sandboxapi.deere.com/platform/notificationEvents/b89c2933-96da-45f4-9f93-880023611e07"
+                  description: "201 Created Location: https://sandboxapi.deere.com/platform/notificationEvents/b89c2933-96da-45f4-9f93-880023611e07"
   /notificationEvents/{sourceEvent}:
     delete:
       description: "This resource deletes a notification event that was previously posted to MJD as well as any generated notifications."
@@ -174,10 +163,10 @@ paths:
                     format: "int32"
               examples:
                 Headers:
-                  description: " 202 Accepted"
+                  description: "202 Accepted"
   /organizations/{orgId}/notifications/events:
     get:
-      description: "This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: <ul> <li><b>targetResource:</b> View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example.</li> <li><b>contributionDefinition:</b> View the definition of \"notification\".</li> </ul>"
+      description: "This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: targetResource: View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example. contributionDefinition: View the definition of \"notification\"."
       summary: "Search Notifications for an Organization"
       parameters:
         - $ref: "#/components/parameters/orgId"
@@ -204,7 +193,7 @@ paths:
                       $ref: "#/components/schemas/GetAvailableLinks"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -214,19 +203,7 @@ paths:
                       - "@type": "GroupedNotifications"
                         geometries: "[{\"type\":\"Point\",\"coordinates\":[-90.1805376,41.4475633]}]"
                         title: "Andy Fence - Enter"
-                        text: "This machine entered the defined Geofence boundaries.  \r
-
-                          \r
-
-                          \ **GEOFENCE**  \r
-
-                          Enter  \r
-
-                          \r
-
-                          **LAT/LONG LOCATION AT THE TIME OF ALERT**  \r
-
-                          41.4475633, -90.1805376"
+                        text: "This machine entered the defined Geofence boundaries. **GEOFENCE** Enter **LAT/LONG LOCATION AT THE TIME OF ALERT** 41.4475633, -90.1805376"
                         severity: "HIGH"
                         sourceEvent: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
                         eventType: "CURFENCE_ALERT"
@@ -317,6 +294,7 @@ components:
       in: "path"
       name: "sourceEvent"
       description: "Source Event"
+      x-required-boolean: true
       schema:
         type: "string"
         example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
@@ -325,6 +303,7 @@ components:
       in: "path"
       name: "orgId"
       description: "Organization"
+      x-required-boolean: true
       schema:
         type: "string"
         example: 123456
@@ -332,6 +311,7 @@ components:
       in: "query"
       name: "before"
       description: "Criteria to search Notifications before event GUID"
+      x-required-boolean: false
       schema:
         type: "Notification event GUID"
         example: "753b1ce2-74bd-4183-8e13-d0f03b9be20"
@@ -340,6 +320,7 @@ components:
       in: "query"
       name: "after"
       description: "Criteria to search Notifications after event GUID."
+      x-required-boolean: false
       schema:
         type: "Notification event GUID"
         example: "753b1ce2-74bd-4183-8e13-d0f03b9be20d"
@@ -348,6 +329,7 @@ components:
       in: "query"
       name: "count"
       description: "Number of records, maximum up to 100 supported."
+      x-required-boolean: false
       schema:
         type: "number"
         example: 100
@@ -355,6 +337,7 @@ components:
       in: "query"
       name: "eventTypes"
       description: "Criteria to search for multiple (comma separated) event types."
+      x-required-boolean: false
       schema:
         type: "List of String"
         example: "FILE, ORGANIZATION, ANNOUNCEMENT"
@@ -362,6 +345,7 @@ components:
       in: "query"
       name: "severities"
       description: "Criteria to search for multiple severities."
+      x-required-boolean: false
       schema:
         type: "List of String"
         example: "NONE, LOW, MEDIUM"
@@ -369,6 +353,7 @@ components:
       in: "query"
       name: "sourceEvents"
       description: "Criteria to search for multiple event GUID."
+      x-required-boolean: false
       schema:
         type: "List of Notification event GUID"
         example: "45acf8953-2eaf-7487-9cd0-691059fcbfcb, 2acf8953-8eaf-4487-9cd0-391059fcbfcf"
@@ -377,6 +362,7 @@ components:
       in: "query"
       name: "startDate"
       description: "Criteria to search for start date in time range."
+      x-required-boolean: false
       schema:
         type: "string"
         format: "date-time"
@@ -385,6 +371,7 @@ components:
       in: "query"
       name: "endDate"
       description: "Criteria to search for end date in time range."
+      x-required-boolean: false
       schema:
         type: "string"
         format: "date-time"
@@ -396,7 +383,7 @@ components:
           type: "string"
           example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
           description: "Event ID"
-        eventStatusCode<sup><a href="#event-status-code">4</a></sup>:
+        eventStatusCode:
           type: "string"
           example: "SUCCESS"
           description: "Event status code."
@@ -418,11 +405,11 @@ components:
           type: "string"
           example: "Detailed event text"
           description: "Event description."
-        severity<sup><a href="#event-severity">1</a></sup>:
+        severity:
           type: "string"
           description: "Event severity."
           example: "HIGH"
-        eventType<sup><a href="#event-type">2</a></sup>:
+        eventType:
           type: "string"
           example: "AGRONOMY"
           description: "Event type."
@@ -434,9 +421,9 @@ components:
         additionalDetails:
           example: "See sample request below."
           description: "More event details."
-        timeRange<sup>DEPRECATED</sup>:
+        timeRange:
           example: "See sample request below."
-          description: "<sup>DEPRECATED</sup>Time range of the event"
+          description: "Time range of the event"
         eventAssociation:
           example: "See sample request below."
           description: "Instructions on how to associate the resulting Notifications with resources."
@@ -460,11 +447,11 @@ components:
           type: "string"
           example: "Detailed event text."
           description: "Event description."
-        severity<sup><a href="#event-severity">1</a></sup>:
+        severity:
           type: "string"
           example: "HIGH"
           description: "Event severity."
-        eventType<sup><a href="#event-type">2</a></sup>:
+        eventType:
           type: "string"
           example: "AGRONOMY"
           description: "Event type."
@@ -475,7 +462,7 @@ components:
         minimizedNotifications:
           type: "List of objects"
           example: "See sample response below."
-          description: "Minimized version of notification having additionalDetails, notificationState<sup><a href=\"#notification-state\">5</a></sup>, targetResourceOrgId, dateCreated and link to targetResource."
+          description: "Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource."
     GetAvailableLinks:
       properties:
         contribution:
@@ -495,6 +482,7 @@ components:
     Error:
       type: "object"
       description: "Error response schema for Error (auto-generated)"
+      x-generated: true
       properties:
         message:
           type: "string"

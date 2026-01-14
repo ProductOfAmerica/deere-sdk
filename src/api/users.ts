@@ -13,7 +13,7 @@ export class UsersApi {
 
   /**
    * View User Info
-   * @description This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information.<br/> The response also contains links to the following resources: <ul><li><b>organizations:</b> View a list of organizations to which the user belongs.</li> <li><b>files:</b> View a list of files belonging to the user.</li></ul>
+   * @description This endpoint returns information about the user, such as first and last name, the account name, etc. This call can be used by a logged-in user to view their own information. The response also contains links to the following resources: organizations: View a list of organizations to which the user belongs. files: View a list of files belonging to the user.
    * @generated from GET /users/{username}
    */
   async get(

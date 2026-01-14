@@ -13,16 +13,16 @@ export class FilesApi {
 
   /**
    * List Files
-   * @description This resource retrieves the list of available files. For each file, the response will link to the following resources: <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partners this file is shared with.</li> </ul>
+   * @description This resource retrieves the list of available files. For each file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partners this file is shared with.
    * @generated from GET /files
    */
   async list(
-    params?: { filter: string; fileType1: number; transferable: boolean },
+    params?: { filter: string; fileType: number; transferable: boolean },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['FilesGet']>> {
     const query = new URLSearchParams();
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
-    if (params?.fileType1 !== undefined) query.set('fileType1', String(params.fileType1));
+    if (params?.fileType !== undefined) query.set('fileType', String(params.fileType));
     if (params?.transferable !== undefined) query.set('transferable', String(params.transferable));
     const queryString = query.toString();
     const path = `/files${queryString ? `?${queryString}` : ''}`;
@@ -33,12 +33,12 @@ export class FilesApi {
    * @generated from GET /files
    */
   async listAll(
-    params?: { filter: string; fileType1: number; transferable: boolean },
+    params?: { filter: string; fileType: number; transferable: boolean },
     options?: RequestOptions
   ): Promise<components['schemas']['FilesGet'][]> {
     const query = new URLSearchParams();
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
-    if (params?.fileType1 !== undefined) query.set('fileType1', String(params.fileType1));
+    if (params?.fileType !== undefined) query.set('fileType', String(params.fileType));
     if (params?.transferable !== undefined) query.set('transferable', String(params.transferable));
     const queryString = query.toString();
     const path = `/files${queryString ? `?${queryString}` : ''}`;
@@ -47,7 +47,7 @@ export class FilesApi {
 
   /**
    * View/Download A File
-   * @description This resource allows the client to view or download a file. <p><strong>Note</strong>: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the <strong>Range</strong> request header, or the <strong>offset</strong> and <strong>size</strong> request parameters. If both are used, the request header will take precedence.</p>
+   * @description This resource allows the client to view or download a file. Note: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the Range request header, or the offset and size request parameters. If both are used, the request header will take precedence. To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources: owningOrganization: View the org that owns the file. partnerships: View a list of the partnerships through which the file is shared, if applicable. initiateFileTransfer: Request to send this file to a specified machine. wdtCapableMachines: View a list of machines in the org which can receive this file.
    * @generated from GET /files/{fileId}
    */
   async get(fileId: string, options?: RequestOptions): Promise<unknown> {
@@ -57,7 +57,7 @@ export class FilesApi {
 
   /**
    * Upload/Update A File
-   * @description This resource allows the client to upload or update a file. The client must <a href="/dev-docs/files#/organizations/{orgId}/files/post" target="_blank">create a file ID</a> before uploading a file.
+   * @description This resource allows the client to upload or update a file. The client must before uploading a file.
    * @generated from PUT /files/{fileId}
    */
   async update(
@@ -71,7 +71,7 @@ export class FilesApi {
 
   /**
    * List an Org's Files
-   * @description View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: <p> <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partnerships through which the file is shared, if applicable.</li> <li><strong>initiateFileTransfer</strong>: Submit a transfer request for the specified file.</li> <li><strong>machinesEligibleToReceiveFile</strong>: List of WDT-capable machines that the specified file can be sent to.</li> <li><strong>sendFileToMachine</strong>: The same as "initiateFileTransfer."</li> <li><strong>wdtCapableMachines</strong>: The same as "machinesEligibleToReceiveFile."</li> </ul> </p>
+   * @description View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: owningOrganization: View the org that owns the file. partnerships: View the partnerships through which the file is shared, if applicable. initiateFileTransfer: Submit a transfer request for the specified file. machinesEligibleToReceiveFile: List of WDT-capable machines that the specified file can be sent to. sendFileToMachine: The same as "initiateFileTransfer." wdtCapableMachines: The same as "machinesEligibleToReceiveFile."
    * @generated from GET /organizations/{orgId}/files
    */
   async listFiles(
@@ -80,7 +80,7 @@ export class FilesApi {
       filter?: string;
       startDate?: string;
       endDate?: unknown;
-      fileType1?: number;
+      fileType?: number;
       archived?: boolean;
       status?: string;
     },
@@ -90,7 +90,7 @@ export class FilesApi {
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
-    if (params?.fileType1 !== undefined) query.set('fileType1', String(params.fileType1));
+    if (params?.fileType !== undefined) query.set('fileType', String(params.fileType));
     if (params?.archived !== undefined) query.set('archived', String(params.archived));
     if (params?.status !== undefined) query.set('status', String(params.status));
     const queryString = query.toString();
@@ -100,7 +100,7 @@ export class FilesApi {
 
   /**
    * Create A File ID
-   * @description The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to <a href="/dev-docs/files#/files/{fileId}/put" target="_blank">upload the file.</a>
+   * @description The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to
    * @generated from POST /organizations/{orgId}/files
    */
   async create(

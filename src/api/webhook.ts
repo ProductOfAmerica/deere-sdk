@@ -31,7 +31,7 @@ export class WebhookApi {
 
   /**
    * Create an Event Subscription
-   * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The created subscription.</li> </ul>
+   * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- user: The subscribed user provided by the current authorization context. self: The created subscription.
    * @generated from POST /eventSubscriptions
    */
   async create(
@@ -48,7 +48,7 @@ export class WebhookApi {
 
   /**
    * Get an Event Subscription
-   * @description This resource will get a single event subscription by id. The response will include links to: <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The subscription itself.</li> </ul>
+   * @description This resource will get a single event subscription by id. The response will include links to: user: The subscribed user provided by the current authorization context. self: The subscription itself.
    * @generated from GET /eventSubscriptions/{id}
    */
   async get(

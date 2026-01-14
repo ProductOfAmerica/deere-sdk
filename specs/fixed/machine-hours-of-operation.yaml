@@ -22,7 +22,7 @@ paths:
     get:
       operationId: "fetchHoursOfOperation"
       summary: "Hours of Operation"
-      description: "The Hours of Operation service allows the user to view the durations for which the engine was on or off during a specified time period. You will also be able to view the last known state of the machine's engine. Each request returns a link to <mark>machine</mark>, which will return a state report for the specified machine.<br/><b>Note</b>: When the terminal is powered off, hours of operation are not recorded."
+      description: "The Hours of Operation service allows the user to view the durations for which the engine was on or off during a specified time period. You will also be able to view the last known state of the machine's engine. Each request returns a link to machine, which will return a state report for the specified machine. Note: When the terminal is powered off, hours of operation are not recorded."
       tags:
         - "/hoursOfOperation"
       security:
@@ -32,6 +32,7 @@ paths:
         - name: "principalId"
           in: "path"
           description: "PrincipalId of Machine/Equipment."
+          x-required-boolean: true
           schema:
             type: "string"
             default: "N/A"
@@ -40,6 +41,7 @@ paths:
         - name: "startDate"
           in: "query"
           description: "Filters hours of operation starting from a specified date. Request date as UTC Timestamp."
+          x-required-boolean: false
           schema:
             type: "string"
             format: "date-time"
@@ -48,6 +50,7 @@ paths:
         - name: "endDate"
           in: "query"
           description: "Filters hours of operation before a specified date. Request date as UTC Timestamp."
+          x-required-boolean: false
           schema:
             type: "string"
             format: "date-time"
@@ -56,6 +59,7 @@ paths:
         - name: "detailedState"
           in: "query"
           description: "detailedState"
+          x-required-boolean: false
           schema:
             type: "string"
             example: "PTOStatus or genericMachineUtilization or genericEngineUtilization"
@@ -68,7 +72,7 @@ paths:
                 $ref: "#/components/schemas/HoursOfOperation_Response"
               examples:
                 No Header:
-                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
                   value:
                     links:
                       - rel: "self"
@@ -153,7 +157,7 @@ components:
           example: "2013-04-30T23:30:00Z"
         engineState:
           type: "integer"
-          description: "The returned value indicates the current state of the engine<sup><a href=\"#additional\">1</a></sup>"
+          description: "The returned value indicates the current state of the engine"
           format: "boolean"
           example: "1"
         detailedState:

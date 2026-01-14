@@ -19,7 +19,7 @@ export interface paths {
     put?: never;
     /**
      * Create an Event Subscription
-     * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The created subscription.</li> </ul>
+     * @description This resource will create an event subscription for a user. It returns a list of event subscriptions. To create a subscription for an event, your client must have access to the event's associated api. The response will include links to:- user: The subscribed user provided by the current authorization context. self: The created subscription.
      */
     post: operations['createSubscription'];
     delete?: never;
@@ -37,7 +37,7 @@ export interface paths {
     };
     /**
      * Get an Event Subscription
-     * @description This resource will get a single event subscription by id. The response will include links to: <ul> <li><b>user:</b> The subscribed user provided by the current authorization context.</li> <li><b>self:</b> The subscription itself.</li> </ul>
+     * @description This resource will get a single event subscription by id. The response will include links to: user: The subscribed user provided by the current authorization context. self: The subscription itself.
      */
     get: operations['getSubscriptionById'];
     /**
@@ -85,7 +85,7 @@ export interface components {
        */
       id?: string;
       /**
-       * @description See <a href="#events" target="_blank">Event Types</a> for valid event names
+       * @description See for valid event names
        * @example heartbeat
        */
       eventTypeId?: string;
@@ -93,17 +93,17 @@ export interface components {
        * @description List of MetadataFilters to filter events on metadata.
        * @example See the sample response below
        */
-      "filters<sup><a href='#filters'>1</a></sup>"?: unknown[];
+      filters?: unknown[];
       /**
        * @description The postback endpoint that receives the event(s).
        * @example See the sample response below
        */
-      "targetEndpoint<sup><a href='#target-endpoint'>3</a></sup>"?: Record<string, never>;
+      targetEndpoint?: Record<string, never>;
       /**
        * @description The status of the event subscription.
        * @example Active
        */
-      "status<sup><a href='#status'>4</a></sup>"?: string;
+      status?: string;
       /**
        * @description Human-readable name to easily identify the event subscription.
        * @example My Data Subscription
@@ -133,7 +133,7 @@ export interface components {
       guid?: string;
       /**
        * @description An english description of the error
-       * @example <parameter> was invalid because <reason>
+       * @example was invalid because
        */
       message?: string;
       /**
@@ -215,22 +215,22 @@ export interface components {
     SubscriptionResponseContent: {
       /**
        * @description The postback endpoint that receives the event(s).
-       * @example See the sample request below<br/>Editable: Yes
+       * @example See the sample request below Editable: Yes
        */
-      "targetEndpoint<sup><a href='#target-endpoint'>3</a></sup>"?: Record<string, never>;
+      targetEndpoint?: Record<string, never>;
       /**
        * @description The status of the event subscription.
-       * @example active<br/>Editable: Yes
+       * @example active Editable: Yes
        */
-      "status<sup><a href='#status'>4</a></sup>"?: string;
+      status?: string;
       /**
        * @description Human-readable name to easily identify the event subscription.
-       * @example My Data Subscription<br/>Editable: Yes
+       * @example My Data Subscription Editable: Yes
        */
       displayName?: string;
       /**
        * @description A string that was sent with each delivery to validate the sender.
-       * @example Follows pattern '^[A-Za-z0-9+/=]{0,256}$'<br/>Editable: Yes
+       * @example Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes
        */
       token?: string;
     };
@@ -268,10 +268,10 @@ export interface components {
     DeliveryStatus: 'Active' | 'Paused';
     /**
      * @description If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb.
-     * @example Bearer <token>
+     * @example Bearer
      */
     AuthorizationHeader: string | null;
-    /** @description Stub schema for HTTPTargetEndpointEventsContent (auto-generated - original was missing) */
+    /** @description AUTO-GENERATED STUB SCHEMA for HTTPTargetEndpointEventsContent. Original definition missing from Deere spec. */
     HTTPTargetEndpointEventsContent: {
       [key: string]: unknown;
     };
@@ -364,7 +364,7 @@ export interface components {
   parameters: {
     /** @description Event Subscription ID as a GUID. */
     Id: string;
-    /** @description See <a href="#events" target="_blank">Event Types</a> for valid event type names. */
+    /** @description See for valid event type names. */
     EventTypeId: string;
     /** @description List of MetadataFilters to filter events on metadata. */
     Filters: unknown[];
