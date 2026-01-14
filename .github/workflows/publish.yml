@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   workflow_call:
 
-permissions: read-all
-
 jobs:
   publish:
     runs-on: ubuntu-latest
