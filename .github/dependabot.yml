@@ -8,5 +8,10 @@ updates:
       dev-dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "@types/node"
+        versions: [">=25"]
+      - dependency-name: "rimraf"
+        versions: [">=6"]
     commit-message:
       prefix: "chore(deps)"
