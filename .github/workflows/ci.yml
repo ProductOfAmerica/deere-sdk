@@ -42,6 +42,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          token: ${{ secrets.PAT_WITH_BYPASS || github.token }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
@@ -103,4 +105,3 @@ jobs:
         with:
           commit_message: "chore: update coverage badge [skip ci]"
           file_pattern: ".github/badges/coverage.json"
-          token: ${{ secrets.PAT_WITH_BYPASS }}
