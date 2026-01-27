@@ -35,9 +35,18 @@ paths:
           x-required-boolean: true
           schema:
             type: "string"
-            default: "N/A"
             format: "Long"
             example: "5432"
+            default: "N/A"
+        - name: "organizationId"
+          in: "query"
+          description: "Organization Id of the Machine/Equipment."
+          x-required-boolean: false
+          schema:
+            type: "string"
+            format: "Long"
+            example: "98765"
+            default: "N/A"
         - name: "startDate"
           in: "query"
           description: "Filters hours of operation starting from a specified date. Request date as UTC Timestamp."
@@ -45,8 +54,8 @@ paths:
           schema:
             type: "string"
             format: "date-time"
-            default: "N/A"
             example: "2013-04-29T00:00:00Z"
+            default: "N/A"
         - name: "endDate"
           in: "query"
           description: "Filters hours of operation before a specified date. Request date as UTC Timestamp."
@@ -54,15 +63,23 @@ paths:
           schema:
             type: "string"
             format: "date-time"
-            default: "N/A"
             example: "2013-04-30T23:30:00Z"
+            default: "N/A"
         - name: "detailedState"
           in: "query"
-          description: "detailedState"
+          description: "Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState"
           x-required-boolean: false
           schema:
             type: "string"
-            example: "PTOStatus or genericMachineUtilization or genericEngineUtilization"
+            example: "FrontWheelDriveActuatorState"
+        - name: "summarizeDuration"
+          in: "query"
+          description: "Only EngagedStates of RearPTOEngagement and FWDActuatorState are returned after merging, if the duration between 2 consecutive EngagedStates is less than provided value."
+          x-required-boolean: false
+          schema:
+            type: "string"
+            format: "Integer"
+            example: "5"
       responses:
         "200":
           description: "HoursOfOperation with list engine State at times for the machine"

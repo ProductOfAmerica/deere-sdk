@@ -23,14 +23,24 @@ export class MachineHoursOfOperationApi {
    */
   async list(
     principalId: string,
-    params?: { startDate?: string; endDate?: string; detailedState?: string },
+    params?: {
+      organizationId?: string;
+      startDate?: string;
+      endDate?: string;
+      detailedState?: string;
+      summarizeDuration?: string;
+    },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['HoursOfOperation_Response']>> {
     const query = new URLSearchParams();
+    if (params?.organizationId !== undefined)
+      query.set('organizationId', String(params.organizationId));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.detailedState !== undefined)
       query.set('detailedState', String(params.detailedState));
+    if (params?.summarizeDuration !== undefined)
+      query.set('summarizeDuration', String(params.summarizeDuration));
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['HoursOfOperation_Response']>>(
@@ -44,14 +54,24 @@ export class MachineHoursOfOperationApi {
    */
   async listAll(
     principalId: string,
-    params?: { startDate?: string; endDate?: string; detailedState?: string },
+    params?: {
+      organizationId?: string;
+      startDate?: string;
+      endDate?: string;
+      detailedState?: string;
+      summarizeDuration?: string;
+    },
     options?: RequestOptions
   ): Promise<components['schemas']['HoursOfOperation_Response'][]> {
     const query = new URLSearchParams();
+    if (params?.organizationId !== undefined)
+      query.set('organizationId', String(params.organizationId));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.detailedState !== undefined)
       query.set('detailedState', String(params.detailedState));
+    if (params?.summarizeDuration !== undefined)
+      query.set('summarizeDuration', String(params.summarizeDuration));
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['HoursOfOperation_Response']>(path, options);

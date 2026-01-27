@@ -86,12 +86,16 @@ export interface operations {
   fetchHoursOfOperation: {
     parameters: {
       query?: {
+        /** @description Organization Id of the Machine/Equipment. */
+        organizationId?: string;
         /** @description Filters hours of operation starting from a specified date. Request date as UTC Timestamp. */
         startDate?: string;
         /** @description Filters hours of operation before a specified date. Request date as UTC Timestamp. */
         endDate?: string;
-        /** @description detailedState */
+        /** @description Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState */
         detailedState?: string;
+        /** @description Only EngagedStates of RearPTOEngagement and FWDActuatorState are returned after merging, if the duration between 2 consecutive EngagedStates is less than provided value. */
+        summarizeDuration?: string;
       };
       header?: never;
       path: {
