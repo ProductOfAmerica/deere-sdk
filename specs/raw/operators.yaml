@@ -62,7 +62,6 @@ paths:
                               https://sandboxapi.deere.com/platform/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
                         name: John Doe
                         id: 0235d40e-02d0-44cb-a126-fff21173fc1f
-                        license: 12345_LICENSE
                         dateModified: '2018-04-30T10:23:50.000Z'
                         archived: false
 
@@ -153,7 +152,6 @@ paths:
                         uri: https://sandboxapi.deere.com/platform/organizations/12345/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
                     id: 0235d40e-02d0-44cb-a126-fff21173fc1f
                     name: John Doe
-                    license: 12345_LICENSE
                     dateModified: '2018-04-30T10:23:50.000Z'
                     archived: false
 
