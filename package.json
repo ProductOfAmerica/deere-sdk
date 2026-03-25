@@ -71,7 +71,7 @@
     "openapi-typescript": "^7.0.0",
     "rimraf": "^5.0.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.0",
+    "typescript": "^6.0.2",
     "yaml": "^2.3.0"
   },
   "sideEffects": false
