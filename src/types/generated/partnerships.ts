@@ -236,6 +236,31 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description A list of errors */
+    Errors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: components['schemas']['Error'][];
+      otherAttributes?: Record<string, never>;
+    };
+    /** @description An error object */
+    Error: {
+      /** @example Error */
+      '@type'?: string;
+      /**
+       * Format: guid
+       * @example 17826sd23-e5e1-4921-8841-3c5f584r3a2e
+       */
+      guid?: string;
+      /** @example No dealer account exists with this accountId */
+      message?: string;
+      /** @example No dealer account exists with this accountId */
+      code?: string;
+      /** @example dealerAccountId */
+      field?: string;
+      /** @example 1234123412341234 */
+      invalidValue?: string;
+    };
     /** @description A list of partnerships */
     Partnerships: {
       links?: components['schemas']['PartnershipsLink'][];
@@ -348,30 +373,30 @@ export interface components {
     };
   };
   responses: {
+    /** @description Not found */
+    TokenNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description Request body was invalid */
+    BadCreateRequests: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
     /** @description Not authorized */
     Forbidden: {
       headers: {
         [name: string]: unknown;
       };
       content?: never;
-    };
-    /** @description Stub response for BadCreateRequests (auto-generated) */
-    BadCreateRequests: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/json': Record<string, never>;
-      };
-    };
-    /** @description Stub response for TokenNotFound (auto-generated) */
-    TokenNotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/json': Record<string, never>;
-      };
     };
   };
   parameters: {

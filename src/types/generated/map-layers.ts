@@ -176,6 +176,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description Provides a reference to an associated object or list. */
+    Link: {
+      /** @example Link */
+      '@type'?: string;
+      /**
+       * @description The relation of the object to the linked resource.
+       * @example owningOrganization
+       */
+      rel?: string;
+      /**
+       * Format: uri
+       * @description The URI to the related resource.
+       * @example https://api.deere.com/platform/organizations/61265
+       */
+      uri?: string;
+    };
     CollectionBase: {
       links?: {
         /**
@@ -556,13 +572,6 @@ export interface components {
         message?: string;
       }[];
       otherAttributes?: Record<string, never>;
-    };
-    /** @description Link schema for Link (auto-generated) */
-    Link: {
-      '@type'?: string;
-      rel?: string;
-      /** Format: uri */
-      uri?: string;
     };
   };
   responses: {

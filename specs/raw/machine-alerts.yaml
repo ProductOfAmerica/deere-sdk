@@ -210,6 +210,144 @@ components:
           schema:
             $ref: "#/components/schemas/TooManyRequestsResponseBody"
   schemas:
+    BadRequestResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '400'
+              format: numeric
+              type: string
+            message:
+              example: The provided payload was invalid or malformed.
+              type: string
+      type: object
+    UnauthorizedResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '401'
+              format: numeric
+              type: string
+            message:
+              example: The request could not be authorized with the given credentials.
+              type: string
+      type: object
+    ForbiddenResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '403'
+              format: numeric
+              type: string
+            message:
+              example: The provided authorization is not allowed to access this
+                resource.
+              type: string
+      type: object
+    NotAcceptableResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '406'
+              format: numeric
+              type: string
+            message:
+              example: The requested resource could not be produced in any acceptable
+                format.
+              type: string
+      type: object
+    NotFoundResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '404'
+              format: numeric
+              type: string
+            message:
+              example: The requested resource could not be found.
+              type: string
+      type: object
+    UID:
+      description: A unique string identifier.
+      example: e7c52f93-4bb6-48bb-b808-11b7b4f23059
+      format: uuid
+      readOnly: true
+      type: string
+    ErrorResponseBody:
+      properties:
+        '@type':
+          description: This is the type definition for this reference object.
+          enum:
+            - Errors
+          readOnly: true
+          type: string
+        errors:
+          items:
+            properties:
+              '@type':
+                description: This is the type definition for this
+                  reference object.
+                enum:
+                  - Error
+                readOnly: true
+                type: string
+              code:
+                example: '400'
+                format: numeric
+                type: string
+              field:
+                description: The field in the request body that is
+                  invalid.
+                example: id
+                type: string
+              guid:
+                $ref: '#/components/schemas/UID'
+              invalidValue:
+                description: The invalid value present in the field.
+                example: b48da18c-c0e6-4bcc-a00e-581035beab3d
+                type: string
+              message:
+                example: There was a problem with the request.
+                type: string
+            required:
+              - guid
+              - message
+            type: object
+          type: array
+        otherAttributes:
+          properties:
+            name:
+              example: example_name
+              type: string
+            value:
+              example: example_value
+              type: string
+          type: object
+      type: object
+    TooManyRequestsResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponseBody'
+        - properties:
+            code:
+              enum:
+                - '429'
+              format: numeric
+              type: string
+            message:
+              example: The server has received too many requests. Try again
+                at a later time.
+              type: string
+      type: object
     AlertLink:
       properties:
         machine:

@@ -451,6 +451,36 @@ components:
       description: The specified resource does not exist
 
   schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: An english description of the error
+          example: <parameter> was invalid because <reason>
+        code:
+          type: string
+          description: A string constant representing the type of error
+          example: 400
+        field:
+          type: string
+          description: The name of the property or parameter deemed invalid
+          example: Machine.serialNumber
+        gud:
+          type: string
+          format: uuid
+          description: A reference to this encounter of the error, for traceability and troubleshooting
+          example: 9b331708-10e8-4e15-8097-a9aed7455d6d
+        invalidValue:
+          type: string
+          description: The value that was supplied for this field in the request
+          example: null
+      readOnly: true
+    Errors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Error'
+      readOnly: true
     LinksArrayGet:
       properties:
         field:

@@ -321,6 +321,111 @@ components:
             eq1: "eq1"
             eq2: "eq2"
   schemas:
+    AssetCatalogItem:
+      required:
+        - "assetCategory"
+        - "assetSubType"
+        - "assetType"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "ContributedCatalogItem"
+        assetCategory:
+          $ref: "#/components/schemas/AssetCategory"
+        assetType:
+          $ref: "#/components/schemas/AssetType"
+        assetSubType:
+          $ref: "#/components/schemas/AssetSubType"
+        links:
+          type: "array"
+          items:
+            properties:
+              rel:
+                type: "string"
+                description: "Links relavent to exploring the collection."
+                example: "self"
+              uri:
+                type: "string"
+                description: "The URI to the related resource."
+                format: "uri"
+                example: "https://sandboxapi.deere.com/platform/resources/61265"
+    MeasurementData:
+      required:
+        - "name"
+        - "value"
+        - "unit"
+      type: "object"
+      properties:
+        name:
+          description: "representation for which to capture data sandardized via the [ADAPT Representation System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/RepresentationSystem.xml)"
+          type: "string"
+          example: "vrSoilTemperature"
+        value:
+          description: "measurement reading"
+          type: "string"
+          example: "46.2"
+        unit:
+          description: "unit of measure - the basis for any conversion sandardized via the [ADAPT Unit System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/UnitSystem.xml)"
+          type: "string"
+          example: "F"
+    AssetCategory:
+      type: "string"
+      example: "DEVICE"
+    AssetType:
+      type: "string"
+      example: "SENSOR"
+    AssetSubType:
+      type: "string"
+      example: "ENVIRONMENTAL"
+    400Errors:
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "ed292512-1f3c-4285-83c3-1fb084423f9b"
+              message:
+                type: "string"
+                example: "This field is required."
+              code:
+                type: "string"
+                example: "validation_constraint_required_field"
+              field:
+                type: "string"
+                example: "title"
+        otherAttributes:
+          type: "object"
+    GenericErrors:
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "ed292512-1f3c-4285-83c3-1fb084423f9b"
+              message:
+                type: "string"
+                example: "some error message"
+        otherAttributes:
+          type: "object"
     CollectionBase:
       type: "object"
       properties:
@@ -619,53 +724,6 @@ components:
               type: "array"
               items:
                 $ref: "#/components/schemas/AssetCatalogItem"
-    MeasurementData:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for MeasurementData. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    AssetCategory:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for AssetCategory. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    AssetType:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for AssetType. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    AssetSubType:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for AssetSubType. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    AssetCatalogItem:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for AssetCatalogItem. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    400Errors:
-      type: "object"
-      description: "Error response schema for 400Errors (auto-generated)"
-      x-generated: true
-      properties:
-        message:
-          type: "string"
-        errors:
-          type: "array"
-          items:
-            type: "object"
-    GenericErrors:
-      type: "object"
-      description: "Error response schema for GenericErrors (auto-generated)"
-      x-generated: true
-      properties:
-        message:
-          type: "string"
-        errors:
-          type: "array"
-          items:
-            type: "object"
   responses:
     "201":
       description: "Request"

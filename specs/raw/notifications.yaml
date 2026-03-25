@@ -97,7 +97,7 @@ paths:
                             dateCreated: '2018-03-31T23:49:39.000Z'
                             id: c84ad945-5b3e-447e-b139-f2318f73679f
         400:
-          $ref: 'common-schemas.yaml#/components/schemas/Error'
+          $ref: '#/components/schemas/Error'
         404:
           description: Not Found
         403:
@@ -410,6 +410,31 @@ components:
         example: '2017-07-25T08:33:27.311Z'
 
   schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: An english description of the error
+          example: <parameter> was invalid because <reason>
+        code:
+          type: string
+          description: A string constant representing the type of error
+          example: 400
+        field:
+          type: string
+          description: The name of the property or parameter deemed invalid
+          example: Machine.serialNumber
+        gud:
+          type: string
+          format: uuid
+          description: A reference to this encounter of the error, for traceability and troubleshooting
+          example: 9b331708-10e8-4e15-8097-a9aed7455d6d
+        invalidValue:
+          type: string
+          description: The value that was supplied for this field in the request
+          example: null
+      readOnly: true
     ResponseDetails:
       properties:
         eventId:

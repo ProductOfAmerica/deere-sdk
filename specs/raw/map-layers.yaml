@@ -35,7 +35,7 @@ paths:
         - OAuth2: [ ag2 ]
       responses:
         '200':
-           $ref: '#/components/schemas/MapLayerSummaryCollection'
+          $ref: '#/components/schemas/MapLayerSummaryCollection'
     post:
       description: Creates a new Map Layer Summary resource.
       summary: Create a map layer summary
@@ -112,8 +112,8 @@ paths:
                     items:
                       $ref: '#/components/schemas/PostContributedMapLayerSummary'
                   links:
-                      items:
-                        $ref: '#/components/schemas/GetMapLayerSummaryAvailableLinks'
+                    items:
+                      $ref: '#/components/schemas/GetMapLayerSummaryAvailableLinks'
               examples:
                 No Header:
                   description: '200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json'
@@ -251,6 +251,22 @@ components:
             ag2: 'ag2'
             ag3: 'ag3'
   schemas:
+    Link:
+      type: object
+      properties:
+        '@type':
+          type: string
+          example: Link
+        rel:
+          type: string
+          description: The relation of the object to the linked resource.
+          example: owningOrganization
+        uri:
+          type: string
+          description: The URI to the related resource.
+          format: uri
+          example: 'https://api.deere.com/platform/organizations/61265'
+      description: Provides a reference to an associated object or list.
     CollectionBase:
       type: object
       properties:
@@ -276,13 +292,13 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             properties:
-             values:
-               type: array
-               items:
+              values:
+                type: array
+                items:
                   $ref: '#/components/schemas/ContributedMapLayerSummary'
-             links:
-               items:
-                 $ref: '#/components/schemas/AvailableLinks'
+              links:
+                items:
+                  $ref: '#/components/schemas/AvailableLinks'
           examples:
             No Header:
               description: '200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json'
@@ -365,7 +381,7 @@ components:
               description: ISO 8601 Date and time in UTC this resource was last modified.
               example: 2016-01-02T16:14:23.421Z
     PostContributedMapLayerSummary:
-     properties:
+      properties:
         links:
           type: array
           description: Links to other objects in the Deere ecosystem.

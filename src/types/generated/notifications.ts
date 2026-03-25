@@ -228,6 +228,34 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    Error: {
+      /**
+       * @description An english description of the error
+       * @example was invalid because
+       */
+      message?: string;
+      /**
+       * @description A string constant representing the type of error
+       * @example 400
+       */
+      code?: string;
+      /**
+       * @description The name of the property or parameter deemed invalid
+       * @example Machine.serialNumber
+       */
+      field?: string;
+      /**
+       * Format: uuid
+       * @description A reference to this encounter of the error, for traceability and troubleshooting
+       * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+       */
+      gud?: string;
+      /**
+       * @description The value that was supplied for this field in the request
+       * @example null
+       */
+      invalidValue?: string;
+    };
     ResponseDetails: {
       /**
        * @description Event ID
@@ -360,11 +388,6 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
        */
       targetResource?: unknown;
-    };
-    /** @description Error response schema for Error (auto-generated) */
-    Error: {
-      message?: string;
-      errors?: Record<string, never>[];
     };
   };
   responses: never;

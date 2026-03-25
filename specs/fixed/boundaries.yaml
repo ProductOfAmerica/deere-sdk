@@ -695,6 +695,464 @@ components:
     NotFound:
       description: "The specified resource does not exist"
   schemas:
+    RecordMetadata:
+      type: "object"
+      description: "Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.)"
+      properties:
+        "@type":
+          type: "string"
+          default: "RecordMetadata"
+          example: "RecordMetadata"
+        createdByUser:
+          type: "string"
+          description: "User involved in creating the entity. Only viewable with the RECORD_METADATA license"
+          example: "XYZ_USER"
+        lastModifiedByUser:
+          type: "string"
+          description: "User involved in modifying the entity. Only viewable with the RECORD_METADATA license"
+          example: "XYZ_USER"
+        userCreationTimestamp:
+          type: "string"
+          description: "Timestamp of entity creation"
+          readOnly: true
+          example: "2018-04-30T10:23:50.000Z"
+        userLastModifiedTimestamp:
+          type: "string"
+          description: "Timestamp of entity modification"
+          readOnly: true
+          example: "2018-05-01T08:11:23.000Z"
+        createdBySourceNode:
+          type: "string"
+          format: "uuid"
+          description: "This is the specific instance of an application that created the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license."
+          readOnly: true
+          example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
+        lastModifiedSourceNode:
+          type: "string"
+          format: "uuid"
+          description: "This is the specific instance of an application that modified the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license"
+          readOnly: true
+          example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
+        createdBySourceSystemUri:
+          type: "string"
+          description: "Derived off of a client key (application that created) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license."
+          readOnly: true
+          example: "https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5"
+        lastModifiedBySourceSystemUri:
+          type: "string"
+          description: "Derived off of a client key (application that did last modification) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license."
+          readOnly: true
+          example: "https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5"
+    GPSDatum:
+      type: "object"
+      required:
+        - "serialNumber"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "GPS Datum"
+        gpsDatumValue:
+          $ref: "#/components/schemas/GPSDatumValue"
+        horizontalUncertainty:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        verticalUncertainty:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        serialNumber:
+          type: "string"
+          example: "serialNumber"
+    GPSDatumValue:
+      type: "object"
+      required:
+        - "datumUuid"
+        - "currentActiveDatum"
+        - "status"
+        - "referenceDatum"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "GPS Datum values"
+        currentActiveDatum:
+          type: "string"
+          example: "currentActiveDatum"
+        currentActiveEpochTime:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        baseLocation:
+          $ref: "#/components/schemas/ThreeDPoint"
+        status:
+          type: "string"
+          example: "status"
+        referenceDatum:
+          type: "string"
+          example: "referenceDatumValue"
+        referenceEpochTime:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        referencePositionOffsets:
+          $ref: "#/components/schemas/ThreeDPoint"
+        datumCreationTime:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        datumUuid:
+          type: "string"
+          description: "Unique id for this datum"
+          example: "205ff5ba-8d63-4a66-bbfe-b2a31ebad0d3"
+    ThreeDPoint:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "3-dimensional point"
+        lat:
+          type: "number"
+          format: "double"
+          description: "The latitude of the point"
+          example: 32.118552
+        lon:
+          type: "number"
+          format: "double"
+          description: "The longitude of the point"
+          example: -81.260776
+        height:
+          type: "number"
+          format: "double"
+          description: "The z-axis of the point"
+          example: 1
+    DatumRange:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Datum Range"
+        startPointIndex:
+          type: "integer"
+          description: "starting point index this datum applies to relative to the boundary"
+          format: "int32"
+          example: 0
+        endPointIndex:
+          type: "integer"
+          description: "ending point index this datum applies to relative to the boundary"
+          format: "int32"
+          example: 127
+        datum:
+          $ref: "#/components/schemas/GPSDatum"
+    LocationSourceRange:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Location Source Range"
+        startPointIndex:
+          type: "integer"
+          format: "int32"
+          description: "starting point index this location source applies to relative to the boundary"
+          example: 0
+        endPointIndex:
+          type: "integer"
+          format: "int32"
+          description: "ending point index this location source applies to relative to the boundary"
+          example: 127
+        locationSource:
+          type: "string"
+          description: "value of location source used"
+          example: "\"locationSource\": \"Computed from Rigid Kinematics\""
+    SignalTypeRange:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Signal Type Range"
+        startPointIndex:
+          type: "integer"
+          description: "starting point index this signal type applies to relative to the boundary"
+          example: 0
+        endPointIndex:
+          type: "integer"
+          description: "ending point index this signal type applies to relative to the boundary"
+          example: 127
+        signalType:
+          type: "string"
+          description: "value of signal type used"
+          example: "\"signalType\": \"SFRTK\""
+    SnapDistanceRange:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Snap Distance Range"
+        startIndex:
+          type: "integer"
+          description: "starting point index this snap distance applies to relative to the boundary"
+          example: 0
+        endIndex:
+          type: "integer"
+          description: "ending point index this snap distance applies to relative to the boundary"
+          example: 127
+        snapDistance:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+    AccuracyData:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Accuracy Data"
+        datums:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/DatumRange"
+        locationSources:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LocationSourceRange"
+        signalTypes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SignalTypeRange"
+        horizontalErrorEstimates_mm:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        snapDistanceRanges:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SnapDistanceRange"
+        simplificationAlgorithm:
+          type: "string"
+          description: "This indicates the style of simplification applied to a boundary."
+          example: "dtiBoundaryDP5InchNoMetadata"
+        maxSnapDistance:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+    Headland:
+      type: "object"
+      required:
+        - "name"
+        - "parentId"
+        - "active"
+      properties:
+        name:
+          type: "string"
+          example: "headland_name"
+        points:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Point"
+        active:
+          type: "boolean"
+          description: "indicates if this is the active headland in a collection"
+    Point:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Point"
+        lat:
+          type: "number"
+          format: "double"
+          description: "The latitude of the point"
+          example: 32.118552
+        lon:
+          type: "number"
+          format: "double"
+          description: "The longitude of the point"
+          example: -81.260776
+    Extent:
+      type: "object"
+      readOnly: true
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "Extent"
+        topLeft:
+          $ref: "#/components/schemas/Point"
+        bottomRight:
+          $ref: "#/components/schemas/Point"
+    MeasurementAsDouble:
+      type: "object"
+      readOnly: true
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the class"
+          example: "MeasurementAsDouble"
+        valueAsDouble:
+          type: "number"
+          format: "double"
+          example: 7.502938
+        unit:
+          type: "string"
+          description: "The unit of measure for this value"
+          example: "ha"
+    Polygon:
+      properties:
+        rings:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+                description: "identifier for polygon"
+                example: 1
+              parentId:
+                type: "integer"
+                description: "id of associated ring"
+                example: 5
+              points:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Point"
+              type:
+                type: "string"
+                description: "Describes whether this geometry is interior (e.g. a pond contained within a field) or exterior (e.g. a fence around the field)"
+                enum:
+                  - "interior"
+                  - "exterior"
+              passable:
+                description: "Describes whether or not a machine may travel through this geometry (e.g. a road vs a stream)"
+                type: "boolean"
+              headlands:
+                description: "A collection of headlands"
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Headland"
+              accuracyData:
+                $ref: "#/components/schemas/AccuracyData"
+              signalType:
+                type: "string"
+                description: "value of signal type used"
+                example: "dtiSignalTypeRTK"
+              creationMethod:
+                type: "string"
+                description: "To determine how their boundary was generated"
+                example: "dtiBoundaryFromWebCoverage"
+    Errors:
+      type: "object"
+      format: "Errors/DataValidationException"
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        otherAttributes:
+          type: "object"
+          example: {}
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+              message:
+                type: "string"
+                description: "An english description of the error"
+                example: "Duplicate boundary name"
+              code:
+                type: "string"
+                description: "A string constant representing the type of error"
+                example: "some error code"
+              field:
+                type: "string"
+                description: "The name of the property or parameter deemed invalid"
+                example: "name"
+              invalidValue:
+                type: "string"
+                description: "The value that was supplied for this field in the request"
+                example: "some boundary name"
+    Link:
+      description: "Provides a reference to an associated object or list"
+      required:
+        - "rel"
+        - "uri"
+      properties:
+        rel:
+          type: "string"
+          description: "The identifier for the associated resource. If the resource is embeddable, this is also the \"embed\" value."
+          example: "self"
+        uri:
+          type: "string"
+          format: "uri"
+          description: "The location of the resource"
+          example: "https://partnerapi.deere.com/platform/organizations/1/boundaries/00000000-0000-0000-0000-000000000000"
+    AutonomousReady:
+      type: "object"
+      description: "Indicates whether or not this boundary is Autonomous Ready."
+      properties:
+        boundaryAutonomousReady:
+          type: "boolean"
+          description: "Flag indicating if the boundary is ready for autonomous operations"
+          default: false
+    Boundary:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          description: "Identifies the type Boundary"
+          example: "Boundary"
+        id:
+          description: "An identifier for this boundary, which is unique within a field context"
+          type: "string"
+          format: "uuid"
+          example: "bed69949-df25-4319-8f6c-94c62b466126"
+          readOnly: true
+        name:
+          type: "string"
+          example: "unique_boundary_name"
+        createdTime:
+          type: "string"
+          readOnly: true
+          format: "date-time"
+          example: "2018-07-01T21:00:11Z"
+        modifiedTime:
+          description: "An ISO-8601 formatted timestamp of the last modification made to this boundary"
+          type: "string"
+          format: "date-time"
+          example: "2016-11-17T11:53:00.000Z"
+        area:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        workableArea:
+          $ref: "#/components/schemas/MeasurementAsDouble"
+        multipolygons:
+          description: "A collection of polygons"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Polygon"
+        extent:
+          $ref: "#/components/schemas/Extent"
+        active:
+          type: "boolean"
+          description: "Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries."
+        archived:
+          type: "boolean"
+          description: "Indicates whether or not this boundary is archived."
+        signalType:
+          type: "string"
+          description: "Indicates what signalType was used to capture boundary information"
+        irrigated:
+          type: "boolean"
+          description: "Indicates whether the contained area is irrigated"
+        sourceType:
+          description: "sourceType of the boundary"
+          type: "string"
+          example: "driven"
+        links:
+          readOnly: true
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+        autonomousReady:
+          $ref: "#/components/schemas/AutonomousReady"
+        recordMetadata:
+          $ref: "#/components/schemas/RecordMetadata"
     BoundaryOrgId:
       type: "object"
       properties:
@@ -933,19 +1391,3 @@ components:
         owningOrganization:
           example: "https://sandboxapi.deere.com/platform/organizations/1234"
           description: "Organizations Link."
-    Boundary:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for Boundary. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    Errors:
-      type: "object"
-      description: "Error response schema for Errors (auto-generated)"
-      x-generated: true
-      properties:
-        message:
-          type: "string"
-        errors:
-          type: "array"
-          items:
-            type: "object"

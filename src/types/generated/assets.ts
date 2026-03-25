@@ -156,6 +156,85 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    AssetCatalogItem: {
+      /** @example ContributedCatalogItem */
+      '@type'?: string;
+      assetCategory: components['schemas']['AssetCategory'];
+      assetType: components['schemas']['AssetType'];
+      assetSubType: components['schemas']['AssetSubType'];
+      links?: {
+        /**
+         * @description Links relavent to exploring the collection.
+         * @example self
+         */
+        rel?: string;
+        /**
+         * Format: uri
+         * @description The URI to the related resource.
+         * @example https://sandboxapi.deere.com/platform/resources/61265
+         */
+        uri?: string;
+      }[];
+    };
+    MeasurementData: {
+      /**
+       * @description representation for which to capture data sandardized via the [ADAPT Representation System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/RepresentationSystem.xml)
+       * @example vrSoilTemperature
+       */
+      name: string;
+      /**
+       * @description measurement reading
+       * @example 46.2
+       */
+      value: string;
+      /**
+       * @description unit of measure - the basis for any conversion sandardized via the [ADAPT Unit System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/UnitSystem.xml)
+       * @example F
+       */
+      unit: string;
+    };
+    /** @example DEVICE */
+    AssetCategory: string;
+    /** @example SENSOR */
+    AssetType: string;
+    /** @example ENVIRONMENTAL */
+    AssetSubType: string;
+    '400Errors': {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
+         */
+        guid?: string;
+        /** @example This field is required. */
+        message?: string;
+        /** @example validation_constraint_required_field */
+        code?: string;
+        /** @example title */
+        field?: string;
+      }[];
+      otherAttributes?: Record<string, never>;
+    };
+    GenericErrors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
+         */
+        guid?: string;
+        /** @example some error message */
+        message?: string;
+      }[];
+      otherAttributes?: Record<string, never>;
+    };
     CollectionBase: {
       links?: {
         /**
@@ -451,36 +530,6 @@ export interface components {
     };
     AssetCatalogCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['AssetCatalogItem'][];
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for MeasurementData. Original definition missing from Deere spec. */
-    MeasurementData: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for AssetCategory. Original definition missing from Deere spec. */
-    AssetCategory: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for AssetType. Original definition missing from Deere spec. */
-    AssetType: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for AssetSubType. Original definition missing from Deere spec. */
-    AssetSubType: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for AssetCatalogItem. Original definition missing from Deere spec. */
-    AssetCatalogItem: {
-      [key: string]: unknown;
-    };
-    /** @description Error response schema for 400Errors (auto-generated) */
-    '400Errors': {
-      message?: string;
-      errors?: Record<string, never>[];
-    };
-    /** @description Error response schema for GenericErrors (auto-generated) */
-    GenericErrors: {
-      message?: string;
-      errors?: Record<string, never>[];
     };
   };
   responses: {

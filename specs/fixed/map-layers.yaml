@@ -242,6 +242,22 @@ components:
             ag2: "ag2"
             ag3: "ag3"
   schemas:
+    Link:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Link"
+        rel:
+          type: "string"
+          description: "The relation of the object to the linked resource."
+          example: "owningOrganization"
+        uri:
+          type: "string"
+          description: "The URI to the related resource."
+          format: "uri"
+          example: "https://api.deere.com/platform/organizations/61265"
+      description: "Provides a reference to an associated object or list."
     CollectionBase:
       type: "object"
       properties:
@@ -678,18 +694,6 @@ components:
                 example: "The requested resource was not found"
         otherAttributes:
           type: "object"
-    Link:
-      type: "object"
-      description: "Link schema for Link (auto-generated)"
-      x-generated: true
-      properties:
-        "@type":
-          type: "string"
-        rel:
-          type: "string"
-        uri:
-          type: "string"
-          format: "uri"
   responses:
     "400":
       description: "The request body was missing a required field or supplied a read-only value."

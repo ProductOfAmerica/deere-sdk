@@ -306,6 +306,105 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /**
+     * @example SETUP
+     * @enum {string}
+     */
+    FileType:
+      | 'SETUP'
+      | 'PRESCRIPTION'
+      | 'INVALID'
+      | 'UNKNOWN'
+      | 'DOC'
+      | 'JDBACKUP'
+      | 'HIC'
+      | 'TIMBERLINK'
+      | 'EXPORT'
+      | 'TIMBERMATIC'
+      | 'PDF'
+      | 'ISO_SETUP'
+      | 'BOUNDARY'
+      | 'EXCEL';
+    PostableFileDetails: components['schemas']['EditableFileDetails'] & {
+      type?: components['schemas']['FileType'];
+      /**
+       * @description The source of the file (e.g., the display type or user that uploaded it)
+       * @example myUserName
+       */
+      source?: string;
+      /**
+       * @description Contextual metadata for the file, such as frequency, report type, machines, and fields
+       * @example {
+       *       "frequency": "DAILY",
+       *       "reportType": "CONNECTIVITY",
+       *       "machines": [
+       *         "eb8a4a58-9d94-4c98-ae56-09331aa0ff50",
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1"
+       *       ],
+       *       "fields": [
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1",
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1"
+       *       ]
+       *     }
+       */
+      contextMetadata?: Record<string, never>;
+      /**
+       * @description Additional custom metadata for the file
+       * @example {
+       *       "time_range_start": "2025-07-01T00:00:00Z",
+       *       "time_range_end": "2025-07-28T00:00:00Z",
+       *       "locale": "en-US",
+       *       "time_zone": "UTC",
+       *       "unit_of_measure": "XYZ",
+       *       "user_type": "Admin",
+       *       "schedule_id": "124jsg"
+       *     }
+       */
+      customMetadata?: Record<string, never>;
+    };
+    EditableFileDetails: {
+      /** @example RW8360R907628_12062012.zip */
+      name?: string;
+      /**
+       * @description Indicates whether the file has been archived.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description If set to true, then processing of the file will be delayed until this is toggled to false.
+       * @example false
+       */
+      delayProcessing?: boolean;
+      /**
+       * @description Contextual metadata for the file, such as frequency, report type, machines, and fields
+       * @example {
+       *       "frequency": "DAILY",
+       *       "reportType": "CONNECTIVITY",
+       *       "machines": [
+       *         "eb8a4a58-9d94-4c98-ae56-09331aa0ff50",
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1"
+       *       ],
+       *       "fields": [
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1",
+       *         "3341fe33-4825-464b-8442-3f17fa876cd1"
+       *       ]
+       *     }
+       */
+      contextMetadata?: Record<string, never>;
+      /**
+       * @description Additional custom metadata for the file
+       * @example {
+       *       "time_range_start": "2025-07-01T00:00:00Z",
+       *       "time_range_end": "2025-07-28T00:00:00Z",
+       *       "locale": "en-US",
+       *       "time_zone": "UTC",
+       *       "unit_of_measure": "XYZ",
+       *       "user_type": "Admin",
+       *       "schedule_id": "124jsg"
+       *     }
+       */
+      customMetadata?: Record<string, never>;
+    };
     FilesLink: {
       /**
        * @description Organization Link.
@@ -496,14 +595,6 @@ export interface components {
        * @example Must be between 1 and 45 characters Should not contain invalid characters.
        */
       400?: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for EditableFileDetails. Original definition missing from Deere spec. */
-    EditableFileDetails: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for PostableFileDetails. Original definition missing from Deere spec. */
-    PostableFileDetails: {
-      [key: string]: unknown;
     };
   };
   responses: {

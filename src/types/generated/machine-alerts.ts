@@ -54,6 +54,104 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    BadRequestResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '400';
+      /** @example The provided payload was invalid or malformed. */
+      message?: string;
+    };
+    UnauthorizedResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '401';
+      /** @example The request could not be authorized with the given credentials. */
+      message?: string;
+    };
+    ForbiddenResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '403';
+      /** @example The provided authorization is not allowed to access this resource. */
+      message?: string;
+    };
+    NotAcceptableResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '406';
+      /** @example The requested resource could not be produced in any acceptable format. */
+      message?: string;
+    };
+    NotFoundResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '404';
+      /** @example The requested resource could not be found. */
+      message?: string;
+    };
+    /**
+     * Format: uuid
+     * @description A unique string identifier.
+     * @example e7c52f93-4bb6-48bb-b808-11b7b4f23059
+     */
+    UID: string;
+    ErrorResponseBody: {
+      /**
+       * @description This is the type definition for this reference object.
+       * @enum {string}
+       */
+      readonly '@type'?: 'Errors';
+      errors?: {
+        /**
+         * @description This is the type definition for this reference object.
+         * @enum {string}
+         */
+        readonly '@type'?: 'Error';
+        /**
+         * Format: numeric
+         * @example 400
+         */
+        code?: string;
+        /**
+         * @description The field in the request body that is invalid.
+         * @example id
+         */
+        field?: string;
+        guid: components['schemas']['UID'];
+        /**
+         * @description The invalid value present in the field.
+         * @example b48da18c-c0e6-4bcc-a00e-581035beab3d
+         */
+        invalidValue?: string;
+        /** @example There was a problem with the request. */
+        message: string;
+      }[];
+      otherAttributes?: {
+        /** @example example_name */
+        name?: string;
+        /** @example example_value */
+        value?: string;
+      };
+    };
+    TooManyRequestsResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '429';
+      /** @example The server has received too many requests. Try again at a later time. */
+      message?: string;
+    };
     AlertLink: {
       /**
        * @description Machines Link.
@@ -203,30 +301,6 @@ export interface components {
          */
         description?: string;
       };
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for BadRequestResponseBody. Original definition missing from Deere spec. */
-    BadRequestResponseBody: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for UnauthorizedResponseBody. Original definition missing from Deere spec. */
-    UnauthorizedResponseBody: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for ForbiddenResponseBody. Original definition missing from Deere spec. */
-    ForbiddenResponseBody: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for NotFoundResponseBody. Original definition missing from Deere spec. */
-    NotFoundResponseBody: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for NotAcceptableResponseBody. Original definition missing from Deere spec. */
-    NotAcceptableResponseBody: {
-      [key: string]: unknown;
-    };
-    /** @description AUTO-GENERATED STUB SCHEMA for TooManyRequestsResponseBody. Original definition missing from Deere spec. */
-    TooManyRequestsResponseBody: {
-      [key: string]: unknown;
     };
   };
   responses: {

@@ -37,8 +37,8 @@ paths:
                                 x-deere-signature: 3b6402615e4b4e1c92013026f47109bb'
                   value:
                     links:
-                    - rel: self
-                      uri: https://sandboxapi.deere.com/platform/partnerships
+                      - rel: self
+                        uri: https://sandboxapi.deere.com/platform/partnerships
                     total: 2
                     values:
                       - links:
@@ -95,10 +95,10 @@ paths:
               No Header:
                 value:
                   links:
-                  - rel: toPartnership
-                    uri: mailto:partnerorg@gmail.com
-                  - rel: fromPartnership
-                    uri: https://partnerapi.deere.com/platform/organizations/orgId
+                    - rel: toPartnership
+                      uri: mailto:partnerorg@gmail.com
+                    - rel: fromPartnership
+                      uri: https://partnerapi.deere.com/platform/organizations/orgId
       responses:
         200:
           description: Created Partnership
@@ -163,19 +163,19 @@ paths:
                                 Content-Type: application/vnd.deere.axiom.v3+json'
                   value:
                     links:
-                    - rel: self
-                      uri: >-
-                        https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc
-                    - rel: fromPartnership
-                      uri: https://sandboxapi.deere.com/platform/organizations/0987
-                    - rel: toPartnership
-                      uri: https://sandboxapi.deere.com/platform/organizations/1234
-                    - rel: permissions
-                      uri: >-
-                        https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
-                    - rel: contactInvitation
-                      uri: >-
-                        https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703
+                      - rel: self
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc
+                      - rel: fromPartnership
+                        uri: https://sandboxapi.deere.com/platform/organizations/0987
+                      - rel: toPartnership
+                        uri: https://sandboxapi.deere.com/platform/organizations/1234
+                      - rel: permissions
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
+                      - rel: contactInvitation
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703
                     status: ACCEPTED
 
         403:
@@ -240,12 +240,12 @@ paths:
                                 Content-Type: application/vnd.deere.axiom.v3+json'
                   value:
                     links:
-                    - rel: self
-                      uri: >-
-                        https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
-                    - rel: requestPermissions
-                      uri: >-
-                        https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
+                      - rel: self
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
+                      - rel: requestPermissions
+                        uri: >-
+                          https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions
                     permissions:
                       - links:
                           - rel: self
@@ -277,8 +277,8 @@ paths:
                               Content-Type: application/vnd.deere.axiom.v3+json'
                 value:
                   permissions:
-                  - type: viewDetailsAndMapLocation
-                    status: requested
+                    - type: viewDetailsAndMapLocation
+                      status: requested
       responses:
         200:
           description: Permissions
@@ -322,10 +322,127 @@ components:
           scopes:
             org1: 'org1'
             org2: 'org2'
+  examples:
+    TokenNotFound:
+      value: {
+        "@type": Errors,
+        errors: [
+          {
+            "@type": Error,
+            guid: 123abc-123-abc-123-abc123,
+            message: No Partnership exists with the given partnership token.
+          }
+        ],
+        otherAttributes: { }
+      }
+    NoDealerAccountExists:
+      value: {
+        "@type": Errors,
+        errors: [
+          {
+            "@type": Error,
+            guid: 123abc-123-abc-123-abc123,
+            message: No dealer account exists with this accountId,
+            code: No dealer account exists with this accountId,
+            field: dealerAccountId,
+            invalidValue: 123412341234
+          }
+        ],
+        otherAttributes: { }
+      }
+
+    OrgAccountDoesNotExist:
+      value: {
+        "@type": Errors,
+        errors: [
+          {
+            "@type": Error,
+            guid: 123abc-123-abc-123-abc123,
+            message: No organization exists with given orgId.,
+            code: No organization exists with given orgId.,
+            field: dealerAccountId,
+            invalidValue: "https://api.deere.com/platform/organizations/12345"
+          }
+        ],
+        otherAttributes: { }
+      }
+
+    CreateInvalidPrimaryDealer:
+      value: {
+        "@type": Errors,
+        errors: [
+          {
+            "@type": Error,
+            guid: 123abc-123-abc-123-abc123,
+            message: Attempting to set a non-dealer organization as primary dealer.,
+            code: Attempting to set a non-dealer organization as primary dealer.,
+            field: uri,
+            invalidValue: "https://api.deere.com/platform/organizations/12345"
+          }
+        ],
+        otherAttributes: { }
+      }
   responses:
+    TokenNotFound:
+      description: Not found
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+          examples:
+            Partnership Not Found:
+              $ref: '#/components/examples/TokenNotFound'
+    BadCreateRequests:
+      description: Request body was invalid
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+          examples:
+            Dealer Account Does Not Exist:
+              $ref: '#/components/examples/NoDealerAccountExists'
+            Organization Does Not Exist:
+              $ref: '#/components/examples/OrgAccountDoesNotExist'
+            Invalid Primary Dealer Organization:
+              $ref: '#/components/examples/CreateInvalidPrimaryDealer'
     Forbidden:
       description: Not authorized
   schemas:
+    Errors:
+      description: A list of errors
+      properties:
+        "@type":
+          type: string
+          example: Errors
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Error"
+        otherAttributes:
+          type: object
+
+    Error:
+      description: An error object
+      properties:
+        "@type":
+          type: string
+          example: Error
+        guid:
+          type: string
+          format: guid
+          example: 17826sd23-e5e1-4921-8841-3c5f584r3a2e
+        message:
+          type: string
+          example: No dealer account exists with this accountId
+        code:
+          type: string
+          example: No dealer account exists with this accountId
+        field:
+          type: string
+          example: dealerAccountId
+        invalidValue:
+          type: string
+          example: 1234123412341234
     Partnerships:
       description: A list of partnerships
       type: object

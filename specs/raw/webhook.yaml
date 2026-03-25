@@ -442,6 +442,56 @@ components:
 
 
   schemas:
+    HTTPTargetEndpointEventsContent:
+      description: A list of events
+      type: array
+      items:
+        $ref: '#/components/schemas/HTTPTargetEndpointEventContent'
+
+    HTTPTargetEndpointEventContent:
+      description: An event
+      type: object
+      properties:
+        clientKey:
+          type: string
+          description: The client key that made the subscription
+          example: johndeere-abcdef
+        eventTypeId:
+          type: string
+          example: fieldOperation
+        targetResource:
+          type: string
+          format: url
+          example: https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
+        token:
+          type: string
+          pattern: '^[A-Za-z0-9+/=]{0,256}$'
+          description: a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set.
+          example: 'abc123ABC+/='
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/HTTPTargetEndpointEventMetadata'
+        links:
+          $ref: '#/components/schemas/Links'
+      required:
+        - clientKey
+        - eventTypeId
+        - targetResource
+        - metadata
+        - links
+
+    HTTPTargetEndpointEventMetadata:
+      type: object
+      description: Generic key value pair
+      properties:
+        key:
+          type: string
+          example: orgId
+        value:
+          type: string
+          example: 12345
+
     Links:
       type: array
       items:

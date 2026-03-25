@@ -460,6 +460,95 @@ components:
                   - rel: "self"
                     uri: "https://sandboxapi.deere.com/platform/files/466578633"
   schemas:
+    FileType:
+      type: "string"
+      enum:
+        - "SETUP"
+        - "PRESCRIPTION"
+        - "INVALID"
+        - "UNKNOWN"
+        - "DOC"
+        - "JDBACKUP"
+        - "HIC"
+        - "TIMBERLINK"
+        - "EXPORT"
+        - "TIMBERMATIC"
+        - "PDF"
+        - "ISO_SETUP"
+        - "BOUNDARY"
+        - "EXCEL"
+      example: "SETUP"
+    PostableFileDetails:
+      allOf:
+        - $ref: "#/components/schemas/EditableFileDetails"
+        - type: "object"
+          properties:
+            type:
+              $ref: "#/components/schemas/FileType"
+            source:
+              type: "string"
+              description: "The source of the file (e.g., the display type or user that uploaded it)"
+              example: "myUserName"
+            contextMetadata:
+              type: "object"
+              description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
+              example:
+                frequency: "DAILY"
+                reportType: "CONNECTIVITY"
+                machines:
+                  - "eb8a4a58-9d94-4c98-ae56-09331aa0ff50"
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+                fields:
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+            customMetadata:
+              type: "object"
+              description: "Additional custom metadata for the file"
+              example:
+                time_range_start: "2025-07-01T00:00:00Z"
+                time_range_end: "2025-07-28T00:00:00Z"
+                locale: "en-US"
+                time_zone: "UTC"
+                unit_of_measure: "XYZ"
+                user_type: "Admin"
+                schedule_id: "124jsg"
+    EditableFileDetails:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "RW8360R907628_12062012.zip"
+        archived:
+          type: "boolean"
+          description: "Indicates whether the file has been archived."
+          example: false
+        delayProcessing:
+          type: "boolean"
+          description: "If set to true, then processing of the file will be delayed until this is toggled to false."
+          example: false
+        contextMetadata:
+          type: "object"
+          description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
+          example:
+            frequency: "DAILY"
+            reportType: "CONNECTIVITY"
+            machines:
+              - "eb8a4a58-9d94-4c98-ae56-09331aa0ff50"
+              - "3341fe33-4825-464b-8442-3f17fa876cd1"
+            fields:
+              - "3341fe33-4825-464b-8442-3f17fa876cd1"
+              - "3341fe33-4825-464b-8442-3f17fa876cd1"
+        customMetadata:
+          type: "object"
+          description: "Additional custom metadata for the file"
+          example:
+            time_range_start: "2025-07-01T00:00:00Z"
+            time_range_end: "2025-07-28T00:00:00Z"
+            locale: "en-US"
+            time_zone: "UTC"
+            unit_of_measure: "XYZ"
+            user_type: "Admin"
+            schedule_id: "124jsg"
     FilesLink:
       properties:
         owningOrganization:
@@ -616,13 +705,3 @@ components:
         "400":
           description: "File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
           example: "Must be between 1 and 45 characters Should not contain invalid characters."
-    EditableFileDetails:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for EditableFileDetails. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true
-    PostableFileDetails:
-      type: "object"
-      description: "AUTO-GENERATED STUB SCHEMA for PostableFileDetails. Original definition missing from Deere spec."
-      x-generated: true
-      additionalProperties: true

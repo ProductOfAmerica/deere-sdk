@@ -56,6 +56,37 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description A list of events */
+    HTTPTargetEndpointEventsContent: components['schemas']['HTTPTargetEndpointEventContent'][];
+    /** @description An event */
+    HTTPTargetEndpointEventContent: {
+      /**
+       * @description The client key that made the subscription
+       * @example johndeere-abcdef
+       */
+      clientKey: string;
+      /** @example fieldOperation */
+      eventTypeId: string;
+      /**
+       * Format: url
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
+       */
+      targetResource: string;
+      /**
+       * @description a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set.
+       * @example abc123ABC+/=
+       */
+      token?: string;
+      metadata: components['schemas']['HTTPTargetEndpointEventMetadata'][];
+      links: components['schemas']['Links'];
+    };
+    /** @description Generic key value pair */
+    HTTPTargetEndpointEventMetadata: {
+      /** @example orgId */
+      key?: string;
+      /** @example 12345 */
+      value?: string;
+    };
     Links: components['schemas']['Link'][];
     /** @description Link to another resource */
     Link: {
@@ -271,10 +302,6 @@ export interface components {
      * @example Bearer
      */
     AuthorizationHeader: string | null;
-    /** @description AUTO-GENERATED STUB SCHEMA for HTTPTargetEndpointEventsContent. Original definition missing from Deere spec. */
-    HTTPTargetEndpointEventsContent: {
-      [key: string]: unknown;
-    };
   };
   responses: {
     /** @description Subscription */
