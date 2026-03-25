@@ -18,6 +18,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
 
+    outputs:
+      should_publish: ${{ steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true' }}
+
     permissions:
       contents: write
       actions: write
@@ -221,13 +224,6 @@ jobs:
           prerelease: false
           files: '*.tgz'
 
-      - name: Trigger publish workflow
-        if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
-        run: |
-          gh workflow run publish.yml
-        env:
-          GH_TOKEN: ${{ secrets.PAT_WITH_BYPASS }}
-
       - name: Summary
         run: |
           if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
@@ -247,3 +243,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "The John Deere API specifications have not changed since the last sync." >> $GITHUB_STEP_SUMMARY
           fi
+
+  publish:
+    needs: sync
+    if: needs.sync.outputs.should_publish == 'true'
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
