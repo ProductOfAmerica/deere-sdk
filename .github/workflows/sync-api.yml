@@ -247,5 +247,8 @@ jobs:
   publish:
     needs: sync
     if: needs.sync.outputs.should_publish == 'true'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/publish.yml
     secrets: inherit
