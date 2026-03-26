@@ -5,7 +5,7 @@
  * @generated from machine-device-state-reports.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/machine-device-state-reports.js';
 
 export class MachineDeviceStateReportsApi {
@@ -28,21 +28,14 @@ export class MachineDeviceStateReportsApi {
    * Device State Report from the specified terminal.
    * @generated from GET /machines/{principalId}/deviceStateReports
    */
-  async get(
-    principalId: string,
-    params?: { lastKnown?: boolean; startDate?: string; endDate?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['DeviceStateReport']>> {
+  async get(principalId: string, params?: { lastKnown?: boolean; startDate?: string; endDate?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['DeviceStateReport']>> {
     const query = new URLSearchParams();
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
     const path = `/machines/${principalId}/deviceStateReports${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['DeviceStateReport']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['DeviceStateReport']>>(path, options);
   }
 }
 

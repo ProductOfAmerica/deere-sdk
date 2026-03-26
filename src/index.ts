@@ -44,6 +44,7 @@ export {
   createClient,
   DeereClient,
   DeereError,
+  HateoasError,
   RateLimitError,
 } from './client.js';
 // Main SDK class

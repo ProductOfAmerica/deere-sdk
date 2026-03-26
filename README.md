@@ -472,6 +472,74 @@ for await (const items of client.paginate('/large/collection')) {
 
 ---
 
+## HATEOAS Mode
+
+John Deere requires applications to demonstrate [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) compliance before granting production API access. When enabled, the SDK automatically follows HAL links from parent resources instead of constructing URLs directly — producing the exact traffic pattern John Deere's certification requires.
+
+```typescript
+const deere = new Deere({
+    accessToken: 'your-token',
+    environment: 'sandbox',
+    hateoas: true,       // Enable HATEOAS link traversal
+    hateoasDebug: true,  // Optional: log resolution details
+});
+
+// Same API — HATEOAS resolution is transparent
+const orgs = await deere.organizations.listAll();
+const fields = await deere.fields.listAll(orgs[0].id);
+```
+
+When `hateoas: true`, the SDK fetches parent resources and follows their HAL links before accessing child resources. For example, `deere.fields.list('org-123')` first fetches `/organizations/org-123`, finds the `fields` link in its response, and uses that discovered URL. Link responses are cached per-session, so subsequent calls incur no extra latency.
+
+### Certification Walkthrough
+
+```typescript
+import {Deere} from 'deere-sdk';
+
+// 1. Create client with HATEOAS enabled
+const deere = new Deere({
+    accessToken: 'your-oauth-token',
+    environment: 'sandbox',
+    hateoas: true,
+    hateoasDebug: true, // See link resolution in console
+});
+
+// 2. Warm the cache (optional — reduces cold-start latency)
+await deere.client.warmLinkCache(['/organizations']);
+
+// 3. Use the SDK normally — HATEOAS happens transparently
+const orgs = await deere.organizations.listAll();
+const org = await deere.organizations.get(orgs[0].id);
+const fields = await deere.fields.listAll(org.id);
+const boundaries = await deere.boundaries.listBoundaries(org.id, fields[0].id);
+
+// Console output (with hateoasDebug: true):
+// [HATEOAS] /organizations/org-123/fields → parent: /organizations/org-123, rel: fields → https://...
+// [HATEOAS] /organizations/org-123/fields/f-456/boundaries → parent: /organizations/org-123/fields/f-456, rel: boundaries → https://...
+
+// 4. After certification, disable HATEOAS for production speed
+// hateoas: false (or omit — it's the default)
+```
+
+### Strict Mode
+
+HATEOAS mode is strict: if link resolution fails (parent returns no matching link, parent fetch errors), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate.
+
+```typescript
+import {HateoasError} from 'deere-sdk';
+
+try {
+    await deere.fields.listAll('org-123');
+} catch (error) {
+    if (error instanceof HateoasError) {
+        console.log(`Link resolution failed: ${error.message}`);
+        console.log(`Path: ${error.path}`);
+    }
+}
+```
+
+---
+
 ## Error Handling
 
 ### Automatic Retries

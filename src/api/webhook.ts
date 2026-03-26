@@ -40,16 +40,9 @@ export class WebhookApi {
    * current authorization context. self: The created subscription.
    * @generated from POST /eventSubscriptions
    */
-  async create(
-    data: Record<string, unknown>,
-    options?: RequestOptions
-  ): Promise<components['schemas']['CreatedSubscriptionValues']> {
+  async create(data: Record<string, unknown>, options?: RequestOptions): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions`;
-    return this.client.post<components['schemas']['CreatedSubscriptionValues']>(
-      path,
-      data,
-      options
-    );
+    return this.client.post<components['schemas']['CreatedSubscriptionValues']>(path, data, options);
   }
 
   /**
@@ -59,10 +52,7 @@ export class WebhookApi {
    * current authorization context. self: The subscription itself.
    * @generated from GET /eventSubscriptions/{id}
    */
-  async get(
-    id: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['CreatedSubscriptionValues']> {
+  async get(id: string, options?: RequestOptions): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions/${id}`;
     return this.client.get<components['schemas']['CreatedSubscriptionValues']>(path, options);
   }
@@ -73,11 +63,7 @@ export class WebhookApi {
    * Only certain fields are editable.
    * @generated from PUT /eventSubscriptions/{id}
    */
-  async update(
-    id: string,
-    data: components['schemas']['SubscriptionResponseContent'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(id: string, data: components['schemas']['SubscriptionResponseContent'], options?: RequestOptions): Promise<void> {
     const path = `/eventSubscriptions/${id}`;
     await this.client.put(path, data, options);
   }

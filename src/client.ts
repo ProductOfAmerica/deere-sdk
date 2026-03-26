@@ -22,6 +22,15 @@ export interface DeereClientConfig {
   timeout?: number;
   /** Maximum number of retry attempts for failed requests. Defaults to 3. Set to 0 to disable retries. */
   maxRetries?: number;
+  /**
+   * Enable HATEOAS link traversal. When true, the client fetches parent resources
+   * and follows HAL links instead of constructing URLs directly.
+   * Required for John Deere production API certification.
+   * @default false
+   */
+  hateoas?: boolean;
+  /** Log HATEOAS resolution details to console for debugging. @default false */
+  hateoasDebug?: boolean;
 }
 
 export interface RetryConfig {
@@ -86,6 +95,17 @@ export class AuthError extends DeereError {
   }
 }
 
+export class HateoasError extends Error {
+  constructor(
+    message: string,
+    public readonly path: string,
+    public readonly cause?: Error
+  ) {
+    super(message);
+    this.name = 'HateoasError';
+  }
+}
+
 const ENVIRONMENT_URLS: Record<Environment, string> = {
   production: 'https://api.deere.com/platform',
   sandbox: 'https://sandboxapi.deere.com/platform',
@@ -98,6 +118,30 @@ const DEERE_ACCEPT_HEADER = 'application/vnd.deere.axiom.v3+json';
 
 /** HTTP status codes that are safe to retry */
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+
+import { HATEOAS_MAP } from './hateoas-map.js';
+
+class LinkCache {
+  private cache = new Map<string, Link[]>();
+
+  set(parentPath: string, links: Link[]): void {
+    this.cache.set(parentPath, links);
+  }
+
+  findRel(parentPath: string, rel: string): string | undefined {
+    const links = this.cache.get(parentPath);
+    if (!links) return undefined;
+    return links.find((l) => l.rel === rel)?.uri;
+  }
+
+  has(parentPath: string): boolean {
+    return this.cache.has(parentPath);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
 
 /**
  * John Deere API Client
@@ -126,12 +170,17 @@ export class DeereClient {
   private readonly defaultHeaders: Record<string, string>;
   private readonly timeout: number;
   private readonly retryConfig: RetryConfig;
+  private readonly hateoas: boolean;
+  private readonly hateoasDebug: boolean;
+  private readonly linkCache = new LinkCache();
 
   constructor(config: DeereClientConfig) {
     this.accessToken = config.accessToken;
     this.baseUrl = config.baseUrl ?? ENVIRONMENT_URLS[config.environment ?? 'sandbox'];
     this.fetchFn = config.fetch ?? fetch;
     this.timeout = config.timeout ?? 30000;
+    this.hateoas = config.hateoas ?? false;
+    this.hateoasDebug = config.hateoasDebug ?? false;
     this.defaultHeaders = {
       Accept: DEERE_ACCEPT_HEADER,
       'Content-Type': DEERE_ACCEPT_HEADER,
@@ -193,7 +242,9 @@ export class DeereClient {
    * Paginate through all results following nextPage links
    */
   async *paginate<T>(path: string, options?: RequestOptions): AsyncGenerator<T[], void, unknown> {
-    let url: string | undefined = `${this.baseUrl}${path}`;
+    let url: string | undefined = this.hateoas
+      ? await this.resolveHateoasUrl(path)
+      : `${this.baseUrl}${path}`;
 
     while (url) {
       const response: PaginatedResponse<T> = await this.requestUrl<PaginatedResponse<T>>(
@@ -232,7 +283,14 @@ export class DeereClient {
     body?: unknown,
     options?: RequestOptions
   ): Promise<T> {
-    const url = path.startsWith('http') ? path : `${this.baseUrl}${path}`;
+    let url: string;
+    if (path.startsWith('http')) {
+      url = path;
+    } else if (this.hateoas) {
+      url = await this.resolveHateoasUrl(path);
+    } else {
+      url = `${this.baseUrl}${path}`;
+    }
     return this.requestUrl<T>(method, url, body, options);
   }
 
@@ -344,6 +402,129 @@ export class DeereClient {
 
     // Should not reach here, but just in case
     throw lastError ?? new DeereError('Request failed after retries', 0, 'RetryExhausted');
+  }
+
+  /**
+   * Clear the HATEOAS link cache. Useful for long-lived clients or testing.
+   */
+  clearLinkCache(): void {
+    this.linkCache.clear();
+  }
+
+  /**
+   * Pre-fetch parent resources to warm the HATEOAS link cache.
+   * Reduces latency for subsequent HATEOAS-resolved requests.
+   * @param paths - Parent resource paths to pre-fetch (defaults to common roots)
+   */
+  async warmLinkCache(paths: string[] = ['/organizations']): Promise<void> {
+    for (const path of paths) {
+      try {
+        const url = `${this.baseUrl}${path}`;
+        const response = await this.requestUrl<{ links?: Link[] }>('GET', url);
+        if (response?.links) {
+          this.linkCache.set(path, response.links);
+        }
+      } catch {
+        // Best-effort — skip paths that fail
+      }
+    }
+  }
+
+  /**
+   * Match a concrete path against the HATEOAS route map.
+   * Returns the concrete parent path and rel name, or null if no match.
+   */
+  private matchHateoasPattern(
+    concretePath: string
+  ): { concreteParentPath: string; rel: string } | null {
+    const concreteSegments = concretePath.split('/').filter(Boolean);
+
+    for (const [pattern, route] of Object.entries(HATEOAS_MAP)) {
+      const patternSegments = pattern.split('/').filter(Boolean);
+
+      if (concreteSegments.length !== patternSegments.length) continue;
+
+      let matches = true;
+      for (let i = 0; i < patternSegments.length; i++) {
+        if (patternSegments[i].startsWith('{')) continue; // wildcard
+        if (patternSegments[i] !== concreteSegments[i]) {
+          matches = false;
+          break;
+        }
+      }
+
+      if (matches) {
+        // Build the concrete parent path by substituting actual values
+        const parentSegments = route.parentPath.split('/').filter(Boolean);
+        const concreteParentParts = parentSegments.map((seg, i) =>
+          seg.startsWith('{') ? concreteSegments[i] : seg
+        );
+        const concreteParentPath = `/${concreteParentParts.join('/')}`;
+
+        return { concreteParentPath, rel: route.rel };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Resolve a path via HATEOAS link traversal.
+   * Fetches the parent resource, finds the matching link rel, and returns the discovered URL.
+   * Throws HateoasError if resolution fails (strict mode).
+   */
+  private async resolveHateoasUrl(path: string): Promise<string> {
+    // Strip query params for matching, reattach after
+    const [basePath, queryString] = path.split('?', 2);
+    const match = this.matchHateoasPattern(basePath);
+
+    if (!match) {
+      // No map entry — path is a root collection or item, use direct URL
+      return `${this.baseUrl}${path}`;
+    }
+
+    const { concreteParentPath, rel } = match;
+
+    // Check cache
+    let discoveredUrl = this.linkCache.findRel(concreteParentPath, rel);
+
+    if (!discoveredUrl) {
+      // Cache miss — fetch parent resource
+      try {
+        const parentUrl = `${this.baseUrl}${concreteParentPath}`;
+        const parentResponse = await this.requestUrl<{ links?: Link[] }>('GET', parentUrl);
+
+        if (parentResponse?.links) {
+          this.linkCache.set(concreteParentPath, parentResponse.links);
+          discoveredUrl = this.linkCache.findRel(concreteParentPath, rel);
+        }
+      } catch (error) {
+        throw new HateoasError(
+          `HATEOAS resolution failed: could not fetch parent resource "${concreteParentPath}"`,
+          path,
+          error instanceof Error ? error : undefined
+        );
+      }
+    }
+
+    if (!discoveredUrl) {
+      const cachedLinks = this.linkCache.has(concreteParentPath);
+      throw new HateoasError(
+        `HATEOAS resolution failed: parent "${concreteParentPath}" has no link with rel "${rel}"${cachedLinks ? '' : ' (parent returned no links)'}`,
+        path
+      );
+    }
+
+    // Reattach query params
+    const resolvedUrl = queryString ? `${discoveredUrl}?${queryString}` : discoveredUrl;
+
+    if (this.hateoasDebug) {
+      console.log(
+        `[HATEOAS] ${path} → parent: ${concreteParentPath}, rel: ${rel} → ${resolvedUrl}`
+      );
+    }
+
+    return resolvedUrl;
   }
 
   /**

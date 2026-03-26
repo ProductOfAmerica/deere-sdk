@@ -5,7 +5,7 @@
  * @generated from files.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/files.js';
 
 export class FilesApi {
@@ -19,10 +19,7 @@ export class FilesApi {
    * partners this file is shared with.
    * @generated from GET /files
    */
-  async list(
-    params?: { filter: string; fileType: number; transferable: boolean },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FilesGet']>> {
+  async list(params?: { filter: string; fileType: number; transferable: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FilesGet']>> {
     const query = new URLSearchParams();
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
     if (params?.fileType !== undefined) query.set('fileType', String(params.fileType));
@@ -35,10 +32,7 @@ export class FilesApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /files
    */
-  async listAll(
-    params?: { filter: string; fileType: number; transferable: boolean },
-    options?: RequestOptions
-  ): Promise<components['schemas']['FilesGet'][]> {
+  async listAll(params?: { filter: string; fileType: number; transferable: boolean }, options?: RequestOptions): Promise<components['schemas']['FilesGet'][]> {
     const query = new URLSearchParams();
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
     if (params?.fileType !== undefined) query.set('fileType', String(params.fileType));
@@ -77,11 +71,7 @@ export class FilesApi {
    * The client must before uploading a file.
    * @generated from PUT /files/{fileId}
    */
-  async update(
-    fileId: string,
-    data: components['schemas']['EditableFileDetails'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(fileId: string, data: components['schemas']['EditableFileDetails'], options?: RequestOptions): Promise<void> {
     const path = `/files/${fileId}`;
     await this.client.put(path, data, options);
   }
@@ -99,18 +89,7 @@ export class FilesApi {
    * "machinesEligibleToReceiveFile."
    * @generated from GET /organizations/{orgId}/files
    */
-  async listFiles(
-    orgId: string,
-    params?: {
-      filter?: string;
-      startDate?: string;
-      endDate?: unknown;
-      fileType?: number;
-      archived?: boolean;
-      status?: string;
-    },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FilesGet']>> {
+  async listFiles(orgId: string, params?: { filter?: string; startDate?: string; endDate?: unknown; fileType?: number; archived?: boolean; status?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FilesGet']>> {
     const query = new URLSearchParams();
     if (params?.filter !== undefined) query.set('filter', String(params.filter));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
@@ -131,11 +110,7 @@ export class FilesApi {
    * use the new file ID, to
    * @generated from POST /organizations/{orgId}/files
    */
-  async create(
-    orgId: string,
-    data: components['schemas']['PostableFileDetails'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async create(orgId: string, data: components['schemas']['PostableFileDetails'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/files`;
     await this.client.post(path, data, options);
   }

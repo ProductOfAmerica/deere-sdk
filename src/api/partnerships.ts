@@ -5,7 +5,7 @@
  * @generated from partnerships.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/partnerships.js';
 
 export class PartnershipsApi {
@@ -23,9 +23,7 @@ export class PartnershipsApi {
    * specific to the partnership request.
    * @generated from GET /partnerships
    */
-  async list(
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Partnerships']>> {
+  async list(options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Partnerships']>> {
     const path = `/partnerships`;
     return this.client.get<PaginatedResponse<components['schemas']['Partnerships']>>(path, options);
   }
@@ -63,10 +61,7 @@ export class PartnershipsApi {
    * specific to the partnership request.
    * @generated from GET /partnerships/{token}
    */
-  async get(
-    token: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['PartnershipsId']> {
+  async get(token: string, options?: RequestOptions): Promise<components['schemas']['PartnershipsId']> {
     const path = `/partnerships/${token}`;
     return this.client.get<components['schemas']['PartnershipsId']>(path, options);
   }
@@ -89,10 +84,7 @@ export class PartnershipsApi {
    * permissions to a partner.
    * @generated from GET /partnerships/{token}/permissions
    */
-  async listPermissions(
-    token: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Permissions']>> {
+  async listPermissions(token: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Permissions']>> {
     const path = `/partnerships/${token}/permissions`;
     return this.client.get<PaginatedResponse<components['schemas']['Permissions']>>(path, options);
   }
@@ -104,11 +96,7 @@ export class PartnershipsApi {
    * partnership, assign or request the relevant permission type.
    * @generated from POST /partnerships/{token}/permissions
    */
-  async createPermissions(
-    token: string,
-    data: Record<string, unknown>,
-    options?: RequestOptions
-  ): Promise<components['schemas']['PermissionsPost']> {
+  async createPermissions(token: string, data: Record<string, unknown>, options?: RequestOptions): Promise<components['schemas']['PermissionsPost']> {
     const path = `/partnerships/${token}/permissions`;
     return this.client.post<components['schemas']['PermissionsPost']>(path, data, options);
   }

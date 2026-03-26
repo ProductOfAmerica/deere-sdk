@@ -5,7 +5,7 @@
  * @generated from harvest-id.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/harvest-id.js';
 
 export class HarvestIdApi {
@@ -17,31 +17,20 @@ export class HarvestIdApi {
    * system for the provided organization ID (filtered by user-level access).
    * @generated from GET /organizations/{orgId}/harvestIdentificationModules
    */
-  async list(
-    orgId: string,
-    params?: { embed?: string; startDate?: string; endDate?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['HIDCottonModule']>> {
+  async list(orgId: string, params?: { embed?: string; startDate?: string; endDate?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['HIDCottonModule']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['HIDCottonModule']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['HIDCottonModule']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/harvestIdentificationModules
    */
-  async listAll(
-    orgId: string,
-    params?: { embed?: string; startDate?: string; endDate?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['HIDCottonModule'][]> {
+  async listAll(orgId: string, params?: { embed?: string; startDate?: string; endDate?: string }, options?: RequestOptions): Promise<components['schemas']['HIDCottonModule'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
@@ -57,12 +46,7 @@ export class HarvestIdApi {
    * number.
    * @generated from GET /organizations/{orgId}/harvestIdentificationModules/{serialNumber}
    */
-  async get(
-    orgId: string,
-    serialNumber: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['HIDCottonModule']> {
+  async get(orgId: string, serialNumber: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['HIDCottonModule']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();

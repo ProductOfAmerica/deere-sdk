@@ -5,7 +5,7 @@
  * @generated from products.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/products.js';
 
 export class ProductsApi {
@@ -17,36 +17,19 @@ export class ProductsApi {
    * specified org.
    * @generated from GET /organizations/{organizationId}/varieties
    */
-  async list(
-    organizationId: string,
-    params?: {
-      status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
-      embed?: 'documents' | 'showMergedProducts';
-    },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['VarietyCollection']>> {
+  async list(organizationId: string, params?: { status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL'; embed?: 'documents' | 'showMergedProducts' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['VarietyCollection']>> {
     const query = new URLSearchParams();
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['VarietyCollection']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['VarietyCollection']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{organizationId}/varieties
    */
-  async listAll(
-    organizationId: string,
-    params?: {
-      status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
-      embed?: 'documents' | 'showMergedProducts';
-    },
-    options?: RequestOptions
-  ): Promise<components['schemas']['VarietyCollection'][]> {
+  async listAll(organizationId: string, params?: { status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL'; embed?: 'documents' | 'showMergedProducts' }, options?: RequestOptions): Promise<components['schemas']['VarietyCollection'][]> {
     const query = new URLSearchParams();
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
@@ -71,11 +54,7 @@ export class ProductsApi {
    * resource with that `id` already exists.
    * @generated from POST /organizations/{organizationId}/varieties
    */
-  async create(
-    organizationId: string,
-    data: components['schemas']['PostVariety'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async create(organizationId: string, data: components['schemas']['PostVariety'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${organizationId}/varieties`;
     await this.client.post(path, data, options);
   }
@@ -85,12 +64,7 @@ export class ProductsApi {
    * @description This endpoint will return the variety with the specified erid.
    * @generated from GET /organizations/{organizationId}/varieties/{erid}
    */
-  async get(
-    organizationId: string,
-    erid: string,
-    params?: { embed?: 'documents' | 'showMergedProducts' },
-    options?: RequestOptions
-  ): Promise<components['schemas']['Variety']> {
+  async get(organizationId: string, erid: string, params?: { embed?: 'documents' | 'showMergedProducts' }, options?: RequestOptions): Promise<components['schemas']['Variety']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -104,12 +78,7 @@ export class ProductsApi {
    * active/archived, or associated to a different manufacturer or crop type.
    * @generated from PUT /organizations/{organizationId}/varieties/{erid}
    */
-  async update(
-    organizationId: string,
-    erid: string,
-    data: components['schemas']['PutVariety'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(organizationId: string, erid: string, data: components['schemas']['PutVariety'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${organizationId}/varieties/${erid}`;
     await this.client.put(path, data, options);
   }
@@ -123,12 +92,7 @@ export class ProductsApi {
    * can be overridden.
    * @generated from POST /varieties/{erid}/associateToOrg/{organizationId}
    */
-  async createAssociatetoorg(
-    erid: string,
-    organizationId: string,
-    data: components['schemas']['ReferenceProductPointerRequest'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async createAssociatetoorg(erid: string, organizationId: string, data: components['schemas']['ReferenceProductPointerRequest'], options?: RequestOptions): Promise<void> {
     const path = `/varieties/${erid}/associateToOrg/${organizationId}`;
     await this.client.post(path, data, options);
   }
@@ -141,31 +105,17 @@ export class ProductsApi {
    * items.
    * @generated from GET /varieties
    */
-  async listVarieties(
-    params?: {
-      searchString?: string;
-      cropName?: string;
-      productName?: string;
-      brandName?: string;
-      sourceSystemProductId?: string;
-      countryCode?: string;
-    },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>> {
+  async listVarieties(params?: { searchString?: string; cropName?: string; productName?: string; brandName?: string; sourceSystemProductId?: string; countryCode?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>> {
     const query = new URLSearchParams();
     if (params?.searchString !== undefined) query.set('searchString', String(params.searchString));
     if (params?.cropName !== undefined) query.set('cropName', String(params.cropName));
     if (params?.productName !== undefined) query.set('productName', String(params.productName));
     if (params?.brandName !== undefined) query.set('brandName', String(params.brandName));
-    if (params?.sourceSystemProductId !== undefined)
-      query.set('sourceSystemProductId', String(params.sourceSystemProductId));
+    if (params?.sourceSystemProductId !== undefined) query.set('sourceSystemProductId', String(params.sourceSystemProductId));
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
     const path = `/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>>(path, options);
   }
 
   /**
@@ -173,10 +123,7 @@ export class ProductsApi {
    * @description Single variety from industry data sources, such as CDMS.
    * @generated from GET /varieties/{erid}
    */
-  async getVarieties(
-    erid: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['ReferenceVariety']> {
+  async getVarieties(erid: string, options?: RequestOptions): Promise<components['schemas']['ReferenceVariety']> {
     const path = `/varieties/${erid}`;
     return this.client.get<components['schemas']['ReferenceVariety']>(path, options);
   }
@@ -187,15 +134,9 @@ export class ProductsApi {
    * sources, such as CDMS.
    * @generated from GET /varieties/{erid}/documents
    */
-  async listDocuments(
-    erid: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['DocumentCollection']>> {
+  async listDocuments(erid: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['DocumentCollection']>> {
     const path = `/varieties/${erid}/documents`;
-    return this.client.get<PaginatedResponse<components['schemas']['DocumentCollection']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['DocumentCollection']>>(path, options);
   }
 
   /**
@@ -207,12 +148,7 @@ export class ProductsApi {
    * can be overridden.
    * @generated from PATCH /varieties/{erid}/setOverridesForOrg/{organizationId}
    */
-  async patch(
-    erid: string,
-    organizationId: string,
-    data: components['schemas']['CommonProductPointerRequest'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async patch(erid: string, organizationId: string, data: components['schemas']['CommonProductPointerRequest'], options?: RequestOptions): Promise<void> {
     const path = `/varieties/${erid}/setOverridesForOrg/${organizationId}`;
     await this.client.patch(path, data, options);
   }

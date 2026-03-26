@@ -5,7 +5,7 @@
  * @generated from farms.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/farms.js';
 
 export class FarmsApi {
@@ -16,11 +16,7 @@ export class FarmsApi {
    * @description Retrieve all of the farms for an organization
    * @generated from GET /organizations/{orgId}/farms
    */
-  async list(
-    orgId: string,
-    params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['GetFarms']>> {
+  async list(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['GetFarms']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
@@ -32,11 +28,7 @@ export class FarmsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/farms
    */
-  async listAll(
-    orgId: string,
-    params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' },
-    options?: RequestOptions
-  ): Promise<components['schemas']['GetFarms'][]> {
+  async listAll(orgId: string, params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' }, options?: RequestOptions): Promise<components['schemas']['GetFarms'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
@@ -50,11 +42,7 @@ export class FarmsApi {
    * @description Create a farm for a given organization
    * @generated from POST /organizations/{orgId}/farms
    */
-  async create(
-    orgId: string,
-    data: components['schemas']['PostFarm'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async create(orgId: string, data: components['schemas']['PostFarm'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/farms`;
     await this.client.post(path, data, options);
   }
@@ -64,12 +52,7 @@ export class FarmsApi {
    * @description Get farm by organization and farmId
    * @generated from GET /organizations/{orgId}/farms/{farmId}
    */
-  async get(
-    orgId: string,
-    farmId: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['GetFarm']> {
+  async get(orgId: string, farmId: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['GetFarm']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -82,12 +65,7 @@ export class FarmsApi {
    * @description Update farm by Id
    * @generated from PUT /organizations/{orgId}/farms/{farmId}
    */
-  async update(
-    orgId: string,
-    farmId: string,
-    data: components['schemas']['PostFarm'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(orgId: string, farmId: string, data: components['schemas']['PostFarm'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/farms/${farmId}`;
     await this.client.put(path, data, options);
   }
@@ -107,11 +85,7 @@ export class FarmsApi {
    * @description Get clients by organization and farmId
    * @generated from GET /organizations/{orgId}/farms/{farmId}/clients
    */
-  async listClients(
-    orgId: string,
-    farmId: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Clients']>> {
+  async listClients(orgId: string, farmId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Clients']>> {
     const path = `/organizations/${orgId}/farms/${farmId}/clients`;
     return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(path, options);
   }
@@ -126,16 +100,9 @@ export class FarmsApi {
    * boundary of this field.
    * @generated from GET /organizations/{orgID}/farms/{id}/fields
    */
-  async listFields(
-    orgID: string,
-    id: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FieldResponse2']>> {
+  async listFields(orgID: string, id: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FieldResponse2']>> {
     const path = `/organizations/${orgID}/farms/${id}/fields`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse2']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse2']>>(path, options);
   }
 }
 

@@ -5,7 +5,7 @@
  * @generated from boundaries.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/boundaries.js';
 
 export class BoundariesApi {
@@ -18,30 +18,19 @@ export class BoundariesApi {
    * organization that owns the field.
    * @generated from GET /organizations/{orgId}/boundaries
    */
-  async list(
-    orgId: string,
-    params?: { embed?: string; recordFilter?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
+  async list(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/boundaries
    */
-  async listAll(
-    orgId: string,
-    params?: { embed?: string; recordFilter?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['BoundaryOrgId'][]> {
+  async listAll(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<components['schemas']['BoundaryOrgId'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
@@ -55,21 +44,13 @@ export class BoundariesApi {
    * @description View the boundaries of a specified field.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/boundaries
    */
-  async listBoundaries(
-    orgId: string,
-    fieldId: string,
-    params?: { embed?: string; recordFilter?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
+  async listBoundaries(orgId: string, fieldId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(path, options);
   }
 
   /**
@@ -77,12 +58,7 @@ export class BoundariesApi {
    * @description Create a boundary with a geometry collection for a field.
    * @generated from POST /organizations/{orgId}/fields/{fieldId}/boundaries
    */
-  async create(
-    orgId: string,
-    fieldId: string,
-    data: Record<string, unknown>,
-    options?: RequestOptions
-  ): Promise<components['schemas']['PostBoundary']> {
+  async create(orgId: string, fieldId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<components['schemas']['PostBoundary']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries`;
     return this.client.post<components['schemas']['PostBoundary']>(path, data, options);
   }
@@ -102,15 +78,9 @@ export class BoundariesApi {
    * boundary.
    * @generated from GET /fieldOperations/{operationId}/boundary
    */
-  async get(
-    operationId: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
+  async get(operationId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
     const path = `/fieldOperations/${operationId}/boundary`;
-    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(path, options);
   }
 
   /**
@@ -118,12 +88,7 @@ export class BoundariesApi {
    * @description This endpoint will retrieve a specific boundary.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
-  async getBoundaries(
-    orgId: string,
-    fieldId: string,
-    boundaryId: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['PostBoundaryGet']> {
+  async getBoundaries(orgId: string, fieldId: string, boundaryId: string, options?: RequestOptions): Promise<components['schemas']['PostBoundaryGet']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
     return this.client.get<components['schemas']['PostBoundaryGet']>(path, options);
   }
@@ -137,13 +102,7 @@ export class BoundariesApi {
    * active, it will mark all other boundaries in this field inactive.
    * @generated from PUT /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
-  async update(
-    orgId: string,
-    fieldId: string,
-    boundaryId: string,
-    data: components['schemas']['PutBoundary'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(orgId: string, fieldId: string, boundaryId: string, data: components['schemas']['PutBoundary'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
     await this.client.put(path, data, options);
   }
@@ -153,12 +112,7 @@ export class BoundariesApi {
    * @description This endpoint will delete a boundary.
    * @generated from DELETE /organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}
    */
-  async delete(
-    orgId: string,
-    fieldId: string,
-    boundaryId: string,
-    options?: RequestOptions
-  ): Promise<void> {
+  async delete(orgId: string, fieldId: string, boundaryId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
     await this.client.delete(path, options);
   }

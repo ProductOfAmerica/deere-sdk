@@ -21,11 +21,7 @@ export class UsersApi {
    * belonging to the user.
    * @generated from GET /users/{username}
    */
-  async get(
-    username: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['UsersValue']> {
+  async get(username: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['UsersValue']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();

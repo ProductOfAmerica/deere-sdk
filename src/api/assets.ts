@@ -5,7 +5,7 @@
  * @generated from assets.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/assets.js';
 
 export class AssetsApi {
@@ -16,29 +16,18 @@ export class AssetsApi {
    * @description This endpoint will retrieve all assets for an organization.
    * @generated from GET /organizations/{orgId}/assets
    */
-  async list(
-    orgId: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>> {
+  async list(orgId: string, params?: { embed?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>>(path, options);
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/assets
    */
-  async listAll(
-    orgId: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['AssetCollectionGetValue'][]> {
+  async listAll(orgId: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['AssetCollectionGetValue'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -51,11 +40,7 @@ export class AssetsApi {
    * @description This endpoint will create a new asset.
    * @generated from POST /organizations/{orgId}/assets
    */
-  async create(
-    orgId: string,
-    data: components['schemas']['CreatePostValues'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async create(orgId: string, data: components['schemas']['CreatePostValues'], options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/assets`;
     await this.client.post(path, data, options);
   }
@@ -65,11 +50,7 @@ export class AssetsApi {
    * @description This endpoint will retrieve a specific asset by its unique ID.
    * @generated from GET /assets/{assetId}
    */
-  async get(
-    assetId: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['AssetGetValues']> {
+  async get(assetId: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['AssetGetValues']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -82,11 +63,7 @@ export class AssetsApi {
    * @description This endpoint will update the asset by its unique id.
    * @generated from PUT /assets/{assetId}
    */
-  async update(
-    assetId: string,
-    data: components['schemas']['CreatePostValues'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async update(assetId: string, data: components['schemas']['CreatePostValues'], options?: RequestOptions): Promise<void> {
     const path = `/assets/${assetId}`;
     await this.client.put(path, data, options);
   }
@@ -108,11 +85,7 @@ export class AssetsApi {
    * given time range.
    * @generated from GET /assets/{assetId}/locations
    */
-  async listLocations(
-    assetId: string,
-    params?: { startDate?: string; endDate?: string; count?: string; pageKey?: string },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['AssetIdValue']>> {
+  async listLocations(assetId: string, params?: { startDate?: string; endDate?: string; count?: string; pageKey?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['AssetIdValue']>> {
     const query = new URLSearchParams();
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
@@ -132,11 +105,7 @@ export class AssetsApi {
    * 2019-01-01T12:34:56Z are considered equivalent.
    * @generated from POST /assets/{assetId}/locations
    */
-  async createLocations(
-    assetId: string,
-    data: components['schemas']['AssetIdValuePost'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async createLocations(assetId: string, data: components['schemas']['AssetIdValuePost'], options?: RequestOptions): Promise<void> {
     const path = `/assets/${assetId}/locations`;
     await this.client.post(path, data, options);
   }
@@ -146,14 +115,9 @@ export class AssetsApi {
    * @description This endpoint will retrieve the Asset Catalog List.
    * @generated from GET /assetCatalog
    */
-  async getAssetcatalog(
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
+  async getAssetcatalog(options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
     const path = `/assetCatalog`;
-    return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(
-      path,
-      options
-    );
+    return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(path, options);
   }
 }
 

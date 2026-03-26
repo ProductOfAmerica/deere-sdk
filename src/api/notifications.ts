@@ -5,7 +5,7 @@
  * @generated from notifications.yaml
  */
 
-import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
 import type { components } from '../types/generated/notifications.js';
 
 export class NotificationsApi {
@@ -16,10 +16,7 @@ export class NotificationsApi {
    * @description Retrieve a single notification by source event.
    * @generated from GET /notifications/{sourceEvent}
    */
-  async get(
-    sourceEvent: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['GetResponse']> {
+  async get(sourceEvent: string, options?: RequestOptions): Promise<components['schemas']['GetResponse']> {
     const path = `/notifications/${sourceEvent}`;
     return this.client.get<components['schemas']['GetResponse']>(path, options);
   }
@@ -32,10 +29,7 @@ export class NotificationsApi {
    * link to source, which will define the event.
    * @generated from POST /notificationEvents
    */
-  async create(
-    data: components['schemas']['PostNotifications'],
-    options?: RequestOptions
-  ): Promise<void> {
+  async create(data: components['schemas']['PostNotifications'], options?: RequestOptions): Promise<void> {
     const path = `/notificationEvents`;
     await this.client.post(path, data, options);
   }
@@ -66,20 +60,7 @@ export class NotificationsApi {
    * definition of "notification".
    * @generated from GET /organizations/{orgId}/notifications/events
    */
-  async list(
-    orgId: string,
-    params?: {
-      before?: unknown;
-      after?: unknown;
-      count?: number;
-      eventTypes?: unknown;
-      severities?: unknown;
-      sourceEvents?: unknown;
-      startDate?: string;
-      endDate?: string;
-    },
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['GetResponse']>> {
+  async list(orgId: string, params?: { before?: unknown; after?: unknown; count?: number; eventTypes?: unknown; severities?: unknown; sourceEvents?: unknown; startDate?: string; endDate?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['GetResponse']>> {
     const query = new URLSearchParams();
     if (params?.before !== undefined) query.set('before', String(params.before));
     if (params?.after !== undefined) query.set('after', String(params.after));
@@ -97,20 +78,7 @@ export class NotificationsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/notifications/events
    */
-  async listAll(
-    orgId: string,
-    params?: {
-      before?: unknown;
-      after?: unknown;
-      count?: number;
-      eventTypes?: unknown;
-      severities?: unknown;
-      sourceEvents?: unknown;
-      startDate?: string;
-      endDate?: string;
-    },
-    options?: RequestOptions
-  ): Promise<components['schemas']['GetResponse'][]> {
+  async listAll(orgId: string, params?: { before?: unknown; after?: unknown; count?: number; eventTypes?: unknown; severities?: unknown; sourceEvents?: unknown; startDate?: string; endDate?: string }, options?: RequestOptions): Promise<components['schemas']['GetResponse'][]> {
     const query = new URLSearchParams();
     if (params?.before !== undefined) query.set('before', String(params.before));
     if (params?.after !== undefined) query.set('after', String(params.after));
