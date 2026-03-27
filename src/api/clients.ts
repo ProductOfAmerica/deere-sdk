@@ -5,7 +5,7 @@
  * @generated from clients.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/clients.js';
 
 export class ClientsApi {
@@ -16,7 +16,11 @@ export class ClientsApi {
    * @description Retrieve all of the clients for an organization
    * @generated from GET /organizations/{orgId}/clients
    */
-  async list(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Clients']>> {
+  async list(
+    orgId: string,
+    params?: { embed?: string; recordFilter?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['Clients']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
@@ -28,7 +32,11 @@ export class ClientsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/clients
    */
-  async listAll(orgId: string, params?: { embed?: string; recordFilter?: string }, options?: RequestOptions): Promise<components['schemas']['Clients'][]> {
+  async listAll(
+    orgId: string,
+    params?: { embed?: string; recordFilter?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['Clients'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
@@ -45,7 +53,11 @@ export class ClientsApi {
    * clients are created with an "active" status.
    * @generated from POST /organizations/{orgId}/clients
    */
-  async create(orgId: string, data: components['schemas']['ClientPost'], options?: RequestOptions): Promise<void> {
+  async create(
+    orgId: string,
+    data: components['schemas']['ClientPost'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/clients`;
     await this.client.post(path, data, options);
   }
@@ -58,7 +70,12 @@ export class ClientsApi {
    * the org that owns the client.
    * @generated from GET /organizations/{orgId}/clients/{clientId}
    */
-  async get(orgId: string, clientId: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['Client']> {
+  async get(
+    orgId: string,
+    clientId: string,
+    params?: { embed?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['Client']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -73,7 +90,12 @@ export class ClientsApi {
    * have Locations Level 3 permission within the target organization.
    * @generated from PUT /organizations/{orgId}/clients/{clientId}
    */
-  async update(orgId: string, clientId: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
+  async update(
+    orgId: string,
+    clientId: string,
+    data: Record<string, unknown>,
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/clients/${clientId}`;
     await this.client.put(path, data, options);
   }
@@ -98,7 +120,12 @@ export class ClientsApi {
    * owningOrganization: View the Organization that owns the farm.
    * @generated from GET /organizations/{orgId}/clients/{id}/farms
    */
-  async listFarms(orgId: string, id: string, params?: { name?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FarmResponse']>> {
+  async listFarms(
+    orgId: string,
+    id: string,
+    params?: { name?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FarmResponse']>> {
     const query = new URLSearchParams();
     if (params?.name !== undefined) query.set('name', String(params.name));
     const queryString = query.toString();
@@ -115,9 +142,16 @@ export class ClientsApi {
    * View the organization that owns the field.
    * @generated from GET /organizations/{orgID}/clients/{id}/fields
    */
-  async listFields(orgID: string, id: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
+  async listFields(
+    orgID: string,
+    id: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
     const path = `/organizations/${orgID}/clients/${id}/fields`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
+      path,
+      options
+    );
   }
 }
 

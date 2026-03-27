@@ -5,7 +5,7 @@
  * @generated from field-operations-api.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/field-operations-api.js';
 
 export class FieldOperationsApi {
@@ -23,26 +23,55 @@ export class FieldOperationsApi {
    * which this operation was performed. self: The field operation.
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/fieldOperations
    */
-  async list(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['FieldOperation']>> {
+  async list(
+    orgId: string,
+    fieldId: string,
+    params?: {
+      cropSeason?: string;
+      fieldOperationType?: string;
+      startDate?: string;
+      endDate?: string;
+      embed?: 'measurementTypes';
+      workPlanIds?: unknown;
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FieldOperation']>> {
     const query = new URLSearchParams();
     if (params?.cropSeason !== undefined) query.set('cropSeason', String(params.cropSeason));
-    if (params?.fieldOperationType !== undefined) query.set('fieldOperationType', String(params.fieldOperationType));
+    if (params?.fieldOperationType !== undefined)
+      query.set('fieldOperationType', String(params.fieldOperationType));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldOperation']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['FieldOperation']>>(
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/fields/{fieldId}/fieldOperations
    */
-  async listAll(orgId: string, fieldId: string, params?: { cropSeason?: string; fieldOperationType?: string; startDate?: string; endDate?: string; embed?: 'measurementTypes'; workPlanIds?: unknown }, options?: RequestOptions): Promise<components['schemas']['FieldOperation'][]> {
+  async listAll(
+    orgId: string,
+    fieldId: string,
+    params?: {
+      cropSeason?: string;
+      fieldOperationType?: string;
+      startDate?: string;
+      endDate?: string;
+      embed?: 'measurementTypes';
+      workPlanIds?: unknown;
+    },
+    options?: RequestOptions
+  ): Promise<components['schemas']['FieldOperation'][]> {
     const query = new URLSearchParams();
     if (params?.cropSeason !== undefined) query.set('cropSeason', String(params.cropSeason));
-    if (params?.fieldOperationType !== undefined) query.set('fieldOperationType', String(params.fieldOperationType));
+    if (params?.fieldOperationType !== undefined)
+      query.set('fieldOperationType', String(params.fieldOperationType));
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
@@ -59,7 +88,11 @@ export class FieldOperationsApi {
    * in which this operation was performed. self: The field operation.
    * @generated from GET /fieldOperations/{operationId}
    */
-  async get(operationId: string, params?: { embed?: 'measurementTypes' }, options?: RequestOptions): Promise<components['schemas']['FieldOperationId']> {
+  async get(
+    operationId: string,
+    params?: { embed?: 'measurementTypes' },
+    options?: RequestOptions
+  ): Promise<components['schemas']['FieldOperationId']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -89,9 +122,18 @@ export class FieldOperationsApi {
    * operation. For a sample integration, see our .
    * @generated from GET /fieldOps/{operationId}
    */
-  async getFieldops(operationId: string, params?: { splitShapeFile?: boolean; shapeType?: 'Point' | 'Polygon'; resolution?: 'EachSection' | 'EachSensor' | 'OneHertz' }, options?: RequestOptions): Promise<unknown> {
+  async getFieldops(
+    operationId: string,
+    params?: {
+      splitShapeFile?: boolean;
+      shapeType?: 'Point' | 'Polygon';
+      resolution?: 'EachSection' | 'EachSensor' | 'OneHertz';
+    },
+    options?: RequestOptions
+  ): Promise<unknown> {
     const query = new URLSearchParams();
-    if (params?.splitShapeFile !== undefined) query.set('splitShapeFile', String(params.splitShapeFile));
+    if (params?.splitShapeFile !== undefined)
+      query.set('splitShapeFile', String(params.splitShapeFile));
     if (params?.shapeType !== undefined) query.set('shapeType', String(params.shapeType));
     if (params?.resolution !== undefined) query.set('resolution', String(params.resolution));
     const queryString = query.toString();

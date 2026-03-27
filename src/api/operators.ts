@@ -5,7 +5,7 @@
  * @generated from operators.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/operators.js';
 
 export class OperatorsApi {
@@ -17,24 +17,37 @@ export class OperatorsApi {
    * the provided organization ID
    * @generated from GET /organizations/{orgId}/operators
    */
-  async list(orgId: string, params?: { embed?: string; recordFilter?: string; lastModifiedTime?: unknown }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['GetResponseDetails']>> {
+  async list(
+    orgId: string,
+    params?: { embed?: string; recordFilter?: string; lastModifiedTime?: unknown },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['GetResponseDetails']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
-    if (params?.lastModifiedTime !== undefined) query.set('lastModifiedTime', String(params.lastModifiedTime));
+    if (params?.lastModifiedTime !== undefined)
+      query.set('lastModifiedTime', String(params.lastModifiedTime));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['GetResponseDetails']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['GetResponseDetails']>>(
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations/{orgId}/operators
    */
-  async listAll(orgId: string, params?: { embed?: string; recordFilter?: string; lastModifiedTime?: unknown }, options?: RequestOptions): Promise<components['schemas']['GetResponseDetails'][]> {
+  async listAll(
+    orgId: string,
+    params?: { embed?: string; recordFilter?: string; lastModifiedTime?: unknown },
+    options?: RequestOptions
+  ): Promise<components['schemas']['GetResponseDetails'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
-    if (params?.lastModifiedTime !== undefined) query.set('lastModifiedTime', String(params.lastModifiedTime));
+    if (params?.lastModifiedTime !== undefined)
+      query.set('lastModifiedTime', String(params.lastModifiedTime));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['GetResponseDetails']>(path, options);
@@ -46,7 +59,11 @@ export class OperatorsApi {
    * provided organization ID
    * @generated from POST /organizations/{orgId}/operators
    */
-  async create(orgId: string, data: components['schemas']['PostOperator'], options?: RequestOptions): Promise<void> {
+  async create(
+    orgId: string,
+    data: components['schemas']['PostOperator'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/operators`;
     await this.client.post(path, data, options);
   }
@@ -69,7 +86,12 @@ export class OperatorsApi {
    * request body
    * @generated from GET /organizations/{orgId}/operators/{id}
    */
-  async get(orgId: string, id: string, params?: { embed?: string }, options?: RequestOptions): Promise<components['schemas']['GetResponseOperatorDetails']> {
+  async get(
+    orgId: string,
+    id: string,
+    params?: { embed?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['GetResponseOperatorDetails']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -84,7 +106,12 @@ export class OperatorsApi {
    * request body
    * @generated from PUT /organizations/{orgId}/operators/{id}
    */
-  async update(orgId: string, id: string, data: components['schemas']['PutOperator'], options?: RequestOptions): Promise<void> {
+  async update(
+    orgId: string,
+    id: string,
+    data: components['schemas']['PutOperator'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${orgId}/operators/${id}`;
     await this.client.put(path, data, options);
   }
@@ -95,7 +122,12 @@ export class OperatorsApi {
    * an org for the provided Operator ID
    * @generated from DELETE /organizations/{orgId}/operators/{id}
    */
-  async deleteOperators(orgId: string, id: string, params?: { orgid?: string }, options?: RequestOptions): Promise<void> {
+  async deleteOperators(
+    orgId: string,
+    id: string,
+    params?: { orgid?: string },
+    options?: RequestOptions
+  ): Promise<void> {
     const query = new URLSearchParams();
     if (params?.orgid !== undefined) query.set('orgid', String(params.orgid));
     const queryString = query.toString();

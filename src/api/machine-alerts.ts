@@ -5,7 +5,7 @@
  * @generated from machine-alerts.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-alerts.js';
 
 export class MachineAlertsApi {
@@ -24,11 +24,16 @@ export class MachineAlertsApi {
    * information
    * @generated from GET /machines/{principalId}/alerts
    */
-  async list(principalId: string, params?: { startDate?: string; endDate?: string; excludeAcknowledged?: boolean }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['AlertValue']>> {
+  async list(
+    principalId: string,
+    params?: { startDate?: string; endDate?: string; excludeAcknowledged?: boolean },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['AlertValue']>> {
     const query = new URLSearchParams();
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
-    if (params?.excludeAcknowledged !== undefined) query.set('excludeAcknowledged', String(params.excludeAcknowledged));
+    if (params?.excludeAcknowledged !== undefined)
+      query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
     const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['AlertValue']>>(path, options);
@@ -37,11 +42,16 @@ export class MachineAlertsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /machines/{principalId}/alerts
    */
-  async listAll(principalId: string, params?: { startDate?: string; endDate?: string; excludeAcknowledged?: boolean }, options?: RequestOptions): Promise<components['schemas']['AlertValue'][]> {
+  async listAll(
+    principalId: string,
+    params?: { startDate?: string; endDate?: string; excludeAcknowledged?: boolean },
+    options?: RequestOptions
+  ): Promise<components['schemas']['AlertValue'][]> {
     const query = new URLSearchParams();
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
-    if (params?.excludeAcknowledged !== undefined) query.set('excludeAcknowledged', String(params.excludeAcknowledged));
+    if (params?.excludeAcknowledged !== undefined)
+      query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
     const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['AlertValue']>(path, options);

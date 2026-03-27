@@ -5,7 +5,6 @@
  * @generated
  */
 
-import { DeereClient, type DeereClientConfig } from './client.js';
 import {
   AempApi,
   AssetsApi,
@@ -13,8 +12,8 @@ import {
   ClientsApi,
   ConnectionManagementApi,
   CropTypesApi,
-  EquipmentMeasurementApi,
   EquipmentApi,
+  EquipmentMeasurementApi,
   FarmsApi,
   FieldOperationsApi,
   FieldsApi,
@@ -36,6 +35,7 @@ import {
   UsersApi,
   WebhookApi,
 } from './api/index.js';
+import { DeereClient, type DeereClientConfig } from './client.js';
 
 /**
  * John Deere SDK

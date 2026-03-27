@@ -71,7 +71,12 @@ export class EquipmentMeasurementApi {
    * organization of the equipment.
    * @generated from POST /organizations/{organizationId}/equipment/{principalId}/measurements
    */
-  async create(organizationId: string, principalId: string, data: components['schemas']['EquipmentMeasurementsNew'], options?: RequestOptions): Promise<void> {
+  async create(
+    organizationId: string,
+    principalId: string,
+    data: components['schemas']['EquipmentMeasurementsNew'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${organizationId}/equipment/${principalId}/measurements`;
     await this.client.post(path, data, options);
   }

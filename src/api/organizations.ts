@@ -5,7 +5,7 @@
  * @generated from organizations.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/organizations.js';
 
 export class OrganizationsApi {
@@ -16,7 +16,10 @@ export class OrganizationsApi {
    * @description This request will return a list of organizations.
    * @generated from GET /organizations
    */
-  async list(params?: { userName?: string; orgId?: string; orgName?: string }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['Organization']>> {
+  async list(
+    params?: { userName?: string; orgId?: string; orgName?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['Organization']>> {
     const query = new URLSearchParams();
     if (params?.userName !== undefined) query.set('userName', String(params.userName));
     if (params?.orgId !== undefined) query.set('orgId', String(params.orgId));
@@ -29,7 +32,10 @@ export class OrganizationsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /organizations
    */
-  async listAll(params?: { userName?: string; orgId?: string; orgName?: string }, options?: RequestOptions): Promise<components['schemas']['Organization'][]> {
+  async listAll(
+    params?: { userName?: string; orgId?: string; orgName?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['Organization'][]> {
     const query = new URLSearchParams();
     if (params?.userName !== undefined) query.set('userName', String(params.userName));
     if (params?.orgId !== undefined) query.set('orgId', String(params.orgId));
@@ -46,7 +52,10 @@ export class OrganizationsApi {
    * organization. It contains links to the following resources:
    * @generated from GET /organizations/{orgId}
    */
-  async get(orgId: string, options?: RequestOptions): Promise<components['schemas']['OrganizationView']> {
+  async get(
+    orgId: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['OrganizationView']> {
     const path = `/organizations/${orgId}`;
     return this.client.get<components['schemas']['OrganizationView']>(path, options);
   }
@@ -59,9 +68,15 @@ export class OrganizationsApi {
    * which the user is not a staff member (member=false).
    * @generated from GET /users/{userName}/organizations
    */
-  async listOrganizations(userName: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['OrganizationViewGet']>> {
+  async listOrganizations(
+    userName: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['OrganizationViewGet']>> {
     const path = `/users/${userName}/organizations`;
-    return this.client.get<PaginatedResponse<components['schemas']['OrganizationViewGet']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['OrganizationViewGet']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -70,9 +85,15 @@ export class OrganizationsApi {
    * organization.
    * @generated from GET /organizations/{orgId}/users
    */
-  async listUsers(orgId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['OrganizationUser']>> {
+  async listUsers(
+    orgId: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['OrganizationUser']>> {
     const path = `/organizations/${orgId}/users`;
-    return this.client.get<PaginatedResponse<components['schemas']['OrganizationUser']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['OrganizationUser']>>(
+      path,
+      options
+    );
   }
 }
 

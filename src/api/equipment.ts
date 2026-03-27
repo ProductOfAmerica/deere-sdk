@@ -5,7 +5,7 @@
  * @generated from equipment.yaml
  */
 
-import type { DeereClient, RequestOptions, PaginatedResponse } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/equipment.js';
 
 export class EquipmentApi {
@@ -26,22 +26,43 @@ export class EquipmentApi {
    * user’s organizations to your application..
    * @generated from GET /equipment
    */
-  async get(params?: { ids?: number[]; serialNumbers?: string[]; organizationIds?: number[]; principalIds?: number[]; capableOf?: 'Connectivity' | '!Connectivity'; categories?: 'Machine' | 'Implement'; organizationRoleType?: 'Controlling' | 'NonControlling'; archived?: boolean; embed?: 'devices' | 'equipment' | 'icon' | 'pairingDetails'; pageOffset?: number; itemLimit?: number }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipmentForList']>> {
+  async get(
+    params?: {
+      ids?: number[];
+      serialNumbers?: string[];
+      organizationIds?: number[];
+      principalIds?: number[];
+      capableOf?: 'Connectivity' | '!Connectivity';
+      categories?: 'Machine' | 'Implement';
+      organizationRoleType?: 'Controlling' | 'NonControlling';
+      archived?: boolean;
+      embed?: 'devices' | 'equipment' | 'icon' | 'pairingDetails';
+      pageOffset?: number;
+      itemLimit?: number;
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipmentForList']>> {
     const query = new URLSearchParams();
     if (params?.ids !== undefined) query.set('ids', String(params.ids));
-    if (params?.serialNumbers !== undefined) query.set('serialNumbers', String(params.serialNumbers));
-    if (params?.organizationIds !== undefined) query.set('organizationIds', String(params.organizationIds));
+    if (params?.serialNumbers !== undefined)
+      query.set('serialNumbers', String(params.serialNumbers));
+    if (params?.organizationIds !== undefined)
+      query.set('organizationIds', String(params.organizationIds));
     if (params?.principalIds !== undefined) query.set('principalIds', String(params.principalIds));
     if (params?.capableOf !== undefined) query.set('capableOf', String(params.capableOf));
     if (params?.categories !== undefined) query.set('categories', String(params.categories));
-    if (params?.organizationRoleType !== undefined) query.set('organizationRole.type', String(params.organizationRoleType));
+    if (params?.organizationRoleType !== undefined)
+      query.set('organizationRole.type', String(params.organizationRoleType));
     if (params?.archived !== undefined) query.set('archived', String(params.archived));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.pageOffset !== undefined) query.set('pageOffset', String(params.pageOffset));
     if (params?.itemLimit !== undefined) query.set('itemLimit', String(params.itemLimit));
     const queryString = query.toString();
     const path = `/equipment${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipmentForList']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipmentForList']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -82,7 +103,11 @@ export class EquipmentApi {
    * Request. The body will include the error information.
    * @generated from POST /organizations/{organizationId}/equipment
    */
-  async create(organizationId: string, data: components['schemas']['createEquipment'], options?: RequestOptions): Promise<void> {
+  async create(
+    organizationId: string,
+    data: components['schemas']['createEquipment'],
+    options?: RequestOptions
+  ): Promise<void> {
     const path = `/organizations/${organizationId}/equipment`;
     await this.client.post(path, data, options);
   }
@@ -93,7 +118,13 @@ export class EquipmentApi {
    * piece of equipment.
    * @generated from GET /equipment/{id}
    */
-  async getEquipment(id: string, params?: { embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities' }, options?: RequestOptions): Promise<components['schemas']['equipment']> {
+  async getEquipment(
+    id: string,
+    params?: {
+      embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
+    },
+    options?: RequestOptions
+  ): Promise<components['schemas']['equipment']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -135,9 +166,14 @@ export class EquipmentApi {
    * their associated IDs and names.
    * @generated from GET /equipmentMakes
    */
-  async list(options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-make']>> {
+  async list(
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-make']>> {
     const path = `/equipmentMakes`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-make']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-make']>>(
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -154,7 +190,10 @@ export class EquipmentApi {
    * equipment make ID.
    * @generated from GET /equipmentMakes/{equipmentMakeId}
    */
-  async getEquipmentmakes(equipmentMakeId: string, options?: RequestOptions): Promise<components['schemas']['equipment-make']> {
+  async getEquipmentmakes(
+    equipmentMakeId: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['equipment-make']> {
     const path = `/equipmentMakes/${equipmentMakeId}`;
     return this.client.get<components['schemas']['equipment-make']>(path, options);
   }
@@ -165,9 +204,15 @@ export class EquipmentApi {
    * providing an equipment make ID.
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentTypes
    */
-  async getEquipmenttypes(equipmentMakeId: string, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
+  async getEquipmenttypes(
+    equipmentMakeId: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentTypes`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -176,9 +221,14 @@ export class EquipmentApi {
    * their associated IDs and names.
    * @generated from GET /equipmentTypes
    */
-  async listEquipmenttypes(options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
+  async listEquipmenttypes(
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
     const path = `/equipmentTypes`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -187,13 +237,23 @@ export class EquipmentApi {
    * our reference database and their associated IDs and names.
    * @generated from GET /equipmentModels
    */
-  async listEquipmentmodels(params?: { embed?: 'make' | 'type' | 'isgType'; equipmentModelName?: 'string or partial string with * wildcard search' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
+  async listEquipmentmodels(
+    params?: {
+      embed?: 'make' | 'type' | 'isgType';
+      equipmentModelName?: 'string or partial string with * wildcard search';
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
-    if (params?.equipmentModelName !== undefined) query.set('equipmentModelName', String(params.equipmentModelName));
+    if (params?.equipmentModelName !== undefined)
+      query.set('equipmentModelName', String(params.equipmentModelName));
     const queryString = query.toString();
     const path = `/equipmentModels${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -202,14 +262,24 @@ export class EquipmentApi {
    * on the supplied query parameters.
    * @generated from GET /equipmentISGTypes
    */
-  async listEquipmentisgtypes(params?: { category?: 'machine' | 'implement'; deprecated?: 'false' | 'true' | 'all'; embed?: 'equipmentModels' | 'recordMetadata' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
+  async listEquipmentisgtypes(
+    params?: {
+      category?: 'machine' | 'implement';
+      deprecated?: 'false' | 'true' | 'all';
+      embed?: 'equipmentModels' | 'recordMetadata';
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
     const query = new URLSearchParams();
     if (params?.category !== undefined) query.set('category', String(params.category));
     if (params?.deprecated !== undefined) query.set('deprecated', String(params.deprecated));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -218,13 +288,23 @@ export class EquipmentApi {
    * given makeId.
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentISGTypes
    */
-  async getEquipmentisgtypes(equipmentMakeId: string, params?: { deprecated?: 'false' | 'true' | 'all'; embed?: 'equipmentModels' | 'recordMetadata' }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
+  async getEquipmentisgtypes(
+    equipmentMakeId: string,
+    params?: {
+      deprecated?: 'false' | 'true' | 'all';
+      embed?: 'equipmentModels' | 'recordMetadata';
+    },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
     const query = new URLSearchParams();
     if (params?.deprecated !== undefined) query.set('deprecated', String(params.deprecated));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -233,7 +313,12 @@ export class EquipmentApi {
    * makeId and isgTypeId..
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}
    */
-  async getEquipmentisgtypes2(equipmentMakeId: string, equipmentISGTypeId: string, params?: { embed?: 'equipmentModels' | 'recordMetadata' }, options?: RequestOptions): Promise<components['schemas']['equipment-isg-type']> {
+  async getEquipmentisgtypes2(
+    equipmentMakeId: string,
+    equipmentISGTypeId: string,
+    params?: { embed?: 'equipmentModels' | 'recordMetadata' },
+    options?: RequestOptions
+  ): Promise<components['schemas']['equipment-isg-type']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
@@ -247,13 +332,22 @@ export class EquipmentApi {
    * given makeId and ISGtypeId.
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels
    */
-  async getEquipmentmodels(equipmentMakeId: string, equipmentISGTypeId: string, params?: { deprecated?: 'false' | 'true' | 'all'; organizationIds?: number[] }, options?: RequestOptions): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
+  async getEquipmentmodels(
+    equipmentMakeId: string,
+    equipmentISGTypeId: string,
+    params?: { deprecated?: 'false' | 'true' | 'all'; organizationIds?: number[] },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
     const query = new URLSearchParams();
     if (params?.deprecated !== undefined) query.set('deprecated', String(params.deprecated));
-    if (params?.organizationIds !== undefined) query.set('organizationIds', String(params.organizationIds));
+    if (params?.organizationIds !== undefined)
+      query.set('organizationIds', String(params.organizationIds));
     const queryString = query.toString();
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(
+      path,
+      options
+    );
   }
 
   /**
@@ -262,7 +356,12 @@ export class EquipmentApi {
    * given makeId, isgTypeId and modelId.
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels/{equipmentModelId}
    */
-  async getEquipmentmodels2(equipmentMakeId: string, equipmentISGTypeId: string, equipmentModelId: string, options?: RequestOptions): Promise<components['schemas']['equipment-model']> {
+  async getEquipmentmodels2(
+    equipmentMakeId: string,
+    equipmentISGTypeId: string,
+    equipmentModelId: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['equipment-model']> {
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels/${equipmentModelId}`;
     return this.client.get<components['schemas']['equipment-model']>(path, options);
   }
