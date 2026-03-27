@@ -16,40 +16,118 @@ export interface HateoasRoute {
 
 export const HATEOAS_MAP: Record<string, HateoasRoute> = {
   '/assets/{assetId}/locations': { parentPath: '/assets/{assetId}', rel: 'locations' },
-  '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes': { parentPath: '/equipmentMakes/{equipmentMakeId}', rel: 'equipmentISGTypes' },
-  '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels': { parentPath: '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}', rel: 'equipmentModels' },
-  '/equipmentMakes/{equipmentMakeId}/equipmentTypes': { parentPath: '/equipmentMakes/{equipmentMakeId}', rel: 'equipmentTypes' },
-  '/fieldOperations/{operationId}/boundary': { parentPath: '/fieldOperations/{operationId}', rel: 'boundary' },
+  '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes': {
+    parentPath: '/equipmentMakes/{equipmentMakeId}',
+    rel: 'equipmentISGTypes',
+  },
+  '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels': {
+    parentPath: '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}',
+    rel: 'equipmentModels',
+  },
+  '/equipmentMakes/{equipmentMakeId}/equipmentTypes': {
+    parentPath: '/equipmentMakes/{equipmentMakeId}',
+    rel: 'equipmentTypes',
+  },
+  '/fieldOperations/{operationId}/boundary': {
+    parentPath: '/fieldOperations/{operationId}',
+    rel: 'boundary',
+  },
   '/machines/{principalId}/alerts': { parentPath: '/machines/{principalId}', rel: 'alerts' },
-  '/machines/{principalId}/deviceStateReports': { parentPath: '/machines/{principalId}', rel: 'deviceStateReports' },
-  '/machines/{principalId}/engineHours': { parentPath: '/machines/{principalId}', rel: 'engineHours' },
-  '/machines/{principalId}/hoursOfOperation': { parentPath: '/machines/{principalId}', rel: 'hoursOfOperation' },
-  '/machines/{principalId}/locationHistory': { parentPath: '/machines/{principalId}', rel: 'locationHistory' },
-  '/organizations/{organizationId}/cropTypes': { parentPath: '/organizations/{organizationId}', rel: 'cropTypes' },
-  '/organizations/{organizationId}/equipment': { parentPath: '/organizations/{organizationId}', rel: 'equipment' },
-  '/organizations/{organizationId}/equipment/{principalId}/measurements': { parentPath: '/organizations/{organizationId}/equipment/{principalId}', rel: 'measurements' },
-  '/organizations/{organizationId}/varieties': { parentPath: '/organizations/{organizationId}', rel: 'varieties' },
+  '/machines/{principalId}/deviceStateReports': {
+    parentPath: '/machines/{principalId}',
+    rel: 'deviceStateReports',
+  },
+  '/machines/{principalId}/engineHours': {
+    parentPath: '/machines/{principalId}',
+    rel: 'engineHours',
+  },
+  '/machines/{principalId}/hoursOfOperation': {
+    parentPath: '/machines/{principalId}',
+    rel: 'hoursOfOperation',
+  },
+  '/machines/{principalId}/locationHistory': {
+    parentPath: '/machines/{principalId}',
+    rel: 'locationHistory',
+  },
+  '/organizations/{organizationId}/cropTypes': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'cropTypes',
+  },
+  '/organizations/{organizationId}/equipment': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'equipment',
+  },
+  '/organizations/{organizationId}/equipment/{principalId}/measurements': {
+    parentPath: '/organizations/{organizationId}/equipment/{principalId}',
+    rel: 'measurements',
+  },
+  '/organizations/{organizationId}/varieties': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'varieties',
+  },
   '/organizations/{orgId}/assets': { parentPath: '/organizations/{orgId}', rel: 'assets' },
   '/organizations/{orgId}/boundaries': { parentPath: '/organizations/{orgId}', rel: 'boundaries' },
   '/organizations/{orgId}/clients': { parentPath: '/organizations/{orgId}', rel: 'clients' },
-  '/organizations/{orgId}/clients/{id}/farms': { parentPath: '/organizations/{orgId}/clients/{id}', rel: 'farms' },
-  '/organizations/{orgID}/clients/{id}/fields': { parentPath: '/organizations/{orgID}/clients/{id}', rel: 'fields' },
-  '/organizations/{orgId}/connections': { parentPath: '/organizations/{orgId}', rel: 'connections' },
+  '/organizations/{orgId}/clients/{id}/farms': {
+    parentPath: '/organizations/{orgId}/clients/{id}',
+    rel: 'farms',
+  },
+  '/organizations/{orgID}/clients/{id}/fields': {
+    parentPath: '/organizations/{orgID}/clients/{id}',
+    rel: 'fields',
+  },
+  '/organizations/{orgId}/connections': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'connections',
+  },
   '/organizations/{orgId}/farms': { parentPath: '/organizations/{orgId}', rel: 'farms' },
-  '/organizations/{orgId}/farms/{farmId}/clients': { parentPath: '/organizations/{orgId}/farms/{farmId}', rel: 'clients' },
-  '/organizations/{orgID}/farms/{id}/fields': { parentPath: '/organizations/{orgID}/farms/{id}', rel: 'fields' },
+  '/organizations/{orgId}/farms/{farmId}/clients': {
+    parentPath: '/organizations/{orgId}/farms/{farmId}',
+    rel: 'clients',
+  },
+  '/organizations/{orgID}/farms/{id}/fields': {
+    parentPath: '/organizations/{orgID}/farms/{id}',
+    rel: 'fields',
+  },
   '/organizations/{orgId}/fields': { parentPath: '/organizations/{orgId}', rel: 'fields' },
-  '/organizations/{orgId}/fields/{fieldId}/boundaries': { parentPath: '/organizations/{orgId}/fields/{fieldId}', rel: 'boundaries' },
-  '/organizations/{orgId}/fields/{fieldId}/farms': { parentPath: '/organizations/{orgId}/fields/{fieldId}', rel: 'farms' },
-  '/organizations/{orgId}/fields/{fieldId}/fieldOperations': { parentPath: '/organizations/{orgId}/fields/{fieldId}', rel: 'fieldOperations' },
-  '/organizations/{orgId}/fields/{fieldId}/flags': { parentPath: '/organizations/{orgId}/fields/{fieldId}', rel: 'flags' },
-  '/organizations/{orgId}/fields/{fieldId}/guidanceLines': { parentPath: '/organizations/{orgId}/fields/{fieldId}', rel: 'guidanceLines' },
-  '/organizations/{orgID}/fields/{id}/clients': { parentPath: '/organizations/{orgID}/fields/{id}', rel: 'clients' },
-  '/organizations/{orgId}/fields/{id}/mapLayerSummaries': { parentPath: '/organizations/{orgId}/fields/{id}', rel: 'mapLayerSummaries' },
+  '/organizations/{orgId}/fields/{fieldId}/boundaries': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'boundaries',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/farms': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'farms',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/fieldOperations': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'fieldOperations',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/flags': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'flags',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/guidanceLines': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'guidanceLines',
+  },
+  '/organizations/{orgID}/fields/{id}/clients': {
+    parentPath: '/organizations/{orgID}/fields/{id}',
+    rel: 'clients',
+  },
+  '/organizations/{orgId}/fields/{id}/mapLayerSummaries': {
+    parentPath: '/organizations/{orgId}/fields/{id}',
+    rel: 'mapLayerSummaries',
+  },
   '/organizations/{orgId}/files': { parentPath: '/organizations/{orgId}', rel: 'files' },
   '/organizations/{orgId}/flags': { parentPath: '/organizations/{orgId}', rel: 'flags' },
-  '/organizations/{orgId}/harvestIdentificationModules': { parentPath: '/organizations/{orgId}', rel: 'harvestIdentificationModules' },
-  '/organizations/{orgId}/notifications/events': { parentPath: '/organizations/{orgId}/notifications', rel: 'events' },
+  '/organizations/{orgId}/harvestIdentificationModules': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'harvestIdentificationModules',
+  },
+  '/organizations/{orgId}/notifications/events': {
+    parentPath: '/organizations/{orgId}/notifications',
+    rel: 'events',
+  },
   '/organizations/{orgId}/operators': { parentPath: '/organizations/{orgId}', rel: 'operators' },
   '/organizations/{orgId}/users': { parentPath: '/organizations/{orgId}', rel: 'users' },
   '/partnerships/{token}/permissions': { parentPath: '/partnerships/{token}', rel: 'permissions' },
