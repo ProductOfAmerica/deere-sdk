@@ -140,4 +140,9 @@ jobs:
           tar xzf actionlint.tar.gz actionlint
           ./actionlint -version
       - name: Run actionlint
-        run: ./actionlint -color
+        # -shellcheck='' disables shellcheck integration. actionlint's native
+        # rules still catch workflow YAML errors (bad needs/matrix/permissions/
+        # action names) — which is what we want. Shellcheck's deep bash analysis
+        # produces noise (info/style findings) on existing run: blocks that
+        # aren't part of this PR's scope.
+        run: ./actionlint -color -shellcheck=''
