@@ -207,7 +207,7 @@ function fixTypes(obj: unknown): unknown {
   }
 
   if (typeof obj === 'string') {
-    // Strip HTML tags
+    // Normalizes JD spec descriptions for YAML output (parsed by openapi-typescript). Not HTML-rendered.
     return obj
       .replace(/<br\s*\/?>|<\/?p>/gi, '\n') // Turn <br> into newlines for better readability
       .replace(/<sup>.*?<\/sup>|<a[^>]*>.*?<\/a>|<span[^>]*>.*?<\/span>/gi, '') // Drop superscripts/links/spans entirely

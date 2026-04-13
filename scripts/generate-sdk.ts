@@ -132,6 +132,7 @@ function toPascalCase(str: string): string {
     .join('');
 }
 
+// Input is trusted JD spec param names; output is a TS identifier, not HTML. Stripping tags is safe here.
 function toSafeIdentifier(str: string): string {
   const stripped = str.replace(/<[^>]*>/g, '');
   return stripped
@@ -141,6 +142,7 @@ function toSafeIdentifier(str: string): string {
     .replace(/[^a-zA-Z0-9_]/g, '');
 }
 
+// Output flows to emitted TS source (type unions, URLSearchParams keys), not HTML.
 function cleanParamName(str: string): string {
   return str.replace(/<[^>]*>/g, '');
 }
