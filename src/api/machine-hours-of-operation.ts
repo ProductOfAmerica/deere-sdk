@@ -5,10 +5,16 @@
  * @generated from machine-hours-of-operation.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-hours-of-operation.js';
 
 export class MachineHoursOfOperationApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'machine-hours-of-operation';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -44,6 +50,7 @@ export class MachineHoursOfOperationApi {
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['HoursOfOperation_Response']>>(
+      this.spec,
       path,
       options
     );
@@ -74,7 +81,11 @@ export class MachineHoursOfOperationApi {
       query.set('summarizeDuration', String(params.summarizeDuration));
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['HoursOfOperation_Response']>(path, options);
+    return this.client.getAll<components['schemas']['HoursOfOperation_Response']>(
+      this.spec,
+      path,
+      options
+    );
   }
 }
 

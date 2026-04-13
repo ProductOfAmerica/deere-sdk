@@ -5,10 +5,16 @@
  * @generated from files.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/files.js';
 
 export class FilesApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'files';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -29,7 +35,11 @@ export class FilesApi {
     if (params?.transferable !== undefined) query.set('transferable', String(params.transferable));
     const queryString = query.toString();
     const path = `/files${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['FilesGet']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['FilesGet']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -45,7 +55,7 @@ export class FilesApi {
     if (params?.transferable !== undefined) query.set('transferable', String(params.transferable));
     const queryString = query.toString();
     const path = `/files${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['FilesGet']>(path, options);
+    return this.client.getAll<components['schemas']['FilesGet']>(this.spec, path, options);
   }
 
   /**
@@ -68,7 +78,7 @@ export class FilesApi {
    */
   async get(fileId: string, options?: RequestOptions): Promise<unknown> {
     const path = `/files/${fileId}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
 
   /**
@@ -83,7 +93,7 @@ export class FilesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/files/${fileId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -120,7 +130,11 @@ export class FilesApi {
     if (params?.status !== undefined) query.set('status', String(params.status));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/files${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['FilesGet']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['FilesGet']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -137,7 +151,7 @@ export class FilesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/files`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 }
 

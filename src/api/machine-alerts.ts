@@ -5,10 +5,16 @@
  * @generated from machine-alerts.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-alerts.js';
 
 export class MachineAlertsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'machine-alerts';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -36,7 +42,11 @@ export class MachineAlertsApi {
       query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
     const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['AlertValue']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['AlertValue']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -54,7 +64,7 @@ export class MachineAlertsApi {
       query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
     const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['AlertValue']>(path, options);
+    return this.client.getAll<components['schemas']['AlertValue']>(this.spec, path, options);
   }
 }
 

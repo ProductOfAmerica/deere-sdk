@@ -5,10 +5,16 @@
  * @generated from partnerships.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/partnerships.js';
 
 export class PartnershipsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'partnerships';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -27,7 +33,11 @@ export class PartnershipsApi {
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Partnerships']>> {
     const path = `/partnerships`;
-    return this.client.get<PaginatedResponse<components['schemas']['Partnerships']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['Partnerships']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -35,7 +45,7 @@ export class PartnershipsApi {
    */
   async listAll(options?: RequestOptions): Promise<components['schemas']['Partnerships'][]> {
     const path = `/partnerships`;
-    return this.client.getAll<components['schemas']['Partnerships']>(path, options);
+    return this.client.getAll<components['schemas']['Partnerships']>(this.spec, path, options);
   }
 
   /**
@@ -48,7 +58,7 @@ export class PartnershipsApi {
    */
   async create(data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
     const path = `/partnerships`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -68,7 +78,7 @@ export class PartnershipsApi {
     options?: RequestOptions
   ): Promise<components['schemas']['PartnershipsId']> {
     const path = `/partnerships/${token}`;
-    return this.client.get<components['schemas']['PartnershipsId']>(path, options);
+    return this.client.get<components['schemas']['PartnershipsId']>(this.spec, path, options);
   }
 
   /**
@@ -78,7 +88,7 @@ export class PartnershipsApi {
    */
   async delete(token: string, options?: RequestOptions): Promise<void> {
     const path = `/partnerships/${token}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -94,7 +104,11 @@ export class PartnershipsApi {
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Permissions']>> {
     const path = `/partnerships/${token}/permissions`;
-    return this.client.get<PaginatedResponse<components['schemas']['Permissions']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['Permissions']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -110,7 +124,12 @@ export class PartnershipsApi {
     options?: RequestOptions
   ): Promise<components['schemas']['PermissionsPost']> {
     const path = `/partnerships/${token}/permissions`;
-    return this.client.post<components['schemas']['PermissionsPost']>(path, data, options);
+    return this.client.post<components['schemas']['PermissionsPost']>(
+      this.spec,
+      path,
+      data,
+      options
+    );
   }
 }
 

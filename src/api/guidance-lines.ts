@@ -5,10 +5,16 @@
  * @generated from guidance-lines.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/guidance-lines.js';
 
 export class GuidanceLinesApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'guidance-lines';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -29,7 +35,7 @@ export class GuidanceLinesApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)
@@ -47,7 +53,7 @@ export class GuidanceLinesApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<unknown>(this.spec, path, options);
   }
 
   /**
@@ -64,7 +70,7 @@ export class GuidanceLinesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -84,7 +90,7 @@ export class GuidanceLinesApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
 
   /**
@@ -100,7 +106,7 @@ export class GuidanceLinesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 }
 

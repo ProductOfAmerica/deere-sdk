@@ -5,10 +5,16 @@
  * @generated from harvest-id.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/harvest-id.js';
 
 export class HarvestIdApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'harvest-id';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -29,6 +35,7 @@ export class HarvestIdApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['HIDCottonModule']>>(
+      this.spec,
       path,
       options
     );
@@ -48,7 +55,7 @@ export class HarvestIdApi {
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['HIDCottonModule']>(path, options);
+    return this.client.getAll<components['schemas']['HIDCottonModule']>(this.spec, path, options);
   }
 
   /**
@@ -67,7 +74,7 @@ export class HarvestIdApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/harvestIdentificationModules/${serialNumber}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['HIDCottonModule']>(path, options);
+    return this.client.get<components['schemas']['HIDCottonModule']>(this.spec, path, options);
   }
 }
 

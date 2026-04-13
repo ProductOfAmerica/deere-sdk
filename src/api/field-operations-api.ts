@@ -5,10 +5,16 @@
  * @generated from field-operations-api.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/field-operations-api.js';
 
 export class FieldOperationsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'field-operations-api';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -47,6 +53,7 @@ export class FieldOperationsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldOperation']>>(
+      this.spec,
       path,
       options
     );
@@ -78,7 +85,7 @@ export class FieldOperationsApi {
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['FieldOperation']>(path, options);
+    return this.client.getAll<components['schemas']['FieldOperation']>(this.spec, path, options);
   }
 
   /**
@@ -97,7 +104,7 @@ export class FieldOperationsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/fieldOperations/${operationId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['FieldOperationId']>(path, options);
+    return this.client.get<components['schemas']['FieldOperationId']>(this.spec, path, options);
   }
 
   /**
@@ -138,7 +145,7 @@ export class FieldOperationsApi {
     if (params?.resolution !== undefined) query.set('resolution', String(params.resolution));
     const queryString = query.toString();
     const path = `/fieldOps/${operationId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
 }
 

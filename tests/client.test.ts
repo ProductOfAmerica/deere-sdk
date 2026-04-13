@@ -13,7 +13,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof AuthError);
           assert.strictEqual(error.message, 'Invalid token');
@@ -31,7 +31,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof AuthError);
           assert.strictEqual((error as AuthError).status, 403);
@@ -48,7 +48,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof RateLimitError);
           assert.strictEqual((error as RateLimitError).retryAfter, 30);
@@ -65,7 +65,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof RateLimitError);
           assert.strictEqual((error as RateLimitError).retryAfter, undefined);
@@ -82,7 +82,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           assert(!(error instanceof AuthError));
@@ -101,7 +101,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           assert.strictEqual((error as DeereError).status, 400);
@@ -118,7 +118,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.strictEqual(error.message, 'Custom error message');
           return true;
@@ -134,7 +134,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.strictEqual(error.message, 'Error from error field');
           return true;
@@ -150,7 +150,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.strictEqual(error.message, 'OAuth error');
           return true;
@@ -166,7 +166,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.strictEqual(error.message, 'First error');
           return true;
@@ -183,7 +183,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.deepStrictEqual((error as DeereError).body, errorBody);
           return true;
@@ -197,7 +197,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'my-secret-token', fetch });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       assert.strictEqual(calls.length, 1);
       assert.strictEqual(
@@ -210,7 +210,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       assert.strictEqual(
         (calls[0].init.headers as Record<string, string>).Accept,
@@ -222,7 +222,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       assert.strictEqual(
         (calls[0].init.headers as Record<string, string>)['Content-Type'],
@@ -230,48 +230,39 @@ describe('DeereClient', () => {
       );
     });
 
-    it('builds URL from path with sandbox environment by default', async () => {
+    it('builds URL from path with sandboxapi environment by default', async () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.get('/organizations');
+      await client.get('organizations', '/organizations');
 
       assert.strictEqual(calls[0].url, 'https://sandboxapi.deere.com/platform/organizations');
     });
 
-    it('builds URL with production environment', async () => {
+    it('builds URL with api (production) environment', async () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({
         accessToken: 'test',
         fetch,
-        environment: 'production',
+        environment: 'api',
       });
 
-      await client.get('/organizations');
+      await client.get('organizations', '/organizations');
 
       assert.strictEqual(calls[0].url, 'https://api.deere.com/platform/organizations');
     });
 
-    it('uses custom baseUrl over environment', async () => {
+    it('fetchUrl passes absolute deere.com URLs through untouched (with Bearer)', async () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
-      const client = new DeereClient({
-        accessToken: 'test',
-        fetch,
-        baseUrl: 'https://custom.api.com',
-      });
+      const client = new DeereClient({ accessToken: 'secret', fetch });
 
-      await client.get('/test');
+      await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');
 
-      assert.strictEqual(calls[0].url, 'https://custom.api.com/test');
-    });
-
-    it('passes through full URLs without modification', async () => {
-      const { fetch, calls } = mockWithSpy({ data: 'test' });
-      const client = new DeereClient({ accessToken: 'test', fetch });
-
-      await client.get('https://other.api.com/resource');
-
-      assert.strictEqual(calls[0].url, 'https://other.api.com/resource');
+      assert.strictEqual(calls[0].url, 'https://api.deere.com/platform/organizations');
+      assert.strictEqual(
+        (calls[0].init.headers as Record<string, string>).Authorization,
+        'Bearer secret'
+      );
     });
 
     it('includes custom headers from config', async () => {
@@ -282,7 +273,7 @@ describe('DeereClient', () => {
         defaultHeaders: { 'X-Custom': 'value' },
       });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       assert.strictEqual((calls[0].init.headers as Record<string, string>)['X-Custom'], 'value');
     });
@@ -291,7 +282,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.get('/test', { headers: { 'X-Request': 'header' } });
+      await client.get('organizations', '/test', { headers: { 'X-Request': 'header' } });
 
       assert.strictEqual((calls[0].init.headers as Record<string, string>)['X-Request'], 'header');
     });
@@ -300,7 +291,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.post('/test', { name: 'value' });
+      await client.post('organizations', '/test', { name: 'value' });
 
       assert.strictEqual(calls[0].init.method, 'POST');
       assert.strictEqual(calls[0].init.body, JSON.stringify({ name: 'value' }));
@@ -310,7 +301,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.put('/test', { updated: true });
+      await client.put('organizations', '/test', { updated: true });
 
       assert.strictEqual(calls[0].init.method, 'PUT');
       assert.strictEqual(calls[0].init.body, JSON.stringify({ updated: true }));
@@ -320,7 +311,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.patch('/test', { partial: 'update' });
+      await client.patch('organizations', '/test', { partial: 'update' });
 
       assert.strictEqual(calls[0].init.method, 'PATCH');
       assert.strictEqual(calls[0].init.body, JSON.stringify({ partial: 'update' }));
@@ -330,7 +321,7 @@ describe('DeereClient', () => {
       const { fetch, calls } = mockWithSpy({ data: 'test' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.delete('/test');
+      await client.delete('organizations', '/test');
 
       assert.strictEqual(calls[0].init.method, 'DELETE');
       assert.strictEqual(calls[0].init.body, undefined);
@@ -344,7 +335,7 @@ describe('DeereClient', () => {
         fetch: mockJsonResponse({ id: 1, name: 'Test' }),
       });
 
-      const result = await client.get<{ id: number; name: string }>('/test');
+      const result = await client.get<{ id: number; name: string }>('organizations', '/test');
 
       assert.deepStrictEqual(result, { id: 1, name: 'Test' });
     });
@@ -355,7 +346,7 @@ describe('DeereClient', () => {
         fetch: async () => new Response(null, { status: 204 }),
       });
 
-      const result = await client.delete('/test');
+      const result = await client.delete('organizations', '/test');
 
       assert.strictEqual(result, undefined);
     });
@@ -370,7 +361,7 @@ describe('DeereClient', () => {
           }),
       });
 
-      const result = await client.get('/test');
+      const result = await client.get('organizations', '/test');
 
       assert.strictEqual(result, undefined);
     });
@@ -385,7 +376,7 @@ describe('DeereClient', () => {
           }),
       });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.deepStrictEqual(result, { data: 'value' });
     });
@@ -400,7 +391,7 @@ describe('DeereClient', () => {
           }),
       });
 
-      const result = await client.get('/test');
+      const result = await client.get('organizations', '/test');
 
       assert.strictEqual(result, 'Plain text response');
     });
@@ -425,13 +416,14 @@ describe('DeereClient', () => {
       assert.strictEqual(calls[0].url, 'https://api.deere.com/resource/456');
     });
 
-    it('handles relative URI in link', async () => {
-      const { fetch, calls } = mockWithSpy({ data: 'linked' });
+    it('rejects relative URI in link (v2 requires absolute)', async () => {
+      const { fetch } = mockWithSpy({ data: 'linked' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await client.followLink({ rel: 'next', uri: '/page/2' });
-
-      assert.strictEqual(calls[0].url, 'https://sandboxapi.deere.com/platform/page/2');
+      // v1 accepted relative URIs via baseUrl prefixing. v2 removed that
+      // abstraction — followLink goes through fetchUrl which requires a
+      // fully-qualified URL. Relative URIs fail at `new URL(uri)`.
+      await assert.rejects(() => client.followLink({ rel: 'next', uri: '/page/2' }), /Invalid URL/);
     });
   });
 
@@ -441,7 +433,7 @@ describe('DeereClient', () => {
       const client = createClient({ accessToken: 'factory-token', fetch });
 
       assert(client instanceof DeereClient);
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       assert.strictEqual(
         (calls[0].init.headers as Record<string, string>).Authorization,
@@ -464,7 +456,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           // Should fall back to statusText when body can't be parsed
@@ -488,7 +480,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           assert.strictEqual(error.message, 'Bad Request');
@@ -520,7 +512,7 @@ describe('DeereClient', () => {
       controller.abort();
 
       await assert.rejects(
-        () => client.get('/test', { signal: controller.signal }),
+        () => client.get('organizations', '/test', { signal: controller.signal }),
         (error: Error) => {
           // AbortError gets wrapped in DeereError with 'Request timeout' message
           assert(error instanceof DeereError);
@@ -530,21 +522,23 @@ describe('DeereClient', () => {
       );
     });
 
-    it('uses all environment URLs correctly', async () => {
-      const environments = ['production', 'sandbox', 'partner', 'cert', 'qa'] as const;
+    it('uses all environment URLs correctly (v2 raw subdomains)', async () => {
+      // Only envs 'organizations' spec declares in its enum after fix-specs
+      // normalization — which is the global union of all templated specs = all 9.
+      const environments = ['api', 'sandboxapi', 'partnerapi', 'apicert', 'apiqa.tal'] as const;
       const expectedUrls: Record<string, string> = {
-        production: 'https://api.deere.com/platform/test',
-        sandbox: 'https://sandboxapi.deere.com/platform/test',
-        partner: 'https://partnerapi.deere.com/platform/test',
-        cert: 'https://apicert.deere.com/platform/test',
-        qa: 'https://apiqa.tal.deere.com/platform/test',
+        api: 'https://api.deere.com/platform/organizations',
+        sandboxapi: 'https://sandboxapi.deere.com/platform/organizations',
+        partnerapi: 'https://partnerapi.deere.com/platform/organizations',
+        apicert: 'https://apicert.deere.com/platform/organizations',
+        'apiqa.tal': 'https://apiqa.tal.deere.com/platform/organizations',
       };
 
       for (const env of environments) {
         const { fetch, calls } = mockWithSpy({ data: 'test' });
         const client = new DeereClient({ accessToken: 'test', fetch, environment: env });
 
-        await client.get('/test');
+        await client.get('organizations', '/organizations');
 
         assert.strictEqual(calls[0].url, expectedUrls[env], `Failed for environment: ${env}`);
       }
@@ -569,7 +563,7 @@ describe('DeereClient', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test', { timeout: 50 }), // Override to 50ms
+        () => client.get('organizations', '/test', { timeout: 50 }), // Override to 50ms
         (_error: Error) => {
           const elapsed = Date.now() - requestStartTime;
           assert(elapsed < 200, `Timeout should have triggered quickly, took ${elapsed}ms`);
@@ -583,7 +577,7 @@ describe('DeereClient', () => {
       // Only required field is accessToken
       const client = new DeereClient({ accessToken: 'minimal', fetch });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.deepStrictEqual(result, { data: 'test' });
       // Should use default sandbox environment
@@ -598,7 +592,7 @@ describe('DeereClient', () => {
         // No defaultHeaders provided
       });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       // Should still have the required Deere headers
       const headers = calls[0].init.headers as Record<string, string>;

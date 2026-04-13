@@ -5,6 +5,145 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-13
+
+**Major release.** URL resolution is now fully spec-driven. This release fixes
+a latent bug where `deere.equipment.*` and `deere.equipmentMeasurement.*`
+calls 404'd on every environment because the client prepended a platform
+baseUrl to specs that declared a different host. Along the way it replaces
+the v1 friendly environment names with the raw JD subdomain names that the
+specs actually declare, refactors every `DeereClient` HTTP method to take a
+spec name as its first argument, and adds a Bearer-token hostname allowlist
+to `fetchUrl` so tokens can't leak to third-party URLs.
+
+### Breaking changes
+
+#### 1. Environment names changed
+
+v2 uses the raw subdomain names that JD's specs declare in their
+`servers.variables.environment.enum` blocks. Constructor throws immediately
+on v1 names with a migration hint pointing at the v2 replacement.
+
+| v1.x          | v2.0          |
+|---------------|---------------|
+| `production`  | `api`         |
+| `sandbox`     | `sandboxapi`  |
+| `partner`     | `partnerapi`  |
+| `cert`        | `apicert`     |
+| `qa`          | `apiqa.tal`   |
+
+Four new environments are also exposed: `partnerapicert`, `partnerapiqa`,
+`sandboxapiqa`, `apidev.tal`. These come directly from templated specs'
+declared enums and will auto-update as JD adds regions.
+
+#### 2. `DeereClient` method signatures now require a spec name
+
+```ts
+// v1
+await client.get('/organizations');
+
+// v2
+await client.get('organizations', '/organizations');
+```
+
+The first argument is a `SpecName` — the name of the OpenAPI spec that owns
+the path. Generated API classes (`deere.organizations.list()` etc.) pass the
+spec name internally, so code using the generated accessors needs **no
+changes**. Only direct `client.get/post/put/patch/delete/paginate/getAll`
+callers must migrate.
+
+#### 3. Absolute URLs use `fetchUrl()`
+
+```ts
+// v1 — auto-detected from URL shape
+await client.get('https://equipmentapi.deere.com/isg/equipment');
+
+// v2 — explicit escape hatch
+await client.fetchUrl('GET', 'https://equipmentapi.deere.com/isg/equipment');
+```
+
+`fetchUrl` is the one entry point for absolute-URL requests. It attaches the
+Bearer token ONLY to `*.deere.com` hosts; third-party URLs get no
+`Authorization` header to prevent token leakage.
+
+#### 4. `config.baseUrl` removed
+
+Per-client base URL no longer exists; each spec declares its own. For
+mocking in tests, inject a custom `fetch` implementation instead.
+
+#### 5. `DeereClient.warmLinkCache` now takes a spec name
+
+```ts
+// v1
+await client.warmLinkCache(['/organizations']);
+
+// v2
+await client.warmLinkCache('organizations', ['/organizations']);
+```
+
+#### 6. Default environment changed from `'sandbox'` to `'sandboxapi'`
+
+Behaviorally identical (both pointed at the sandbox host) — just the string
+value changed to match the v2 naming.
+
+### Fixed
+
+- **`EquipmentApi` and `EquipmentMeasurementApi` now route correctly.** Every
+  call in v1 404'd because the client prepended the platform baseUrl
+  (`https://api.deere.com/platform`) to specs whose actual host is
+  `https://equipmentapi.deere.com/isg`. v2 reads each spec's `servers` block
+  at build time via `scripts/generate-api-servers.ts` and routes requests
+  to the right host per-spec, per-environment.
+- **Trust-boundary safety for equipment-measurement.** `equipment-measurement.yaml`
+  declares three static hosts (`-qual`, `-cert`, bare prod). v1 silently
+  routed every environment to whatever host the client's scalar `baseUrl`
+  pointed at, so sandbox users could nuke prod data. v2 maps each
+  environment to a tier via JD's own `x-deere-proxy-info` metadata and
+  throws `UnsupportedEnvironmentError` for environments without a matching
+  tier (`sandboxapi` and `apidev.tal`) before any HTTP call.
+- **`fetchUrl` Bearer token hostname allowlist.** v1's
+  `client.get(absoluteUrl)` attached the Bearer token to any URL, risking
+  leakage via HATEOAS nextPage links or paste-and-fetch bugs. v2's `fetchUrl`
+  only attaches the token to `*.deere.com` hosts.
+- **`ENVIRONMENT_URLS` duplication eliminated.** The URL table used to live
+  in both `src/client.ts` and `scripts/generate-sdk.ts`. v2 has one source
+  of truth: the generated `src/api-servers.generated.ts`.
+- **Platform-disguised specs normalized at build time.** Six specs
+  (`files.yaml`, `flags.yaml`, `organizations.yaml`, `machine-alerts.yaml`,
+  `machine-locations.yaml`, `partnerships.yaml`) hardcoded platform URLs
+  without using the `{environment}` template. `scripts/fix-specs.ts` now
+  rewrites them to the templated form with the global env enum union, so
+  sandbox users don't regress.
+- **HATEOAS cross-spec parent resolution.** `HATEOAS_MAP` entries now record
+  `parentSpec` — which spec owns the parent resource — so a child in
+  `equipment.yaml` whose parent `/organizations/{orgId}` lives in
+  `organizations.yaml` fetches the parent via the platform host, not the
+  equipment host.
+
+### Added
+
+- `SpecName` type exported from `deere-sdk` — the literal union of all 28
+  spec names. Useful for generic wrappers over the SDK.
+- `NoServerConfigError` and `UnsupportedEnvironmentError` classes — both
+  extend `DeereError`. Thrown from the runtime URL resolver before any HTTP
+  call when a spec is unavailable or an env isn't supported for a spec.
+- `client.fetchUrl(method, url, body?, options?)` — public escape hatch for
+  absolute-URL requests.
+- `scripts/generate-api-servers.ts` build step that reads all
+  `specs/fixed/*.yaml` and emits `src/api-servers.generated.ts` as the
+  single source of truth for URL resolution. Runs as part of `pnpm generate`.
+
+### Internal
+
+- Error hierarchy (`DeereError`, `RateLimitError`, `AuthError`, `HateoasError`)
+  moved from `src/client.ts` to new `src/errors.ts` to avoid a circular
+  import with the environment resolver. `src/client.ts` re-exports them for
+  backward compatibility.
+- `yamlFiles.sort()` added to both `fix-specs.ts` and `generate-sdk.ts` main
+  loops for deterministic generator output across CI runners.
+- Removed orphan `src/api/field-operations.ts` (dead code, never referenced
+  from `src/api/index.ts`).
+
 ## [1.0.10] - 2026-03-26
 
 ### Added

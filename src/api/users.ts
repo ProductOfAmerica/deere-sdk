@@ -5,10 +5,16 @@
  * @generated from users.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/users.js';
 
 export class UsersApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'users';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -30,7 +36,7 @@ export class UsersApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/users/${username}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['UsersValue']>(path, options);
+    return this.client.get<components['schemas']['UsersValue']>(this.spec, path, options);
   }
 }
 

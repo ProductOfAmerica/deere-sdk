@@ -3,8 +3,20 @@ info:
   title: "Partnerships & Permission"
   version: "0.0.1"
 servers:
-  - url: "https://api.deere.com/platform"
-    description: "MyJohnDeere API"
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "sandboxapi"
+          - "partnerapi"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+          - "partnerapicert"
+          - "partnerapiqa"
+          - "sandboxapiqa"
 tags:
   - name: "Partnership Endpoints"
 paths:

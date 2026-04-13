@@ -7,7 +7,20 @@ info:
     email: "RostaninOleg@JohnDeere.com"
   title: "Axiom Public Flags API"
 servers:
-  - url: "https://partnerapi.deere.com/platform"
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "sandboxapi"
+          - "partnerapi"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+          - "partnerapicert"
+          - "partnerapiqa"
+          - "sandboxapiqa"
 paths:
   /organizations/{orgId}/flags/{flagId}:
     get:

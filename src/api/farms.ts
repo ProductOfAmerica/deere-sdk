@@ -5,10 +5,16 @@
  * @generated from farms.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/farms.js';
 
 export class FarmsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'farms';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -26,7 +32,11 @@ export class FarmsApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -42,7 +52,7 @@ export class FarmsApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['GetFarms']>(path, options);
+    return this.client.getAll<components['schemas']['GetFarms']>(this.spec, path, options);
   }
 
   /**
@@ -56,7 +66,7 @@ export class FarmsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/farms`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -74,7 +84,7 @@ export class FarmsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms/${farmId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['GetFarm']>(path, options);
+    return this.client.get<components['schemas']['GetFarm']>(this.spec, path, options);
   }
 
   /**
@@ -89,7 +99,7 @@ export class FarmsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/farms/${farmId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -99,7 +109,7 @@ export class FarmsApi {
    */
   async delete(orgId: string, farmId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/farms/${farmId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -113,7 +123,11 @@ export class FarmsApi {
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Clients']>> {
     const path = `/organizations/${orgId}/farms/${farmId}/clients`;
-    return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -133,6 +147,7 @@ export class FarmsApi {
   ): Promise<PaginatedResponse<components['schemas']['FieldResponse2']>> {
     const path = `/organizations/${orgID}/farms/${id}/fields`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse2']>>(
+      this.spec,
       path,
       options
     );

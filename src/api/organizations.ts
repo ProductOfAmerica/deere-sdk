@@ -5,10 +5,16 @@
  * @generated from organizations.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/organizations.js';
 
 export class OrganizationsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'organizations';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -26,7 +32,11 @@ export class OrganizationsApi {
     if (params?.orgName !== undefined) query.set('orgName', String(params.orgName));
     const queryString = query.toString();
     const path = `/organizations${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['Organization']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['Organization']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -42,7 +52,7 @@ export class OrganizationsApi {
     if (params?.orgName !== undefined) query.set('orgName', String(params.orgName));
     const queryString = query.toString();
     const path = `/organizations${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['Organization']>(path, options);
+    return this.client.getAll<components['schemas']['Organization']>(this.spec, path, options);
   }
 
   /**
@@ -57,7 +67,7 @@ export class OrganizationsApi {
     options?: RequestOptions
   ): Promise<components['schemas']['OrganizationView']> {
     const path = `/organizations/${orgId}`;
-    return this.client.get<components['schemas']['OrganizationView']>(path, options);
+    return this.client.get<components['schemas']['OrganizationView']>(this.spec, path, options);
   }
 
   /**
@@ -74,6 +84,7 @@ export class OrganizationsApi {
   ): Promise<PaginatedResponse<components['schemas']['OrganizationViewGet']>> {
     const path = `/users/${userName}/organizations`;
     return this.client.get<PaginatedResponse<components['schemas']['OrganizationViewGet']>>(
+      this.spec,
       path,
       options
     );
@@ -91,6 +102,7 @@ export class OrganizationsApi {
   ): Promise<PaginatedResponse<components['schemas']['OrganizationUser']>> {
     const path = `/organizations/${orgId}/users`;
     return this.client.get<PaginatedResponse<components['schemas']['OrganizationUser']>>(
+      this.spec,
       path,
       options
     );

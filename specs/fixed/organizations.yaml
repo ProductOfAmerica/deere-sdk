@@ -7,8 +7,20 @@ info:
     name: "SOUP Team"
     email: "isg_souperfriends@johndeere.com"
 servers:
-  - url: "https://api.deere.com/platform"
-    description: "MyJohnDeere API"
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "sandboxapi"
+          - "partnerapi"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+          - "partnerapicert"
+          - "partnerapiqa"
+          - "sandboxapiqa"
 paths:
   /organizations:
     get:

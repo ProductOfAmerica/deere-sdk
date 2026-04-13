@@ -248,6 +248,195 @@ function removeInvalidFields(spec: Record<string, unknown>): void {
   }
 }
 
+// ============================================================================
+// Platform-disguise normalization
+// ============================================================================
+//
+// Five specs on main hardcode platform URLs without using the `{environment}`
+// template (files.yaml, organizations.yaml, machine-alerts.yaml,
+// machine-locations.yaml, partnerships.yaml). In v1 the client's scalar
+// baseUrl ignored the spec's servers list entirely, so this worked by
+// coincidence. In v2.0 with spec-driven URL resolution, leaving these
+// hardcoded would break sandbox users: generate-api-servers would see
+// `https://api.deere.com/platform` and map only the `api` env, throwing
+// UnsupportedEnvironmentError for every other env.
+//
+// Fix: detect specs whose server list is entirely made of static JD platform
+// URLs and rewrite them to the templated form with the global enum union.
+// After this pass runs, generate-api-servers sees a uniform templated shape
+// and every env routes correctly.
+
+interface OpenAPIServer {
+  url: string;
+  description?: string;
+  variables?: Record<string, { default?: string; enum?: string[] }>;
+}
+
+const PLATFORM_URL_PATTERN = /^https:\/\/([a-z0-9.-]+)\.deere\.com\/platform$/i;
+
+/**
+ * Read every raw spec, extract the `environment` variable enum from templated
+ * servers blocks, and return the union of all values. This is the enum we
+ * inject into normalized specs so they declare the same env coverage as the
+ * rest of the SDK.
+ */
+function collectGlobalEnvEnum(specsDir: string): string[] {
+  const union = new Set<string>();
+  const files = readdirSync(specsDir).filter((f) => f.endsWith('.yaml'));
+  for (const file of files) {
+    let spec: Record<string, unknown>;
+    try {
+      spec = yaml.parse(readFileSync(join(specsDir, file), 'utf-8')) as Record<string, unknown>;
+    } catch {
+      continue;
+    }
+    const servers = spec.servers as OpenAPIServer[] | undefined;
+    const first = servers?.[0];
+    if (!first?.url.includes('{environment}')) continue;
+    const envVar = first.variables?.environment;
+    if (Array.isArray(envVar?.enum)) {
+      for (const value of envVar.enum) {
+        if (typeof value === 'string') union.add(value);
+      }
+    }
+  }
+  // Production-first ordering — deterministic.
+  const ordered = ['api', 'sandboxapi', 'partnerapi', 'apicert', 'apiqa.tal'];
+  const result: string[] = [];
+  for (const known of ordered) {
+    if (union.has(known)) {
+      result.push(known);
+      union.delete(known);
+    }
+  }
+  // Any remaining values (future regions) get appended in sorted order for stability.
+  result.push(...[...union].sort());
+  return result;
+}
+
+/**
+ * A spec is "platform-disguised" when every entry in its servers list is a
+ * static `https://<subdomain>.deere.com/platform` URL with no `{` template
+ * and no `variables` block. These are the 5 specs we need to normalize.
+ */
+function isPlatformDisguised(servers: OpenAPIServer[] | undefined): boolean {
+  if (!servers || servers.length === 0) return false;
+  for (const server of servers) {
+    if (typeof server.url !== 'string') return false;
+    if (server.url.includes('{')) return false; // already templated
+    if (server.variables) return false; // already has variables → not disguised
+    if (!PLATFORM_URL_PATTERN.test(server.url)) return false;
+  }
+  return true;
+}
+
+/**
+ * Rewrites a platform-disguised spec's servers block to the templated form
+ * with the global env enum union. No-op for specs that aren't disguised.
+ */
+function normalizePlatformDisguise(
+  spec: Record<string, unknown>,
+  globalEnumUnion: string[]
+): boolean {
+  const servers = spec.servers as OpenAPIServer[] | undefined;
+  if (!isPlatformDisguised(servers)) return false;
+
+  spec.servers = buildTemplatedPlatformServers(globalEnumUnion);
+  return true;
+}
+
+/**
+ * Inject a default templated platform servers block into a spec that has
+ * NO servers block at all (or has an empty/invalid one). Returns true if
+ * the spec was modified, false if it already had a valid servers block.
+ *
+ * This handles notifications.yaml, which doesn't declare any servers block
+ * upstream. Without this fix, generate-api-servers classifies it as
+ * `kind: 'unavailable'` and every API call throws NoServerConfigError.
+ *
+ * We assume specs without a servers block are platform-style — their paths
+ * look like `/notifications/*` or `/organizations/{orgId}/*`, which are
+ * normal JD platform API patterns. If an upstream spec adds new non-platform
+ * shapes, this pass may need a more conservative check.
+ */
+function injectDefaultServers(spec: Record<string, unknown>, globalEnumUnion: string[]): boolean {
+  const existing = spec.servers as unknown;
+  if (Array.isArray(existing) && existing.length > 0) return false;
+
+  spec.servers = buildTemplatedPlatformServers(globalEnumUnion);
+  return true;
+}
+
+function buildTemplatedPlatformServers(globalEnumUnion: string[]): OpenAPIServer[] {
+  return [
+    {
+      url: 'https://{environment}.deere.com/platform',
+      variables: {
+        environment: {
+          default: 'api',
+          enum: globalEnumUnion,
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Repair jammed-together URLs where a spec author pasted multiple URLs into
+ * one `servers[0].url` string separated by literal text like `<br/>GET` or
+ * `(sandbox) GET`. aemp.yaml is the canonical case:
+ *
+ *   'https://sandboxaemp.deere.com/Fleet/{pageNumber} (sandbox)<br/>GET
+ *    https://partneraemp.deere.com/Fleet/{pageNumber} (live)'
+ *
+ * This extracts the actual URL substrings via regex, strips everything
+ * after the hostname (the `/Fleet/{pageNumber}` suffix is documentation that
+ * duplicates the spec's declared path), and rewrites to multiple clean
+ * server entries.
+ *
+ * Returns true if the spec was modified.
+ */
+function repairJammedServers(spec: Record<string, unknown>): boolean {
+  const servers = spec.servers as OpenAPIServer[] | undefined;
+  if (!servers || servers.length === 0) return false;
+
+  const first = servers[0];
+  if (typeof first?.url !== 'string') return false;
+
+  // Detect the jammed shape: whitespace + GET + whitespace + http(s), or
+  // <br/>GET + whitespace + http(s). Both signatures indicate the URL
+  // field contains multiple documentation-style URLs concatenated.
+  const isJammed =
+    /\s+GET\s+https?:\/\//i.test(first.url) || /<br\/?>GET\s+https?:\/\//i.test(first.url);
+  if (!isJammed) return false;
+
+  // Extract every http(s) URL substring. Regex stops at whitespace, `<`, or
+  // `(` so documentation suffixes like "(sandbox)" are excluded. Braces
+  // like `{pageNumber}` are allowed in the match.
+  const urlMatches = first.url.match(/https?:\/\/[^\s<()]+/g);
+  if (!urlMatches || urlMatches.length < 2) return false;
+
+  // Reduce each URL to its base (protocol + host). The suffix after the
+  // host is typically a documentation-style path that duplicates the
+  // spec's declared `paths:` entries.
+  const baseUrls: string[] = [];
+  for (const u of urlMatches) {
+    try {
+      const parsed = new URL(u);
+      baseUrls.push(`${parsed.protocol}//${parsed.host}`);
+    } catch {
+      // Skip unparseable fragments
+    }
+  }
+  if (baseUrls.length < 2) return false;
+
+  // Dedupe while preserving order
+  const unique = [...new Set(baseUrls)];
+
+  spec.servers = unique.map((url) => ({ url }));
+  return true;
+}
+
 function addMissingSchemas(spec: Record<string, unknown>, missingRefs: Set<string>): void {
   if (!spec.components) {
     spec.components = {};
@@ -427,7 +616,7 @@ function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: st
   }
 }
 
-function fixSpec(content: string, filename: string): string {
+function fixSpec(content: string, filename: string, globalEnumUnion: string[]): string {
   console.log(`\nProcessing: ${filename}`);
 
   let spec: Record<string, unknown>;
@@ -446,7 +635,7 @@ function fixSpec(content: string, filename: string): string {
     spec = { openapi: '3.0.0', ...rest };
   }
 
-  if (!spec || !spec.openapi) {
+  if (!spec?.openapi) {
     console.log('  Not a valid OpenAPI spec');
     return content;
   }
@@ -509,6 +698,31 @@ function fixSpec(content: string, filename: string): string {
   addMissingSchemas(spec, missingRefs);
   injectUndocumentedEndpoints(spec, filename);
 
+  // Repair jammed-together server URLs (aemp.yaml has multiple URLs
+  // concatenated with literal "GET" separators). Runs BEFORE
+  // normalizePlatformDisguise because it has to fix the shape first.
+  if (repairJammedServers(spec)) {
+    console.log(`  Repaired jammed servers URL`);
+  }
+
+  // Rewrite platform-disguised servers blocks (files.yaml, organizations.yaml,
+  // machine-alerts.yaml, machine-locations.yaml, partnerships.yaml) to templated
+  // form. This must run before yaml.stringify so the emitted spec has the new
+  // shape. Downstream generate-api-servers.ts sees a uniform templated input.
+  if (normalizePlatformDisguise(spec, globalEnumUnion)) {
+    console.log(
+      `  Normalized platform-disguised servers (enum union: ${globalEnumUnion.join(', ')})`
+    );
+  }
+
+  // Inject a default templated platform servers block for specs that have
+  // no servers at all (notifications.yaml). Without this they'd be
+  // classified as `kind: 'unavailable'` and throw NoServerConfigError on
+  // every call.
+  if (injectDefaultServers(spec, globalEnumUnion)) {
+    console.log(`  Injected default templated servers block (no servers declared upstream)`);
+  }
+
   return yaml.stringify(spec, {
     lineWidth: 0,
     defaultKeyType: 'PLAIN',
@@ -529,8 +743,17 @@ async function main() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const yamlFiles = readdirSync(SPECS_DIR).filter((f) => f.endsWith('.yaml'));
+  const yamlFiles = readdirSync(SPECS_DIR)
+    .filter((f) => f.endsWith('.yaml'))
+    .sort();
   console.log(`Found ${yamlFiles.length} specs to fix`);
+
+  // Pre-pass: collect the union of `environment` enum values across every
+  // already-templated spec. Used by normalizePlatformDisguise to inject the
+  // same enum breadth into specs whose servers block was hardcoded. Without
+  // this, sandbox users of files/organizations/etc. would regress in v2.0.
+  const globalEnumUnion = collectGlobalEnvEnum(SPECS_DIR);
+  console.log(`Global environment enum union: ${globalEnumUnion.join(', ')}`);
 
   let fixed = 0;
   let failed = 0;
@@ -541,7 +764,7 @@ async function main() {
 
     try {
       const content = readFileSync(inputPath, 'utf-8');
-      const fixedContent = fixSpec(content, yamlFile);
+      const fixedContent = fixSpec(content, yamlFile, globalEnumUnion);
       writeFileSync(outputPath, fixedContent);
       fixed++;
     } catch (error) {

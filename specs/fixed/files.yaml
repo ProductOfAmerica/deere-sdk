@@ -7,14 +7,20 @@ info:
     email: "ISG_HalpDesk@JohnDeere.com"
     name: "Halp Desk"
 servers:
-  - url: "https://api.deere.com/platform"
-    description: "Production API endpoint"
-  - url: "https://apicert.deere.com/platform"
-    description: "Certification API endpoint"
-  - url: "https://apiqa.tal.deere.com/platform"
-    description: "Quality API endpoint"
-  - url: "https://apidev.tal.deere.com/platform"
-    description: "Development API endpoint"
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "sandboxapi"
+          - "partnerapi"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+          - "partnerapicert"
+          - "partnerapiqa"
+          - "sandboxapiqa"
 paths:
   /files:
     get:

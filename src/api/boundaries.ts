@@ -5,10 +5,16 @@
  * @generated from boundaries.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/boundaries.js';
 
 export class BoundariesApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'boundaries';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -29,6 +35,7 @@ export class BoundariesApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/boundaries${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(
+      this.spec,
       path,
       options
     );
@@ -47,7 +54,7 @@ export class BoundariesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/boundaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['BoundaryOrgId']>(path, options);
+    return this.client.getAll<components['schemas']['BoundaryOrgId']>(this.spec, path, options);
   }
 
   /**
@@ -67,6 +74,7 @@ export class BoundariesApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId']>>(
+      this.spec,
       path,
       options
     );
@@ -84,7 +92,7 @@ export class BoundariesApi {
     options?: RequestOptions
   ): Promise<components['schemas']['PostBoundary']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries`;
-    return this.client.post<components['schemas']['PostBoundary']>(path, data, options);
+    return this.client.post<components['schemas']['PostBoundary']>(this.spec, path, data, options);
   }
 
   /**
@@ -108,6 +116,7 @@ export class BoundariesApi {
   ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
     const path = `/fieldOperations/${operationId}/boundary`;
     return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(
+      this.spec,
       path,
       options
     );
@@ -125,7 +134,7 @@ export class BoundariesApi {
     options?: RequestOptions
   ): Promise<components['schemas']['PostBoundaryGet']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
-    return this.client.get<components['schemas']['PostBoundaryGet']>(path, options);
+    return this.client.get<components['schemas']['PostBoundaryGet']>(this.spec, path, options);
   }
 
   /**
@@ -145,7 +154,7 @@ export class BoundariesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -160,7 +169,7 @@ export class BoundariesApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 }
 

@@ -504,3 +504,18 @@ components:
         targetResource:
           example: "https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID"
           description: "Fields Link."
+servers:
+  - url: "https://{environment}.deere.com/platform"
+    variables:
+      environment:
+        default: "api"
+        enum:
+          - "api"
+          - "sandboxapi"
+          - "partnerapi"
+          - "apicert"
+          - "apiqa.tal"
+          - "apidev.tal"
+          - "partnerapicert"
+          - "partnerapiqa"
+          - "sandboxapiqa"

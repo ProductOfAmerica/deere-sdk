@@ -5,10 +5,16 @@
  * @generated from assets.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/assets.js';
 
 export class AssetsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'assets';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -26,6 +32,7 @@ export class AssetsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>>(
+      this.spec,
       path,
       options
     );
@@ -43,7 +50,11 @@ export class AssetsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['AssetCollectionGetValue']>(path, options);
+    return this.client.getAll<components['schemas']['AssetCollectionGetValue']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -57,7 +68,7 @@ export class AssetsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/assets`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -74,7 +85,7 @@ export class AssetsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/assets/${assetId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['AssetGetValues']>(path, options);
+    return this.client.get<components['schemas']['AssetGetValues']>(this.spec, path, options);
   }
 
   /**
@@ -88,7 +99,7 @@ export class AssetsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/assets/${assetId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -98,7 +109,7 @@ export class AssetsApi {
    */
   async delete(assetId: string, options?: RequestOptions): Promise<void> {
     const path = `/assets/${assetId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -120,7 +131,11 @@ export class AssetsApi {
     if (params?.pageKey !== undefined) query.set('pageKey', String(params.pageKey));
     const queryString = query.toString();
     const path = `/assets/${assetId}/locations${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['AssetIdValue']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['AssetIdValue']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -138,7 +153,7 @@ export class AssetsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/assets/${assetId}/locations`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -151,6 +166,7 @@ export class AssetsApi {
   ): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
     const path = `/assetCatalog`;
     return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(
+      this.spec,
       path,
       options
     );

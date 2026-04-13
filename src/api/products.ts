@@ -5,10 +5,16 @@
  * @generated from products.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/products.js';
 
 export class ProductsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'products';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -31,6 +37,7 @@ export class ProductsApi {
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['VarietyCollection']>>(
+      this.spec,
       path,
       options
     );
@@ -52,7 +59,7 @@ export class ProductsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['VarietyCollection']>(path, options);
+    return this.client.getAll<components['schemas']['VarietyCollection']>(this.spec, path, options);
   }
 
   /**
@@ -77,7 +84,7 @@ export class ProductsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${organizationId}/varieties`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -95,7 +102,7 @@ export class ProductsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties/${erid}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['Variety']>(path, options);
+    return this.client.get<components['schemas']['Variety']>(this.spec, path, options);
   }
 
   /**
@@ -111,7 +118,7 @@ export class ProductsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${organizationId}/varieties/${erid}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -130,7 +137,7 @@ export class ProductsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/varieties/${erid}/associateToOrg/${organizationId}`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -163,6 +170,7 @@ export class ProductsApi {
     const queryString = query.toString();
     const path = `/varieties${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>>(
+      this.spec,
       path,
       options
     );
@@ -178,7 +186,7 @@ export class ProductsApi {
     options?: RequestOptions
   ): Promise<components['schemas']['ReferenceVariety']> {
     const path = `/varieties/${erid}`;
-    return this.client.get<components['schemas']['ReferenceVariety']>(path, options);
+    return this.client.get<components['schemas']['ReferenceVariety']>(this.spec, path, options);
   }
 
   /**
@@ -193,6 +201,7 @@ export class ProductsApi {
   ): Promise<PaginatedResponse<components['schemas']['DocumentCollection']>> {
     const path = `/varieties/${erid}/documents`;
     return this.client.get<PaginatedResponse<components['schemas']['DocumentCollection']>>(
+      this.spec,
       path,
       options
     );
@@ -214,7 +223,7 @@ export class ProductsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/varieties/${erid}/setOverridesForOrg/${organizationId}`;
-    await this.client.patch(path, data, options);
+    await this.client.patch(this.spec, path, data, options);
   }
 }
 

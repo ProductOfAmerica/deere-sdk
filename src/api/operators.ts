@@ -5,10 +5,16 @@
  * @generated from operators.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/operators.js';
 
 export class OperatorsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'operators';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -30,6 +36,7 @@ export class OperatorsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetResponseDetails']>>(
+      this.spec,
       path,
       options
     );
@@ -50,7 +57,11 @@ export class OperatorsApi {
       query.set('lastModifiedTime', String(params.lastModifiedTime));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['GetResponseDetails']>(path, options);
+    return this.client.getAll<components['schemas']['GetResponseDetails']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -65,7 +76,7 @@ export class OperatorsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/operators`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -76,7 +87,7 @@ export class OperatorsApi {
    */
   async delete(orgId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/operators`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -96,7 +107,11 @@ export class OperatorsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators/${id}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['GetResponseOperatorDetails']>(path, options);
+    return this.client.get<components['schemas']['GetResponseOperatorDetails']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -113,7 +128,7 @@ export class OperatorsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/operators/${id}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -132,7 +147,7 @@ export class OperatorsApi {
     if (params?.orgid !== undefined) query.set('orgid', String(params.orgid));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/operators/${id}${queryString ? `?${queryString}` : ''}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 }
 

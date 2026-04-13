@@ -5,9 +5,15 @@
  * @generated from aemp.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 
 export class AempApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'aemp';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -23,7 +29,7 @@ export class AempApi {
    */
   async get(pageNumber: string, options?: RequestOptions): Promise<unknown> {
     const path = `/Fleet/${pageNumber}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
 }
 

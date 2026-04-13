@@ -344,7 +344,7 @@ function parseSpec(specPath: string): GeneratedApi | null {
     return null;
   }
 
-  if (!spec || !spec.openapi || !spec.paths) {
+  if (!spec?.openapi || !spec.paths) {
     console.error(`  Invalid OpenAPI spec: ${specPath}`);
     return null;
   }
@@ -534,10 +534,14 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
 
   const bodyArg = op.hasRequestBody ? ', data' : '';
 
+  // v2.0: every generated method passes `this.spec` as the first arg so
+  // DeereClient can resolve the request URL via API_SERVERS[spec].
   if (returnType === 'void') {
-    lines.push(`    await this.client.${op.method}(path${bodyArg}, options);`);
+    lines.push(`    await this.client.${op.method}(this.spec, path${bodyArg}, options);`);
   } else {
-    lines.push(`    return this.client.${op.method}<${returnType}>(path${bodyArg}, options);`);
+    lines.push(
+      `    return this.client.${op.method}<${returnType}>(this.spec, path${bodyArg}, options);`
+    );
   }
 
   const jsdoc: string[] = ['  /**'];
@@ -559,7 +563,7 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
     const getAllLines = [...lines];
     getAllLines[getAllLines.length - 1] = `    return this.client.getAll<${
       op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown'
-    }>(path, options);`;
+    }>(this.spec, path, options);`;
 
     listAllMethod = `
   /**
@@ -596,8 +600,13 @@ function generateApiClass(api: GeneratedApi): string {
     clientImports.push('PaginatedResponse');
   }
 
-  // Build import lines
-  const imports = [`import type { ${clientImports.join(', ')} } from '../client.js';`];
+  // Build import lines. The SpecName import is always needed for the typed
+  // `spec` field on the generated class — gives us compile-time typo
+  // protection against renamed specs.
+  const imports = [
+    `import type { ${clientImports.join(', ')} } from '../client.js';`,
+    `import type { SpecName } from '../api-servers.generated.js';`,
+  ];
   if (usesComponents) {
     imports.push(`import type { components } from '../types/generated/${api.typesImportPath}.js';`);
   }
@@ -612,6 +621,11 @@ function generateApiClass(api: GeneratedApi): string {
 ${imports.join('\n')}
 
 export class ${api.className} {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = '${api.specName}';
+
   constructor(private readonly client: DeereClient) {}
 
 ${methods}
@@ -714,10 +728,48 @@ export function createDeere(config: DeereClientConfig): Deere {
 interface HateoasEntry {
   parentPath: string;
   rel: string;
+  parentSpec: string;
+}
+
+/**
+ * Normalize a path pattern by replacing every `{paramName}` with `{_}` so
+ * path-param name differences (e.g. `{orgId}` vs `{organizationId}`) collapse
+ * into the same key. Used for pathOwner index lookups — HATEOAS entries
+ * should match regardless of which variable name a spec uses.
+ */
+function normalizePathPattern(path: string): string {
+  return path.replace(/\{[^}]+\}/g, '{_}');
+}
+
+/**
+ * Build a reverse index mapping every declared path pattern to the spec that
+ * owns it. Used by generateHateoasMap to record `parentSpec` per entry —
+ * critical for cross-spec HATEOAS flows (e.g. equipment.yaml declares
+ * `/organizations/{orgId}/equipment`, but the parent `/organizations/{orgId}`
+ * is declared in organizations.yaml, which routes to a different host).
+ *
+ * Keyed by NORMALIZED path (param names replaced with `{_}`) so
+ * `/organizations/{orgId}` and `/organizations/{organizationId}` both resolve
+ * to the same entry. First-write-wins is stable because main() sorts
+ * yamlFiles before parsing.
+ */
+function buildPathOwnerIndex(apis: GeneratedApi[]): Map<string, string> {
+  const owners = new Map<string, string>();
+  for (const api of apis) {
+    for (const op of api.operations) {
+      const key = normalizePathPattern(op.path);
+      if (!owners.has(key)) {
+        owners.set(key, api.specName);
+      }
+    }
+  }
+  return owners;
 }
 
 function generateHateoasMap(apis: GeneratedApi[]): string {
   const entries: Record<string, HateoasEntry> = {};
+  const pathOwners = buildPathOwnerIndex(apis);
+  const skippedSynthesizedParents: string[] = [];
 
   for (const api of apis) {
     for (const op of api.operations) {
@@ -734,11 +786,38 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
       const rel = lastSegment;
       const parentPath = `/${segments.slice(0, -1).join('/')}`;
 
+      // The HATEOAS generator creates parent paths by stripping the last
+      // segment. That synthesis only produces a VALID parent when the
+      // stripped path is a real declared endpoint somewhere. For cases like
+      // `/organizations/{orgId}/equipment/{principalId}/measurements`, the
+      // stripped parent `/organizations/{orgId}/equipment/{principalId}` is
+      // NOT a declared endpoint in any spec, so the HATEOAS walk would 404
+      // at runtime. Skip these entries — resolveHateoasUrl falls back to
+      // direct URL resolution for paths without a map match, which is the
+      // correct behavior.
+      const parentSpec = pathOwners.get(normalizePathPattern(parentPath));
+      if (!parentSpec) {
+        skippedSynthesizedParents.push(op.path);
+        continue;
+      }
+
       // Deduplicate — multiple HTTP methods on the same path share one entry
       if (!entries[op.path]) {
-        entries[op.path] = { parentPath, rel };
+        entries[op.path] = { parentPath, rel, parentSpec };
       }
     }
+  }
+
+  if (skippedSynthesizedParents.length > 0) {
+    console.log(
+      `  HATEOAS: skipped ${skippedSynthesizedParents.length} entries with synthesized parents that aren't declared endpoints:`
+    );
+    for (const path of skippedSynthesizedParents) {
+      console.log(`    ${path}`);
+    }
+    console.log(
+      `  (Runtime resolveHateoasUrl falls back to direct URL resolution for these paths.)`
+    );
   }
 
   // Build-time collision check: ensure no two patterns would match the same concrete path
@@ -762,7 +841,8 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
   const mapEntries = Object.entries(entries)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(
-      ([path, entry]) => `  '${path}': { parentPath: '${entry.parentPath}', rel: '${entry.rel}' },`
+      ([path, entry]) =>
+        `  '${path}': { parentPath: '${entry.parentPath}', rel: '${entry.rel}', parentSpec: '${entry.parentSpec}' },`
     )
     .join('\n');
 
@@ -775,11 +855,21 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
  * @generated by generate-sdk.ts — do not edit manually
  */
 
+import type { SpecName } from './api-servers.generated.js';
+
 export interface HateoasRoute {
   /** Path pattern of the parent resource (with parameter placeholders) */
   parentPath: string;
   /** HAL link relation name to follow from the parent response */
   rel: string;
+  /**
+   * Which OpenAPI spec declares the parent resource. Required for cross-spec
+   * HATEOAS: if a child lives in equipment.yaml but its parent
+   * /organizations/{orgId} is declared in organizations.yaml, the client
+   * must fetch the parent via organizations.yaml's host (platform) not
+   * equipment.yaml's host (equipmentapi.deere.com/isg).
+   */
+  parentSpec: SpecName;
 }
 
 export const HATEOAS_MAP: Record<string, HateoasRoute> = {
@@ -829,7 +919,12 @@ async function main() {
     mkdirSync(typesDir, { recursive: true });
   }
 
-  const yamlFiles = readdirSync(SPECS_DIR).filter((f) => f.endsWith('.yaml'));
+  // Sort for determinism: first-write-wins in the HATEOAS path-owner index
+  // depends on iteration order, and readdirSync returns filesystem-inode
+  // order on Linux (non-deterministic across CI runners).
+  const yamlFiles = readdirSync(SPECS_DIR)
+    .filter((f) => f.endsWith('.yaml'))
+    .sort();
   console.log(`Found ${yamlFiles.length} OpenAPI specs\n`);
 
   const apis: GeneratedApi[] = [];
