@@ -133,7 +133,11 @@ jobs:
     # in action names, permission syntax errors) pre-merge instead of at runtime.
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
-        with:
-          reporter: local
-          fail_on_error: true
+      - name: Install actionlint
+        run: |
+          curl -sSfL -o actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          tar xzf actionlint.tar.gz actionlint
+          ./actionlint -version
+      - name: Run actionlint
+        run: ./actionlint -color
