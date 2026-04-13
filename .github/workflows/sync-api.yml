@@ -12,7 +12,8 @@ on:
         default: false
         type: boolean
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   sync:
@@ -21,9 +22,9 @@ jobs:
     outputs:
       should_publish: ${{ steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true' }}
 
+    # contents: write for commit/push/tag; id-token + attestations for build provenance on the release tarball.
     permissions:
       contents: write
-      actions: write
       id-token: write
       attestations: write
 
