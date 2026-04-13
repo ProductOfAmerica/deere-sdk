@@ -1,0 +1,149 @@
+{
+  "timestamp": "2026-04-13T23:02:24.932Z",
+  "total": 28,
+  "healthy": 28,
+  "empty": 0,
+  "errors": 0,
+  "apis": [
+    {
+      "slug": "assets",
+      "status": "healthy",
+      "name": "assets"
+    },
+    {
+      "slug": "boundaries",
+      "status": "healthy",
+      "name": "boundaries"
+    },
+    {
+      "slug": "clients",
+      "status": "healthy",
+      "name": "clients"
+    },
+    {
+      "slug": "connection-management",
+      "status": "healthy",
+      "name": "connection-management"
+    },
+    {
+      "slug": "crop-types",
+      "status": "healthy",
+      "name": "crop-types"
+    },
+    {
+      "slug": "equipment",
+      "status": "healthy",
+      "name": "equipment"
+    },
+    {
+      "slug": "farms",
+      "status": "healthy",
+      "name": "farms"
+    },
+    {
+      "slug": "field-operations-api",
+      "status": "healthy",
+      "name": "field-operations-api"
+    },
+    {
+      "slug": "fields",
+      "status": "healthy",
+      "name": "fields"
+    },
+    {
+      "slug": "files",
+      "status": "healthy",
+      "name": "files"
+    },
+    {
+      "slug": "flags",
+      "status": "healthy",
+      "name": "flags"
+    },
+    {
+      "slug": "guidance-lines",
+      "status": "healthy",
+      "name": "guidance-lines"
+    },
+    {
+      "slug": "map-layers",
+      "status": "healthy",
+      "name": "map-layers"
+    },
+    {
+      "slug": "operators",
+      "status": "healthy",
+      "name": "operators"
+    },
+    {
+      "slug": "organizations",
+      "status": "healthy",
+      "name": "organizations"
+    },
+    {
+      "slug": "products",
+      "status": "healthy",
+      "name": "products"
+    },
+    {
+      "slug": "users",
+      "status": "healthy",
+      "name": "users"
+    },
+    {
+      "slug": "webhook",
+      "status": "healthy",
+      "name": "webhook"
+    },
+    {
+      "slug": "aemp",
+      "status": "healthy",
+      "name": "aemp"
+    },
+    {
+      "slug": "equipment-measurement",
+      "status": "healthy",
+      "name": "equipment-measurement"
+    },
+    {
+      "slug": "harvest-id",
+      "status": "healthy",
+      "name": "harvest-id"
+    },
+    {
+      "slug": "machine-alerts",
+      "status": "healthy",
+      "name": "machine-alerts"
+    },
+    {
+      "slug": "machine-device-state-reports",
+      "status": "healthy",
+      "name": "machine-device-state-reports"
+    },
+    {
+      "slug": "machine-engine-hours",
+      "status": "healthy",
+      "name": "machine-engine-hours"
+    },
+    {
+      "slug": "machine-hours-of-operation",
+      "status": "healthy",
+      "name": "machine-hours-of-operation"
+    },
+    {
+      "slug": "machine-locations",
+      "status": "healthy",
+      "name": "machine-locations"
+    },
+    {
+      "slug": "notifications",
+      "status": "healthy",
+      "name": "notifications"
+    },
+    {
+      "slug": "partnerships",
+      "status": "healthy",
+      "name": "partnerships"
+    }
+  ]
+}
