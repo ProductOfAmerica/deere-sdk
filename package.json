@@ -1,6 +1,6 @@
 {
   "name": "deere-sdk",
-  "version": "1.0.10",
+  "version": "2.0.0",
   "description": "Unofficial TypeScript SDK for John Deere Operations Center API",
   "author": "ProductOfAmerica",
   "license": "MIT",
@@ -52,9 +52,10 @@
     "prepublishOnly": "pnpm clean && pnpm build",
     "fetch-specs": "tsx scripts/fetch-specs.ts",
     "fix-specs": "tsx scripts/fix-specs.ts",
+    "generate-api-servers": "tsx scripts/generate-api-servers.ts",
     "generate-types": "tsx scripts/generate-types.ts",
     "generate-sdk": "tsx scripts/generate-sdk.ts",
-    "generate": "pnpm fetch-specs && pnpm fix-specs && pnpm generate-types && pnpm generate-sdk",
+    "generate": "pnpm fetch-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -73,6 +74,11 @@
     "tsx": "^4.7.0",
     "typescript": "^6.0.2",
     "yaml": "^2.3.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimatch": "^10.2.3"
+    }
   },
   "sideEffects": false
 }

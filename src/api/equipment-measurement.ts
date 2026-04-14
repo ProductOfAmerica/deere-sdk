@@ -5,10 +5,16 @@
  * @generated from equipment-measurement.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/equipment-measurement.js';
 
 export class EquipmentMeasurementApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'equipment-measurement';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -78,7 +84,7 @@ export class EquipmentMeasurementApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${organizationId}/equipment/${principalId}/measurements`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 }
 

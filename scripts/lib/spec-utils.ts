@@ -16,6 +16,7 @@ export function isDocumentationKey(key: string): boolean {
  * e.g., "createdTime<sup><a href='#foo'>2</a></sup>" → "createdTime"
  * e.g., "referenceId<sup>DEPRECATED</sup>" → "referenceId"
  */
+// Output is a YAML/TS property key, not HTML. Regex stripper is safe for this sink.
 export function sanitizePropertyKey(key: string): string {
   return key
     .replace(/<sup>.*?<\/sup>/gi, '') // Remove entire <sup>...</sup> blocks

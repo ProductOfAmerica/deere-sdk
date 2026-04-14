@@ -5,10 +5,16 @@
  * @generated from fields.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/fields.js';
 
 export class FieldsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'fields';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -35,6 +41,7 @@ export class FieldsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldsResponse']>>(
+      this.spec,
       path,
       options
     );
@@ -62,7 +69,7 @@ export class FieldsApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['FieldsResponse']>(path, options);
+    return this.client.getAll<components['schemas']['FieldsResponse']>(this.spec, path, options);
   }
 
   /**
@@ -86,7 +93,7 @@ export class FieldsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -103,7 +110,7 @@ export class FieldsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['FieldResponse']>(path, options);
+    return this.client.get<components['schemas']['FieldResponse']>(this.spec, path, options);
   }
 
   /**
@@ -120,7 +127,7 @@ export class FieldsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -129,7 +136,7 @@ export class FieldsApi {
    */
   async delete(orgId: string, fieldId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -148,7 +155,11 @@ export class FieldsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -166,6 +177,7 @@ export class FieldsApi {
   ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
     const path = `/organizations/${orgID}/fields/${id}/clients`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
+      this.spec,
       path,
       options
     );

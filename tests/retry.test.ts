@@ -9,7 +9,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(2, 429, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 3);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -19,7 +19,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 500, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -29,7 +29,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 502, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -39,7 +39,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(2, 503, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 3);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -49,7 +49,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 504, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -68,7 +68,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
 
@@ -83,7 +83,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
 
@@ -98,7 +98,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
 
@@ -113,7 +113,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
 
@@ -128,7 +128,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
   });
@@ -139,7 +139,7 @@ describe('retry behavior', () => {
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           return true;
@@ -161,7 +161,7 @@ describe('retry behavior', () => {
         maxRetries: 0,
       });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(attempts, 1);
     });
 
@@ -169,7 +169,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(5, 503, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 1 });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(getAttempts(), 2);
     });
 
@@ -177,7 +177,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(10, 503, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch });
 
-      await assert.rejects(() => client.get('/test'));
+      await assert.rejects(() => client.get('organizations', '/test'));
       assert.strictEqual(getAttempts(), 4); // 1 initial + 3 retries
     });
   });
@@ -200,7 +200,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(attempts, 3);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -223,7 +223,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(attempts, 2);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -241,7 +241,7 @@ describe('retry behavior', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof TypeError);
           return true;
@@ -263,7 +263,7 @@ describe('retry behavior', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert.strictEqual(error.message, 'Some other error');
           return true;
@@ -300,7 +300,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      const result = await client.get<{ data: string }>('/test');
+      const result = await client.get<{ data: string }>('organizations', '/test');
 
       assert.strictEqual(attempts, 2);
       assert.deepStrictEqual(result, { data: 'success' });
@@ -315,7 +315,7 @@ describe('retry behavior', () => {
       });
 
       await assert.rejects(
-        () => client.get('/test'),
+        () => client.get('organizations', '/test'),
         (error: Error) => {
           assert(error instanceof DeereError);
           assert.strictEqual(error.message, 'Request timeout');
@@ -356,7 +356,7 @@ describe('retry behavior', () => {
         maxRetries: 3,
       });
 
-      await client.get('/test');
+      await client.get('organizations', '/test');
 
       // Both delays should be at least 900ms (allowing some tolerance)
       // since Retry-After: 1 means 1 second
@@ -371,7 +371,9 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 503, { created: true });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.post<{ created: boolean }>('/test', { data: 'value' });
+      const result = await client.post<{ created: boolean }>('organizations', '/test', {
+        data: 'value',
+      });
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { created: true });
@@ -381,7 +383,9 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 503, { updated: true });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.put<{ updated: boolean }>('/test', { data: 'value' });
+      const result = await client.put<{ updated: boolean }>('organizations', '/test', {
+        data: 'value',
+      });
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { updated: true });
@@ -391,7 +395,7 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 503, { deleted: true });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.delete<{ deleted: boolean }>('/test');
+      const result = await client.delete<{ deleted: boolean }>('organizations', '/test');
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { deleted: true });
@@ -401,7 +405,9 @@ describe('retry behavior', () => {
       const { fetch, getAttempts } = mockFailThenSucceed(1, 503, { patched: true });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
 
-      const result = await client.patch<{ patched: boolean }>('/test', { field: 'value' });
+      const result = await client.patch<{ patched: boolean }>('organizations', '/test', {
+        field: 'value',
+      });
 
       assert.strictEqual(getAttempts(), 2);
       assert.deepStrictEqual(result, { patched: true });

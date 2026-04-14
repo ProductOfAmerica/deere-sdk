@@ -5,10 +5,16 @@
  * @generated from equipment.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/equipment.js';
 
 export class EquipmentApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'equipment';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -60,6 +66,7 @@ export class EquipmentApi {
     const queryString = query.toString();
     const path = `/equipment${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipmentForList']>>(
+      this.spec,
       path,
       options
     );
@@ -109,7 +116,7 @@ export class EquipmentApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${organizationId}/equipment`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -129,7 +136,7 @@ export class EquipmentApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipment/${id}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['equipment']>(path, options);
+    return this.client.get<components['schemas']['equipment']>(this.spec, path, options);
   }
 
   /**
@@ -143,7 +150,7 @@ export class EquipmentApi {
    */
   async update(id: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
     const path = `/equipment/${id}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -157,7 +164,7 @@ export class EquipmentApi {
    */
   async delete(id: string, options?: RequestOptions): Promise<void> {
     const path = `/equipment/${id}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -171,6 +178,7 @@ export class EquipmentApi {
   ): Promise<PaginatedResponse<components['schemas']['equipment-make']>> {
     const path = `/equipmentMakes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-make']>>(
+      this.spec,
       path,
       options
     );
@@ -181,7 +189,7 @@ export class EquipmentApi {
    */
   async listAll(options?: RequestOptions): Promise<components['schemas']['equipment-make'][]> {
     const path = `/equipmentMakes`;
-    return this.client.getAll<components['schemas']['equipment-make']>(path, options);
+    return this.client.getAll<components['schemas']['equipment-make']>(this.spec, path, options);
   }
 
   /**
@@ -195,7 +203,7 @@ export class EquipmentApi {
     options?: RequestOptions
   ): Promise<components['schemas']['equipment-make']> {
     const path = `/equipmentMakes/${equipmentMakeId}`;
-    return this.client.get<components['schemas']['equipment-make']>(path, options);
+    return this.client.get<components['schemas']['equipment-make']>(this.spec, path, options);
   }
 
   /**
@@ -210,6 +218,7 @@ export class EquipmentApi {
   ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentTypes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
+      this.spec,
       path,
       options
     );
@@ -226,6 +235,7 @@ export class EquipmentApi {
   ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
     const path = `/equipmentTypes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
+      this.spec,
       path,
       options
     );
@@ -251,6 +261,7 @@ export class EquipmentApi {
     const queryString = query.toString();
     const path = `/equipmentModels${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(
+      this.spec,
       path,
       options
     );
@@ -277,6 +288,7 @@ export class EquipmentApi {
     const queryString = query.toString();
     const path = `/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(
+      this.spec,
       path,
       options
     );
@@ -302,6 +314,7 @@ export class EquipmentApi {
     const queryString = query.toString();
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(
+      this.spec,
       path,
       options
     );
@@ -323,7 +336,7 @@ export class EquipmentApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['equipment-isg-type']>(path, options);
+    return this.client.get<components['schemas']['equipment-isg-type']>(this.spec, path, options);
   }
 
   /**
@@ -345,6 +358,7 @@ export class EquipmentApi {
     const queryString = query.toString();
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(
+      this.spec,
       path,
       options
     );
@@ -363,7 +377,7 @@ export class EquipmentApi {
     options?: RequestOptions
   ): Promise<components['schemas']['equipment-model']> {
     const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels/${equipmentModelId}`;
-    return this.client.get<components['schemas']['equipment-model']>(path, options);
+    return this.client.get<components['schemas']['equipment-model']>(this.spec, path, options);
   }
 }
 

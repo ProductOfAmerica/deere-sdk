@@ -5,10 +5,16 @@
  * @generated from connection-management.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/connection-management.js';
 
 export class ConnectionManagementApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'connection-management';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -26,6 +32,7 @@ export class ConnectionManagementApi {
     const queryString = query.toString();
     const path = `/connections${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ConnectionsResponse']>>(
+      this.spec,
       path,
       options
     );
@@ -42,7 +49,11 @@ export class ConnectionManagementApi {
     if (params?.createdAfter !== undefined) query.set('createdAfter', String(params.createdAfter));
     const queryString = query.toString();
     const path = `/connections${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['ConnectionsResponse']>(path, options);
+    return this.client.getAll<components['schemas']['ConnectionsResponse']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -52,7 +63,7 @@ export class ConnectionManagementApi {
    */
   async delete(connectionId: string, options?: RequestOptions): Promise<void> {
     const path = `/connections/${connectionId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -63,7 +74,7 @@ export class ConnectionManagementApi {
    */
   async deleteConnections(orgId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/connections`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 }
 

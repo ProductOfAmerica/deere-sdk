@@ -5,10 +5,16 @@
  * @generated from webhook.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/webhook.js';
 
 export class WebhookApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'webhook';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -20,7 +26,7 @@ export class WebhookApi {
    */
   async list(options?: RequestOptions): Promise<unknown> {
     const path = `/eventSubscriptions`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)
@@ -28,7 +34,7 @@ export class WebhookApi {
    */
   async listAll(options?: RequestOptions): Promise<unknown[]> {
     const path = `/eventSubscriptions`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<unknown>(this.spec, path, options);
   }
 
   /**
@@ -46,6 +52,7 @@ export class WebhookApi {
   ): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions`;
     return this.client.post<components['schemas']['CreatedSubscriptionValues']>(
+      this.spec,
       path,
       data,
       options
@@ -64,7 +71,11 @@ export class WebhookApi {
     options?: RequestOptions
   ): Promise<components['schemas']['CreatedSubscriptionValues']> {
     const path = `/eventSubscriptions/${id}`;
-    return this.client.get<components['schemas']['CreatedSubscriptionValues']>(path, options);
+    return this.client.get<components['schemas']['CreatedSubscriptionValues']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -79,7 +90,7 @@ export class WebhookApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/eventSubscriptions/${id}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 }
 

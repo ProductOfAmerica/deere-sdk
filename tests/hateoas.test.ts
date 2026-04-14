@@ -39,7 +39,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 1);
       assert.equal(calls[0].url, `${BASE}/organizations/123/fields`);
     });
@@ -57,7 +57,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations');
+      await client.get('organizations', '/organizations');
       assert.equal(calls.length, 1);
       assert.equal(calls[0].url, `${BASE}/organizations`);
     });
@@ -73,7 +73,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123');
+      await client.get('organizations', '/organizations/123');
       assert.equal(calls.length, 1);
       assert.equal(calls[0].url, `${BASE}/organizations/123`);
     });
@@ -99,7 +99,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      const result = await client.get('/organizations/123/fields');
+      const result = await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 2);
       assert.equal(calls[0].url, `${BASE}/organizations/123`); // parent fetch
       assert.equal(calls[1].url, discoveredFieldsUrl); // discovered URL
@@ -122,10 +122,10 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 2); // parent + actual
 
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 3); // only the actual request (cache hit)
     });
 
@@ -145,14 +145,14 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123/fields/456/boundaries');
+      await client.get('boundaries', '/organizations/123/fields/456/boundaries');
       assert.equal(calls.length, 2);
       assert.equal(calls[0].url, `${BASE}/organizations/123/fields/456`);
       assert.equal(calls[1].url, `${BASE}/organizations/123/fields/456/boundaries`);
     });
 
     it('throws HateoasError when parent has no matching rel', async () => {
-      const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
+      const { fetch: mockFetch, responses } = mockFetchWithSpy();
 
       responses.set(`${BASE}/organizations/123`, {
         id: '123',
@@ -167,7 +167,7 @@ describe('HATEOAS mode', () => {
       });
 
       await assert.rejects(
-        () => client.get('/organizations/123/fields'),
+        () => client.get('fields', '/organizations/123/fields'),
         (err: HateoasError) => {
           assert.equal(err.name, 'HateoasError');
           assert.ok(err.message.includes('no link with rel "fields"'));
@@ -194,7 +194,10 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123/fields?embed=boundaries&recordFilter=AVAILABLE');
+      await client.get(
+        'fields',
+        '/organizations/123/fields?embed=boundaries&recordFilter=AVAILABLE'
+      );
       assert.equal(calls[1].url, `${discoveredUrl}?embed=boundaries&recordFilter=AVAILABLE`);
     });
 
@@ -214,7 +217,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.post('/organizations/123/fields', { name: 'Test' });
+      await client.post('fields', '/organizations/123/fields', { name: 'Test' });
       assert.equal(calls.length, 2);
       assert.equal(calls[0].url, `${BASE}/organizations/123`);
       assert.equal(calls[1].url, `${BASE}/organizations/123/fields`);
@@ -243,7 +246,7 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      const all = await client.getAll('/organizations/123/fields');
+      const all = await client.getAll('fields', '/organizations/123/fields');
       assert.deepEqual(all, [{ id: '1' }, { id: '2' }]);
       assert.equal(calls[0].url, `${BASE}/organizations/123`); // parent fetch
       assert.equal(calls[1].url, `${BASE}/organizations/123/fields`); // first page
@@ -266,12 +269,12 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 2);
 
       client.clearLinkCache();
 
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 4); // parent re-fetched
     });
 
@@ -291,7 +294,7 @@ describe('HATEOAS mode', () => {
       });
 
       await assert.rejects(
-        () => client.get('/organizations/123/fields'),
+        () => client.get('fields', '/organizations/123/fields'),
         (err: HateoasError) => {
           assert.equal(err.name, 'HateoasError');
           assert.ok(err.message.includes('could not fetch parent'));
@@ -324,7 +327,7 @@ describe('HATEOAS mode', () => {
           maxRetries: 0,
         });
 
-        await client.get('/organizations/123/fields');
+        await client.get('fields', '/organizations/123/fields');
         assert.ok(logs.some((l) => l.includes('[HATEOAS]')));
         assert.ok(logs.some((l) => l.includes('fields')));
       } finally {
@@ -348,15 +351,15 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.warmLinkCache(['/organizations/123']);
+      await client.warmLinkCache('organizations', ['/organizations/123']);
       assert.equal(calls.length, 1);
 
       // Now the actual request should NOT fetch the parent again
-      await client.get('/organizations/123/fields');
+      await client.get('fields', '/organizations/123/fields');
       assert.equal(calls.length, 2); // only the actual request
     });
 
-    it('bypasses HATEOAS for full URLs (e.g. from followLink)', async () => {
+    it('fetchUrl bypasses HATEOAS (e.g. from followLink / nextPage)', async () => {
       const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
       const fullUrl = `${BASE}/organizations/123/fields`;
       responses.set(fullUrl, { values: [] });
@@ -368,7 +371,9 @@ describe('HATEOAS mode', () => {
         maxRetries: 0,
       });
 
-      await client.get(fullUrl);
+      // v2: absolute URLs go through fetchUrl, which bypasses the
+      // spec-aware resolver and the HATEOAS parent-link lookup entirely.
+      await client.fetchUrl('GET', fullUrl);
       assert.equal(calls.length, 1); // no parent fetch
       assert.equal(calls[0].url, fullUrl);
     });

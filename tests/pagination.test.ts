@@ -14,7 +14,7 @@ describe('pagination', () => {
       });
 
       const receivedPages: Array<{ id: number }[]> = [];
-      for await (const page of client.paginate<{ id: number }>('/items')) {
+      for await (const page of client.paginate<{ id: number }>('organizations', '/items')) {
         receivedPages.push(page);
       }
 
@@ -38,7 +38,7 @@ describe('pagination', () => {
       });
 
       const pages: Array<{ id: number }[]> = [];
-      for await (const page of client.paginate<{ id: number }>('/items')) {
+      for await (const page of client.paginate<{ id: number }>('organizations', '/items')) {
         pages.push(page);
       }
 
@@ -59,7 +59,7 @@ describe('pagination', () => {
       });
 
       const pages: Array<{ id: number }[]> = [];
-      for await (const page of client.paginate<{ id: number }>('/items')) {
+      for await (const page of client.paginate<{ id: number }>('organizations', '/items')) {
         pages.push(page);
       }
 
@@ -97,7 +97,7 @@ describe('pagination', () => {
       });
 
       const pages: Array<{ id: number }[]> = [];
-      for await (const page of client.paginate<{ id: number }>('/items')) {
+      for await (const page of client.paginate<{ id: number }>('organizations', '/items')) {
         pages.push(page);
       }
 
@@ -120,7 +120,7 @@ describe('pagination', () => {
       });
 
       const pages: Array<{ id: number }[]> = [];
-      for await (const page of client.paginate<{ id: number }>('/items')) {
+      for await (const page of client.paginate<{ id: number }>('organizations', '/items')) {
         pages.push(page);
       }
 
@@ -138,7 +138,7 @@ describe('pagination', () => {
         fetch: mockPaginatedResponse(pages),
       });
 
-      const allItems = await client.getAll<{ id: number }>('/items');
+      const allItems = await client.getAll<{ id: number }>('organizations', '/items');
 
       assert.strictEqual(allItems.length, 5);
       assert.deepStrictEqual(allItems, [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }]);
@@ -154,7 +154,7 @@ describe('pagination', () => {
           }),
       });
 
-      const allItems = await client.getAll<{ id: number }>('/items');
+      const allItems = await client.getAll<{ id: number }>('organizations', '/items');
 
       assert.deepStrictEqual(allItems, []);
     });
@@ -172,7 +172,7 @@ describe('pagination', () => {
           ),
       });
 
-      const allItems = await client.getAll<{ id: number }>('/items');
+      const allItems = await client.getAll<{ id: number }>('organizations', '/items');
 
       assert.deepStrictEqual(allItems, [{ id: 1 }, { id: 2 }, { id: 3 }]);
     });
@@ -190,7 +190,7 @@ describe('pagination', () => {
         fetch: mockPaginatedResponse(pages),
       });
 
-      const allItems = await client.getAll<{ id: number }>('/items');
+      const allItems = await client.getAll<{ id: number }>('organizations', '/items');
 
       assert.strictEqual(allItems.length, 1000);
       assert.strictEqual(allItems[0].id, 0);
@@ -237,7 +237,7 @@ describe('pagination', () => {
         maxRetries: 3,
       });
 
-      const allItems = await client.getAll<{ id: number }>('/items');
+      const allItems = await client.getAll<{ id: number }>('organizations', '/items');
 
       assert.strictEqual(allItems.length, 2);
       assert.strictEqual(page2Attempts, 2); // Failed once, then succeeded

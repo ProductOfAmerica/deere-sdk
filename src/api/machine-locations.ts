@@ -5,10 +5,16 @@
  * @generated from machine-locations.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-locations.js';
 
 export class MachineLocationsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'machine-locations';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -31,6 +37,7 @@ export class MachineLocationsApi {
     const queryString = query.toString();
     const path = `/machines/${principalId}/locationHistory${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ReportedLocation']>>(
+      this.spec,
       path,
       options
     );

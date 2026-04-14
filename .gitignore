@@ -25,3 +25,6 @@ coverage/
 
 # OS
 Thumbs.db
+
+bash.exe.stackdump
+settings.local.json

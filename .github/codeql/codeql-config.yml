@@ -1,0 +1,14 @@
+name: "CodeQL config for deere-sdk"
+
+# Suppresses js/bad-tag-filter alerts in scripts/ (#39, #47, #48, #49).
+# All four regex HTML strippers in scripts/ feed TypeScript identifier or
+# YAML code generation sinks, not HTML rendering. Input is trusted JD
+# OpenAPI specs. Re-enable this query if the project ever adds HTML
+# rendering (e.g., a docs site or web UI).
+
+queries:
+  - uses: security-extended
+
+query-filters:
+  - exclude:
+      id: js/bad-tag-filter

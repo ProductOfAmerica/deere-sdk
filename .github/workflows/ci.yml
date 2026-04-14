@@ -27,14 +27,12 @@ on:
       - '.github/CODEOWNERS'
       - '.github/workflows/**'
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     strategy:
       matrix:
@@ -42,8 +40,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          token: ${{ secrets.PAT_WITH_BYPASS || github.token }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
@@ -99,9 +95,54 @@ jobs:
           mkdir -p .github/badges
           echo "{\"schemaVersion\":1,\"label\":\"coverage\",\"message\":\"${COVERAGE}%\",\"color\":\"${COLOR}\"}" > .github/badges/coverage.json
 
-      - name: Upload coverage badge
+      - name: Upload coverage badge artifact
         if: matrix.node-version == '24.x' && github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-badge
+          path: .github/badges/coverage.json
+          retention-days: 1
+
+  # STRICT: needs: build waits for ALL 6 matrix entries. If ANY Node version fails
+  # (including flakes), the badge does NOT update that run. This is more correct
+  # than the pre-split racy behavior — don't advertise a passing badge when a
+  # matrix entry actually failed. Flaky CI is a separate problem to fix upstream.
+  update-coverage-badge:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          token: ${{ secrets.PAT_WITH_BYPASS || github.token }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: coverage-badge
+          path: .github/badges/
+      - uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: "chore: update coverage badge [skip ci]"
           file_pattern: ".github/badges/coverage.json"
+
+  lint-workflows:
+    runs-on: ubuntu-latest
+    # NO job-level permissions block → inherits top-level contents: read.
+    # Catches workflow YAML errors (bad `needs:`, undefined matrix refs, typos
+    # in action names, permission syntax errors) pre-merge instead of at runtime.
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Install actionlint
+        run: |
+          curl -sSfL -o actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          tar xzf actionlint.tar.gz actionlint
+          ./actionlint -version
+      - name: Run actionlint
+        # -shellcheck='' disables shellcheck integration. actionlint's native
+        # rules still catch workflow YAML errors (bad needs/matrix/permissions/
+        # action names) — which is what we want. Shellcheck's deep bash analysis
+        # produces noise (info/style findings) on existing run: blocks that
+        # aren't part of this PR's scope.
+        run: ./actionlint -color -shellcheck=''

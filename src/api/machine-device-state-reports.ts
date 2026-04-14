@@ -5,10 +5,16 @@
  * @generated from machine-device-state-reports.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-device-state-reports.js';
 
 export class MachineDeviceStateReportsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'machine-device-state-reports';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -40,6 +46,7 @@ export class MachineDeviceStateReportsApi {
     const queryString = query.toString();
     const path = `/machines/${principalId}/deviceStateReports${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['DeviceStateReport']>>(
+      this.spec,
       path,
       options
     );

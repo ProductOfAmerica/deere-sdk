@@ -5,10 +5,16 @@
  * @generated from flags.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/flags.js';
 
 export class FlagsApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'flags';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -47,7 +53,7 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/flags/${flagId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['ValuesFlagId']>(path, options);
+    return this.client.get<components['schemas']['ValuesFlagId']>(this.spec, path, options);
   }
 
   /**
@@ -62,7 +68,7 @@ export class FlagsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/flags/${flagId}`;
-    await this.client.put(path, data, options);
+    await this.client.put(this.spec, path, data, options);
   }
 
   /**
@@ -73,7 +79,7 @@ export class FlagsApi {
    */
   async delete(orgId: string, flagId: string, options?: RequestOptions): Promise<void> {
     const path = `/organizations/${orgId}/flags/${flagId}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 
   /**
@@ -111,7 +117,11 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -125,7 +135,7 @@ export class FlagsApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/flags`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -163,7 +173,11 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -198,7 +212,7 @@ export class FlagsApi {
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['ValuesFlagId']>(path, options);
+    return this.client.getAll<components['schemas']['ValuesFlagId']>(this.spec, path, options);
   }
 }
 

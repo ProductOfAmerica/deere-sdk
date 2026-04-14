@@ -4,8 +4,8 @@ info:
   title: "Fleet endpoints"
   version: "1.0.0"
 servers:
-  - url: "https://sandboxaemp.deere.com/Fleet/{pageNumber} (sandbox) GET https://partneraemp.deere.com/Fleet/{pageNumber} (live)"
-    description: "url"
+  - url: "https://sandboxaemp.deere.com"
+  - url: "https://partneraemp.deere.com"
 paths:
   /Fleet/{pageNumber}:
     get:

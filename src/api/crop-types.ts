@@ -5,10 +5,16 @@
  * @generated from crop-types.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/crop-types.js';
 
 export class CropTypesApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'crop-types';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -25,7 +31,11 @@ export class CropTypesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/cropTypes${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['CropType']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['CropType']>>(
+      this.spec,
+      path,
+      options
+    );
   }
   /**
    * Get all items (follows pagination automatically)
@@ -39,7 +49,7 @@ export class CropTypesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/cropTypes${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['CropType']>(path, options);
+    return this.client.getAll<components['schemas']['CropType']>(this.spec, path, options);
   }
 
   /**
@@ -49,7 +59,7 @@ export class CropTypesApi {
    */
   async get(name: string, options?: RequestOptions): Promise<components['schemas']['CropType2']> {
     const path = `/cropTypes/${name}`;
-    return this.client.get<components['schemas']['CropType2']>(path, options);
+    return this.client.get<components['schemas']['CropType2']>(this.spec, path, options);
   }
 
   /**
@@ -62,7 +72,7 @@ export class CropTypesApi {
     options?: RequestOptions
   ): Promise<components['schemas']['CropType3']> {
     const path = `/cropTypes/${id}`;
-    return this.client.get<components['schemas']['CropType3']>(path, options);
+    return this.client.get<components['schemas']['CropType3']>(this.spec, path, options);
   }
 
   /**
@@ -80,7 +90,11 @@ export class CropTypesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/cropTypes${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['CropType4']>>(path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['CropType4']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 }
 

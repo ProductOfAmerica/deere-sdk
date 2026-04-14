@@ -5,10 +5,16 @@
  * @generated from machine-engine-hours.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/machine-engine-hours.js';
 
 export class MachineEngineHoursApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'machine-engine-hours';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -32,6 +38,7 @@ export class MachineEngineHoursApi {
     const queryString = query.toString();
     const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['EngineHours_Response']>>(
+      this.spec,
       path,
       options
     );
@@ -51,7 +58,11 @@ export class MachineEngineHoursApi {
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
     const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['EngineHours_Response']>(path, options);
+    return this.client.getAll<components['schemas']['EngineHours_Response']>(
+      this.spec,
+      path,
+      options
+    );
   }
 }
 

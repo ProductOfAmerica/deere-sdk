@@ -5,10 +5,16 @@
  * @generated from map-layers.yaml
  */
 
+import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/map-layers.js';
 
 export class MapLayersApi {
+  /** The OpenAPI spec this class is generated from. Used by DeereClient to
+   * resolve request URLs via API_SERVERS. Typed against SpecName so typos
+   * are caught at compile time. */
+  private readonly spec: SpecName = 'map-layers';
+
   constructor(private readonly client: DeereClient) {}
 
   /**
@@ -29,7 +35,7 @@ export class MapLayersApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(path, options);
+    return this.client.get<unknown>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)
@@ -47,7 +53,7 @@ export class MapLayersApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<unknown>(path, options);
+    return this.client.getAll<unknown>(this.spec, path, options);
   }
 
   /**
@@ -62,7 +68,7 @@ export class MapLayersApi {
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries`;
-    await this.client.post(path, data, options);
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -75,7 +81,11 @@ export class MapLayersApi {
     options?: RequestOptions
   ): Promise<components['schemas']['PostContributedMapLayerSummary']> {
     const path = `/mapLayerSummaries/${id}`;
-    return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(path, options);
+    return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -86,7 +96,7 @@ export class MapLayersApi {
    */
   async delete(id: string, options?: RequestOptions): Promise<void> {
     const path = `/mapLayerSummaries/${id}`;
-    await this.client.delete(path, options);
+    await this.client.delete(this.spec, path, options);
   }
 }
 
