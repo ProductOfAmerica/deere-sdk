@@ -1,0 +1,1539 @@
+{
+  "_meta": {
+    "source": "field-mcp/apps/gateway/src/__tests__/fixtures/jd/field-operation-harvest.json",
+    "capturedBy": "field-mcp/scripts/jd-probe-shapes.ts",
+    "capturedAt": "2026-04-14",
+    "org": "7294700"
+  },
+  "@type": "FieldOperation",
+  "fieldOperationType": "harvest",
+  "adaptMachineType": "combine",
+  "cropSeason": "2017",
+  "modifiedTime": "2026-03-25T02:02:54.102Z",
+  "startDate": "2017-10-27T08:59:58.548Z",
+  "endDate": "2017-10-27T09:40:32.915Z",
+  "cropName": "CORN_WET",
+  "measurementTypes": [
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestYieldResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestWetMassResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestWetMassResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestWetMassResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestYieldContourResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldContourResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldContourResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestMoistureResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestMoistureResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestMoistureResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestSpeedResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestAdfResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestAdfResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestAdfResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestNdfResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestNdfResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestNdfResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestCrudeProteinResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestCrudeProteinResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestCrudeProteinResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestStarchResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestStarchResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestStarchResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestSugarResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSugarResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSugarResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestTrashResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestTrashResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestTrashResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "HarvestSpecialtyGrossYieldResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 3.81,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "yield": {
+        "@type": "EventMeasurement",
+        "value": 49.7,
+        "unitId": "m3",
+        "variableRepresentation": "vrYieldVolume"
+      },
+      "averageYield": {
+        "@type": "EventMeasurement",
+        "value": 13.04,
+        "unitId": "[m3]1ha-1",
+        "variableRepresentation": "vrYieldVolumePerArea"
+      },
+      "averageMoisture": {
+        "@type": "EventMeasurement",
+        "value": 16.93,
+        "unitId": "prcnt",
+        "variableRepresentation": "vrHarvestMoisture"
+      },
+      "wetMass": {
+        "@type": "EventMeasurement",
+        "value": 36.67,
+        "unitId": "t",
+        "variableRepresentation": "vrYieldWetMass"
+      },
+      "averageWetMass": {
+        "@type": "EventMeasurement",
+        "value": 9.62,
+        "unitId": "t1ha-1",
+        "variableRepresentation": "vrYieldWetMassPerArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 6.7,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+          "name": "CORNVAR-001",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 3.81,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "yield": {
+            "@type": "EventMeasurement",
+            "value": 49.7,
+            "unitId": "m3",
+            "variableRepresentation": "vrYieldVolume"
+          },
+          "averageYield": {
+            "@type": "EventMeasurement",
+            "value": 13.04,
+            "unitId": "[m3]1ha-1",
+            "variableRepresentation": "vrYieldVolumePerArea"
+          },
+          "averageMoisture": {
+            "@type": "EventMeasurement",
+            "value": 16.93,
+            "unitId": "prcnt",
+            "variableRepresentation": "vrHarvestMoisture"
+          },
+          "wetMass": {
+            "@type": "EventMeasurement",
+            "value": 36.67,
+            "unitId": "t",
+            "variableRepresentation": "vrYieldWetMass"
+          },
+          "averageWetMass": {
+            "@type": "EventMeasurement",
+            "value": 9.62,
+            "unitId": "t1ha-1",
+            "variableRepresentation": "vrYieldWetMassPerArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSpecialtyGrossYieldResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSpecialtyGrossYieldResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+        }
+      ]
+    }
+  ],
+  "fieldOperationMachines": [
+    {
+      "@type": "FieldOperationMachine",
+      "vin": "1H0S770SVH9999999",
+      "GUID": "88710e04-9fb4-beaa-4259-7a9e14b53f8a",
+      "erid": "88710e04-9fb4-beaa-4259-7a9e14b53f8a",
+      "operators": [
+        {
+          "@type": "Operator",
+          "name": ""
+        }
+      ]
+    }
+  ],
+  "orgId": 7294700,
+  "varieties": [
+    {
+      "@type": "Product",
+      "guid": "0c98749c-2618-45ea-b5ff-94fe2c7ad045",
+      "productType": "SEED",
+      "productId": "ed09bcd3",
+      "name": "CORNVAR-001",
+      "brand": "---",
+      "tankMix": false
+    }
+  ],
+  "tasks": [],
+  "id": "d965c64c-b447-4932-9bff-066d0ec6c893",
+  "links": [
+    {
+      "@type": "Link",
+      "rel": "field",
+      "uri": "https://api.deere.com/platform/organizations/7294700/fields/fbf5c2c6-3e1a-4b0b-9dd9-e5f990f8ea44"
+    },
+    {
+      "@type": "Link",
+      "rel": "organization",
+      "uri": "https://api.deere.com/platform/organizations/7294700"
+    },
+    {
+      "@type": "Link",
+      "rel": "self",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893"
+    },
+    {
+      "@type": "Link",
+      "rel": "client",
+      "uri": "https://api.deere.com/platform/organizations/7294700/clients/545d2b1e-0000-1000-7ff0-e1e1e1257010"
+    },
+    {
+      "@type": "Link",
+      "rel": "farm",
+      "uri": "https://api.deere.com/platform/organizations/7294700/farms/3cbdf277-c274-47f5-a6b7-156666ebfdea"
+    },
+    {
+      "@type": "Link",
+      "rel": "shapeFileAsync",
+      "uri": "https://api.deere.com/platform/fieldOps/d965c64c-b447-4932-9bff-066d0ec6c893"
+    },
+    {
+      "@type": "Link",
+      "rel": "fieldOperationWorkNotes",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/workNotes"
+    },
+    {
+      "@type": "Link",
+      "rel": "elevationResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/ElevationResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "fuelRateResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/FuelRateResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "harvestMoistureResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestMoistureResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "harvestSpeedResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestSpeedResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "harvestYieldResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "harvestYieldContourResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestYieldContourResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "harvestWetMassResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/d965c64c-b447-4932-9bff-066d0ec6c893/measurementTypes/HarvestWetMassResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "operators",
+      "uri": "https://api.deere.com/platform/organizations/7294700/operators?operatorGuids"
+    }
+  ]
+}

@@ -1,0 +1,373 @@
+{
+  "_meta": {
+    "source": "field-mcp/apps/gateway/src/__tests__/fixtures/jd/field-operation-application.json",
+    "capturedBy": "field-mcp/scripts/jd-probe-shapes.ts",
+    "capturedAt": "2026-04-14",
+    "org": "7294700"
+  },
+  "@type": "FieldOperation",
+  "fieldOperationType": "application",
+  "adaptMachineType": "unknown",
+  "cropSeason": "2017",
+  "modifiedTime": "2026-03-25T02:02:56.854Z",
+  "startDate": "2017-11-29T17:29:13.693Z",
+  "endDate": "2017-11-29T17:42:13.905Z",
+  "products": [
+    {
+      "@type": "Product",
+      "guid": "57d16d1a-0df9-4615-b0b1-7b347d0f22bb",
+      "productType": "CHEMICAL",
+      "productId": "61cb3844",
+      "name": "Atrazine",
+      "tankMix": false
+    }
+  ],
+  "measurementTypes": [
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "ApplicationRateResult",
+      "measurementCategory": "Result",
+      "varietyTotals": [],
+      "applicationProductTotals": [
+        {
+          "@type": "ApplicationProductTotal",
+          "productId": "61cb3844",
+          "name": "Atrazine",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 19.21,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "averageSpeed": {
+            "@type": "EventMeasurement",
+            "value": 24,
+            "unitId": "km1hr-1",
+            "variableRepresentation": "vrVehicleSpeed"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 28.1,
+            "unitId": "l",
+            "variableRepresentation": "vrTotalQuantityAppliedVolume"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 1.46,
+            "unitId": "l1ha-1",
+            "variableRepresentation": "vrAppRateVolumeMeasured"
+          },
+          "appliedArea": {
+            "@type": "EventMeasurement",
+            "value": 19.21,
+            "unitId": "ha",
+            "variableRepresentation": "vrAppliedArea"
+          },
+          "productTotals": [
+            {
+              "@type": "ProductTotal",
+              "productId": "57d16d1a-0df9-4615-b0b1-7b347d0f22bb",
+              "name": "Atrazine",
+              "brand": "---",
+              "carrier": false,
+              "totalMaterial": {
+                "@type": "EventMeasurement",
+                "value": 28.1,
+                "unitId": "l",
+                "variableRepresentation": "vrTotalQuantityAppliedVolume"
+              },
+              "averageMaterial": {
+                "@type": "EventMeasurement",
+                "value": 1.46,
+                "unitId": "l1ha-1",
+                "variableRepresentation": "vrAppRateVolumeMeasured"
+              }
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/c1d1a746-70fa-4949-94eb-41a678e51a00"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "ApplicationSpeedResult",
+      "measurementCategory": "Result",
+      "varietyTotals": [],
+      "applicationProductTotals": [
+        {
+          "@type": "ApplicationProductTotal",
+          "productId": "61cb3844",
+          "name": "Atrazine",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 19.21,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "averageSpeed": {
+            "@type": "EventMeasurement",
+            "value": 24,
+            "unitId": "km1hr-1",
+            "variableRepresentation": "vrVehicleSpeed"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 28.1,
+            "unitId": "l",
+            "variableRepresentation": "vrTotalQuantityAppliedVolume"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 1.46,
+            "unitId": "l1ha-1",
+            "variableRepresentation": "vrAppRateVolumeMeasured"
+          },
+          "appliedArea": {
+            "@type": "EventMeasurement",
+            "value": 19.21,
+            "unitId": "ha",
+            "variableRepresentation": "vrAppliedArea"
+          },
+          "productTotals": [
+            {
+              "@type": "ProductTotal",
+              "productId": "57d16d1a-0df9-4615-b0b1-7b347d0f22bb",
+              "name": "Atrazine",
+              "brand": "---",
+              "carrier": false,
+              "totalMaterial": {
+                "@type": "EventMeasurement",
+                "value": 28.1,
+                "unitId": "l",
+                "variableRepresentation": "vrTotalQuantityAppliedVolume"
+              },
+              "averageMaterial": {
+                "@type": "EventMeasurement",
+                "value": 1.46,
+                "unitId": "l1ha-1",
+                "variableRepresentation": "vrAppRateVolumeMeasured"
+              }
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/c1d1a746-70fa-4949-94eb-41a678e51a00"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "ApplicationRateTarget",
+      "measurementCategory": "Target",
+      "varietyTotals": [],
+      "applicationProductTotals": [
+        {
+          "@type": "ApplicationProductTotal",
+          "productId": "61cb3844",
+          "name": "Atrazine",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 19.21,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "averageSpeed": {
+            "@type": "EventMeasurement",
+            "value": 24,
+            "unitId": "km1hr-1",
+            "variableRepresentation": "vrVehicleSpeed"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 28,
+            "unitId": "l",
+            "variableRepresentation": "vrTotalQuantityTargetVolume"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 1.46,
+            "unitId": "l1ha-1",
+            "variableRepresentation": "vrAppRateVolumeTarget"
+          },
+          "productTotals": [
+            {
+              "@type": "ProductTotal",
+              "productId": "57d16d1a-0df9-4615-b0b1-7b347d0f22bb",
+              "name": "Atrazine",
+              "brand": "---",
+              "carrier": false,
+              "totalMaterial": {
+                "@type": "EventMeasurement",
+                "value": 28,
+                "unitId": "l",
+                "variableRepresentation": "vrTotalQuantityTargetVolume"
+              },
+              "averageMaterial": {
+                "@type": "EventMeasurement",
+                "value": 1.46,
+                "unitId": "l1ha-1",
+                "variableRepresentation": "vrAppRateVolumeTarget"
+              }
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/c1d1a746-70fa-4949-94eb-41a678e51a00"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937"
+        }
+      ]
+    }
+  ],
+  "fieldOperationMachines": [
+    {
+      "@type": "FieldOperationMachine",
+      "vin": "1N04045RJC0000106",
+      "GUID": "75967f0e-96c6-83e4-6bec-d6b5c868720b",
+      "erid": "75967f0e-96c6-83e4-6bec-d6b5c868720b",
+      "operators": [
+        {
+          "@type": "Operator",
+          "name": ""
+        }
+      ]
+    }
+  ],
+  "orgId": 7294700,
+  "tasks": [],
+  "id": "90db4bd8-29fb-4756-8cba-1811b6f0c937",
+  "links": [
+    {
+      "@type": "Link",
+      "rel": "field",
+      "uri": "https://api.deere.com/platform/organizations/7294700/fields/c1d1a746-70fa-4949-94eb-41a678e51a00"
+    },
+    {
+      "@type": "Link",
+      "rel": "organization",
+      "uri": "https://api.deere.com/platform/organizations/7294700"
+    },
+    {
+      "@type": "Link",
+      "rel": "self",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937"
+    },
+    {
+      "@type": "Link",
+      "rel": "client",
+      "uri": "https://api.deere.com/platform/organizations/7294700/clients/f9052cfa-e006-4d24-af59-a39f3239a3e3"
+    },
+    {
+      "@type": "Link",
+      "rel": "farm",
+      "uri": "https://api.deere.com/platform/organizations/7294700/farms/48758010-7e48-4e59-8a2a-b776c975fa2b"
+    },
+    {
+      "@type": "Link",
+      "rel": "shapeFileAsync",
+      "uri": "https://api.deere.com/platform/fieldOps/90db4bd8-29fb-4756-8cba-1811b6f0c937"
+    },
+    {
+      "@type": "Link",
+      "rel": "fieldOperationWorkNotes",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/workNotes"
+    },
+    {
+      "@type": "Link",
+      "rel": "applicationRateResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "applicationRateTarget",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationRateTarget"
+    },
+    {
+      "@type": "Link",
+      "rel": "elevationResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ElevationResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "applicationSpeedResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/90db4bd8-29fb-4756-8cba-1811b6f0c937/measurementTypes/ApplicationSpeedResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "operators",
+      "uri": "https://api.deere.com/platform/organizations/7294700/operators?operatorGuids"
+    }
+  ]
+}

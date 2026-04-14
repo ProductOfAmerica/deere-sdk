@@ -683,6 +683,8 @@ export interface components {
        */
       components?: unknown;
       fieldOperationMachines?: components['schemas']['FieldOperationMachines'];
+      /** @description Embedded measurement data. Present only when the request passes ?embed=measurementTypes. JD's published OpenAPI spec omits this field; it is patched in via scripts/embed-contracts.yaml. Verified against real wire traces from the field-mcp probe on 2026-04-14. */
+      measurementTypes?: components['schemas']['FieldOperationMeasurement'][];
     };
     FieldOperationId: {
       /**
@@ -1040,6 +1042,8 @@ export interface components {
       maxSugar?: components['schemas']['EventMeasurement'];
       varietyTotals?: components['schemas']['VarietyTotal'][];
       productTotals?: components['schemas']['ProductTotal'][];
+      /** @description Present on ApplicationRateResult, ApplicationSpeedResult, and ApplicationRateTarget measurement entries. JD declares the outer `productTotals` and the inner `ProductTotal` but omits this intermediate layer. Verified in the field-mcp probe on 2026-04-14 (Atrazine application, org 7294700). */
+      applicationProductTotals?: components['schemas']['ApplicationProductTotal'][];
     };
     /** @description Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints. */
     FieldOperationMeasurementFromAgreportsApi: {
@@ -1326,6 +1330,19 @@ export interface components {
       '@type'?: string;
       id: components['schemas']['FieldOperationLayersEnum'];
       links?: components['schemas']['Link'][];
+    };
+    /** @description One element of FieldOperationMeasurement.applicationProductTotals. Not documented in JD's spec; fields are provisional, verified against one Atrazine application wire trace on 2026-04-14. Matches JD's house style of keeping FieldOperationMeasurementInFullRelease fields all optional, so no required[] is declared here. Widen or tighten as additional wire traces arrive. */
+    ApplicationProductTotal: {
+      /** @example ApplicationProductTotal */
+      '@type'?: string;
+      productId?: string;
+      name?: string;
+      area?: components['schemas']['EventMeasurement'];
+      averageSpeed?: components['schemas']['EventMeasurement'];
+      totalMaterial?: components['schemas']['EventMeasurement'];
+      averageMaterial?: components['schemas']['EventMeasurement'];
+      appliedArea?: components['schemas']['EventMeasurement'];
+      productTotals?: components['schemas']['ProductTotal'][];
     };
   };
   responses: {

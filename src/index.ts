@@ -50,5 +50,13 @@ export {
 // Main SDK class
 export { createDeere, Deere } from './deere.js';
 
+// Safe facades that force query params the raw API leaves optional.
+// See scripts/embed-contracts.yaml and src/safe/ for context.
+export {
+  type FieldOperationWithMeasurements,
+  SafeFacades,
+  SafeFieldOperationsApi,
+} from './safe/index.js';
+
 // OpenAPI Types (for advanced usage)
 export * as Types from './types/index.js';

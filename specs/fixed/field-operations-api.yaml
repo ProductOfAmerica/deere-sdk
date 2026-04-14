@@ -1606,6 +1606,12 @@ components:
         fieldOperationMachines:
           type: "object"
           $ref: "#/components/schemas/FieldOperationMachines"
+        measurementTypes:
+          type: "array"
+          description: "Embedded measurement data. Present only when the request passes ?embed=measurementTypes. JD's published OpenAPI spec omits this field; it is patched in via scripts/embed-contracts.yaml. Verified against real wire traces from the field-mcp probe on 2026-04-14.\n"
+          items:
+            $ref: "#/components/schemas/FieldOperationMeasurement"
+      x-embed-contract-applied: true
     FieldOperationId:
       type: "object"
       properties:
@@ -2051,6 +2057,12 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/ProductTotal"
+        applicationProductTotals:
+          type: "array"
+          description: "Present on ApplicationRateResult, ApplicationSpeedResult, and ApplicationRateTarget measurement entries. JD declares the outer `productTotals` and the inner `ProductTotal` but omits this intermediate layer. Verified in the field-mcp probe on 2026-04-14 (Atrazine application, org 7294700).\n"
+          items:
+            $ref: "#/components/schemas/ApplicationProductTotal"
+      x-embed-contract-applied: true
     FieldOperationMeasurementFromAgreportsApi:
       description: "Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints."
       type: "object"
@@ -2497,3 +2509,29 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Link"
+    ApplicationProductTotal:
+      type: "object"
+      description: "One element of FieldOperationMeasurement.applicationProductTotals. Not documented in JD's spec; fields are provisional, verified against one Atrazine application wire trace on 2026-04-14. Matches JD's house style of keeping FieldOperationMeasurementInFullRelease fields all optional, so no required[] is declared here. Widen or tighten as additional wire traces arrive.\n"
+      properties:
+        "@type":
+          type: "string"
+          example: "ApplicationProductTotal"
+        productId:
+          type: "string"
+        name:
+          type: "string"
+        area:
+          $ref: "#/components/schemas/EventMeasurement"
+        averageSpeed:
+          $ref: "#/components/schemas/EventMeasurement"
+        totalMaterial:
+          $ref: "#/components/schemas/EventMeasurement"
+        averageMaterial:
+          $ref: "#/components/schemas/EventMeasurement"
+        appliedArea:
+          $ref: "#/components/schemas/EventMeasurement"
+        productTotals:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ProductTotal"
+      x-embed-contract-applied: true

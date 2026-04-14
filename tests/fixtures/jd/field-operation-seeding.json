@@ -1,0 +1,591 @@
+{
+  "_meta": {
+    "source": "field-mcp/apps/gateway/src/__tests__/fixtures/jd/field-operation-seeding.json",
+    "capturedBy": "field-mcp/scripts/jd-probe-shapes.ts",
+    "capturedAt": "2026-04-14",
+    "org": "7294700"
+  },
+  "@type": "FieldOperation",
+  "fieldOperationType": "seeding",
+  "adaptMachineType": "unknown",
+  "cropSeason": "2017",
+  "modifiedTime": "2026-03-25T02:04:29.593Z",
+  "startDate": "2017-09-22T15:53:43.501Z",
+  "endDate": "2017-09-22T16:36:38.691Z",
+  "cropName": "SOYBEANS",
+  "measurementTypes": [
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "SeedingVarietiesResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 20.22,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "totalMaterial": {
+        "@type": "EventMeasurement",
+        "value": 7603448,
+        "unitId": "seeds",
+        "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+      },
+      "averageMaterial": {
+        "@type": "EventMeasurement",
+        "value": 376126,
+        "unitId": "seeds1ha-1",
+        "variableRepresentation": "vrSeedRateSeedsMeasured"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "fb963d62-96c9-4be6-a544-4ebb17219972",
+          "name": "VAR2",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.12,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3808437,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 376173,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsMeasured"
+          }
+        },
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+          "name": "VAR1",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.09,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3795012,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 376079,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsMeasured"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "SeedingRateResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 20.22,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "totalMaterial": {
+        "@type": "EventMeasurement",
+        "value": 7603448,
+        "unitId": "seeds",
+        "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+      },
+      "averageMaterial": {
+        "@type": "EventMeasurement",
+        "value": 376126,
+        "unitId": "seeds1ha-1",
+        "variableRepresentation": "vrSeedRateSeedsMeasured"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "fb963d62-96c9-4be6-a544-4ebb17219972",
+          "name": "VAR2",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.12,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3808437,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 376173,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsMeasured"
+          }
+        },
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+          "name": "VAR1",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.09,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3795012,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityAppliedSeed"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 376079,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsMeasured"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "SeedingSpeedResult",
+      "measurementCategory": "Result",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 20.22,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "averageSpeed": {
+        "@type": "EventMeasurement",
+        "value": 16.1,
+        "unitId": "km1hr-1",
+        "variableRepresentation": "vrVehicleSpeed"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "fb963d62-96c9-4be6-a544-4ebb17219972",
+          "name": "VAR2",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.12,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          }
+        },
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+          "name": "VAR1",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.09,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingSpeedResult"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "SeedingRateTarget",
+      "measurementCategory": "Target",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 20.22,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "totalMaterial": {
+        "@type": "EventMeasurement",
+        "value": 7492911,
+        "unitId": "seeds",
+        "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+      },
+      "averageMaterial": {
+        "@type": "EventMeasurement",
+        "value": 370658,
+        "unitId": "seeds1ha-1",
+        "variableRepresentation": "vrSeedRateSeedsTarget"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "fb963d62-96c9-4be6-a544-4ebb17219972",
+          "name": "VAR2",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.12,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3752603,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 370658,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsTarget"
+          }
+        },
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+          "name": "VAR1",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.09,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3740308,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 370658,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsTarget"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+        }
+      ]
+    },
+    {
+      "@type": "FieldOperationMeasurement",
+      "measurementName": "SeedingVarietiesTarget",
+      "measurementCategory": "Target",
+      "area": {
+        "@type": "EventMeasurement",
+        "value": 20.22,
+        "unitId": "ha",
+        "variableRepresentation": "vrTaskArea"
+      },
+      "totalMaterial": {
+        "@type": "EventMeasurement",
+        "value": 7492911,
+        "unitId": "seeds",
+        "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+      },
+      "averageMaterial": {
+        "@type": "EventMeasurement",
+        "value": 370658,
+        "unitId": "seeds1ha-1",
+        "variableRepresentation": "vrSeedRateSeedsTarget"
+      },
+      "varietyTotals": [
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "fb963d62-96c9-4be6-a544-4ebb17219972",
+          "name": "VAR2",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.12,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3752603,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 370658,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsTarget"
+          }
+        },
+        {
+          "@type": "VarietyTotal",
+          "varietyId": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+          "name": "VAR1",
+          "area": {
+            "@type": "EventMeasurement",
+            "value": 10.09,
+            "unitId": "ha",
+            "variableRepresentation": "vrTaskArea"
+          },
+          "totalMaterial": {
+            "@type": "EventMeasurement",
+            "value": 3740308,
+            "unitId": "seeds",
+            "variableRepresentation": "vrTotalSeedQuantityTargetSeeds"
+          },
+          "averageMaterial": {
+            "@type": "EventMeasurement",
+            "value": 370658,
+            "unitId": "seeds1ha-1",
+            "variableRepresentation": "vrSeedRateSeedsTarget"
+          }
+        }
+      ],
+      "productTotals": [],
+      "links": [
+        {
+          "@type": "Link",
+          "rel": "self",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "mapImage",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesTarget"
+        },
+        {
+          "@type": "Link",
+          "rel": "organization",
+          "uri": "https://api.deere.com/platform/organizations/7294700"
+        },
+        {
+          "@type": "Link",
+          "rel": "field",
+          "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+        },
+        {
+          "@type": "Link",
+          "rel": "fieldOperation",
+          "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+        }
+      ]
+    }
+  ],
+  "fieldOperationMachines": [
+    {
+      "@type": "FieldOperationMachine",
+      "GUID": "af3fcf55-aeb8-c247-4720-53bc3d48e3cd",
+      "erid": "af3fcf55-aeb8-c247-4720-53bc3d48e3cd",
+      "operators": [
+        {
+          "@type": "Operator",
+          "name": ""
+        }
+      ]
+    }
+  ],
+  "orgId": 7294700,
+  "varieties": [
+    {
+      "@type": "Product",
+      "guid": "aff0e4a9-1946-4eb3-aebb-d198493c16eb",
+      "productType": "SEED",
+      "productId": "775ecd83",
+      "name": "VAR1",
+      "brand": "---",
+      "tankMix": false
+    },
+    {
+      "@type": "Product",
+      "guid": "fb963d62-96c9-4be6-a544-4ebb17219972",
+      "productType": "SEED",
+      "productId": "4db3e23b",
+      "name": "VAR2",
+      "brand": "---",
+      "tankMix": false
+    }
+  ],
+  "tasks": [],
+  "id": "333f4a6f-22f4-49bf-85df-ea23921f316d",
+  "links": [
+    {
+      "@type": "Link",
+      "rel": "field",
+      "uri": "https://api.deere.com/platform/organizations/7294700/fields/f9b7198d-a8b7-4f87-a4d2-d42c00b5fbc2"
+    },
+    {
+      "@type": "Link",
+      "rel": "organization",
+      "uri": "https://api.deere.com/platform/organizations/7294700"
+    },
+    {
+      "@type": "Link",
+      "rel": "self",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d"
+    },
+    {
+      "@type": "Link",
+      "rel": "client",
+      "uri": "https://api.deere.com/platform/organizations/7294700/clients/f9052cfa-e006-4d24-af59-a39f3239a3e3"
+    },
+    {
+      "@type": "Link",
+      "rel": "farm",
+      "uri": "https://api.deere.com/platform/organizations/7294700/farms/48758010-7e48-4e59-8a2a-b776c975fa2b"
+    },
+    {
+      "@type": "Link",
+      "rel": "shapeFileAsync",
+      "uri": "https://api.deere.com/platform/fieldOps/333f4a6f-22f4-49bf-85df-ea23921f316d"
+    },
+    {
+      "@type": "Link",
+      "rel": "fieldOperationWorkNotes",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/workNotes"
+    },
+    {
+      "@type": "Link",
+      "rel": "elevationResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/ElevationResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "seedingRateResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "seedingRateTarget",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingRateTarget"
+    },
+    {
+      "@type": "Link",
+      "rel": "seedingSpeedResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingSpeedResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "seedingVarietiesResult",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesResult"
+    },
+    {
+      "@type": "Link",
+      "rel": "seedingVarietiesTarget",
+      "uri": "https://api.deere.com/platform/fieldOperations/333f4a6f-22f4-49bf-85df-ea23921f316d/measurementTypes/SeedingVarietiesTarget"
+    },
+    {
+      "@type": "Link",
+      "rel": "operators",
+      "uri": "https://api.deere.com/platform/organizations/7294700/operators?operatorGuids"
+    }
+  ]
+}

@@ -5,6 +5,90 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-14
+
+**Minor, additive release.** Kills a footgun on `fieldOperations.listAll` by
+introducing a "safe facade" layer (`deere.safe.*`) that forces query params
+John Deere's API requires for a complete response but the raw SDK leaves
+optional. Also adds a contract registry that lets future SDK patches encode
+JD spec gaps in one place instead of across hand-written wrappers.
+
+### Why
+
+John Deere's API documents `embed` as an optional query param on
+`GET /organizations/{orgId}/fields/{fieldId}/fieldOperations`, but silently
+omits the `measurementTypes` array on every returned FieldOperation unless
+the request passes `?embed=measurementTypes`. Downstream consumers that
+forget the embed param get objects with zero values for yield, area,
+moisture, application rate, and seeding population — and can't tell "missing
+data" from "real zero" because JD's OpenAPI spec never documents the
+invariant. FieldMCP shipped placeholder data to production three separate
+times because of this exact bug. 2.1.0 makes "forget the embed param"
+syntactically impossible.
+
+### Added
+
+- **`deere.safe.fieldOperations.listAllWithMeasurements(orgId, fieldId, params?)`**
+  — returns `FieldOperationWithMeasurements[]` (non-optional `measurementTypes`
+  array). Forces `embed=measurementTypes` on the outgoing request, and verifies
+  every returned operation actually carries the array, throwing `DeereError`
+  with the operation id on any contract violation. Empty `measurementTypes: []`
+  is valid (the operation has no recorded measurements yet); `undefined` is not
+  and fails loudly.
+- **`SafeFacades` class** on `deere.safe` — composition root for safe facades.
+  Adding a new safe wrapper means writing a file under `src/safe/` and adding
+  one field + one constructor init to `SafeFacades`. The codegen at
+  `scripts/generate-sdk.ts` is deliberately kept dumb about what's inside
+  `SafeFacades` — it only emits the wire-up, never the contents.
+- **`FieldOperationWithMeasurements`** type — re-exported from the main entry
+  for consumers who need to reference the narrowed shape directly.
+- **`scripts/embed-contracts.yaml`** — new registry encoding JD's undocumented
+  invariants as a list of OpenAPI schema-patch operations. Consumed at codegen
+  time by `scripts/fix-specs.ts`'s `applyEmbedContracts()` transform before
+  `openapi-typescript` runs, so the generated types include the
+  previously-missing fields with JD's own declared schemas as `$ref` targets.
+- **Generated type `ApplicationProductTotal`** and optional properties
+  `FieldOperation.measurementTypes: FieldOperationMeasurement[]` and
+  `FieldOperationMeasurementInFullRelease.applicationProductTotals:
+  ApplicationProductTotal[]` — produced by the registry patcher and visible to
+  both safe-path and raw-path callers.
+
+### Migration
+
+Replace raw `listAll` calls that read measurement data with the safe variant:
+
+```ts
+// Before — silently returns FieldOperation objects without measurementTypes
+// unless you remember to pass embed, and the type system doesn't warn you.
+const ops = await deere.fieldOperations.listAll(orgId, fieldId);
+const yield_ = ops[0].measurementTypes; // ← undefined, silent data loss
+
+// After — always populated, type-guaranteed, throws clearly on drift
+const ops = await deere.safe.fieldOperations.listAllWithMeasurements(
+  orgId,
+  fieldId
+);
+const yield_ = ops[0].measurementTypes[0]?.averageYield?.value; // typed, narrowed
+```
+
+Raw `deere.fieldOperations.listAll` still exists and still works — it's the
+right tool for metadata-only callers (calendar UIs, operation listings that
+don't consume measurement data). The raw return type now carries
+`measurementTypes?: FieldOperationMeasurement[]` as an optional field, so
+raw-path consumers can read it when they pass the embed param themselves,
+but with a compile-time nudge that it might be absent.
+
+### Unchanged
+
+- `FieldOperationsApi.listAll` signature, behavior, and existing query param
+  semantics. No breaking changes.
+- All other generated API classes.
+- Error hierarchy, HATEOAS mode, URL resolution, retry policy.
+- `openapi-typescript` version, generator script structure (aside from the
+  three literal-string insertions in `generateMainClass()` that wire up
+  `SafeFacades` — see `scripts/generate-sdk.ts` and the `// DO NOT REORDER`
+  comment it emits into the generated `deere.ts`).
+
 ## [2.0.0] - 2026-04-13
 
 **Major release.** URL resolution is now fully spec-driven. This release fixes

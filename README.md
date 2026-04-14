@@ -329,14 +329,26 @@ const models = await deere.equipment.listEquipmentmodels({equipmentModelName: '9
 <summary><strong>Field Operations</strong></summary>
 
 ```typescript
-// List field operations
-const ops = await deere.fieldOperations.list('org-id', 'field-id');
+// Prefer the safe facade when you need measurement data (yield, area,
+// moisture, application rate, seeding population). It forces
+// ?embed=measurementTypes on the request and guarantees the returned
+// operations carry a measurementTypes array, throwing a clear error if
+// JD's wire format ever drifts from the documented contract.
+const ops = await deere.safe.fieldOperations.listAllWithMeasurements(
+    'org-id',
+    'field-id'
+);
+const yieldValue = ops[0].measurementTypes[0]?.averageYield?.value;
 
-// Filter by type and season
-const harvests = await deere.fieldOperations.list('org-id', 'field-id', {
-    cropSeason: '2026',
-    fieldOperationType: 'harvest'
-});
+// Filter by type and season — filters forward through to the safe wrapper too.
+const harvests = await deere.safe.fieldOperations.listAllWithMeasurements(
+    'org-id',
+    'field-id',
+    { cropSeason: '2026', fieldOperationType: 'harvest' }
+);
+
+// Raw API (no forcing) — use when you only need metadata, not measurements.
+const metaOnly = await deere.fieldOperations.list('org-id', 'field-id');
 
 // Get operation details
 const op = await deere.fieldOperations.get('operation-id');
@@ -347,6 +359,17 @@ const shapefile = await deere.fieldOperations.getFieldops('operation-id', {
     resolution: 'EachSection'
 });
 ```
+
+**Why `deere.safe.*`?** John Deere's API silently omits the `measurementTypes`
+array on `fieldOperations.listAll` responses unless the request passes
+`?embed=measurementTypes`, and their OpenAPI spec doesn't document that
+invariant. Consumers that forget the embed param get objects with zero values
+for yield, area, moisture, and rate — and can't tell "missing data" from "real
+zero." The safe facade makes that footgun syntactically impossible: you can't
+call `listAllWithMeasurements` without the embed param because the wrapper
+adds it for you, and the returned type guarantees `measurementTypes` is
+present. See `src/safe/` and `scripts/embed-contracts.yaml` for the spec-patch
+machinery that makes the narrowed type honest at the type level.
 
 </details>
 

@@ -686,6 +686,7 @@ import { DeereClient, type DeereClientConfig } from './client.js';
 import {
   ${classNames},
 } from './api/index.js';
+import { SafeFacades } from './safe/index.js';
 
 /**
  * John Deere SDK
@@ -704,6 +705,14 @@ import {
  * const orgs = await deere.organizations.listAll();
  * const farms = await deere.farms.listAll(orgs[0].id);
  * const fields = await deere.fields.listAll(orgs[0].id);
+ *
+ * // Safe facades force query params that JD's API requires for a complete
+ * // response but the raw SDK leaves optional. See src/safe/ and
+ * // scripts/embed-contracts.yaml for the contract invariants they enforce.
+ * const ops = await deere.safe.fieldOperations.listAllWithMeasurements(
+ *   orgs[0].id,
+ *   fields[0].id
+ * );
  * \`\`\`
  */
 export class Deere {
@@ -712,9 +721,21 @@ export class Deere {
 
 ${properties}
 
+  /**
+   * Safe facades that force query params the raw API leaves optional (e.g.
+   * \`embed=measurementTypes\`). See src/safe/ and scripts/embed-contracts.yaml.
+   */
+  readonly safe: SafeFacades;
+
   constructor(config: DeereClientConfig) {
     this.client = new DeereClient(config);
 ${assignments}
+    // DO NOT REORDER: SafeFacades reads generated API fields (e.g.
+    // \`this.fieldOperations\`), so it MUST run AFTER every API field has
+    // been initialized above. The runtime guard in SafeFacades' constructor
+    // fires loudly if this line ever moves ahead of the generated field
+    // inits. See scripts/generate-sdk.ts generateMainClass() for the source.
+    this.safe = new SafeFacades(this);
   }
 }
 

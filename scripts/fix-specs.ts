@@ -14,6 +14,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
+import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './embed-contracts.js';
 import { isDocumentationKey, sanitizePropertyKey } from './lib/spec-utils.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
@@ -616,7 +617,12 @@ function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: st
   }
 }
 
-function fixSpec(content: string, filename: string, globalEnumUnion: string[]): string {
+function fixSpec(
+  content: string,
+  filename: string,
+  globalEnumUnion: string[],
+  embedContracts: EmbedContract[]
+): string {
   console.log(`\nProcessing: ${filename}`);
 
   let spec: Record<string, unknown>;
@@ -698,6 +704,17 @@ function fixSpec(content: string, filename: string, globalEnumUnion: string[]): 
   addMissingSchemas(spec, missingRefs);
   injectUndocumentedEndpoints(spec, filename);
 
+  // Apply embed contracts from scripts/embed-contracts.yaml. Runs AFTER
+  // injectUndocumentedEndpoints (the last transform that touches
+  // components.schemas) and BEFORE the server-level transforms below (which
+  // only touch `servers`). If a future transform starts mutating
+  // components.schemas above this point, re-check the ordering.
+  const specName = filename.replace(/\.yaml$/, '');
+  const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
+  if (embedPatchCount > 0) {
+    console.log(`  Applied ${embedPatchCount} embed-contract patch(es)`);
+  }
+
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs
   // concatenated with literal "GET" separators). Runs BEFORE
   // normalizePlatformDisguise because it has to fix the shape first.
@@ -755,6 +772,14 @@ async function main() {
   const globalEnumUnion = collectGlobalEnvEnum(SPECS_DIR);
   console.log(`Global environment enum union: ${globalEnumUnion.join(', ')}`);
 
+  // Load embed-contract registry once. Fails loudly if the file is missing,
+  // malformed, or references unknown patch ops — stale registries should not
+  // silently slip through.
+  const embedContracts = loadEmbedContracts();
+  console.log(
+    `Loaded ${embedContracts.length} embed contract(s): ${embedContracts.map((c) => c.spec).join(', ') || '(none)'}`
+  );
+
   let fixed = 0;
   let failed = 0;
 
@@ -764,7 +789,7 @@ async function main() {
 
     try {
       const content = readFileSync(inputPath, 'utf-8');
-      const fixedContent = fixSpec(content, yamlFile, globalEnumUnion);
+      const fixedContent = fixSpec(content, yamlFile, globalEnumUnion, embedContracts);
       writeFileSync(outputPath, fixedContent);
       fixed++;
     } catch (error) {

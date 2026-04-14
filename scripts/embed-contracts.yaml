@@ -1,0 +1,89 @@
+# Embed contract registry — scripts/embed-contracts.yaml
+#
+# Encodes John Deere's undocumented invariants: places where JD's published
+# OpenAPI spec omits response fields that their real API actually returns when
+# specific query params are set. Each entry is consumed by
+# scripts/fix-specs.ts's applyEmbedContracts() transform and patched into the
+# fixed spec BEFORE openapi-typescript runs, so generated types match reality.
+#
+# Adding a new entry requires a matching safe wrapper in src/safe/ that forces
+# the relevant query param. Otherwise the patched type is only available to
+# raw callers willing to narrow optional fields manually.
+#
+# See plan: docs/designs or the relevant CEO/eng review for context.
+#
+# Patch operations:
+#   - addProperty: inject a property onto an existing schema in components.schemas
+#   - addSchema:   inject a new named schema into components.schemas
+#
+# Every patched schema gets stamped with `x-embed-contract-applied: true` for
+# idempotence (safe to re-run pnpm generate) and drift detection (if JD ever
+# documents the field themselves, the patcher aborts loudly instead of silently
+# re-applying).
+
+- spec: field-operations-api
+  path: /organizations/{orgId}/fields/{fieldId}/fieldOperations
+  method: get
+  embedParam: embed
+  responseItemSchema: FieldOperation
+  variants:
+    measurementTypes:
+      patches:
+        - op: addProperty
+          target: FieldOperation
+          property: measurementTypes
+          schema:
+            type: array
+            description: >
+              Embedded measurement data. Present only when the request passes
+              ?embed=measurementTypes. JD's published OpenAPI spec omits this
+              field; it is patched in via scripts/embed-contracts.yaml. Verified
+              against real wire traces from the field-mcp probe on 2026-04-14.
+            items:
+              $ref: "#/components/schemas/FieldOperationMeasurement"
+        - op: addProperty
+          target: FieldOperationMeasurementInFullRelease
+          property: applicationProductTotals
+          schema:
+            type: array
+            description: >
+              Present on ApplicationRateResult, ApplicationSpeedResult, and
+              ApplicationRateTarget measurement entries. JD declares the outer
+              `productTotals` and the inner `ProductTotal` but omits this
+              intermediate layer. Verified in the field-mcp probe on 2026-04-14
+              (Atrazine application, org 7294700).
+            items:
+              $ref: "#/components/schemas/ApplicationProductTotal"
+        - op: addSchema
+          name: ApplicationProductTotal
+          schema:
+            type: object
+            description: >
+              One element of FieldOperationMeasurement.applicationProductTotals.
+              Not documented in JD's spec; fields are provisional, verified
+              against one Atrazine application wire trace on 2026-04-14. Matches
+              JD's house style of keeping FieldOperationMeasurementInFullRelease
+              fields all optional, so no required[] is declared here. Widen or
+              tighten as additional wire traces arrive.
+            properties:
+              "@type":
+                type: string
+                example: ApplicationProductTotal
+              productId:
+                type: string
+              name:
+                type: string
+              area:
+                $ref: "#/components/schemas/EventMeasurement"
+              averageSpeed:
+                $ref: "#/components/schemas/EventMeasurement"
+              totalMaterial:
+                $ref: "#/components/schemas/EventMeasurement"
+              averageMaterial:
+                $ref: "#/components/schemas/EventMeasurement"
+              appliedArea:
+                $ref: "#/components/schemas/EventMeasurement"
+              productTotals:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductTotal"
