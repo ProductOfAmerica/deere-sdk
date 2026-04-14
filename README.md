@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/images/hero.png" alt="deere-sdk">
+</p>
+
 <h1 align="center">deere-sdk</h1>
 
 <p align="center">
