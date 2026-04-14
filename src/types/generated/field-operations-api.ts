@@ -725,6 +725,8 @@ export interface components {
        */
       adaptMachineType?: string;
       fieldOperationMachines?: components['schemas']['FieldOperationMachines'];
+      /** @description Same measurementTypes array as on FieldOperation, but on the FieldOperationId schema returned by GET /fieldOperations/{id}. JD's spec treats these as separate types but the embedded wire format is identical. Added in 2.1.1 after 2.1.0 shipped coverage for the list/listAll response shape only. */
+      measurementTypes?: components['schemas']['FieldOperationMeasurement'][];
     };
     UpdateFieldOperation: {
       cropSeason?: components['schemas']['CropSeason'];

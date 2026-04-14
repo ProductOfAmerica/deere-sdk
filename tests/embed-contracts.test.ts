@@ -268,21 +268,282 @@ describe('Spec-patch regression — generated types file', () => {
 });
 
 describe('Generator wire-up — deere.safe is live', () => {
-  it('new Deere(config) exposes a live deere.safe.fieldOperations facade', () => {
+  it('new Deere(config) exposes every safe facade as a live callable object', () => {
     const deere = new Deere({ accessToken: 'test', environment: 'sandboxapi' });
 
     assert.ok(
       deere.safe,
       'deere.safe should exist (generator must emit `readonly safe: SafeFacades`)'
     );
-    assert.ok(
-      deere.safe.fieldOperations,
-      'deere.safe.fieldOperations should exist (SafeFacades constructor must wire it)'
-    );
+
+    // Field operations — 2.1.0 shipped listAllWithMeasurements. 2.1.1 adds list + get variants.
+    assert.ok(deere.safe.fieldOperations, 'deere.safe.fieldOperations should exist');
     assert.strictEqual(
       typeof deere.safe.fieldOperations.listAllWithMeasurements,
       'function',
-      'listAllWithMeasurements should be a callable method'
+      'listAllWithMeasurements should be callable'
+    );
+    assert.strictEqual(
+      typeof deere.safe.fieldOperations.listWithMeasurements,
+      'function',
+      'listWithMeasurements (new in 2.1.1) should be callable'
+    );
+    assert.strictEqual(
+      typeof deere.safe.fieldOperations.getWithMeasurements,
+      'function',
+      'getWithMeasurements (new in 2.1.1) should be callable'
+    );
+
+    // Equipment — 2.1.1 adds the forcing facade.
+    assert.ok(deere.safe.equipment, 'deere.safe.equipment (new in 2.1.1) should exist');
+    assert.strictEqual(typeof deere.safe.equipment.getWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.equipment.getEquipmentWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.equipment.listEquipmentmodelsWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.equipment.listEquipmentisgtypesWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.equipment.getEquipmentisgtypesWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.equipment.getEquipmentisgtypes2WithEmbed, 'function');
+
+    // Products — 2.1.1 adds the forcing facade.
+    assert.ok(deere.safe.products, 'deere.safe.products (new in 2.1.1) should exist');
+    assert.strictEqual(typeof deere.safe.products.listWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.products.listAllWithEmbed, 'function');
+    assert.strictEqual(typeof deere.safe.products.getWithEmbed, 'function');
+  });
+});
+
+describe('SafeFieldOperationsApi — listWithMeasurements (2.1.1)', () => {
+  it('returns a paginated envelope with measurementTypes populated', async () => {
+    const harvest = loadFixture(HARVEST_FIXTURE_PATH);
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockJsonResponse(envelope([harvest])),
+    });
+
+    const page = await deere.safe.fieldOperations.listWithMeasurements('org-id', 'field-id');
+    assert.strictEqual(page.values?.length, 1);
+    assert.ok(Array.isArray(page.values?.[0].measurementTypes));
+    assert.strictEqual(page.values?.[0].measurementTypes[0].measurementName, 'HarvestYieldResult');
+  });
+
+  it('throws DeereError on a single-page contract violation', async () => {
+    const brokenOp = {
+      '@type': 'FieldOperation',
+      id: 'single-page-op',
+      fieldOperationType: 'seeding',
+      // no measurementTypes
+    };
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockJsonResponse(envelope([brokenOp])),
+    });
+
+    await assert.rejects(
+      () => deere.safe.fieldOperations.listWithMeasurements('org-id', 'field-id'),
+      (err: Error) => {
+        assert.ok(err instanceof DeereError);
+        assert.match(err.message, /contract violation in listWithMeasurements/);
+        assert.match(err.message, /single-page-op/);
+        return true;
+      }
+    );
+  });
+
+  it('forces embed=measurementTypes on the outgoing URL', async () => {
+    const harvest = loadFixture(HARVEST_FIXTURE_PATH);
+    const { fetch: mockFetch, calls } = mockWithSpy(envelope([harvest]));
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockFetch,
+    });
+
+    await deere.safe.fieldOperations.listWithMeasurements('org-id', 'field-id');
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=measurementTypes/);
+  });
+});
+
+describe('SafeFieldOperationsApi — getWithMeasurements (2.1.1)', () => {
+  it('returns a single FieldOperationId with measurementTypes populated', async () => {
+    const opWithMeasurements = {
+      '@type': 'FieldOperation',
+      orgId: 'org-123',
+      id: 'single-op-id',
+      fieldOperationType: 'harvest',
+      measurementTypes: [
+        {
+          '@type': 'FieldOperationMeasurement',
+          measurementName: 'HarvestYieldResult',
+          measurementCategory: 'Result',
+        },
+      ],
+    };
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockJsonResponse(opWithMeasurements),
+    });
+
+    const op = await deere.safe.fieldOperations.getWithMeasurements('operation-id');
+    assert.ok(Array.isArray(op.measurementTypes));
+    assert.strictEqual(op.measurementTypes[0].measurementName, 'HarvestYieldResult');
+  });
+
+  it('throws DeereError when the single operation has no measurementTypes', async () => {
+    const brokenOp = {
+      '@type': 'FieldOperation',
+      id: 'broken-get-op',
+      fieldOperationType: 'seeding',
+    };
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockJsonResponse(brokenOp),
+    });
+
+    await assert.rejects(
+      () => deere.safe.fieldOperations.getWithMeasurements('operation-id'),
+      (err: Error) => {
+        assert.ok(err instanceof DeereError);
+        assert.match(err.message, /contract violation in getWithMeasurements/);
+        assert.match(err.message, /broken-get-op/);
+        return true;
+      }
+    );
+  });
+
+  it('forces embed=measurementTypes on the outgoing URL', async () => {
+    const opWithMeasurements = {
+      id: 'x',
+      fieldOperationType: 'harvest',
+      measurementTypes: [],
+    };
+    const { fetch: mockFetch, calls } = mockWithSpy(opWithMeasurements);
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockFetch,
+    });
+
+    await deere.safe.fieldOperations.getWithMeasurements('operation-id');
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=measurementTypes/);
+  });
+});
+
+describe('SafeEquipmentApi — forcing facade (2.1.1)', () => {
+  // The equipment spec (the generic one at /equipment, not equipment-measurement)
+  // declares servers only for `api` and `partnerapi`. The tests mock fetch so
+  // the outbound URL never actually hits JD; use `api` purely to satisfy
+  // resolveRequestUrl's spec-aware routing.
+  const EQUIPMENT_ENV = 'api' as const;
+
+  it('getWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy(envelope([{ '@type': 'equipmentForList' }]));
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: EQUIPMENT_ENV,
+      fetch: mockFetch,
+    });
+
+    await deere.safe.equipment.getWithEmbed({ embed: 'devices' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=devices/);
+  });
+
+  it('getEquipmentWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy({ '@type': 'equipment' });
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: EQUIPMENT_ENV,
+      fetch: mockFetch,
+    });
+
+    await deere.safe.equipment.getEquipmentWithEmbed('equipment-id', { embed: 'pairingDetails' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=pairingDetails/);
+  });
+
+  it('listEquipmentmodelsWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy(envelope([{ '@type': 'equipment-model' }]));
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: EQUIPMENT_ENV,
+      fetch: mockFetch,
+    });
+
+    await deere.safe.equipment.listEquipmentmodelsWithEmbed({ embed: 'make' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=make/);
+  });
+});
+
+describe('SafeProductsApi — forcing facade (2.1.1)', () => {
+  it('listWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy(envelope([{}]));
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockFetch,
+    });
+
+    await deere.safe.products.listWithEmbed('org-id', { embed: 'documents' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=documents/);
+  });
+
+  it('listAllWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy(envelope([{}]));
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockFetch,
+    });
+
+    await deere.safe.products.listAllWithEmbed('org-id', { embed: 'showMergedProducts' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=showMergedProducts/);
+  });
+
+  it('getWithEmbed always adds embed= to the outgoing URL', async () => {
+    const { fetch: mockFetch, calls } = mockWithSpy({});
+    const deere = new Deere({
+      accessToken: 'test',
+      environment: 'sandboxapi',
+      fetch: mockFetch,
+    });
+
+    await deere.safe.products.getWithEmbed('org-id', 'erid-xyz', { embed: 'documents' });
+    assert.strictEqual(calls.length, 1);
+    assert.match(calls[0].url, /embed=documents/);
+  });
+});
+
+describe('FieldOperationId spec-patch regression (2.1.1)', () => {
+  const GENERATED_TYPES_PATH = join(
+    process.cwd(),
+    'src',
+    'types',
+    'generated',
+    'field-operations-api.ts'
+  );
+  const generated = readFileSync(GENERATED_TYPES_PATH, 'utf-8');
+  const Q = `['"]`;
+
+  it('FieldOperationId gains an optional measurementTypes: FieldOperationMeasurement[]', () => {
+    // The schema FieldOperationId sits below FieldOperation in the file. Make
+    // sure the patch landed on BOTH schemas (v2.1.0 only covered FieldOperation;
+    // v2.1.1 added coverage for FieldOperationId too).
+    const idBlockPattern = new RegExp(
+      // Match `FieldOperationId: { ... }` and require measurementTypes somewhere inside
+      `FieldOperationId:\\s*\\{[\\s\\S]*?measurementTypes\\?:\\s*components\\[${Q}schemas${Q}\\]\\[${Q}FieldOperationMeasurement${Q}\\]\\[\\][\\s\\S]*?\\};`
+    );
+    assert.match(
+      generated,
+      idBlockPattern,
+      'FieldOperationId spec patch appears to have regressed — re-check scripts/embed-contracts.yaml'
     );
   });
 });

@@ -17,10 +17,17 @@
  */
 
 import type { Deere } from '../deere.js';
+import { SafeEquipmentApi } from './equipment.js';
 import { SafeFieldOperationsApi } from './field-operations.js';
+import { SafeProductsApi } from './products.js';
 
-export type { FieldOperationWithMeasurements } from './field-operations.js';
+export { SafeEquipmentApi } from './equipment.js';
+export type {
+  FieldOperationIdWithMeasurements,
+  FieldOperationWithMeasurements,
+} from './field-operations.js';
 export { SafeFieldOperationsApi } from './field-operations.js';
+export { SafeProductsApi } from './products.js';
 
 /**
  * Composition root for all safe facades.
@@ -28,27 +35,36 @@ export { SafeFieldOperationsApi } from './field-operations.js';
  * Constructed by the generated `Deere` class as its last init step (after all
  * generated API fields have been initialized). Expose as `deere.safe`.
  *
- * Init-order invariant: SafeFacades' constructor reads
- * `deere.fieldOperations` (and future safe wrappers will read other generated
- * fields). The generator's `generateMainClass()` emits `this.safe = new
- * SafeFacades(this)` AFTER the `${assignments}` substitution for exactly this
- * reason. If a future generator refactor ever reorders those emissions, the
- * runtime guard in this constructor fires loudly rather than silently
- * initializing fields to undefined and failing ten minutes later in a
- * downstream method call.
+ * Init-order invariant: SafeFacades' constructor reads generated API fields
+ * (`deere.fieldOperations`, `deere.equipment`, `deere.products`). The
+ * generator's `generateMainClass()` emits `this.safe = new SafeFacades(this)`
+ * AFTER the `${assignments}` substitution for exactly this reason. If a
+ * future generator refactor ever reorders those emissions, the runtime guard
+ * in this constructor fires loudly rather than silently initializing fields
+ * to undefined and failing ten minutes later in a downstream method call.
+ *
+ * Adding a new safe facade: write the class under `src/safe/`, import it
+ * here, add a `readonly` field, add an init line in the constructor, and
+ * extend the init-order guard to cover the required raw API. The generator
+ * never learns about the new facade — `scripts/generate-sdk.ts` only wires
+ * up `SafeFacades` as a black box.
  */
 export class SafeFacades {
   readonly fieldOperations: SafeFieldOperationsApi;
+  readonly equipment: SafeEquipmentApi;
+  readonly products: SafeProductsApi;
 
   constructor(deere: Deere) {
-    if (!deere.fieldOperations) {
+    if (!deere.fieldOperations || !deere.equipment || !deere.products) {
       throw new Error(
-        'SafeFacades constructed before deere.fieldOperations was initialized. ' +
-          'scripts/generate-sdk.ts must emit `this.safe = new SafeFacades(this)` ' +
-          'AFTER the generated API field initializations in generateMainClass(). ' +
-          'Check the output order of the template substitutions.'
+        'SafeFacades constructed before all required raw API fields were initialized ' +
+          '(fieldOperations, equipment, products). scripts/generate-sdk.ts must emit ' +
+          '`this.safe = new SafeFacades(this)` AFTER the generated API field initializations ' +
+          'in generateMainClass(). Check the output order of the template substitutions.'
       );
     }
     this.fieldOperations = new SafeFieldOperationsApi(deere.fieldOperations);
+    this.equipment = new SafeEquipmentApi(deere.equipment);
+    this.products = new SafeProductsApi(deere.products);
   }
 }

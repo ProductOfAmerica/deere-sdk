@@ -5,6 +5,116 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-04-14
+
+**Patch release completing 2.1.0's intended scope.** 2.1.0 shipped one safe
+facade method — `deere.safe.fieldOperations.listAllWithMeasurements` — against
+a plan that explicitly deferred `list`/`get` variants and silently omitted any
+audit of the rest of the embed surface. A post-ship audit found that the same
+silent-zero bug class was still loaded on TWO other field-operations methods,
+plus the entire equipment and products families. 2.1.1 fixes that.
+
+Framing as a patch is technically stretched (2.1.1 adds public API surface,
+which semver-purists would call a minor), but the work here is completing
+2.1.0's promise to kill the embed footgun in the `fieldOperations` family and
+extending that guarantee to adjacent families where JD's spec documents narrow
+embed enum values. Nothing in 2.1.0 is broken or removed.
+
+### Added
+
+- **`deere.safe.fieldOperations.listWithMeasurements(orgId, fieldId, params?)`** —
+  paginated single-page variant. Returns `PaginatedResponse<FieldOperationWithMeasurements>`.
+  Forces `embed=measurementTypes`, runtime-verifies every operation on the
+  returned page carries the `measurementTypes` array, throws `DeereError` on
+  contract violation. Same guarantee contract as `listAllWithMeasurements`.
+- **`deere.safe.fieldOperations.getWithMeasurements(operationId, params?)`** —
+  single-operation-by-id variant. Returns `FieldOperationIdWithMeasurements`.
+  JD treats the list-shape (`FieldOperation`) and get-shape (`FieldOperationId`)
+  as separate schemas; 2.1.0's spec patch only covered `FieldOperation`. 2.1.1
+  adds a matching patch for `FieldOperationId` so the narrowed return type on
+  the single-op path is honest.
+- **`FieldOperationIdWithMeasurements`** — new exported type, the narrowed
+  variant of `FieldOperationId`.
+- **`deere.safe.equipment`** (new facade, `SafeEquipmentApi`) — six methods
+  wrapping every embed-accepting raw method on `EquipmentApi`:
+  `getWithEmbed`, `getEquipmentWithEmbed`, `listEquipmentmodelsWithEmbed`,
+  `listEquipmentisgtypesWithEmbed`, `getEquipmentisgtypesWithEmbed`,
+  `getEquipmentisgtypes2WithEmbed`. Each method makes the `embed` parameter
+  **required at the type level** — TypeScript refuses to compile a call that
+  forgets it. Embed values follow JD's documented enums (`devices`, `equipment`,
+  `icon`, `pairingDetails`, `offsets`, `capabilities`, `make`, `type`, `isgType`,
+  `equipmentModels`, `recordMetadata`).
+- **`deere.safe.products`** (new facade, `SafeProductsApi`) — three methods
+  wrapping every embed-accepting raw method on `ProductsApi`: `listWithEmbed`,
+  `listAllWithEmbed`, `getWithEmbed`. Embed values are JD's documented enum:
+  `documents`, `showMergedProducts`.
+- **Spec patch: `FieldOperationId.measurementTypes`** — mirrors the 2.1.0
+  patch on `FieldOperation` so both the list-shape and get-shape carry the
+  optional array in the generated types. Added via one new `addProperty` entry
+  in `scripts/embed-contracts.yaml`.
+
+### Important scope note — what 2.1.1 does NOT cover
+
+Equipment and Products safe facades are **type-level forcing functions only**.
+They require the caller to pass `embed`, but they do NOT narrow the return
+type and do NOT runtime-verify that response fields are populated. The reason:
+we don't yet have empirical wire traces confirming which response fields each
+embed value populates on those endpoints. Without that evidence, any type
+narrowing or runtime assertion would be guessing. 2.1.0's pattern of spec
+patch + narrowed type + runtime verification is deferred for these families
+until `field-mcp/scripts/jd-probe-shapes.ts` captures wire traces for
+equipment and products. Once captured, a future release can tighten the
+wrappers with the same registry-driven mechanism.
+
+The following endpoints also take an `embed` parameter but **remain unwrapped
+in 2.1.1** because JD's published OpenAPI spec documents the embed as a bare
+`string` with no enum values — we literally cannot know what values the caller
+should be forced to pass. These endpoints are still raw-only and still expose
+the silent-zero footgun to callers who forget the embed: `boundaries.list`,
+`boundaries.listAll`, `boundaries.listBoundaries`, `clients.list`,
+`clients.listAll`, `clients.get`, `farms.list`, `farms.listAll`, `farms.get`,
+`assets.list`, `assets.listAll`, `assets.get`, `guidance-lines.list`,
+`guidance-lines.listAll`, `guidance-lines.get`, `harvest-id.list`,
+`harvest-id.listAll`, `harvest-id.get`, `operators.list`, `operators.listAll`,
+`operators.get`, `map-layers.list`, `map-layers.listAll`, `users.*`,
+`flags.*`, `fields.*`. A proper audit of these requires both empirical wire
+traces AND a fix-specs patch to tighten the `embed?: string` type to a
+narrow enum, and is tracked as a future work item.
+
+### Migration
+
+If FieldMCP (or any other consumer) calls `fieldOperations.list` or
+`fieldOperations.get` and reads measurement data from the response, migrate:
+
+```ts
+// Before — silent data loss if embed is forgotten
+const page = await deere.fieldOperations.list(orgId, fieldId);
+const op = await deere.fieldOperations.get(operationId);
+
+// After — guaranteed measurementTypes, throws on contract drift
+const page = await deere.safe.fieldOperations.listWithMeasurements(orgId, fieldId);
+const op = await deere.safe.fieldOperations.getWithMeasurements(operationId);
+```
+
+For equipment and products, the migration is the same pattern but the safe
+wrapper just forces you to pick an embed at compile time:
+
+```ts
+// Raw (compiles, will silently miss fields when you forget embed)
+const equipmentList = await deere.equipment.get();
+
+// Safe (refuses to compile unless you pass embed)
+const equipmentList = await deere.safe.equipment.getWithEmbed({ embed: 'devices' });
+```
+
+### Unchanged
+
+- Everything shipped in 2.1.0. `listAllWithMeasurements` is untouched, same
+  signature, same guarantee.
+- Raw `FieldOperationsApi`, `EquipmentApi`, `ProductsApi` method signatures.
+- Error hierarchy, URL resolution, HATEOAS mode.
+- The contract registry mechanism and `applyEmbedContracts` patcher.
+
 ## [2.1.0] - 2026-04-14
 
 **Minor, additive release.** Kills a footgun on `fieldOperations.listAll` by

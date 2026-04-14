@@ -42,6 +42,19 @@
             items:
               $ref: "#/components/schemas/FieldOperationMeasurement"
         - op: addProperty
+          target: FieldOperationId
+          property: measurementTypes
+          schema:
+            type: array
+            description: >
+              Same measurementTypes array as on FieldOperation, but on the
+              FieldOperationId schema returned by GET /fieldOperations/{id}.
+              JD's spec treats these as separate types but the embedded wire
+              format is identical. Added in 2.1.1 after 2.1.0 shipped coverage
+              for the list/listAll response shape only.
+            items:
+              $ref: "#/components/schemas/FieldOperationMeasurement"
+        - op: addProperty
           target: FieldOperationMeasurementInFullRelease
           property: applicationProductTotals
           schema:
