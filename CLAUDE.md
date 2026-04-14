@@ -151,15 +151,35 @@ features).
 
 ## Releases
 
-Normal commits don't publish. To release:
+**Normal development** – just commit and push as usual. No release happens:
 
-1. Update `CHANGELOG.md`.
-2. `npm version patch|minor|major` (auto-commits + tags).
-3. `git push --follow-tags`.
+```bash
+git add -A
+git commit -m "fix: whatever you fixed"
+git push
+```
 
-`release.yml` triggers off the tag, builds, signs with cosign + build provenance, creates a GitHub Release, and
-`publish.yml` uploads to npm. If the tag push didn't auto-trigger the workflow (occasional GitHub quirk with
-`--follow-tags`), dispatch it manually: `gh workflow run release.yml --ref vX.Y.Z`.
+**When ready to release** a new version:
+
+```bash
+# 1. Update CHANGELOG.md with what changed
+
+# 2. Bump version (auto-commits + auto-creates tag)
+npm version patch   # or: minor, major
+
+# 3. Push commit and tag together
+git push --follow-tags
+```
+
+CI sees the tag → creates GitHub Release → publishes to npm.
+
+**Gotcha:** GitHub sometimes does not fire the `push` event for a tag pushed via `git push --follow-tags`, so `release.yml` never auto-triggers. If you don't see a "Create Release" run within a minute of pushing the tag, dispatch it manually:
+
+```bash
+gh workflow run release.yml --ref vX.Y.Z
+```
+
+`release.yml` also accepts `workflow_dispatch`, so this produces an identical run against the tag's commit.
 
 <!-- gitnexus:start -->
 
