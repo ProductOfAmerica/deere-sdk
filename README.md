@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/images/hero.png" alt="deere-sdk">
+</p>
+
 <h1 align="center">deere-sdk</h1>
 
 <p align="center">
@@ -59,7 +63,7 @@ import {Deere} from 'deere-sdk';
 
 const deere = new Deere({
     accessToken: 'your-oauth-access-token',
-    environment: 'sandbox', // or 'production'
+    environment: 'sandboxapi', // or 'api' for production
 });
 
 // List all organizations
@@ -98,13 +102,48 @@ This SDK requires an OAuth 2.0 access token from John Deere:
 <details>
 <summary><strong>Environments</strong></summary>
 
-| Environment  | URL                  | Use Case             |
-|--------------|----------------------|----------------------|
-| `production` | api.deere.com        | Live data            |
-| `sandbox`    | sandboxapi.deere.com | Development          |
-| `partner`    | partnerapi.deere.com | Partner integrations |
-| `cert`       | apicert.deere.com    | Certification        |
-| `qa`         | apiqa.tal.deere.com  | QA testing           |
+v2.0.0 uses raw John Deere subdomain names as environment values. Pass the subdomain (without `.deere.com`) as `environment`. Default: `sandboxapi`.
+
+| Environment      | URL                        | Use Case                         |
+|------------------|----------------------------|----------------------------------|
+| `api`            | api.deere.com              | Live production                  |
+| `sandboxapi`     | sandboxapi.deere.com       | Development (default)            |
+| `partnerapi`     | partnerapi.deere.com       | Partner production               |
+| `apicert`        | apicert.deere.com          | Production certification         |
+| `partnerapicert` | partnerapicert.deere.com   | Partner certification            |
+| `apiqa.tal`      | apiqa.tal.deere.com        | QA tier                          |
+| `partnerapiqa`   | partnerapiqa.deere.com     | Partner QA                       |
+| `sandboxapiqa`   | sandboxapiqa.deere.com     | Sandbox QA                       |
+| `apidev.tal`     | apidev.tal.deere.com       | Internal dev tier (rarely used)  |
+
+Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), the constructor throws `UnsupportedEnvironmentError` with the valid values for that spec.
+
+</details>
+
+<details>
+<summary><strong>Migrating from v1</strong></summary>
+
+v1 accepted friendly environment names. v2.0.0 replaces them with the raw John Deere subdomain names so URL routing comes directly from each spec's OpenAPI `servers` block — no more hardcoded hostname maps.
+
+Passing a v1 name to the v2 constructor throws immediately with a migration hint:
+
+| v1 (pre-2.0.0) | v2.0.0+        |
+|----------------|----------------|
+| `production`   | `api`          |
+| `sandbox`      | `sandboxapi`   |
+| `partner`      | `partnerapi`   |
+| `cert`         | `apicert`      |
+| `qa`           | `apiqa.tal`    |
+
+```typescript
+// v1
+const deere = new Deere({ accessToken, environment: 'sandbox' });
+
+// v2.0.0
+const deere = new Deere({ accessToken, environment: 'sandboxapi' });
+```
+
+The SDK now uses separate host subdomains per spec family (e.g., `equipmentapi.deere.com` for machine telemetry, `api.deere.com` for organizations) on the production tier. v1 silently routed everything through `api.deere.com`, which worked for most flows but mis-routed some machine-data endpoints. v2 routes each call to the exact host the spec declares.
 
 </details>
 
@@ -452,7 +491,7 @@ import {DeereClient} from 'deere-sdk';
 
 const client = new DeereClient({
     accessToken: 'your-token',
-    environment: 'sandbox',
+    environment: 'sandboxapi',
     timeout: 30000,   // Request timeout in ms (default: 30000)
     maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
@@ -470,6 +509,25 @@ for await (const items of client.paginate('/large/collection')) {
 }
 ```
 
+### fetchUrl — Bearer token hostname guard
+
+`DeereClient` exposes `fetchUrl(method, url, body?, options?)` and `followLink(url)` for calling absolute URLs (e.g., HAL `next` page links, externally-discovered URLs). Both **suppress the OAuth Bearer token** on any URL whose hostname is not a trusted `*.deere.com` origin. This prevents accidental token leakage if a HATEOAS response, user-supplied URL, or link cache ever includes a third-party host.
+
+```typescript
+// Bearer token attached (trusted host)
+await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');
+
+// Bearer token SUPPRESSED (untrusted host) — request still goes out, just without Authorization
+await client.fetchUrl('GET', 'https://example.com/some-webhook');
+
+// You can opt in explicitly by passing your own Authorization header:
+await client.fetchUrl('GET', 'https://example.com/api', undefined, {
+    headers: { Authorization: 'Bearer some-other-token' },
+});
+```
+
+Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppressed, so you can audit where your HATEOAS graph is pointing.
+
 ---
 
 ## HATEOAS Mode
@@ -479,7 +537,7 @@ John Deere requires applications to demonstrate [HATEOAS](https://en.wikipedia.o
 ```typescript
 const deere = new Deere({
     accessToken: 'your-token',
-    environment: 'sandbox',
+    environment: 'sandboxapi',
     hateoas: true,       // Enable HATEOAS link traversal
     hateoasDebug: true,  // Optional: log resolution details
 });
@@ -499,7 +557,7 @@ import {Deere} from 'deere-sdk';
 // 1. Create client with HATEOAS enabled
 const deere = new Deere({
     accessToken: 'your-oauth-token',
-    environment: 'sandbox',
+    environment: 'sandboxapi',
     hateoas: true,
     hateoasDebug: true, // See link resolution in console
 });
@@ -573,8 +631,23 @@ const deere = new Deere({
 
 ### Error Types
 
+| Error                         | When it's thrown                                                  | Retried? |
+|-------------------------------|-------------------------------------------------------------------|----------|
+| `DeereError`                  | Base class. Any HTTP error from John Deere (400/404/422/5xx).     | Only 5xx |
+| `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
+| `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
+| `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
+| `UnsupportedEnvironmentError` | Constructor threw because `environment` doesn't match the spec's `servers` block. | N/A (thrown at construction) |
+| `NoServerConfigError`         | Constructor threw because a spec has no `servers` block at all.    | N/A      |
+
 ```typescript
-import {DeereError, RateLimitError, AuthError} from 'deere-sdk';
+import {
+    DeereError,
+    RateLimitError,
+    AuthError,
+    HateoasError,
+    UnsupportedEnvironmentError,
+} from 'deere-sdk';
 
 try {
     const fields = await deere.fields.listAll('org-id');
@@ -585,6 +658,12 @@ try {
     } else if (error instanceof AuthError) {
         // Never retried - refresh your token
         console.log('Token expired - refresh required');
+    } else if (error instanceof HateoasError) {
+        // HATEOAS link resolution failed (only when hateoas: true)
+        console.log(`Link resolution failed on ${error.path}: ${error.message}`);
+    } else if (error instanceof UnsupportedEnvironmentError) {
+        // Spec doesn't ship this environment — try another from its valid list
+        console.log(error.message);
     } else if (error instanceof DeereError) {
         console.log(`API error: ${error.status} ${error.message}`);
     }
@@ -690,6 +769,14 @@ git push --follow-tags
 ```
 
 CI sees the tag → creates GitHub Release → publishes to npm.
+
+**Gotcha:** GitHub sometimes does not fire the `push` event for a tag pushed via `git push --follow-tags`, so `release.yml` never auto-triggers. If you don't see a "Create Release" run within a minute of pushing the tag, dispatch it manually:
+
+```bash
+gh workflow run release.yml --ref vX.Y.Z
+```
+
+`release.yml` also accepts `workflow_dispatch`, so this produces an identical run against the tag's commit.
 
 ---
 
