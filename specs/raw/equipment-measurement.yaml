@@ -126,7 +126,7 @@ paths:
       responses:
         204:
           description: Created
-          $ref: '#/components/Response/CreateEquip'
+          $ref: '#/components/responses/CreateEquip'
         400:
           description: Measurement format invalid or an unexpected measurements name was found.
         403:
@@ -554,8 +554,7 @@ components:
           description: 'State of the engine. engineState only possible values are: On or Off.'
           example: 'On'
           required: true
-
-  Response:
+  responses:
     CreateEquip:
       description: No Content
       content:
