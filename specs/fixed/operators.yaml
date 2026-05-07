@@ -178,7 +178,7 @@ paths:
       description: "This endpoint will delete a specific operator in the system in an org for the provided Operator ID"
       summary: "Delete a specific Operator in an org by Operator ID"
       parameters:
-        - $ref: "#/components/parameters/orgID"
+        - $ref: "#/components/parameters/orgId"
         - $ref: "#/components/parameters/id"
       security:
         - OAuth2:
@@ -244,12 +244,6 @@ components:
         type: "dateTime"
         example: "2019-01-01T00:00:00Z"
         format: "uuid"
-    orgID:
-      name: "orgid"
-      in: "query"
-      description: "Stub parameter for orgID (auto-generated)"
-      schema:
-        type: "string"
   securitySchemes:
     OAuth2:
       type: "oauth2"

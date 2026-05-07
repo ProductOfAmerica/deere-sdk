@@ -137,16 +137,8 @@ export class OperatorsApi {
    * an org for the provided Operator ID
    * @generated from DELETE /organizations/{orgId}/operators/{id}
    */
-  async deleteOperators(
-    orgId: string,
-    id: string,
-    params?: { orgid?: string },
-    options?: RequestOptions
-  ): Promise<void> {
-    const query = new URLSearchParams();
-    if (params?.orgid !== undefined) query.set('orgid', String(params.orgid));
-    const queryString = query.toString();
-    const path = `/organizations/${orgId}/operators/${id}${queryString ? `?${queryString}` : ''}`;
+  async deleteOperators(orgId: string, id: string, options?: RequestOptions): Promise<void> {
+    const path = `/organizations/${orgId}/operators/${id}`;
     await this.client.delete(this.spec, path, options);
   }
 }

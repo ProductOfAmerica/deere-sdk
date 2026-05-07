@@ -212,12 +212,11 @@ export interface paths {
      */
     delete: {
       parameters: {
-        query?: {
-          /** @description Stub parameter for orgID (auto-generated) */
-          orgid?: components['parameters']['orgID'];
-        };
+        query?: never;
         header?: never;
         path: {
+          /** @description Organization ID */
+          orgId: components['parameters']['orgId'];
           /** @description Operator ID */
           id: components['parameters']['id'];
         };
@@ -344,8 +343,6 @@ export interface components {
     recordFilter: string;
     /** @description Start of the range for timestamp filtering */
     lastModifiedTime: Record<string, never>;
-    /** @description Stub parameter for orgID (auto-generated) */
-    orgID: string;
   };
   requestBodies: never;
   headers: never;

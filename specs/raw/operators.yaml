@@ -193,7 +193,7 @@ paths:
       description: This endpoint will delete a specific operator in the system in an org for the provided Operator ID
       summary: Delete a specific Operator in an org by Operator ID
       parameters:
-        - $ref: '#/components/parameters/orgID'
+        - $ref: '#/components/parameters/orgId'
         - $ref: '#/components/parameters/id'
       security:
         - OAuth2: [ ag3 ]
@@ -268,75 +268,75 @@ components:
             org1: 'org1'
             org2: 'org2'
   schemas:
-      GetResponseDetails:
-        properties:
-          id:
-            type: string
-            example: 0235d40e-02d0-44cb-a126-fff21173fc1f
-            description: Operator ID
-          name:
-            type: string
-            example: John Doe
-            description: Operator Name
-          dateModified:
-            type: datetime
-            example: 2019-03-22T08:48:20Z
-            description: Datetime when the entity modified, it would be null on creation.
-          archived:
-            type: boolean
-            example: 'true'
-            description: Archived Status
+    GetResponseDetails:
+      properties:
+        id:
+          type: string
+          example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+          description: Operator ID
+        name:
+          type: string
+          example: John Doe
+          description: Operator Name
+        dateModified:
+          type: datetime
+          example: 2019-03-22T08:48:20Z
+          description: Datetime when the entity modified, it would be null on creation.
+        archived:
+          type: boolean
+          example: 'true'
+          description: Archived Status
 
-      GetResponseOperatorDetails:
-        properties:
-          id:
-            type: string
-            example: 0235d40e-02d0-44cb-a126-fff21173fc1f
-            description: Operator ID
-          name:
-            type: string
-            example: John Doe
-            description: Operator Name
-          dateModified:
-            type: datetime
-            example: 2019-03-22T08:48:20Z
-            description: Datetime when the entity modified, it would be null on creation.
-          archived:
-            type: boolean
-            example: 'true'
-            description: Archived Status
-      PostOperator:
-        properties:
-          name:
-            example: John Doe
-            description: Operator Name
-            type: string
-      ContentType:
-        properties:
-          Content-Type: application/vnd.deere.axiom.v3+json
-      PutOperator:
-        properties:
-          name:
-            example: John Doe
-            description: Operator Name
-            type: string
-            required: true
-          archived:
-            example: 'false'
-            type: string
-            description: Archived Status
+    GetResponseOperatorDetails:
+      properties:
+        id:
+          type: string
+          example: 0235d40e-02d0-44cb-a126-fff21173fc1f
+          description: Operator ID
+        name:
+          type: string
+          example: John Doe
+          description: Operator Name
+        dateModified:
+          type: datetime
+          example: 2019-03-22T08:48:20Z
+          description: Datetime when the entity modified, it would be null on creation.
+        archived:
+          type: boolean
+          example: 'true'
+          description: Archived Status
+    PostOperator:
+      properties:
+        name:
+          example: John Doe
+          description: Operator Name
+          type: string
+    ContentType:
+      properties:
+        Content-Type: application/vnd.deere.axiom.v3+json
+    PutOperator:
+      properties:
+        name:
+          example: John Doe
+          description: Operator Name
+          type: string
+          required: true
+        archived:
+          example: 'false'
+          type: string
+          description: Archived Status
 
-      GetAvailableLinks:
-        properties:
-          self:
-            example: https://sandboxapi.deere.com/platform/organizations/123456/operators
-            description: Self Link
+    GetAvailableLinks:
+      properties:
+        self:
+          example: https://sandboxapi.deere.com/platform/organizations/123456/operators
+          description: Self Link
 
-      GetOperatorAvailableLinks:
-        properties:
-          self:
-            example: https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
-            description: Self Link
+    GetOperatorAvailableLinks:
+      properties:
+        self:
+          example: https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
+          description: Self Link
 
 
 
