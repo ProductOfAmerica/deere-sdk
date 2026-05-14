@@ -32,12 +32,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description client Id */
-        clientId: components['parameters']['ClientId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -63,17 +58,9 @@ export interface paths {
   };
   '/organizations/{orgId}/clients/{id}/farms': {
     parameters: {
-      query?: {
-        /** @description farm name */
-        name?: components['parameters']['FarmName'];
-      };
+      query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description client Id */
-        clientId: components['parameters']['ClientId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -439,27 +426,14 @@ export interface components {
     Id: string;
   };
   requestBodies: {
-    /** @description The request body used to create or update a client */
     ClientRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['ClientPost'];
+        '*/*'?: never;
       };
     };
-    /** @description The request body used to create or update a client */
     ClientRequest2: {
       content: {
-        'application/vnd.deere.axiom.v3+json': {
-          /**
-           * @description New Client Name
-           * @example UniqueClientName
-           */
-          name?: string;
-          /**
-           * @description Archived status (false = active)
-           * @example false
-           */
-          archived?: string;
-        };
+        '*/*'?: never;
       };
     };
   };
@@ -501,7 +475,12 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components['requestBodies']['ClientRequest'];
+    /** @description The request body used to create or update a client */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['requestBodies']['ClientRequest'];
+      };
+    };
     responses: {
       200: components['responses']['ClientCreatedResponse'];
       400: components['responses']['MalformedRequest'];
@@ -516,12 +495,7 @@ export interface operations {
         embed?: components['parameters']['Embed'];
       };
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description client Id */
-        clientId: components['parameters']['ClientId'];
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;
@@ -535,15 +509,15 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description client Id */
-        clientId: components['parameters']['ClientId'];
-      };
+      path?: never;
       cookie?: never;
     };
-    requestBody?: components['requestBodies']['ClientRequest2'];
+    /** @description The request body used to create or update a client */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['requestBodies']['ClientRequest2'];
+      };
+    };
     responses: {
       204: components['responses']['UpdatedResponse'];
       400: components['responses']['MalformedRequest'];
@@ -555,12 +529,7 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description client Id */
-        clientId: components['parameters']['ClientId'];
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;

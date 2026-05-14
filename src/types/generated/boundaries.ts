@@ -198,7 +198,12 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: components['requestBodies']['PutRequest'];
+      /** @description putRequest */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['requestBodies']['PutRequest'];
+        };
+      };
       responses: {
         200: components['responses']['Update'];
         400: components['responses']['BadRequest'];
@@ -1115,7 +1120,7 @@ export interface components {
     /** @description The desired Boundary to be updated */
     PutRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['PutBoundary'];
+        '*/*'?: never;
       };
     };
   };

@@ -242,29 +242,9 @@ export interface paths {
   };
   '/equipmentModels': {
     parameters: {
-      query?: {
-        /**
-         * @description Embed additional attributes if required.
-         * @example [
-         *       "make",
-         *       "type"
-         *     ]
-         */
-        embed?: components['parameters']['EmbedV1'];
-        /**
-         * @description It should be equipment model name
-         * @example [
-         *       "9RX420",
-         *       "9RX*"
-         *     ]
-         */
-        equipmentModelName?: components['parameters']['EquipmentModelName'];
-      };
+      query?: never;
       header?: never;
-      path: {
-        /** @description Deprecated value should be false */
-        deprecated: components['parameters']['Deprecated'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -342,19 +322,9 @@ export interface paths {
   };
   '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels': {
     parameters: {
-      query?: {
-        /** @description Whether to filter isg types by the deprecated flag */
-        deprecated?: components['parameters']['deprecated'];
-        /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
-        organizationIds?: components['parameters']['organizationIds'];
-      };
+      query?: never;
       header?: never;
-      path: {
-        /** @description ID for Equipment Make */
-        equipmentMakeId: components['parameters']['EquipmentMakeId'];
-        /** @description ID for Equipment ISG Type */
-        equipmentISGTypeId: components['parameters']['EquipmentISGTypeId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -374,14 +344,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description ID for Equipment Make */
-        equipmentMakeId: components['parameters']['EquipmentMakeId'];
-        /** @description ID for Equipment ISG Type */
-        equipmentISGTypeId: components['parameters']['EquipmentISGTypeId'];
-        /** @description ID for Equipment Model */
-        equipmentModelId: components['parameters']['EquipmentModelId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -1940,79 +1903,18 @@ export interface components {
         };
       };
     };
-    /** @description Update Equipment */
+    /** Equipment Creation */
     UpdateEquipment: {
       headers: {
         [name: string]: unknown;
       };
-      content: {
-        'application/json': {
-          /**
-           * @description Unique id
-           * @example 1 | fcdc83cb-8840-4215-84b5-1769889db932
-           */
-          id: string;
-          /**
-           * @description Equipment Name.
-           * @example Cates 8360R 055358
-           */
-          name?: string;
-          /**
-           * @description Serial Number of the Equipment and passed on the query parameter
-           * @example Must be unique string. Max character count is 30.
-           */
-          serialNumber?: string;
-          /**
-           * Make of the equipment.
-           * @description Make of the equipment.
-           */
-          make?: {
-            /**
-             * @description Unique id
-             * @example 1 | fcdc83cb-8840-4215-84b5-1769889db932
-             */
-            id?: string;
-            /**
-             * @description EquipmentMake
-             * @example EquipmentMake
-             */
-            '@type'?: string;
-          };
-          /**
-           * Type of the equipment.
-           * @description Type of the equipment.
-           */
-          type?: {
-            /**
-             * @description Unique id
-             * @example 2 | 82115264-9385-460c-bfbe-177a59445fd9
-             */
-            id?: string;
-            /**
-             * @description EquipmentType
-             * @example EquipmentType
-             */
-            '@type'?: string;
-          };
-          /**
-           * Model of the equipment.
-           * @description Model of the equipment.
-           */
-          model?: {
-            /**
-             * @description Unique id
-             * @example 3 | 158df9ff-334a-4e0d-86cc-3adca17a9686
-             */
-            id?: string;
-            /**
-             * @description EquipmentModel
-             * @example EquipmentModel
-             */
-            '@type'?: string;
-          };
-          icon?: components['schemas']['equipment-icon'];
-        };
+      content?: never;
+    };
+    examples: {
+      headers: {
+        [name: string]: unknown;
       };
+      content?: never;
     };
     /** @description A collection of Assets */
     GetEquipmentMake: {
@@ -2219,7 +2121,12 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components['responses']['UpdateEquipment'];
+    /** @description Update Equipment */
+    requestBody?: {
+      content: {
+        'application/json': components['responses']['UpdateEquipment'];
+      };
+    };
     responses: {
       /** @description Patch Successful Updated Equipment */
       200: components['responses']['UpdatedEquip'];

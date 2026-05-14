@@ -112,7 +112,11 @@ paths:
         - OAuth2:
             - "eq2"
       requestBody:
-        $ref: "#/components/responses/UpdateEquipment"
+        description: "Update Equipment"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/responses/UpdateEquipment"
       responses:
         "200":
           description: "Patch Successful Updated Equipment"
@@ -300,11 +304,11 @@ paths:
                             primaryColor: "#7E7E7E"
                             secondaryColor: "#D3D3D3"
   /equipmentModels:
-    parameters:
-      - $ref: "#/components/parameters/Deprecated"
-      - $ref: "#/components/parameters/EmbedV1"
-      - $ref: "#/components/parameters/EquipmentModelName"
     get:
+      parameters:
+        - $ref: "#/components/parameters/Deprecated"
+        - $ref: "#/components/parameters/EmbedV1"
+        - $ref: "#/components/parameters/EquipmentModelName"
       tags:
         - "Equipment Models"
       description: "This resource allows the client to view equipment models in our reference database and their associated IDs and names."
@@ -434,12 +438,12 @@ paths:
         "404":
           description: "Resource Not Found."
   /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels:
-    parameters:
-      - $ref: "#/components/parameters/EquipmentMakeId"
-      - $ref: "#/components/parameters/EquipmentISGTypeId"
-      - $ref: "#/components/parameters/deprecated"
-      - $ref: "#/components/parameters/organizationIds"
     get:
+      parameters:
+        - $ref: "#/components/parameters/EquipmentMakeId"
+        - $ref: "#/components/parameters/EquipmentISGTypeId"
+        - $ref: "#/components/parameters/deprecated"
+        - $ref: "#/components/parameters/organizationIds"
       tags:
         - "Equipment Model Resource"
       description: "This operation retrieves a list of Equipment Models based on given makeId and ISGtypeId."
@@ -484,11 +488,11 @@ paths:
         "403":
           description: "User/applications does not have the license assigned"
   /equipmentMakes/{equipmentMakeId}/equipmentISGTypes/{equipmentISGTypeId}/equipmentModels/{equipmentModelId}:
-    parameters:
-      - $ref: "#/components/parameters/EquipmentMakeId"
-      - $ref: "#/components/parameters/EquipmentISGTypeId"
-      - $ref: "#/components/parameters/EquipmentModelId"
     get:
+      parameters:
+        - $ref: "#/components/parameters/EquipmentMakeId"
+        - $ref: "#/components/parameters/EquipmentISGTypeId"
+        - $ref: "#/components/parameters/EquipmentModelId"
       tags:
         - "Equipment Model Resource"
       description: "This operation retrieves a single Equipment Model based on given makeId, isgTypeId and modelId."
@@ -2802,93 +2806,89 @@ components:
                         id: 1
                         ERID: "82115264-9385-460c-bfbe-177a59445fd9"
     UpdateEquipment:
-      description: "Update Equipment"
-      content:
-        application/json:
-          schema:
-            required:
-              - "@type"
-              - "id"
-            type: "object"
-            title: "Equipment Creation"
-            properties:
-              id:
-                type: "string"
-                description: "Unique id"
-                example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
-                x-required-boolean: true
-              name:
-                type: "string"
-                description: "Equipment Name."
-                example: "Cates 8360R 055358"
-              serialNumber:
-                type: "string"
-                description: "Serial Number of the Equipment and passed on the query parameter"
-                example: "Must be unique string. Max character count is 30."
-                x-required-boolean: true
-              make:
-                type: "object"
-                title: "Make of the equipment."
-                description: "Make of the equipment."
-                properties:
-                  id:
-                    type: "string"
-                    description: "Unique id"
-                    example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
-                  "@type":
-                    type: "string"
-                    description: "EquipmentMake"
-                    example: "EquipmentMake"
-              type:
-                type: "object"
-                title: "Type of the equipment."
-                description: "Type of the equipment."
-                properties:
-                  id:
-                    type: "string"
-                    description: "Unique id"
-                    example: "2 | 82115264-9385-460c-bfbe-177a59445fd9"
-                  "@type":
-                    type: "string"
-                    description: "EquipmentType"
-                    example: "EquipmentType"
-              model:
-                type: "object"
-                title: "Model of the equipment."
-                description: "Model of the equipment."
-                properties:
-                  id:
-                    type: "string"
-                    description: "Unique id"
-                    example: "3 | 158df9ff-334a-4e0d-86cc-3adca17a9686"
-                  "@type":
-                    type: "string"
-                    description: "EquipmentModel"
-                    example: "EquipmentModel"
-              icon:
-                $ref: "#/components/schemas/equipment-icon"
-          examples:
-            No Header:
-              value:
-                "@type": "Machine"
-                id: 1
-                name: "Equipment Name"
-                serialNumber: "1T0750LXCNF012345"
-                make:
-                  - "@type": "EquipmentMake"
-                    id: 1
-                type:
-                  - "@type": "EquipmentType"
-                    id: 414
-                model:
-                  - "@type": "EquipmentModel"
-                    id: 585917
-                icon:
-                  - "@type": "EquipmentIcon"
-                    name: "crawler-loader"
-                    iconStyle:
-                      primaryColor: "#F2A900"
-                      secondaryColor: "#808082"
+      required:
+        - "@type"
+        - "id"
+      type: "object"
+      title: "Equipment Creation"
+      properties:
+        id:
+          type: "string"
+          description: "Unique id"
+          example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
+          x-required-boolean: true
+        name:
+          type: "string"
+          description: "Equipment Name."
+          example: "Cates 8360R 055358"
+        serialNumber:
+          type: "string"
+          description: "Serial Number of the Equipment and passed on the query parameter"
+          example: "Must be unique string. Max character count is 30."
+          x-required-boolean: true
+        make:
+          type: "object"
+          title: "Make of the equipment."
+          description: "Make of the equipment."
+          properties:
+            id:
+              type: "string"
+              description: "Unique id"
+              example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
+            "@type":
+              type: "string"
+              description: "EquipmentMake"
+              example: "EquipmentMake"
+        type:
+          type: "object"
+          title: "Type of the equipment."
+          description: "Type of the equipment."
+          properties:
+            id:
+              type: "string"
+              description: "Unique id"
+              example: "2 | 82115264-9385-460c-bfbe-177a59445fd9"
+            "@type":
+              type: "string"
+              description: "EquipmentType"
+              example: "EquipmentType"
+        model:
+          type: "object"
+          title: "Model of the equipment."
+          description: "Model of the equipment."
+          properties:
+            id:
+              type: "string"
+              description: "Unique id"
+              example: "3 | 158df9ff-334a-4e0d-86cc-3adca17a9686"
+            "@type":
+              type: "string"
+              description: "EquipmentModel"
+              example: "EquipmentModel"
+        icon:
+          $ref: "#/components/schemas/equipment-icon"
+    examples:
+      No Header:
+        value:
+          "@type": "Machine"
+          id: 1
+          name: "Equipment Name"
+          serialNumber: "1T0750LXCNF012345"
+          make:
+            - "@type": "EquipmentMake"
+              id: 1
+          type:
+            - "@type": "EquipmentType"
+              id: 414
+          model:
+            - "@type": "EquipmentModel"
+              id: 585917
+          icon:
+            - "@type": "EquipmentIcon"
+              name: "crawler-loader"
+              iconStyle:
+                primaryColor: "#F2A900"
+                secondaryColor: "#808082"
     GetEquipmentMake:
       description: "A collection of Assets"
       content:

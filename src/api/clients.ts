@@ -65,7 +65,7 @@ export class ClientsApi {
    */
   async create(
     orgId: string,
-    data: components['schemas']['ClientPost'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/clients`;

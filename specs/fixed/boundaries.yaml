@@ -150,7 +150,11 @@ paths:
       summary: "Update a boundary"
       description: "This endpoint will update a boundary. The shape of the object must include name, active, irrigated, sourceType, and multipolygons. All these fields can be updated, however a license is required to set sourceType to a value other than \"External\". If the boundary is set to active, it will mark all other boundaries in this field inactive."
       requestBody:
-        $ref: "#/components/requestBodies/PutRequest"
+        description: "putRequest"
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/requestBodies/PutRequest"
       security:
         - OAuth2:
             - "ag3"
@@ -310,12 +314,37 @@ components:
       description: "Specifies Boundary details"
       x-required-boolean: true
     PutRequest:
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/PutBoundary"
+      type: "object"
       description: "The desired Boundary to be updated"
       x-required-boolean: true
+      properties:
+        name:
+          type: "string"
+          example: "Boundary01"
+          description: "Boundary Name."
+        active:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the boundary is active in this field."
+        archive:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the boundary is archived."
+        irrigated:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the boundary is irrigated."
+        multipolygons:
+          description: "Polygon representation of the new boundary."
+          example: "See sample request below."
+        sourceType:
+          example: "External"
+          type: "string"
+          description: "Describes the source of boundary (requires license to set)."
+        signalType:
+          type: "string"
+          example: "dtiSignalTypeRTK"
+          description: "Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values."
   responses:
     BoundariesResponse:
       description: "A collection of boundaries"
@@ -1355,6 +1384,7 @@ components:
           example: "dtiSignalTypeRTK"
           description: "Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values."
     PutBoundary:
+      type: "object"
       properties:
         name:
           type: "string"

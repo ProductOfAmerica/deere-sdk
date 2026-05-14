@@ -34,22 +34,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConnectionsResponse'
   /connections/{connectionId}:
-    parameters:
-        - $ref: '#/components/parameters/ConnectionId'
     delete:
       summary: Delete connection by connection ID
       description: Remove specific connection by ID
+      parameters:
+        - $ref: '#/components/parameters/ConnectionId'
       responses:
         204:
           $ref: '#/components/responses/Deleted'
         403:
           $ref: '#/components/responses/Forbidden'
   /organizations/{orgId}/connections:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
     delete:
       summary: Delete all partner connections by Org Id
       description: Remove all connections between the calling application and the org. This includes all partner connections.
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
       responses:
         204:
           $ref: '#/components/responses/Deleted'
@@ -158,7 +158,8 @@ components:
       properties:
         links:
           type: array
-          $ref: '#/components/schemas/Link'
+          items:
+            $ref: '#/components/schemas/Link'
         total:
           type: integer
           format: int32

@@ -150,7 +150,7 @@ export class BoundariesApi {
     orgId: string,
     fieldId: string,
     boundaryId: string,
-    data: components['schemas']['PutBoundary'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries/${boundaryId}`;

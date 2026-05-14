@@ -50,10 +50,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The identifier of the connection */
-        connectionId: components['parameters']['ConnectionId'];
-      };
+      path?: never;
       cookie?: never;
     };
     get?: never;
@@ -88,10 +85,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description Organization Id */
-        orgId: components['parameters']['OrgId'];
-      };
+      path?: never;
       cookie?: never;
     };
     get?: never;
@@ -167,7 +161,7 @@ export interface components {
       links?: components['schemas']['Link'][];
     };
     ConnectionsResponse: {
-      links: components['schemas']['Link'];
+      links: components['schemas']['Link'][];
       /**
        * Format: int32
        * @example 1
