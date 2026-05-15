@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# pnpm pack / npm pack output (release.yml creates these in CI; never commit)
+*.tgz
+
 # IDE
 .idea/
 .vscode/
