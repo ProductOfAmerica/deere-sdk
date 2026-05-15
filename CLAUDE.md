@@ -146,8 +146,9 @@ Tests use `tests/helpers/mock-fetch.ts` for injecting fetch behaviour (JSON succ
 error, timeout, paginated). Never hit the real API in tests — inject a custom `fetch` via `DeereClientConfig.fetch`.
 `fuzz.test.ts` uses `fast-check`; run separately via `pnpm test:fuzz` (CI runs it only on Node 24.x).
 
-CI runs the test matrix on Node 18/20/22/23/24/25. Keep the code Node-18-compatible (no fresh-platform-API-only
-features).
+CI runs the test matrix on Node 20/22/23/24/25. Node 18 was dropped 2026-05-15 because tsx ≥4.22.0 calls
+`Array.prototype.toReversed()` (ES2023, Node 20+). Node 18 hit EOL April 2025. Keep the code Node-20-compatible
+(no fresh-platform-API-only features beyond Node 20).
 
 ## Releases
 
