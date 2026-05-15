@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.6] - 2026-05-15
+
+### Changed
+- Bumped `engines.node` from `>=18` to `>=20`. Node 18 hit EOL April 2025, and the
+  project's test runner (tsx ≥4.22.0) now uses `Array.prototype.toReversed()` which
+  is Node 20+. Installs on Node 18 will warn (`EBADENGINE`) but the published code
+  itself remains framework-compatible; using Node 20+ is recommended.
+
+### Fixed
+- CI matrix no longer tests against Node 18 (matched the engines bump above).
+- `sync-api.yml` no longer races `release.yml` on npm publish. The previous design
+  ran a `publish` job via reusable `workflow_call`, which checked out the workflow's
+  trigger SHA (pre-bump) and consistently tried to republish the previous version.
+  `release.yml` (triggered by the tag push) owns publish + GitHub Release + cosign
+  signing exclusively.
+
+### Internal
+- Removed eight stale `deere-sdk-*.tgz` tarballs from the repo root. The pre-fix
+  sync workflow ran `pnpm pack` before the version bump and `git add .` swept the
+  resulting tarball into each sync commit. Added `*.tgz` to `.gitignore`.
+- Bumped dev-dependencies (biome, @types/node, fast-check, tsx, typescript, yaml)
+  via Dependabot.
+
 ## [2.1.5] - 2026-05-15
 
 ### Changed
