@@ -96,7 +96,34 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Id"
       requestBody:
-        $ref: "#/components/requestBodies/SubscriptionUpdateRequest"
+        x-required-boolean: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              No Header:
+                value:
+                  id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
+                  eventTypeId: "fieldOperation"
+                  filters:
+                    - key: "orgId"
+                      values:
+                        - "123456"
+                    - key: "fieldOperationType"
+                      values:
+                        - "seeding"
+                  targetEndpoint:
+                    targetType: "https"
+                    uri: "https://website.com/api/receiveEvents"
+                  status: "Active"
+                  displayName: "Org 123456 Seeding Field Ops Subscription"
+                  token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                  links:
+                    - rel: "user"
+                      uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
+                    - rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
+            schema:
+              $ref: "#/components/requestBodies/SubscriptionUpdateRequest"
       responses:
         "200":
           $ref: "#/components/responses/UpdatedResponse"
@@ -186,34 +213,7 @@ components:
           schema:
             $ref: "#/components/schemas/SubscriptionRequestContent"
     SubscriptionUpdateRequest:
-      x-required-boolean: true
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/SubscriptionResponseContent"
-          examples:
-            No Header:
-              value:
-                id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
-                eventTypeId: "fieldOperation"
-                filters:
-                  - key: "orgId"
-                    values:
-                      - "123456"
-                  - key: "fieldOperationType"
-                    values:
-                      - "seeding"
-                targetEndpoint:
-                  targetType: "https"
-                  uri: "https://website.com/api/receiveEvents"
-                status: "Active"
-                displayName: "Org 123456 Seeding Field Ops Subscription"
-                token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
-                links:
-                  - rel: "user"
-                    uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
-                  - rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
+      $ref: "#/components/schemas/SubscriptionResponseContent"
     DeliveryUpdateRequest:
       x-required-boolean: true
       content:

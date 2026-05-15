@@ -7,7 +7,6 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
-import type { components } from '../types/generated/guidance-lines.js';
 
 export class GuidanceLinesApi {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
@@ -66,7 +65,7 @@ export class GuidanceLinesApi {
   async create(
     orgId: string,
     fieldId: string,
-    data: components['schemas']['GuidanceLine'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines`;
@@ -102,7 +101,7 @@ export class GuidanceLinesApi {
     orgId: string,
     fieldId: string,
     guidanceLineId: string,
-    data: components['schemas']['GuidanceLinePut'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}`;

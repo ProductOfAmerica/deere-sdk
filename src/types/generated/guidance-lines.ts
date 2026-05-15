@@ -58,7 +58,12 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: components['requestBodies']['PostRequest'];
+      /** @description Specifies guidance line details */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['requestBodies']['PostRequest'];
+        };
+      };
       responses: {
         200: components['responses']['Created'];
         400: components['responses']['BadRequest'];
@@ -125,7 +130,11 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: components['requestBodies']['PutRequest'];
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['requestBodies']['PutRequest'];
+        };
+      };
       responses: {
         200: components['responses']['NoContent'];
         400: components['responses']['BadRequest'];
@@ -410,15 +419,14 @@ export interface components {
     Embed: string;
   };
   requestBodies: {
-    /** @description Specifies guidance line details */
     PostRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['GuidanceLine'];
+        '*/*'?: never;
       };
     };
     PutRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['GuidanceLinePut'];
+        '*/*'?: never;
       };
     };
   };

@@ -5,7 +5,6 @@ info:
   contact:
     name: Land
     email: ISGLand@JohnDeere.com
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:
@@ -17,11 +16,8 @@ servers:
           - apiqa.tal
           - sandboxapi
           - partnerapi
-
 paths:
   /organizations/{orgId}/farms:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
     get:
       description: Retrieve all of the farms for an organization
       summary: View Farms in an Org
@@ -29,6 +25,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/RecordMetadataEmbed'
         - $ref: '#/components/parameters/RecordFilter'
+        - $ref: '#/components/parameters/OrgId'
       responses:
         200:
           $ref: '#/components/responses/FarmsReturned'
@@ -39,11 +36,26 @@ paths:
         404:
           $ref: '#/components/responses/OrgNotFound'
     post:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
       description: Create a farm for a given organization
       summary: Create Farm
       operationId: createFarm
       requestBody:
-        $ref: '#/components/requestBodies/FarmRequest'
+        description: The request body used to create or update a farm
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              Create Farm:
+                value:
+                  name: farmName
+                  archived: false
+                  links:
+                    - "@type": Link,
+                      rel: client
+                      links: https://sandboxapi.deere.com/platform/organizations/{orgId}/clients/{clientId}
+            schema:
+              $ref: '#/components/requestBodies/FarmRequest'
       responses:
         201:
           $ref: '#/components/responses/FarmCreatedResponse'
@@ -53,17 +65,15 @@ paths:
           $ref: '#/components/responses/DoesNotHaveAccessResponse'
         404:
           $ref: '#/components/responses/OrgNotFound'
-
   /organizations/{orgId}/farms/{farmId}:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
-      - $ref: '#/components/parameters/FarmId'
     get:
       description: Get farm by organization and farmId
       summary: View a Farm
       operationId: getFarm
       parameters:
         - $ref: '#/components/parameters/RecordMetadataEmbed'
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FarmId'
       responses:
         200:
           $ref: '#/components/responses/FarmReturned'
@@ -72,11 +82,27 @@ paths:
         404:
           $ref: '#/components/responses/OrgOrFarmNotFound'
     put:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FarmId'
       description: Update farm by Id
       summary: Update a Farm
       operationId: updateFarm
       requestBody:
-        $ref: '#/components/requestBodies/FarmRequest'
+        description: The request body used to create or update a farm
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              Update Farm:
+                value:
+                  name: farmName
+                  archived: false
+                  links:
+                    - "@type": Link,
+                      rel: client
+                      links: https://sandboxapi.deere.com/platform/organizations/{orgId}/clients/{clientId}
+            schema:
+              $ref: '#/components/requestBodies/FarmRequest'
       responses:
         204:
           $ref: '#/components/responses/UpdatedResponse'
@@ -87,6 +113,9 @@ paths:
         404:
           $ref: '#/components/responses/OrgOrFarmNotFound'
     delete:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FarmId'
       description: Delete a farm by Id
       summary: Delete a Farm
       operationId: deleteFarm
@@ -97,13 +126,11 @@ paths:
           $ref: '#/components/responses/DoesNotHaveAccessResponse'
         404:
           $ref: '#/components/responses/OrgOrFarmNotFound'
-
-
   /organizations/{orgId}/farms/{farmId}/clients:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
-      - $ref: '#/components/parameters/FarmId'
     get:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FarmId'
       description: Get clients by organization and farmId
       summary: View Clients that Own a Farm
       operationId: getAllClients
@@ -242,22 +269,7 @@ components:
         default: available
   requestBodies:
     FarmRequest:
-      description: The request body used to create or update a farm
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: '#/components/schemas/PostFarm'
-          examples:
-            Create Farm:
-              value:
-                  name:  farmName
-                  archived: false
-                  links: [{
-                              "@type": Link,
-                              "rel": client,
-                              "links": "https://sandboxapi.deere.com/platform/organizations/{ordId}/clients/{clientId}"
-                            }]
-
+      $ref: '#/components/schemas/PostFarm'
   responses:
     ClientsReturned:
       description: Array of clients containing links related to assets
@@ -370,14 +382,14 @@ components:
                       - rel: owningOrganization
                         uri: https://sandboxapi.deere.com/platform/organizations/6789
     FarmCreatedResponse:
-      description:  created
+      description: created
       headers:
         Location:
           schema:
-            description:  The uri of the newly created resource
+            description: The uri of the newly created resource
             type: string
             format: url
-            example:  https://sandboxapi.deere.com/platform/organizations/1234/clients/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
+            example: https://sandboxapi.deere.com/platform/organizations/1234/clients/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
     DeletedResponse:
       description: Deleted
       content:
@@ -394,7 +406,7 @@ components:
     UpdatedResponse:
       description: Updated
     DoesNotHaveAccessResponse:
-      description:  Does not have access
+      description: Does not have access
     DoesNotHaveAccessToOrg:
       description: Invalid access to organization
     HasNotChanged:
@@ -442,7 +454,7 @@ components:
           example: Aronnax Farm
         lastModifiedTime:
           type: string
-          description: 
+          description: The last time the farm was modified.
           example: 2020-09-21T15:41:15.205Z
 
     GetFarms:
@@ -462,7 +474,7 @@ components:
                 example: self
               uri:
                 type: string
-                example: https://sandboxapi.deere.com/platform/organizations/5555/farms/
+                example: https://apiqa.tal.deere.com/platform/organizations/5555/farms/
         values:
           type: array
           items:
@@ -490,7 +502,7 @@ components:
           description: Archived Status
         clientUri:
           type: string
-          example: https://sandboxapi.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c
+          example: https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c
           description: Client Uri
         links:
           type: array
@@ -506,7 +518,7 @@ components:
                 example: self
               uri:
                 type: string
-                example: https://sandboxapi.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d
+                example: https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d
 
     GroupLink:
       description: Link to another resource
@@ -529,7 +541,7 @@ components:
         clientUri:
           description: Link to client resource
           type: string
-          example: https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
+          example: https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
 
     MalformedRequestError:
       type: object
@@ -559,4 +571,4 @@ components:
                 example: This field is required.
         otherAttributes:
           type: object
-          example: {}
+          example: { }

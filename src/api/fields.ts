@@ -89,7 +89,7 @@ export class FieldsApi {
    */
   async create(
     orgId: string,
-    data: components['schemas']['CreateUpdateField'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields`;
@@ -123,7 +123,7 @@ export class FieldsApi {
   async update(
     orgId: string,
     fieldId: string,
-    data: components['schemas']['CreateUpdateField'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${fieldId}`;

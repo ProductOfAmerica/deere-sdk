@@ -8,10 +8,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -35,12 +32,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description Farm id */
-        farmId: components['parameters']['FarmId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -68,12 +60,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The id of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description Farm id */
-        farmId: components['parameters']['FarmId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -172,7 +159,7 @@ export interface components {
        */
       name?: string;
       /**
-       * @description null
+       * @description The last time the farm was modified.
        * @example 2020-09-21T15:41:15.205Z
        */
       lastModifiedTime?: string;
@@ -186,7 +173,7 @@ export interface components {
       links?: {
         /** @example self */
         rel?: string;
-        /** @example https://sandboxapi.deere.com/platform/organizations/5555/farms/ */
+        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/ */
         uri?: string;
       }[];
       values?: components['schemas']['GetFarm'][];
@@ -212,7 +199,7 @@ export interface components {
       archived?: boolean;
       /**
        * @description Client Uri
-       * @example https://sandboxapi.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c
+       * @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c
        */
       clientUri?: string;
       readonly links?: {
@@ -220,7 +207,7 @@ export interface components {
         '@type'?: string;
         /** @example self */
         rel?: string;
-        /** @example https://sandboxapi.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
+        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
         uri?: string;
       }[];
     };
@@ -233,7 +220,7 @@ export interface components {
       archived?: boolean;
       /**
        * @description Link to client resource
-       * @example https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       * @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
        */
       clientUri: string;
     };
@@ -380,10 +367,9 @@ export interface components {
     RecordFilter: 'available' | 'archived' | 'all';
   };
   requestBodies: {
-    /** @description The request body used to create or update a farm */
     FarmRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['PostFarm'];
+        '*/*'?: never;
       };
     };
   };
@@ -428,7 +414,12 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components['requestBodies']['FarmRequest'];
+    /** @description The request body used to create or update a farm */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['requestBodies']['FarmRequest'];
+      };
+    };
     responses: {
       201: components['responses']['FarmCreatedResponse'];
       400: components['responses']['MalformedRequest'];
@@ -470,7 +461,12 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components['requestBodies']['FarmRequest'];
+    /** @description The request body used to create or update a farm */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['requestBodies']['FarmRequest'];
+      };
+    };
     responses: {
       204: components['responses']['UpdatedResponse'];
       400: components['responses']['MalformedRequest'];

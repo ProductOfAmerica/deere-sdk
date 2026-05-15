@@ -532,29 +532,6 @@ components:
           type: "boolean"
           description: "If set to true, then processing of the file will be delayed until this is toggled to false."
           example: false
-        contextMetadata:
-          type: "object"
-          description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
-          example:
-            frequency: "DAILY"
-            reportType: "CONNECTIVITY"
-            machines:
-              - "eb8a4a58-9d94-4c98-ae56-09331aa0ff50"
-              - "3341fe33-4825-464b-8442-3f17fa876cd1"
-            fields:
-              - "3341fe33-4825-464b-8442-3f17fa876cd1"
-              - "3341fe33-4825-464b-8442-3f17fa876cd1"
-        customMetadata:
-          type: "object"
-          description: "Additional custom metadata for the file"
-          example:
-            time_range_start: "2025-07-01T00:00:00Z"
-            time_range_end: "2025-07-28T00:00:00Z"
-            locale: "en-US"
-            time_zone: "UTC"
-            unit_of_measure: "XYZ"
-            user_type: "Admin"
-            schedule_id: "124jsg"
     FilesLink:
       properties:
         owningOrganization:

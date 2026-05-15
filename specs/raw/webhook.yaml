@@ -8,7 +8,6 @@ info:
     name: Peder Kopperud & Jeff Martin
     email: KopperudPederO@JohnDeere.com,ISG_Red_October@JohnDeere.com
     url: https://developer.deere.com/
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:
@@ -21,7 +20,6 @@ servers:
           - apidev.tal
           - sandboxapi
           - partnerapi
-
 paths:
   /eventSubscriptions:
     post:
@@ -97,7 +95,6 @@ paths:
             schema:
               properties:
                 Content-Type: 'application/vnd.deere.axiom.v3+json'
-
   /eventSubscriptions/{id}:
     get:
       summary: Get an Event Subscription
@@ -123,7 +120,6 @@ paths:
             schema:
               properties:
                 Content-Type: 'application/vnd.deere.axiom.v3+json'
-
     put:
       description: 'This resource will update an event subscription for a user.
                     Only certain fields are editable.'
@@ -132,7 +128,35 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Id'
       requestBody:
-        $ref: '#/components/requestBodies/SubscriptionUpdateRequest'
+        required: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              No Header:
+                value:
+                  id: ae4b499c-1111-2222-3333-d7498cd7d9dd
+                  eventTypeId: fieldOperation
+                  filters:
+                    - key: orgId
+                      values:
+                        - '123456'
+                    - key: fieldOperationType
+                      values:
+                        - seeding
+                  targetEndpoint:
+                    targetType: https
+                    uri: https://website.com/api/receiveEvents
+                  status: Active
+                  displayName: Org 123456 Seeding Field Ops Subscription
+                  token: wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf
+                  links:
+                    - rel: user
+                      uri: https://sandboxapi.deere.com/platform/users/subscribedUser
+                    - rel: self
+                      uri: >-
+                        https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd
+            schema:
+              $ref: '#/components/requestBodies/SubscriptionUpdateRequest'
       responses:
         '200':
           $ref: '#/components/responses/UpdatedResponse'
@@ -149,7 +173,6 @@ paths:
             schema:
               properties:
                 Content-Type: 'application/vnd.deere.axiom.v3+json'
-
 components:
   parameters:
     Id:
@@ -232,36 +255,7 @@ components:
             $ref: '#/components/schemas/SubscriptionRequestContent'
 
     SubscriptionUpdateRequest:
-      required: true
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: '#/components/schemas/SubscriptionResponseContent'
-          examples:
-            No Header:
-              value:
-                id: ae4b499c-1111-2222-3333-d7498cd7d9dd
-                eventTypeId: fieldOperation
-                filters:
-                  - key: orgId
-                    values:
-                      - '123456'
-                  - key: fieldOperationType
-                    values:
-                      - seeding
-                targetEndpoint:
-                  targetType: https
-                  uri: https://website.com/api/receiveEvents
-                status: Active
-                displayName: Org 123456 Seeding Field Ops Subscription
-                token: wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf
-                links:
-                  - rel: user
-                    uri: https://sandboxapi.deere.com/platform/users/subscribedUser
-                  - rel: self
-                    uri: >-
-                      https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd
-
+      $ref: '#/components/schemas/SubscriptionResponseContent'
     DeliveryUpdateRequest:
       required: true
       content:

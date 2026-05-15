@@ -414,7 +414,7 @@ export interface components {
     };
     SubscriptionUpdateRequest: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['SubscriptionResponseContent'];
+        '*/*'?: never;
       };
     };
     DeliveryUpdateRequest: {
@@ -491,7 +491,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: components['requestBodies']['SubscriptionUpdateRequest'];
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['requestBodies']['SubscriptionUpdateRequest'];
+      };
+    };
     responses: {
       200: components['responses']['UpdatedResponse'];
       400: components['responses']['BadRequestResponse'];

@@ -62,7 +62,7 @@ export class FarmsApi {
    */
   async create(
     orgId: string,
-    data: components['schemas']['PostFarm'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/farms`;
@@ -95,7 +95,7 @@ export class FarmsApi {
   async update(
     orgId: string,
     farmId: string,
-    data: components['schemas']['PostFarm'],
+    data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
     const path = `/organizations/${orgId}/farms/${farmId}`;

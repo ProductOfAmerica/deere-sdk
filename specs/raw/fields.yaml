@@ -5,7 +5,6 @@ info:
   contact:
     name: Land
     email: ISGLand@JohnDeere.com
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:
@@ -17,11 +16,8 @@ servers:
           - apiqa.tal
           - sandboxapi
           - partnerapi
-
 paths:
   /organizations/{orgId}/fields:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
     get:
       summary: Retrieve all of the Fields for an Organization
       description: Retrieve all of the Fields for an Organization
@@ -32,6 +28,7 @@ paths:
         - $ref: '#/components/parameters/FieldsEmbed'
         - $ref: '#/components/parameters/recordFilter'
         - $ref: '#/components/parameters/UnitOfMeasureHeader'
+        - $ref: '#/components/parameters/OrgId'
       responses:
         200:
           $ref: '#/components/responses/FieldsReturned'
@@ -40,6 +37,8 @@ paths:
         404:
           $ref: '#/components/responses/OrgNotFound'
     post:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
       summary: Create field for an Organization
       description: |
         This API is used to create a new field resource within the target organization. In order to do this, the authenticated user must have Locations Level 3 permission within the target organization. The client and farm names in the request body may be either new or existing names.
@@ -56,7 +55,42 @@ paths:
         Note: All fields are created with an 'available' status.
 
       requestBody:
-        $ref: '#/components/requestBodies/ASingleField'
+        required: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              Create new field (Existing farm and client):
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - id: ExistingFarmId
+                  clients:
+                    clients:
+                      - id: ExistingClientId
+              Create new field and farm (Existing client):
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - name: UniqueFarmName
+                  clients:
+                    clients:
+                      - id: ExistingClientId
+              Create new field, farm and client:
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - name: UniqueFarmName
+                  clients:
+                    clients:
+                      - name: UniqueClientName
+            schema:
+              $ref: '#/components/requestBodies/ASingleField'
       responses:
         201:
           $ref: '#/components/responses/Created'
@@ -66,17 +100,15 @@ paths:
           $ref: '#/components/responses/OrgNotFound'
         400:
           $ref: '#/components/responses/ValidationErrorForCreate'
-
   /organizations/{orgId}/fields/{fieldId}:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
-      - $ref: '#/components/parameters/FieldId'
     get:
       summary: Get field by organization and fieldId
       description: Get field by organization and fieldId
       parameters:
         - $ref: '#/components/parameters/FieldEmbed'
         - $ref: '#/components/parameters/UnitOfMeasureHeader'
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FieldId'
       responses:
         200:
           $ref: '#/components/responses/FieldReturned'
@@ -85,10 +117,48 @@ paths:
         404:
           $ref: '#/components/responses/OrgOrFieldNotFound'
     put:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FieldId'
       summary: Update field
       description: Update the field name, the archived status, or the associated client or farm. If the client and/or farm does not exist, it will be created.
       requestBody:
-        $ref: '#/components/requestBodies/ASingleField'
+        required: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            examples:
+              Create new field (Existing farm and client):
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - id: ExistingFarmId
+                  clients:
+                    clients:
+                      - id: ExistingClientId
+              Create new field and farm (Existing client):
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - name: UniqueFarmName
+                  clients:
+                    clients:
+                      - id: ExistingClientId
+              Create new field, farm and client:
+                value:
+                  name: UniqueFieldName
+                  archived: false
+                  farms:
+                    farms:
+                      - name: UniqueFarmName
+                  clients:
+                    clients:
+                      - name: UniqueClientName
+            schema:
+              $ref: '#/components/requestBodies/ASingleField'
       responses:
         204:
           $ref: '#/components/responses/Updated'
@@ -99,6 +169,9 @@ paths:
         400:
           $ref: '#/components/responses/ValidationErrorForUpdate'
     delete:
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FieldId'
       summary: Delete Field by organization and fieldId
       description: Delete Field by organization and fieldId
       responses:
@@ -108,17 +181,15 @@ paths:
           $ref: '#/components/responses/DoesNotHaveAccessToOrg'
         404:
           $ref: '#/components/responses/OrgOrFieldNotFound'
-
   /organizations/{orgId}/fields/{fieldId}/farms:
-    parameters:
-      - $ref: '#/components/parameters/OrgId'
-      - $ref: '#/components/parameters/FieldId'
     get:
       summary: Get Farm by organization and fieldId
       description: |
         This api is designed to get farms within an organization and for provided fieldId
       parameters:
         - $ref: '#/components/parameters/FieldEmbed'
+        - $ref: '#/components/parameters/OrgId'
+        - $ref: '#/components/parameters/FieldId'
       responses:
         200:
           $ref: '#/components/responses/FarmsReturned'
@@ -126,7 +197,6 @@ paths:
           $ref: '#/components/responses/DoesNotHaveAccessToOrg'
         404:
           $ref: '#/components/responses/OrgOrFieldNotFound'
-
   /organizations/{orgID}/fields/{id}/clients:
     get:
       description: 'View details about the client that owns the field. The response will link to the following resources:<br/>
@@ -143,7 +213,6 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getFieldResponse'
-
 components:
   parameters:
     OrgId:
@@ -254,42 +323,7 @@ components:
 
   requestBodies:
     ASingleField:
-      required: true
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: '#/components/schemas/CreateUpdateField'
-          examples:
-            Create new field (Existing farm and client):
-              value:
-                name: UniqueFieldName
-                archived: false
-                farms:
-                  farms:
-                    - id: ExistingFarmId
-                clients:
-                  clients:
-                    - id: ExistingClientId
-            Create new field and farm (Existing client):
-              value:
-                name: UniqueFieldName
-                archived: false
-                farms:
-                  farms:
-                    - name: UniqueFarmName
-                clients:
-                  clients:
-                    - id: ExistingClientId
-            Create new field, farm and client:
-              value:
-                name: UniqueFieldName
-                archived: false
-                farms:
-                  farms:
-                    - name: UniqueFarmName
-                clients:
-                  clients:
-                    - name: UniqueClientName
+      $ref: '#/components/schemas/CreateUpdateField'
     FieldGuidSearches:
       required: true
       content:

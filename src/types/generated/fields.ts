@@ -8,10 +8,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The ID of the organization */
-        orgId: components['parameters']['OrgId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -64,7 +61,11 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: components['requestBodies']['ASingleField'];
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['requestBodies']['ASingleField'];
+        };
+      };
       responses: {
         201: components['responses']['Created'];
         400: components['responses']['ValidationErrorForCreate'];
@@ -82,12 +83,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The ID of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description field guid */
-        fieldId: components['parameters']['FieldId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -135,7 +131,11 @@ export interface paths {
         };
         cookie?: never;
       };
-      requestBody?: components['requestBodies']['ASingleField'];
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['requestBodies']['ASingleField'];
+        };
+      };
       responses: {
         204: components['responses']['Updated'];
         400: components['responses']['ValidationErrorForUpdate'];
@@ -176,12 +176,7 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path: {
-        /** @description The ID of the organization */
-        orgId: components['parameters']['OrgId'];
-        /** @description field guid */
-        fieldId: components['parameters']['FieldId'];
-      };
+      path?: never;
       cookie?: never;
     };
     /**
@@ -839,7 +834,7 @@ export interface components {
   requestBodies: {
     ASingleField: {
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['CreateUpdateField'];
+        '*/*'?: never;
       };
     };
     FieldGuidSearches: {
