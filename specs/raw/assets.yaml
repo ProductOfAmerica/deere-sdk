@@ -52,7 +52,6 @@ paths:
           $ref: '#/components/responses/406'
         429:
           $ref: '#/components/responses/429'
-
     post:
       tags:
         - Asset
@@ -102,7 +101,6 @@ paths:
           $ref: '#/components/responses/415'
         429:
           $ref: '#/components/responses/429'
-
   /assets/{assetId}:
     get:
       tags:
@@ -128,7 +126,6 @@ paths:
           $ref: '#/components/responses/406'
         429:
           $ref: '#/components/responses/429'
-
     put:
       tags:
         - Asset
@@ -177,7 +174,6 @@ paths:
           $ref: '#/components/responses/415'
         429:
           $ref: '#/components/responses/429'
-
     delete:
       tags:
         - Asset
@@ -203,7 +199,6 @@ paths:
           $ref: '#/components/responses/404'
         429:
           $ref: '#/components/responses/429'
-
   /assets/{assetId}/locations:
     get:
       tags:
@@ -300,7 +295,6 @@ paths:
           $ref: '#/components/responses/415'
         429:
           $ref: '#/components/responses/429'
-
   /assetCatalog:
     get:
       summary: Get Asset Catalog List
@@ -345,7 +339,6 @@ paths:
                         assetType: SENSOR
                         assetSubType: OTHER
                         links: [ ]
-
 components:
   securitySchemes:
     OAuth2:
@@ -828,10 +821,6 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             type: object
-            properties:
-            # links:
-            #   items:
-            #     $ref: '#/components/schemas/CreatePostLink'
           examples:
             Headers:
               description: '201 Created<br/>Location: https://sandboxapi.deere.com/platform/assets/abx6f24c-2d91-40bd-70e6-0137e6ccbfb0'
@@ -881,10 +870,6 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             type: object
-            properties:
-            # links:
-            #   items:
-            #     $ref: '#/components/schemas/CreatePostLink'
           examples:
             Headers:
               description: '204 No Content<br/>

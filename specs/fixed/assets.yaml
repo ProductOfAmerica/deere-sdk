@@ -807,7 +807,6 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             type: "object"
-            properties: null
           examples:
             Headers:
               description: "201 Created Location: https://sandboxapi.deere.com/platform/assets/abx6f24c-2d91-40bd-70e6-0137e6ccbfb0"
@@ -851,7 +850,6 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             type: "object"
-            properties: null
           examples:
             Headers:
               description: "204 No Content Date: Tue, 31 May 2016 08:49:20 GMT Content-Encoding: gzip Server: Apache-Coyote/1.1 ADRUM_0: g:ec9c31ed-7102-4117-832e-f6986dc31665 X-Deere-Elapsed-Ms: 449 X-Frame-Options: SAMEORIGIN ADRUM_1: i:3472 Content-Type: text/plain ADRUM_2: e:129 ADRUM_3: d:467 Connection: Keep-Alive Keep-Alive: timeout=5, max=98 Content-Length: 0 X-Deere-Handling-Server: ldxx90tc5"
