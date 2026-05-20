@@ -1,5 +1,4 @@
 openapi: 3.0.0
-
 info:
   description: This is file management service for managing files
   version: 4.0.0
@@ -7,7 +6,6 @@ info:
   contact:
     email: ISG_HalpDesk@JohnDeere.com
     name: Halp Desk
-
 servers:
   - url: 'https://api.deere.com/platform'
     description: 'Production API endpoint'
@@ -20,7 +18,6 @@ servers:
 
   - url: 'https://apidev.tal.deere.com/platform'
     description: 'Development API endpoint'
-
 paths:
   '/files':
     get:
@@ -37,7 +34,6 @@ paths:
         - $ref: '#/components/parameters/FileTypeOptional'
         - $ref: '#/components/parameters/Transferable'
         - $ref: '#/components/parameters/X-deere-signatureOptional'
-
       responses:
         '200':
           $ref: '#/components/responses/FileListResponse'
@@ -45,7 +41,6 @@ paths:
           description: Invalid filter value.
         '403':
           description: Invalid to access files for organization.
-
   '/files/{fileId}':
     get:
       summary: View/Download A File
@@ -71,15 +66,7 @@ paths:
         description: The request body used to create or update a client
         content:
           application/vnd.deere.axiom.v3+json:
-            schema:
-              properties:
-                List of valid Accept headers: ''
-                'a': 'application/zip'
-                'b': 'application/octet-stream'
-                'c': 'application/x-zip'
-                'd': 'application/x-zip-compressed'
-                'e': 'multipart/mixed'
-                'f': 'application/vnd.deere.axiom.v3+json'
+            schema: {}
       security:
         - OAuth2: [ files, ag3 ]
       responses:
@@ -89,7 +76,6 @@ paths:
           description: Unauthorized to access file
         '404':
           description: File is not present
-
     put:
       summary: Upload/Update A File
       security:
@@ -183,7 +169,6 @@ paths:
           application/vnd.deere.axiom.v3+json:
             schema:
               $ref: '#/components/schemas/PutFiles'
-
   '/organizations/{orgId}/files':
     get:
       summary: List an Org's Files
@@ -302,7 +287,6 @@ paths:
           application/vnd.deere.axiom.v3+json:
             schema:
               $ref: '#/components/schemas/PostFiles'
-
 components:
   securitySchemes:
     OAuth2:
@@ -538,11 +522,25 @@ components:
                       archived: 'false'
                       assigned: 'false'
                       new: 'false'
-
     FileIdGet:
       description: Successful operation
       content:
-        '':
+        application/zip:
+          schema:
+            description: 'Based on value of embed request param one of the above response object is returned'
+        application/octet-stream:
+          schema:
+            description: 'Based on value of embed request param one of the above response object is returned'
+        application/x-zip:
+          schema:
+            description: 'Based on value of embed request param one of the above response object is returned'
+        application/x-zip-compressed:
+          schema:
+            description: 'Based on value of embed request param one of the above response object is returned'
+        multipart/mixed:
+          schema:
+            description: 'Based on value of embed request param one of the above response object is returned'
+        application/vnd.deere.axiom.v3+json:
           schema:
             description: 'Based on value of embed request param one of the above response object is returned'
             properties:

@@ -974,17 +974,17 @@ export interface components {
      * Identifier of Equipment
      * @description Identifier of the Equipment like DE-13, DE-17, ERID...
      */
-    identifier: Record<string, never> & {
+    identifier: {
       /**
        * @description Type of identifier.
        * @enum {string}
        */
-      type: 'serialNumber' | 'ERID';
+      type?: 'serialNumber' | 'ERID';
       /**
        * @description Value of identifier.
        * @example RW8360R055358
        */
-      value: string;
+      value?: string;
     };
     /**
      * OrganizationRole

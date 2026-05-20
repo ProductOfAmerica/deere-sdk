@@ -1108,17 +1108,16 @@ components:
       description: "Identifier of the Equipment like DE-13, DE-17, ERID..."
       allOf:
         - type: "object"
-        - required:
-            - "type"
-            - "value"
           properties:
             type:
+              x-required-boolean: true
               type: "string"
               description: "Type of identifier."
               enum:
                 - "serialNumber"
                 - "ERID"
             value:
+              x-required-boolean: true
               type: "string"
               description: "Value of identifier."
               example: "RW8360R055358"
@@ -2806,17 +2805,14 @@ components:
                         id: 1
                         ERID: "82115264-9385-460c-bfbe-177a59445fd9"
     UpdateEquipment:
-      required:
-        - "@type"
-        - "id"
       type: "object"
       title: "Equipment Creation"
       properties:
         id:
+          x-required-boolean: true
           type: "string"
           description: "Unique id"
           example: "1 | fcdc83cb-8840-4215-84b5-1769889db932"
-          x-required-boolean: true
         name:
           type: "string"
           description: "Equipment Name."

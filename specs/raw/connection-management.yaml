@@ -7,7 +7,6 @@ info:
     name: 'SOUP Team'
     email: 'ISG_SOUPERFRIENDS@JohnDeere.com'
   title: CSC Connection Management
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:
@@ -18,7 +17,6 @@ servers:
           - apicert
           - apiqa.tal
           - sandboxapi
-
 paths:
   /connections:
     get:
@@ -55,7 +53,6 @@ paths:
           $ref: '#/components/responses/Deleted'
         403:
           $ref: '#/components/responses/Forbidden'
-
 components:
   parameters:
     ConnectionId:
@@ -100,31 +97,29 @@ components:
     Link:
       description: Link to the delete action
       type: object
-      required:
-        - rel
-        - uri
       properties:
         '@type':
           type: string
           default: Link
           example: Link
         rel:
+          required: true
           type: string
           example: self
         uri:
+          required: true
           type: string
           example: https://api.deere.com/platform/connections/abc123
 
     Connection:
       type: object
-      required:
-        - id
-        - orgId
       properties:
         id:
+          required: true
           type: string
           example: 'abc123'
         orgId:
+          required: true
           type: integer
           format: int32
           example: 2551
@@ -148,23 +143,21 @@ components:
           description: Link to the delete action
           items:
             $ref: '#/components/schemas/Link'
-
     ConnectionsResponse:
       type: object
-      required:
-        - links
-        - total
-        - values
       properties:
         links:
+          required: true
           type: array
           items:
             $ref: '#/components/schemas/Link'
         total:
+          required: true
           type: integer
           format: int32
           example: 1
         values:
+          required: true
           type: array
           items:
             $ref: '#/components/schemas/Connection'

@@ -593,7 +593,12 @@ export interface components {
         [name: string]: unknown;
       };
       content: {
-        '': {
+        'application/zip': unknown;
+        'application/octet-stream': unknown;
+        'application/x-zip': unknown;
+        'application/x-zip-compressed': unknown;
+        'multipart/mixed': unknown;
+        'application/vnd.deere.axiom.v3+json': {
           links?: unknown;
           values?: unknown;
         };

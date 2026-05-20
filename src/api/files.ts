@@ -76,9 +76,12 @@ export class FilesApi {
    * this file.
    * @generated from GET /files/{fileId}
    */
-  async get(fileId: string, options?: RequestOptions): Promise<unknown> {
+  async get(
+    fileId: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['ValueFileIdGet']> {
     const path = `/files/${fileId}`;
-    return this.client.get<unknown>(this.spec, path, options);
+    return this.client.get<components['schemas']['ValueFileIdGet']>(this.spec, path, options);
   }
 
   /**

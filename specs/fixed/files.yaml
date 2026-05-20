@@ -432,7 +432,22 @@ components:
     FileIdGet:
       description: "Successful operation"
       content:
-        "":
+        application/zip:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/octet-stream:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/x-zip:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/x-zip-compressed:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        multipart/mixed:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/vnd.deere.axiom.v3+json:
           schema:
             description: "Based on value of embed request param one of the above response object is returned"
             properties:

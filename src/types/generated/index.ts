@@ -2,7 +2,7 @@
  * John Deere API TypeScript Types
  * Auto-generated from OpenAPI specifications
  *
- * @generated 2026-05-16T06:54:16.910Z
+ * @generated 2026-05-20T07:23:04.231Z
  */
 
 export type { components as AempComponents, paths as AempPaths } from './aemp.js';

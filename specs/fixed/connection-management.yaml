@@ -94,30 +94,28 @@ components:
     Link:
       description: "Link to the delete action"
       type: "object"
-      required:
-        - "rel"
-        - "uri"
       properties:
         "@type":
           type: "string"
           default: "Link"
           example: "Link"
         rel:
+          x-required-boolean: true
           type: "string"
           example: "self"
         uri:
+          x-required-boolean: true
           type: "string"
           example: "https://api.deere.com/platform/connections/abc123"
     Connection:
       type: "object"
-      required:
-        - "id"
-        - "orgId"
       properties:
         id:
+          x-required-boolean: true
           type: "string"
           example: "abc123"
         orgId:
+          x-required-boolean: true
           type: "integer"
           format: "int32"
           example: 2551
@@ -143,20 +141,19 @@ components:
             $ref: "#/components/schemas/Link"
     ConnectionsResponse:
       type: "object"
-      required:
-        - "links"
-        - "total"
-        - "values"
       properties:
         links:
+          x-required-boolean: true
           type: "array"
           items:
             $ref: "#/components/schemas/Link"
         total:
+          x-required-boolean: true
           type: "integer"
           format: "int32"
           example: 1
         values:
+          x-required-boolean: true
           type: "array"
           items:
             $ref: "#/components/schemas/Connection"

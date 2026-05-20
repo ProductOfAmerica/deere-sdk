@@ -128,18 +128,18 @@ export interface components {
        */
       '@type': string;
       /** @example self */
-      rel: string;
+      rel?: string;
       /** @example https://api.deere.com/platform/connections/abc123 */
-      uri: string;
+      uri?: string;
     };
     Connection: {
       /** @example abc123 */
-      id: string;
+      id?: string;
       /**
        * Format: int32
        * @example 2551
        */
-      orgId: number;
+      orgId?: number;
       /**
        * Format: int32
        * @example 2101
@@ -161,13 +161,13 @@ export interface components {
       links?: components['schemas']['Link'][];
     };
     ConnectionsResponse: {
-      links: components['schemas']['Link'][];
+      links?: components['schemas']['Link'][];
       /**
        * Format: int32
        * @example 1
        */
-      total: number;
-      values: components['schemas']['Connection'][];
+      total?: number;
+      values?: components['schemas']['Connection'][];
     };
   };
   responses: {
