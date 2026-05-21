@@ -195,10 +195,6 @@ components:
   schemas:
     MyJD_links:
       description: The link object provides links to ressources which are related to the response
-      required:
-        - "@type"
-        - rel
-        - uri
       properties:
         self:
           example: https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports
@@ -370,7 +366,7 @@ components:
         lastBootType:
           description: This number identifies if the device was cold booted or warm booted
           type: integer
-          format: int32        
+          format: int32
           example: 2
         lastBootTimestamp:
           description: UTC Timestamp, when the device was booted up last time

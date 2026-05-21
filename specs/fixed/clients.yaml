@@ -466,17 +466,16 @@ components:
     GroupLink:
       description: "Link to another resource"
       type: "object"
-      required:
-        - "rel"
-        - "uri"
       properties:
         "@type":
           type: "string"
           example: "Link"
         rel:
+          x-required-boolean: true
           type: "string"
           example: "self"
         uri:
+          x-required-boolean: true
           type: "string"
           example: "https://sandboxapi.deere.com/platform/organizations/5555/clients"
     FieldResponse:
@@ -499,17 +498,16 @@ components:
     Link:
       description: "Link to another resource"
       type: "object"
-      required:
-        - "rel"
-        - "uri"
       properties:
         "@type":
           type: "string"
           example: "Link"
         rel:
+          x-required-boolean: true
           type: "string"
           example: "self"
         uri:
+          x-required-boolean: true
           type: "string"
           example: "https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
     GroupLinkID:
@@ -540,23 +538,22 @@ components:
           type: "string"
           description: "Archived status (false = active)"
     FarmResponse:
-      required:
-        - "farmId"
-        - "farmName"
-        - "orgId"
-        - "clientId"
       properties:
         farmId:
+          x-required-boolean: true
           type: "string"
         farmName:
+          x-required-boolean: true
           type: "string"
         clientId:
+          x-required-boolean: true
           type: "string"
         clientName:
           type: "string"
         clientUri:
           type: "string"
         orgId:
+          x-required-boolean: true
           type: "integer"
           format: "int64"
         archived:

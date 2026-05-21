@@ -55,19 +55,19 @@ export interface components {
        * @description Time at which the machine started. Returns a UTC Timestamp.
        * @example 2013-04-29T00:00:00Z
        */
-      startDate: string;
+      startDate?: string;
       /**
        * Format: date-time
        * @description Time at which the machine stopped. Returns a UTC Timestamp.
        * @example 2013-04-30T23:30:00Z
        */
-      endDate: string;
+      endDate?: string;
       /**
        * Format: boolean
        * @description The returned value indicates the current state of the engine
        * @example 1
        */
-      engineState: number;
+      engineState?: number;
       /**
        * @description The returned value indicates the user queried definedType value.
        * @example PTO Status On

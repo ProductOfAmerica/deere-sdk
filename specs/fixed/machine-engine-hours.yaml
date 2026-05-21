@@ -118,22 +118,21 @@ components:
     EngineHours_Response:
       description: "Page of engineHours information for the machine."
       type: "object"
-      required:
-        - "links"
-        - "total"
-        - "values"
       properties:
         links:
+          x-required-boolean: true
           description: "Link list"
           type: "array"
           items:
             $ref: "#/components/schemas/MyJD_links"
         total:
+          x-required-boolean: true
           description: "Number of results in the list"
           type: "integer"
           format: "int64"
           example: 1
         values:
+          x-required-boolean: true
           type: "array"
           items:
             $ref: "#/components/schemas/EngineHours"
@@ -146,15 +145,14 @@ components:
     EngineHours:
       description: "Engine Hours"
       type: "object"
-      required:
-        - "reportTime"
-        - "reading"
       properties:
         reading:
+          x-required-boolean: true
           description: "The number of hours the engine has been running."
           example: "&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;"
           type: "measurementAsDouble"
         reportTime:
+          x-required-boolean: true
           description: "Timestamp at which the report was created."
           type: "string"
           format: "date-time"

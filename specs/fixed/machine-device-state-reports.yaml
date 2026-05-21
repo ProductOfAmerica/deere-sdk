@@ -169,10 +169,6 @@ components:
   schemas:
     MyJD_links:
       description: "The link object provides links to ressources which are related to the response"
-      required:
-        - "@type"
-        - "rel"
-        - "uri"
       properties:
         self:
           example: "https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports"

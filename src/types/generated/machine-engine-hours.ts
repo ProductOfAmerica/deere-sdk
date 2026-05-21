@@ -31,14 +31,14 @@ export interface components {
     /** @description Page of engineHours information for the machine. */
     EngineHours_Response: {
       /** @description Link list */
-      links: components['schemas']['MyJD_links'][];
+      links?: components['schemas']['MyJD_links'][];
       /**
        * Format: int64
        * @description Number of results in the list
        * @example 1
        */
-      total: number;
-      values: components['schemas']['EngineHours'][];
+      total?: number;
+      values?: components['schemas']['EngineHours'][];
     };
     /** @description The link object provides links to ressources which are related to the response */
     MyJD_links: {
@@ -54,13 +54,13 @@ export interface components {
        * @description The number of hours the engine has been running.
        * @example &lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;
        */
-      reading: Record<string, never>;
+      reading?: Record<string, never>;
       /**
        * Format: date-time
        * @description Timestamp at which the report was created.
        * @example 2010-10-04T14:35:05.000Z
        */
-      reportTime: string;
+      reportTime?: string;
       /**
        * @description Device which collected the data.
        * @example CI

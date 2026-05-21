@@ -215,14 +215,14 @@ export interface components {
     GroupLink: Record<string, never>;
     PostFarm: {
       /** @example John Doe */
-      name: string;
+      name?: string;
       /** @example false */
       archived?: boolean;
       /**
        * @description Link to client resource
        * @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
        */
-      clientUri: string;
+      clientUri?: string;
     };
     MalformedRequestError: {
       /** @example Link */

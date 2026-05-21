@@ -684,9 +684,6 @@ components:
     GroupLink:
       description: "Link to another resource"
       type: "object"
-      required:
-        - "rel"
-        - "uri"
       properties:
         boundaries:
           example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/e61b83f4-3a12-431e-8010-596f2466dc27/boundaries"
@@ -1038,14 +1035,13 @@ components:
     Link:
       description: "Link to another resource"
       type: "object"
-      required:
-        - "rel"
-        - "uri"
       properties:
         rel:
+          x-required-boolean: true
           type: "string"
           example: "self"
         uri:
+          x-required-boolean: true
           type: "string"
           example: "https://apiqa.tal.deere.com/platform/users/grumpybear"
     FieldGuidSearches:

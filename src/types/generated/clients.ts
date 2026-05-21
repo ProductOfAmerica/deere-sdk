@@ -174,9 +174,9 @@ export interface components {
       /** @example Link */
       '@type'?: string;
       /** @example self */
-      rel: string;
+      rel?: string;
       /** @example https://sandboxapi.deere.com/platform/organizations/5555/clients */
-      uri: string;
+      uri?: string;
     };
     FieldResponse: {
       /**
@@ -202,9 +202,9 @@ export interface components {
       /** @example Link */
       '@type'?: string;
       /** @example self */
-      rel: string;
+      rel?: string;
       /** @example https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
-      uri: string;
+      uri?: string;
     };
     GroupLinkID: {
       /**
@@ -246,13 +246,13 @@ export interface components {
       archived?: string;
     };
     FarmResponse: {
-      farmId: string;
-      farmName: string;
-      clientId: string;
+      farmId?: string;
+      farmName?: string;
+      clientId?: string;
       clientName?: string;
       clientUri?: string;
       /** Format: int64 */
-      orgId: number;
+      orgId?: number;
       archived?: boolean;
       sourceModifiedDate?: string;
       sourceCreatedDate?: string;

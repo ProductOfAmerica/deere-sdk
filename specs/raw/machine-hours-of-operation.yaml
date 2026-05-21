@@ -146,10 +146,6 @@ components:
 
     MyJD_links:
       description: The link object provides links to ressources which are related to the response
-      required:
-        - "@type"
-        - rel
-        - uri
       properties:
         machine:
           example: https://sandboxapi.deere.com/platform/machines/5432
@@ -159,24 +155,23 @@ components:
     HoursOfOperation:
       description: Hours Of Operation
       type: object
-      required:
-        - startDate
-        - endDate
-        - engineState
       properties:
         startDate:
+          required: true
           x-zally-ignore: [D010]
           description: Time at which the machine started. Returns a UTC Timestamp.
           type: datetime
           format: date-time
           example: "2013-04-29T00:00:00Z"
         endDate:
+          required: true
           x-zally-ignore: [D010]
           description: Time at which the machine stopped. Returns a UTC Timestamp.
           type: datetime
           format: date-time
           example: "2013-04-30T23:30:00Z"
         engineState:
+          required: true
           type: integer
           description: The returned value indicates the current state of the engine<sup><a href="#additional">1</a></sup>
           format: boolean

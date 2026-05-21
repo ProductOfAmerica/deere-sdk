@@ -523,22 +523,18 @@ components:
     GroupLink:
       description: Link to another resource
       type: object
-      required:
-        - rel
-        - uri
     PostFarm:
       type: object
-      required:
-        - name
-        - clientUri
       properties:
         name:
+          required: true
           type: string
           example: John Doe
         archived:
           type: boolean
           example: false
         clientUri:
+          required: true
           description: Link to client resource
           type: string
           example: https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d

@@ -607,9 +607,9 @@ export interface components {
     /** @description Link to another resource */
     Link: {
       /** @example self */
-      rel: string;
+      rel?: string;
       /** @example https://apiqa.tal.deere.com/platform/users/grumpybear */
-      uri: string;
+      uri?: string;
     };
     FieldGuidSearches: {
       /** @example FieldGuidSearches */

@@ -142,10 +142,6 @@ components:
             $ref: "#/components/schemas/HoursOfOperation"
     MyJD_links:
       description: "The link object provides links to ressources which are related to the response"
-      required:
-        - "@type"
-        - "rel"
-        - "uri"
       properties:
         machine:
           example: "https://sandboxapi.deere.com/platform/machines/5432"
@@ -153,12 +149,9 @@ components:
     HoursOfOperation:
       description: "Hours Of Operation"
       type: "object"
-      required:
-        - "startDate"
-        - "endDate"
-        - "engineState"
       properties:
         startDate:
+          x-required-boolean: true
           x-zally-ignore:
             - "D010"
           description: "Time at which the machine started. Returns a UTC Timestamp."
@@ -166,6 +159,7 @@ components:
           format: "date-time"
           example: "2013-04-29T00:00:00Z"
         endDate:
+          x-required-boolean: true
           x-zally-ignore:
             - "D010"
           description: "Time at which the machine stopped. Returns a UTC Timestamp."
@@ -173,6 +167,7 @@ components:
           format: "date-time"
           example: "2013-04-30T23:30:00Z"
         engineState:
+          x-required-boolean: true
           type: "integer"
           description: "The returned value indicates the current state of the engine"
           format: "boolean"

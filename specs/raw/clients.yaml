@@ -515,17 +515,16 @@ components:
     GroupLink:
       description: Link to another resource
       type: object
-      required:
-        - rel
-        - uri
       properties:
         '@type':
           type: string
           example: Link
         rel:
+          required: true
           type: string
           example: self
         uri:
+          required: true
           type: string
           example: https://sandboxapi.deere.com/platform/organizations/5555/clients
     FieldResponse:
@@ -549,17 +548,16 @@ components:
     Link:
       description: Link to another resource
       type: object
-      required:
-        - rel
-        - uri
       properties:
         '@type':
           type: string
           example: Link
         rel:
+          required: true
           type: string
           example: self
         uri:
+          required: true
           type: string
           example: https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
     GroupLinkID:
@@ -590,23 +588,22 @@ components:
           type: string
           description: Archived status (false = active)
     FarmResponse:
-      required:
-        - farmId
-        - farmName
-        - orgId
-        - clientId
       properties:
         farmId:
+          required: true
           type: string
         farmName:
+          required: true
           type: string
         clientId:
+          required: true
           type: string
         clientName:
           type: string
         clientUri:
           type: string
         orgId:
+          required: true
           type: integer
           format: int64
         archived:
