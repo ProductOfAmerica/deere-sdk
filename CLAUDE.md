@@ -174,6 +174,8 @@ git push --follow-tags
 
 CI sees the tag → creates GitHub Release → publishes to npm.
 
+npm publishing uses Trusted Publishing/OIDC via `release.yml`; do not create or restore an `NPM_TOKEN` for CI publishing.
+
 **Gotcha:** GitHub sometimes does not fire the `push` event for a tag pushed via `git push --follow-tags`, so `release.yml` never auto-triggers. If you don't see a "Create Release" run within a minute of pushing the tag, dispatch it manually:
 
 ```bash
@@ -183,26 +185,19 @@ gh workflow run release.yml --ref vX.Y.Z
 `release.yml` also accepts `workflow_dispatch`, so this produces an identical run against the tag's commit.
 
 <!-- gitnexus:start -->
-
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **deere-sdk** (701 symbols, 1759 relationships, 53 execution flows). Use the
-GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **deere-sdk** (817 symbols, 1987 relationships, 62 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run
-  `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected
-  processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and
-  execution flows.
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
 - **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping.
-  It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use
-  `gitnexus_context({name: "symbolName"})`.
+- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
 
 ## When Debugging
 
@@ -213,10 +208,8 @@ GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 ## When Refactoring
 
-- **Renaming**: MUST use `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` first. Review the
-  preview — graph edits are safe, text_search edits need manual review. Then run with `dry_run: false`.
-- **Extracting/Splitting**: MUST run `gitnexus_context({name: "target"})` to see all incoming/outgoing refs, then
-  `gitnexus_impact({target: "target", direction: "upstream"})` to find all external callers before moving code.
+- **Renaming**: MUST use `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` first. Review the preview — graph edits are safe, text_search edits need manual review. Then run with `dry_run: false`.
+- **Extracting/Splitting**: MUST run `gitnexus_context({name: "target"})` to see all incoming/outgoing refs, then `gitnexus_impact({target: "target", direction: "upstream"})` to find all external callers before moving code.
 - After any refactor: run `gitnexus_detect_changes({scope: "all"})` to verify only expected files changed.
 
 ## Never Do
@@ -276,8 +269,7 @@ If the index previously included embeddings, preserve them by adding `--embeddin
 npx gitnexus analyze --embeddings
 ```
 
-To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.embeddings` field shows the count (0 means
-no embeddings). **Running analyze without `--embeddings` will delete any previously generated embeddings.**
+To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.embeddings` field shows the count (0 means no embeddings). **Running analyze without `--embeddings` will delete any previously generated embeddings.**
 
 > Claude Code users: A PostToolUse hook handles this automatically after `git commit` and `git merge`.
 

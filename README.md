@@ -808,6 +808,8 @@ git push --follow-tags
 
 CI sees the tag → creates GitHub Release → publishes to npm.
 
+npm publishing uses Trusted Publishing/OIDC via `release.yml`; do not create or restore an `NPM_TOKEN` for CI publishing.
+
 **Gotcha:** GitHub sometimes does not fire the `push` event for a tag pushed via `git push --follow-tags`, so `release.yml` never auto-triggers. If you don't see a "Create Release" run within a minute of pushing the tag, dispatch it manually:
 
 ```bash
