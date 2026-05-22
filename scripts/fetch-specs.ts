@@ -14,6 +14,7 @@
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { type ValidatedFetchedSpec, validateFetchedSpec } from './lib/fetched-spec-utils.js';
 
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');
@@ -52,27 +53,17 @@ const API_SLUGS = [
   'equipment-measurement',
   'partnerships',
 ];
+const API_SLUG_SET = new Set(API_SLUGS);
 
-interface ApiResponse {
-  id: number;
-  name: string;
-  yml_content: string;
-}
-
-interface FetchedSpec {
-  slug: string;
-  spec: ApiResponse;
-}
-
-async function fetchApiSpec(slug: string): Promise<ApiResponse | null> {
+async function fetchApiSpec(slug: string): Promise<ValidatedFetchedSpec | null> {
   const url = `${BASE_URL}/${slug}`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
       return null;
     }
-    const data = (await response.json()) as ApiResponse[];
-    return data[0] || null;
+    const data: unknown = await response.json();
+    return validateFetchedSpec(slug, data, API_SLUG_SET);
   } catch (error) {
     console.error(`Error fetching ${slug}:`, error);
     return null;
@@ -86,14 +77,14 @@ async function main() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const foundSpecs: FetchedSpec[] = [];
+  const foundSpecs: ValidatedFetchedSpec[] = [];
   const notFound: string[] = [];
 
   for (const slug of API_SLUGS) {
     process.stdout.write(`Fetching ${slug}...`);
     const spec = await fetchApiSpec(slug);
     if (spec) {
-      foundSpecs.push({ slug, spec });
+      foundSpecs.push(spec);
       console.log(' OK');
     } else {
       notFound.push(slug);
@@ -104,20 +95,22 @@ async function main() {
   console.log(`\nResults: ${foundSpecs.length} found, ${notFound.length} not found`);
 
   // Save individual specs (normalize line endings to LF)
-  for (const { slug, spec } of foundSpecs) {
+  for (const spec of foundSpecs) {
+    const { slug } = spec;
     const filename = `${slug}.yaml`;
-    const normalized = spec.yml_content.replace(/\r\n/g, '\n');
-    writeFileSync(join(OUTPUT_DIR, filename), normalized);
+    // Materializes validated OpenAPI YAML from the trusted Deere API slug catalog.
+    // codeql[js/http-to-file-access]
+    writeFileSync(join(OUTPUT_DIR, filename), spec.ymlContent);
   }
 
   // Create summary file
   const summary = {
     fetchedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
-    specs: foundSpecs.map(({ slug, spec }) => ({
+    specs: foundSpecs.map((spec) => ({
       id: spec.id,
       name: spec.name,
-      file: `${slug}.yaml`,
+      file: `${spec.slug}.yaml`,
     })),
     notFound,
   };
