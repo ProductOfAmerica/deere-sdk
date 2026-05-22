@@ -13,6 +13,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
+import { stripDocumentationMarkup } from './lib/spec-utils.js';
 
 // ============================================================================
 // Configuration
@@ -134,7 +135,7 @@ function toPascalCase(str: string): string {
 
 // Input is trusted JD spec param names; output is a TS identifier, not HTML. Stripping tags is safe here.
 function toSafeIdentifier(str: string): string {
-  const stripped = str.replace(/<[^>]*>/g, '');
+  const stripped = stripDocumentationMarkup(str);
   return stripped
     .split(/[.\-\s]/)
     .map((part, i) => (i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)))
@@ -144,7 +145,7 @@ function toSafeIdentifier(str: string): string {
 
 // Output flows to emitted TS source (type unions, URLSearchParams keys), not HTML.
 function cleanParamName(str: string): string {
-  return str.replace(/<[^>]*>/g, '');
+  return stripDocumentationMarkup(str);
 }
 
 function toCamelCase(str: string): string {

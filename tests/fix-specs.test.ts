@@ -1,6 +1,10 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { isDocumentationKey, sanitizePropertyKey } from '../scripts/lib/spec-utils.js';
+import {
+  isDocumentationKey,
+  sanitizePropertyKey,
+  stripDocumentationMarkup,
+} from '../scripts/lib/spec-utils.js';
 
 describe('fix-specs utilities', () => {
   describe('isDocumentationKey', () => {
@@ -65,6 +69,32 @@ describe('fix-specs utilities', () => {
 
     it('strips standalone tags after sup removal', () => {
       assert.strictEqual(sanitizePropertyKey('field<b>bold</b>'), 'fieldbold');
+    });
+  });
+
+  describe('stripDocumentationMarkup', () => {
+    it('strips tags without reintroducing nested script markup', () => {
+      const stripped = stripDocumentationMarkup('<scrip<script>alert(1)</script>t>safe</script>');
+
+      assert.strictEqual(stripped.includes('<script'), false);
+    });
+
+    it('can drop documentation-only tag contents', () => {
+      assert.strictEqual(
+        stripDocumentationMarkup('createdTime<sup><a href="#foo">2</a></sup>', {
+          dropTagContent: ['sup'],
+        }),
+        'createdTime'
+      );
+    });
+
+    it('can replace line-break style tags', () => {
+      assert.strictEqual(
+        stripDocumentationMarkup('first<br/>second</p>third', {
+          replaceTags: { br: '\n', p: '\n' },
+        }),
+        'first\nsecond\nthird'
+      );
     });
   });
 });
