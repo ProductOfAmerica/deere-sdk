@@ -581,7 +581,7 @@ describe('DeereClient', () => {
 
       assert.deepStrictEqual(result, { data: 'test' });
       // Should use default sandbox environment
-      assert(calls[0].url.includes('sandboxapi.deere.com'));
+      assert.strictEqual(new URL(calls[0].url).hostname, 'sandboxapi.deere.com');
     });
 
     it('works without defaultHeaders config', async () => {

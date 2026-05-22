@@ -15,7 +15,11 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './embed-contracts.js';
-import { isDocumentationKey, sanitizePropertyKey } from './lib/spec-utils.js';
+import {
+  isDocumentationKey,
+  sanitizePropertyKey,
+  stripDocumentationMarkup,
+} from './lib/spec-utils.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'fixed');
@@ -209,10 +213,10 @@ function fixTypes(obj: unknown): unknown {
 
   if (typeof obj === 'string') {
     // Normalizes JD spec descriptions for YAML output (parsed by openapi-typescript). Not HTML-rendered.
-    return obj
-      .replace(/<br\s*\/?>|<\/?p>/gi, '\n') // Turn <br> into newlines for better readability
-      .replace(/<sup>.*?<\/sup>|<a[^>]*>.*?<\/a>|<span[^>]*>.*?<\/span>/gi, '') // Drop superscripts/links/spans entirely
-      .replace(/<[^>]*>/g, '') // Remove any remaining tags
+    return stripDocumentationMarkup(obj, {
+      dropTagContent: ['sup', 'a', 'span'],
+      replaceTags: { br: '\n', p: '\n' },
+    })
       .replace(/\s+/g, ' ') // Normalize spaces
       .trim();
   }

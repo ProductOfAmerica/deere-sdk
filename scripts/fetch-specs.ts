@@ -59,6 +59,11 @@ interface ApiResponse {
   yml_content: string;
 }
 
+interface FetchedSpec {
+  slug: string;
+  spec: ApiResponse;
+}
+
 async function fetchApiSpec(slug: string): Promise<ApiResponse | null> {
   const url = `${BASE_URL}/${slug}`;
   try {
@@ -81,14 +86,14 @@ async function main() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const foundSpecs: ApiResponse[] = [];
+  const foundSpecs: FetchedSpec[] = [];
   const notFound: string[] = [];
 
   for (const slug of API_SLUGS) {
     process.stdout.write(`Fetching ${slug}...`);
     const spec = await fetchApiSpec(slug);
     if (spec) {
-      foundSpecs.push(spec);
+      foundSpecs.push({ slug, spec });
       console.log(' OK');
     } else {
       notFound.push(slug);
@@ -99,8 +104,8 @@ async function main() {
   console.log(`\nResults: ${foundSpecs.length} found, ${notFound.length} not found`);
 
   // Save individual specs (normalize line endings to LF)
-  for (const spec of foundSpecs) {
-    const filename = `${spec.name}.yaml`;
+  for (const { slug, spec } of foundSpecs) {
+    const filename = `${slug}.yaml`;
     const normalized = spec.yml_content.replace(/\r\n/g, '\n');
     writeFileSync(join(OUTPUT_DIR, filename), normalized);
   }
@@ -109,10 +114,10 @@ async function main() {
   const summary = {
     fetchedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
-    specs: foundSpecs.map((s) => ({
-      id: s.id,
-      name: s.name,
-      file: `${s.name}.yaml`,
+    specs: foundSpecs.map(({ slug, spec }) => ({
+      id: spec.id,
+      name: spec.name,
+      file: `${slug}.yaml`,
     })),
     notFound,
   };
