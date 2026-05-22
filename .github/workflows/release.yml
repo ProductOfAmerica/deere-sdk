@@ -106,4 +106,3 @@ jobs:
       contents: read
       id-token: write
     uses: ./.github/workflows/publish.yml
-    secrets: inherit
