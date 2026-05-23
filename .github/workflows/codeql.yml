@@ -52,6 +52,18 @@ jobs:
           config-file: ./.github/codeql/codeql-config.yml
 
       - name: Perform CodeQL Analysis
+        id: analyze
         uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
         with:
           category: "/language:javascript-typescript"
+          output: sarif-results
+          wait-for-processing: true
+
+      - name: Dismiss SARIF-suppressed alerts
+        if: github.ref == 'refs/heads/main'
+        uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # v2.0.2
+        with:
+          sarif-id: ${{ steps.analyze.outputs.sarif-id }}
+          sarif-file: sarif-results/javascript-typescript.sarif
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
