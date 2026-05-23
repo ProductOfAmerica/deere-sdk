@@ -64,6 +64,6 @@ jobs:
         uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # v2.0.2
         with:
           sarif-id: ${{ steps.analyze.outputs.sarif-id }}
-          sarif-file: sarif-results/javascript-typescript.sarif
+          sarif-file: sarif-results
         env:
           GITHUB_TOKEN: ${{ github.token }}
