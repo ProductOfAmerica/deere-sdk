@@ -22,7 +22,7 @@ export interface paths {
           lastKnown?: boolean;
           /** @description Retrieves results that occurred after a specified date.If start date is not passedin the API request then start Date is considered as end date minus 1 day. The format is in the Standard. */
           startDate?: string;
-          /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the Standard.Also startDate and endDate time interval range should be <=1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be <=2010-10-31T23:59:59.000Z */
+          /** @description Retrieves results that occurred before a specified date. If end date is not passed in the API requestthen end Date is considered as start date plus 1 day. The format is in the Standard.Also startDate and endDate time interval range should be =1 month.Example if startDate=2020-10-01T00:00:00.000Z endDate should be =2010-10-31T23:59:59.000Z */
           endDate?: string;
         };
         header?: never;

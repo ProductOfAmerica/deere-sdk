@@ -163,7 +163,7 @@ paths:
                       $ref: "#/components/schemas/FieldResponse"
               examples:
                 No Header:
-                  description: "20O OK Content-Type: application/vnd.deere.axiom.v3+jsonx-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+                  description: "20O OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
                   value:
                     links:
                       - rel: "self"
