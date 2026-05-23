@@ -49,6 +49,7 @@ jobs:
         with:
           languages: javascript-typescript
           queries: security-extended
+          packs: codeql/javascript-queries:AlertSuppression.ql
           config-file: ./.github/codeql/codeql-config.yml
 
       - name: Perform CodeQL Analysis
