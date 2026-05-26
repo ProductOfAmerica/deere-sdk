@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './embed-contracts.js';
+import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
   sanitizePropertyKey,
@@ -629,12 +630,13 @@ function fixSpec(
 ): string {
   console.log(`\nProcessing: ${filename}`);
 
+  const redactedContent = redactSpecContent(content);
   let spec: Record<string, unknown>;
   try {
-    spec = yaml.parse(content) as Record<string, unknown>;
+    spec = yaml.parse(redactedContent) as Record<string, unknown>;
   } catch (e) {
     console.log(`  Failed to parse YAML: ${e}`);
-    return content;
+    return redactedContent;
   }
 
   // Fix incorrect swagger version (notifications.yaml has "swagger: '3.0.0'" instead of "openapi: '3.0.0'")

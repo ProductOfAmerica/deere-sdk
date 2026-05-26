@@ -3,9 +3,6 @@ info:
   description: "Endpoint provides engine Hours for Machines"
   version: "1.0.0"
   title: "Axiom - /engineHours API"
-  contact:
-    name: "ISG Data Platform Equipment Data Engine"
-    email: "ISGDataPlatformEquipmentDataEngine@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:

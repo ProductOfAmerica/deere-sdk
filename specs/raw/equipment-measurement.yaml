@@ -3,9 +3,6 @@ info:
   title: Equipment Measurements
   description: This resource allows the client to provide metadata for a third-party managed piece of equipment in Operations Center.
   version: '1.0'
-  contact:
-    email: ISG_APIIntegrations@JohnDeere.com
-    name: API Integrations Team
   x-deere-proxy-info:
     api-name: inbound-measurements
     license: "INBOUND_MEASUREMENTS"

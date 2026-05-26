@@ -32,9 +32,6 @@ info:
     11. Clients SHALL ignore geometries they cannot interpret/process/display or use request parameters to exclude those.
 
   version: 1.0.0
-  contact:
-    name: 'Oleg Rostanin'
-    email: 'RostaninOleg@JohnDeere.com'
   title: Axiom Public Flags API
 
 servers:

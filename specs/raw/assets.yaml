@@ -3,9 +3,6 @@ info:
   title: Contributed Assets API
   description: |
     A collection of APIs to contribute Assets and Asset data to MyJohnDeere. Learn more at [developer.deere.com](https://developer.deere.com)
-  contact:
-    name: Peder Kopperud & Patrick O'Connell
-    email: OConnellPatrickD@JohnDeere.com
   version: 1.0.0
 servers:
   - url: https://{environment}.deere.com/platform

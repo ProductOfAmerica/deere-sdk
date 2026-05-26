@@ -4,9 +4,6 @@ info:
   title: 'Notification API'
   description: |
     APIs for creating, monitoring the creation of, as well as the viewing of Notifications
-  contact:
-    name: Notifications Team
-    email: ISGDataPlatformNotifications@JohnDeere.com
 paths:
   /notifications/{sourceEvent}:
     get:

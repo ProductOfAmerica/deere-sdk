@@ -2,9 +2,6 @@ openapi: "3.0.1"
 info:
   title: "Machine locations history API"
   description: "Endpoints related to machine locations and location history without considering machine data"
-  contact:
-    name: "Team Concept"
-    email: "JDIITISGJDLinkTeamConcept@JohnDeere.com"
   version: "1.0.0"
 servers:
   - url: "https://{environment}.deere.com/platform"

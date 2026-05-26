@@ -3,9 +3,6 @@ info:
   title: "Inputs API"
   description: "Provides a reference list for crop varieties"
   version: "3.0"
-  contact:
-    name: "Andrew Senner & Monte Miller"
-    email: "ISG_THIRST_MUTILATOR@JohnDeere.com"
   license:
     name: "INPUTS"
 tags:

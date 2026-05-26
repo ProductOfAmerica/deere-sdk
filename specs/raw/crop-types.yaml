@@ -3,10 +3,6 @@ info:
   title: Crop Types API
   description: Provides all crop types available in the system
   version: '3.0'
-  contact:
-    name: ISG Ops Vertex - Brian Ashmore - Jeff Garlich
-    email: ISG_Vertex@JohnDeere.com
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:

@@ -1,8 +1,5 @@
 openapi: "3.0.2"
 info:
-  contact:
-    name: "ISG_Dreamland"
-    email: "ISG_Dreamland@JohnDeere.com"
   description: "Endpoints for Viewing machine information and their details."
   title: "Alerts endpoints"
   version: "1.0.0"

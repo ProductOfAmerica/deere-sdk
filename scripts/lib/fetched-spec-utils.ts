@@ -1,4 +1,5 @@
 import * as yaml from 'yaml';
+import { redactSpecContent } from './spec-redactor.js';
 
 export interface ValidatedFetchedSpec {
   slug: string;
@@ -63,6 +64,6 @@ export function validateFetchedSpec(
     slug,
     id,
     name,
-    ymlContent,
+    ymlContent: redactSpecContent(ymlContent),
   };
 }

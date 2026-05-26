@@ -2,9 +2,6 @@ openapi: "3.0.0"
 info:
   title: "Boundaries API"
   description: "Provides boundary management within a field context. Management capabilities include creating, retrieving, editing, and archiving boundaries."
-  contact:
-    name: "ISG-Break-Point"
-    email: "ISG-Break-Point@JohnDeere.com"
   version: "3.0"
 servers:
   - url: "https://{environment}.deere.com/platform"

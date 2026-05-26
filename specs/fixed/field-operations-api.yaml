@@ -3,8 +3,6 @@ info:
   title: "Field Operations API"
   description: "Provides field operation retrieval within an organizational context"
   version: "3.0"
-  contact:
-    email: "ISG_Red_October@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:

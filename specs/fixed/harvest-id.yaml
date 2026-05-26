@@ -3,9 +3,6 @@ info:
   title: "HID Cotton Modules API"
   description: "Provides access to HID Cotton Module event data"
   version: "3.0"
-  contact:
-    name: "Chex Mix - Matt Nivarel"
-    email: "ISGOpsCenterChexMix@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:

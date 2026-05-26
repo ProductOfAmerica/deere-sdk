@@ -3,9 +3,6 @@ info:
   title: Organizations
   description: This endpoint is used to retrieve organizations for which the requesting user has permissions.
   version: "0.0.1"
-  contact:
-    name: SOUP Team
-    email: isg_souperfriends@johndeere.com
 servers:
   - url: https://api.deere.com/platform
     description: MyJohnDeere API

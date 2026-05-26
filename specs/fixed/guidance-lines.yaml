@@ -3,9 +3,6 @@ info:
   title: "Guidance Lines API"
   description: "Provides guidance line management within a field context. Management capabilities include creating, retrieving, editing, and archiving lines."
   version: "3.0"
-  contact:
-    name: "ISG-Break-Point"
-    email: "ISG-BREAK-POINT@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:

@@ -3,10 +3,6 @@ info:
   description: Endpoint provides device state report for Machines
   version: 1.0.0
   title: Axiom - /deviceStateReports API
-  contact:
-    name: ISG Data Platform Equipment Data Engine
-    email: ISGDataPlatformEquipmentDataEngine@JohnDeere.com
-
 servers:
   - url: https://{environment}.deere.com/platform
     variables:

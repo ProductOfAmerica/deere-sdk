@@ -2,9 +2,6 @@ openapi: "3.0.1"
 info:
   title: "Contributed Map Layers API"
   description: "A collection of APIs used for interacting with Contributed Map Layers in MJD."
-  contact:
-    name: "Patrick O'Connell"
-    email: "O'ConnellPatrickD@JohnDeere.com"
   version: "0.0.1"
 servers:
   - url: "https://{environment}.deere.com/platform"

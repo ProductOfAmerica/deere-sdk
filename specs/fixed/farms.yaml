@@ -2,9 +2,6 @@ openapi: "3.0.0"
 info:
   title: "Farms API"
   version: "3.0"
-  contact:
-    name: "Land"
-    email: "ISGLand@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:
