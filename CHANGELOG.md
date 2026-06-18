@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-06-18
+
+### Fixed
+- Repaired the daily `sync-api` workflow, which had failed at the build step since
+  2026-06-07, blocking all releases. John Deere dropped the array `items.$ref` from
+  two equipment responses, degrading the generated return types to `unknown`, which
+  the hand-written `src/safe/` facades could not accept. Facade return types now
+  derive from the raw API methods (`ReturnType<...>`) instead of hard-coded schema
+  keys, so upstream spec drift can no longer break `tsc`.
+- Generated equipment schemas (`equipment`, `equipmentForList`, and others) no longer
+  collapse to `never`: `fix-specs` strips the `@type` discriminators whose injected
+  literal conflicted with each schema's own `@type` enum.
+
+### Changed
+- **Collection return types now use the item type instead of the response wrapper.**
+  `list()` / `listAll()` for clients, connection-management, farms, fields,
+  machine-engine-hours, machine-hours-of-operation, partnerships, and products now
+  return the element type (for example `Variety`) rather than the collection envelope
+  (for example `VarietyCollection`), matching the runtime shape. Consumers that
+  referenced the old wrapper element type will need to update.
+- Collection endpoints whose item type cannot be resolved now return
+  `PaginatedResponse<unknown>` instead of a bare `unknown`, preserving the pagination
+  envelope.
+
 ## [2.1.11] - 2026-05-23
 
 ### Changed
