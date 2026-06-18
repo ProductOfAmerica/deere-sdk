@@ -125,7 +125,7 @@ export function sanitizePropertyKey(key: string): string {
  * John Deere base schemas (`resource`, `resource-embed`, `resourcewithoutLinks`,
  * `organization-embed`) carry a `@type` discriminator. openapi-typescript turns
  * that into a literal `"@type": "<childSchemaName>"` injected into every child
- * that `allOf`-extends the base — which then conflicts with the child's own
+ * that `allOf`-extends the base, which then conflicts with the child's own
  * `@type` enum (`"Equipment" | "Machine" | ...`). The intersection
  * `"equipment" & ("Equipment" | ...)` reduces to `never`, collapsing the whole
  * generated schema. The faithful type is the enum, so we drop the discriminator

@@ -593,7 +593,7 @@ function generateApiClass(api: GeneratedApi): string {
   const methods = api.operations.map((op) => generateMethod(op, usedMethodNames)).join('\n\n');
 
   // Determine which imports are actually used. PaginatedResponse is needed by
-  // EVERY collection GET — including the PaginatedResponse<unknown> fallback for
+  // EVERY collection GET, including the PaginatedResponse<unknown> fallback for
   // ones whose item schema didn't resolve, which would otherwise reference an
   // unimported type and fail to compile.
   const needsPaginatedResponse = usesPaginatedResponse(api.operations);

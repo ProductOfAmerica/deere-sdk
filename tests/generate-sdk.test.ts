@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   computeReturnType,
+  type ReturnTypeOp,
   resolveContentSchemaRef,
   type SchemaLike,
   unwrapCollectionItemRef,
@@ -149,6 +150,32 @@ describe('generate-sdk helpers', () => {
         ]),
         false
       );
+    });
+  });
+
+  describe('computeReturnType + usesPaginatedResponse agreement', () => {
+    // The import fix hinges on this invariant: any op whose return type is a
+    // PaginatedResponse<...> must be counted by usesPaginatedResponse, or the
+    // generated class references PaginatedResponse without importing it. Pin it
+    // so a future narrowing of one helper without the other fails a unit test
+    // instead of only a full generate+typecheck.
+    it('every op that emits a PaginatedResponse<...> is counted by usesPaginatedResponse', () => {
+      const ops: ReturnTypeOp[] = [
+        { method: 'get', isCollection: true, responseSchemaRef: 'Variety' },
+        { method: 'get', isCollection: true },
+        { method: 'get', isCollection: false, responseSchemaRef: 'X' },
+        { method: 'post', isCollection: false },
+        { method: 'delete', isCollection: false },
+        { method: 'get', isCollection: false },
+      ];
+      for (const op of ops) {
+        if (computeReturnType(op).startsWith('PaginatedResponse')) {
+          assert.ok(
+            usesPaginatedResponse([op]),
+            `${JSON.stringify(op)} emits PaginatedResponse but usesPaginatedResponse is false (would emit an unimported type)`
+          );
+        }
+      }
     });
   });
 });

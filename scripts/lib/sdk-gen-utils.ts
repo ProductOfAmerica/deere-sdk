@@ -6,7 +6,7 @@
  * on import. See tests/generate-sdk.test.ts.
  */
 
-/** Minimal structural shape of an OpenAPI schema — enough for wrapper detection. */
+/** Minimal structural shape of an OpenAPI schema, enough for wrapper detection. */
 export interface SchemaLike {
   $ref?: string;
   items?: SchemaLike;
@@ -54,9 +54,9 @@ function findValuesItemRef(
 }
 
 /**
- * If `schemaName` names a collection wrapper — a schema with a `values` array
+ * If `schemaName` names a collection wrapper (a schema with a `values` array
  * whose items have a `$ref`, directly or through `allOf` / a referenced base
- * (e.g. `CollectionBase`) — return the item schema name. Otherwise undefined.
+ * like `CollectionBase`), return the item schema name. Otherwise undefined.
  *
  * John Deere models most list responses as a direct `$ref` to a named wrapper
  * (e.g. `VarietyCollection = { values: Variety[] }`). The generated SDK needs
@@ -138,7 +138,7 @@ export function computeReturnType(op: ReturnTypeOp): string {
 
 /**
  * Whether any operation needs the `PaginatedResponse` import. True for every
- * collection GET — including the `PaginatedResponse<unknown>` fallback above,
+ * collection GET, including the `PaginatedResponse<unknown>` fallback above,
  * which would otherwise reference an unimported type and fail to compile.
  */
 export function usesPaginatedResponse(ops: ReturnTypeOp[]): boolean {
