@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
+  collectionItemType,
   computeReturnType,
   type ReturnTypeOp,
   resolveContentSchemaRef,
@@ -26,6 +27,8 @@ const schemas: Record<string, SchemaLike> = {
     ],
   },
   Variety: { properties: { name: { type: 'string' } as SchemaLike } },
+  // A values-shaped wrapper whose items carry NO $ref (inline-typed items).
+  InlineWrap: { properties: { values: { items: { type: 'object' } as SchemaLike } } },
 };
 
 describe('generate-sdk helpers', () => {
@@ -92,6 +95,13 @@ describe('generate-sdk helpers', () => {
       );
     });
 
+    it('(e) COLLECTION + values-shaped wrapper whose items have no $ref -> undefined (degrades to PaginatedResponse<unknown>, not a double envelope)', () => {
+      assert.strictEqual(
+        resolveContentSchemaRef({ $ref: '#/components/schemas/InlineWrap' }, schemas, true),
+        undefined
+      );
+    });
+
     it('returns undefined when the schema names nothing', () => {
       assert.strictEqual(resolveContentSchemaRef(undefined, schemas, true), undefined);
       assert.strictEqual(
@@ -150,6 +160,19 @@ describe('generate-sdk helpers', () => {
         ]),
         false
       );
+    });
+  });
+
+  describe('collectionItemType', () => {
+    it('is the resolved item type when responseSchemaRef is set', () => {
+      assert.strictEqual(
+        collectionItemType({ method: 'get', isCollection: true, responseSchemaRef: 'Variety' }),
+        "components['schemas']['Variety']"
+      );
+    });
+
+    it('is unknown when there is no responseSchemaRef', () => {
+      assert.strictEqual(collectionItemType({ method: 'get', isCollection: true }), 'unknown');
     });
   });
 

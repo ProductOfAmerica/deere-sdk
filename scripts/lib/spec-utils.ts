@@ -4,6 +4,15 @@
  */
 
 /**
+ * Last path segment of a JSON `$ref`.
+ * e.g. "#/components/schemas/Foo" -> "Foo"
+ */
+export function refName(ref: string): string {
+  const parts = ref.split('/');
+  return parts[parts.length - 1];
+}
+
+/**
  * Checks if a property key is entirely an HTML documentation marker.
  * e.g., "<b>Location</b>" or "<span>Section</span>"
  */

@@ -6,6 +6,8 @@
  * on import. See tests/generate-sdk.test.ts.
  */
 
+import { refName } from './spec-utils.js';
+
 /** Minimal structural shape of an OpenAPI schema, enough for wrapper detection. */
 export interface SchemaLike {
   $ref?: string;
@@ -14,25 +16,32 @@ export interface SchemaLike {
   allOf?: SchemaLike[];
 }
 
-function refName(ref: string): string {
-  const parts = ref.split('/');
-  return parts[parts.length - 1];
+/** What a schema is, for collection-unwrap purposes. */
+interface CollectionShape {
+  /** True if a `values` array property was found (directly or through allOf). */
+  isWrapper: boolean;
+  /** The item schema name, if `values.items` carried a resolvable `$ref`. */
+  itemRef?: string;
 }
 
 /**
  * Walk a schema (and any `allOf` members, including `$ref`'d bases like
- * `CollectionBase`) looking for a `values` array whose items carry a `$ref`.
- * Returns the item schema name, or undefined. Cycle-guarded via `seen`.
+ * `CollectionBase`) for a `values` property. Reports whether the schema is a
+ * collection wrapper and, if so, the item schema name when `values.items`
+ * carries a `$ref`. Cycle-guarded via `seen`.
  */
-function findValuesItemRef(
+function findCollectionShape(
   schema: SchemaLike | undefined,
   schemas: Record<string, SchemaLike>,
   seen: Set<string>
-): string | undefined {
-  if (!schema || typeof schema !== 'object') return undefined;
+): CollectionShape {
+  if (!schema || typeof schema !== 'object') return { isWrapper: false };
 
-  const itemRef = schema.properties?.values?.items?.$ref;
-  if (itemRef?.includes('/schemas/')) return refName(itemRef);
+  const values = schema.properties?.values;
+  if (values) {
+    const ref = values.items?.$ref;
+    return { isWrapper: true, itemRef: ref?.includes('/schemas/') ? refName(ref) : undefined };
+  }
 
   if (Array.isArray(schema.allOf)) {
     for (const member of schema.allOf) {
@@ -40,17 +49,17 @@ function findValuesItemRef(
         const name = refName(member.$ref);
         if (!seen.has(name)) {
           seen.add(name);
-          const found = findValuesItemRef(schemas[name], schemas, seen);
-          if (found) return found;
+          const shape = findCollectionShape(schemas[name], schemas, seen);
+          if (shape.isWrapper) return shape;
         }
       } else {
-        const found = findValuesItemRef(member, schemas, seen);
-        if (found) return found;
+        const shape = findCollectionShape(member, schemas, seen);
+        if (shape.isWrapper) return shape;
       }
     }
   }
 
-  return undefined;
+  return { isWrapper: false };
 }
 
 /**
@@ -70,20 +79,23 @@ export function unwrapCollectionItemRef(
   schemas: Record<string, SchemaLike> | undefined
 ): string | undefined {
   if (!schemas) return undefined;
-  return findValuesItemRef(schemas[schemaName], schemas, new Set([schemaName]));
+  return findCollectionShape(schemas[schemaName], schemas, new Set([schemaName])).itemRef;
 }
 
 /**
  * Resolve the schema name a response/request content `schema` refers to, with
  * collection-wrapper unwrapping. Two branches, kept deliberately distinct:
  *
- * 1. Direct `$ref` to a named schema → that name, EXCEPT when `isCollection`
- *    and the named schema is a collection wrapper, in which case the unwrapped
- *    item name (gating prevents single-resource endpoints whose `$ref` is a
- *    values-shaped wrapper, e.g. `GET /partnerships/{token}`, from unwrapping).
- * 2. Inline `values.items.$ref` → the item name, UNCONDITIONALLY (single-
- *    resource endpoints like `GET /equipment/{id}` rely on this; it must NOT be
- *    gated on `isCollection`).
+ * 1. Direct `$ref` to a named schema: that name, EXCEPT when `isCollection` and
+ *    the named schema is a collection wrapper. A wrapper with a resolvable item
+ *    `$ref` unwraps to the item; a values-shaped wrapper whose item `$ref` is
+ *    NOT resolvable (inline items, or no items) returns undefined so the caller
+ *    degrades to `PaginatedResponse<unknown>` instead of double-nesting the
+ *    envelope. The collection gate keeps single-resource endpoints whose `$ref`
+ *    is a values-shaped wrapper (e.g. `GET /partnerships/{token}`) untouched.
+ * 2. Inline `values.items.$ref`: the item name, UNCONDITIONALLY (single-resource
+ *    endpoints like `GET /equipment/{id}` rely on this; it must NOT be gated on
+ *    `isCollection`).
  *
  * Returns undefined when the schema names nothing in `components/schemas`.
  */
@@ -96,9 +108,10 @@ export function resolveContentSchemaRef(
 
   if (schema.$ref?.includes('/schemas/')) {
     const name = refName(schema.$ref);
-    if (isCollection) {
-      const item = unwrapCollectionItemRef(name, schemas);
-      if (item) return item;
+    if (isCollection && schemas) {
+      const shape = findCollectionShape(schemas[name], schemas, new Set([name]));
+      if (shape.itemRef) return shape.itemRef;
+      if (shape.isWrapper) return undefined;
     }
     return name;
   }
@@ -117,6 +130,16 @@ export interface ReturnTypeOp {
 }
 
 /**
+ * The element type for a collection GET: the resolved item schema, or `unknown`
+ * when no item schema could be resolved. Shared by `computeReturnType` (for the
+ * `PaginatedResponse<T>` of the single-page method) and the `listAll` generator
+ * (`T[]` / `getAll<T>`), so the two cannot drift.
+ */
+export function collectionItemType(op: ReturnTypeOp): string {
+  return op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown';
+}
+
+/**
  * The inner type of a generated method's `Promise<...>` return.
  *
  * A collection GET with no resolvable item schema degrades to
@@ -126,12 +149,8 @@ export interface ReturnTypeOp {
  */
 export function computeReturnType(op: ReturnTypeOp): string {
   if (op.method === 'delete') return 'void';
-  if (op.responseSchemaRef) {
-    return op.isCollection && op.method === 'get'
-      ? `PaginatedResponse<components['schemas']['${op.responseSchemaRef}']>`
-      : `components['schemas']['${op.responseSchemaRef}']`;
-  }
-  if (op.isCollection && op.method === 'get') return 'PaginatedResponse<unknown>';
+  if (op.isCollection && op.method === 'get') return `PaginatedResponse<${collectionItemType(op)}>`;
+  if (op.responseSchemaRef) return `components['schemas']['${op.responseSchemaRef}']`;
   if (op.method === 'post' || op.method === 'put' || op.method === 'patch') return 'void';
   return 'unknown';
 }

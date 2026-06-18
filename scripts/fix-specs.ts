@@ -18,6 +18,7 @@ import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './e
 import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
+  refName,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -100,7 +101,7 @@ function getDefinedSchemas(spec: Record<string, unknown>): Set<string> {
 }
 
 function createStubSchema(refPath: string): Record<string, unknown> {
-  const name = refPath.split('/').pop() || 'Unknown';
+  const name = refName(refPath) || 'Unknown';
 
   if (name.endsWith('Collection') || name.endsWith('List')) {
     return {

@@ -14,11 +14,12 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 import {
+  collectionItemType,
   computeReturnType,
   resolveContentSchemaRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
-import { stripDocumentationMarkup } from './lib/spec-utils.js';
+import { refName, stripDocumentationMarkup } from './lib/spec-utils.js';
 
 // ============================================================================
 // Configuration
@@ -201,11 +202,6 @@ function isCollectionEndpoint(path: string, method: string): boolean {
   return !lastSegment.startsWith('{');
 }
 
-function resolveRef(ref: string): string {
-  const parts = ref.split('/');
-  return parts[parts.length - 1];
-}
-
 function inferMethodName(op: ParsedOperation): string {
   const id = (op.operationId || '').toLowerCase();
 
@@ -304,7 +300,7 @@ function resolveResponseSchema(
 ): string | undefined {
   // If it's a $ref, resolve it from components.responses
   if ('$ref' in response && response.$ref) {
-    const responseName = resolveRef(response.$ref);
+    const responseName = refName(response.$ref);
     const resolved = spec.components?.responses?.[responseName];
     if (!resolved) return undefined;
     return extractSchemaFromContent(resolved.content, spec.components?.schemas, isCollection);
@@ -328,7 +324,7 @@ function resolveRequestBodySchema(
 ): string | undefined {
   // If it's a $ref, resolve it from components.requestBodies
   if ('$ref' in requestBody && requestBody.$ref) {
-    const name = resolveRef(requestBody.$ref);
+    const name = refName(requestBody.$ref);
     const resolved = spec.components?.requestBodies?.[name];
     if (!resolved) return undefined;
     return extractSchemaFromContent(resolved.content, spec.components?.schemas, false);
@@ -394,8 +390,8 @@ function parseSpec(specPath: string): GeneratedApi | null {
 
       for (const param of allParams) {
         if ('$ref' in param && param.$ref) {
-          const refName = resolveRef(param.$ref);
-          const resolved = spec.components?.parameters?.[refName];
+          const paramName = refName(param.$ref);
+          const resolved = spec.components?.parameters?.[paramName];
           if (resolved && resolved.in === 'query') {
             queryParams.push({
               name: resolved.name,
@@ -562,21 +558,18 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
 
   let listAllMethod = '';
   if (op.isCollection && op.method === 'get' && methodName === 'list') {
-    const listAllReturnType = op.responseSchemaRef
-      ? `components['schemas']['${op.responseSchemaRef}'][]`
-      : 'unknown[]';
+    const itemType = collectionItemType(op);
 
     const getAllLines = [...lines];
-    getAllLines[getAllLines.length - 1] = `    return this.client.getAll<${
-      op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown'
-    }>(this.spec, path, options);`;
+    getAllLines[getAllLines.length - 1] =
+      `    return this.client.getAll<${itemType}>(this.spec, path, options);`;
 
     listAllMethod = `
   /**
    * Get all items (follows pagination automatically)
    * @generated from ${op.method.toUpperCase()} ${op.path}
    */
-  async listAll(${params.join(', ')}): Promise<${listAllReturnType}> {
+  async listAll(${params.join(', ')}): Promise<${itemType}[]> {
 ${getAllLines.join('\n')}
   }`;
   }
