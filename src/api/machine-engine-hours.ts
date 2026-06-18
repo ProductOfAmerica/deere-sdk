@@ -30,14 +30,14 @@ export class MachineEngineHoursApi {
     principalId: string,
     params?: { startDate?: string; endDate?: string; lastKnown?: boolean },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['EngineHours_Response']>> {
+  ): Promise<PaginatedResponse<components['schemas']['EngineHours']>> {
     const query = new URLSearchParams();
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
     const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['EngineHours_Response']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['EngineHours']>>(
       this.spec,
       path,
       options
@@ -51,18 +51,14 @@ export class MachineEngineHoursApi {
     principalId: string,
     params?: { startDate?: string; endDate?: string; lastKnown?: boolean },
     options?: RequestOptions
-  ): Promise<components['schemas']['EngineHours_Response'][]> {
+  ): Promise<components['schemas']['EngineHours'][]> {
     const query = new URLSearchParams();
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
     const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['EngineHours_Response']>(
-      this.spec,
-      path,
-      options
-    );
+    return this.client.getAll<components['schemas']['EngineHours']>(this.spec, path, options);
   }
 }
 

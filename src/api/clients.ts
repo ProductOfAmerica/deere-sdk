@@ -26,13 +26,13 @@ export class ClientsApi {
     orgId: string,
     params?: { embed?: string; recordFilter?: string },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Clients']>> {
+  ): Promise<PaginatedResponse<components['schemas']['Client']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/clients${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['Client']>>(
       this.spec,
       path,
       options
@@ -46,13 +46,13 @@ export class ClientsApi {
     orgId: string,
     params?: { embed?: string; recordFilter?: string },
     options?: RequestOptions
-  ): Promise<components['schemas']['Clients'][]> {
+  ): Promise<components['schemas']['Client'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/clients${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['Clients']>(this.spec, path, options);
+    return this.client.getAll<components['schemas']['Client']>(this.spec, path, options);
   }
 
   /**

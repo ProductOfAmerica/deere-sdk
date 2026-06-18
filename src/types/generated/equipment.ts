@@ -421,9 +421,7 @@ export interface components {
      *       }
      *     }
      */
-    'equipment-isg-type': {
-      '@type': 'equipment-isg-type';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-isg-type': components['schemas']['resource'] & {
       /**
        * @description The name of the ISG equipment type.
        * @example Tractor
@@ -462,7 +460,7 @@ export interface components {
        * @example false
        */
       deprecated?: boolean;
-    });
+    };
     /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
     RecordMetadata: {
       /**
@@ -620,9 +618,7 @@ export interface components {
      *       }
      *     }
      */
-    'equipment-make': {
-      '@type': 'equipment-make';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-make': components['schemas']['resource'] & {
       /**
        * @description The name of the equipment make.
        * @example JOHN DEERE
@@ -648,7 +644,7 @@ export interface components {
        * @example false
        */
       deprecated?: boolean;
-    });
+    };
     /**
      * EquipmentType
      * @deprecated
@@ -674,9 +670,7 @@ export interface components {
      *       }
      *     }
      */
-    'equipment-type': {
-      '@type': 'equipment-type';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-type': components['schemas']['resource'] & {
       /**
        * @description The name of the equipment type.
        * @example Two-wheel Drive Tractors - 140 Hp And Above
@@ -723,7 +717,7 @@ export interface components {
        * @example false
        */
       deprecated?: boolean;
-    });
+    };
     /**
      * EquipmentType
      * @description Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
@@ -761,16 +755,14 @@ export interface components {
       secondaryColor?: string;
     };
     /** EquipmentIcon */
-    'equipment-icon': {
-      '@type': 'equipment-icon';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-icon': components['schemas']['resource'] & {
       /**
        * @description The name of the equipment icon.
        * @example JOHN DEERE
        */
       name?: string;
       iconStyle?: components['schemas']['icon-style'];
-    });
+    };
     /** EquipmentModel */
     'equipment-model-details': {
       /** @example 8360R */
@@ -871,9 +863,7 @@ export interface components {
      *       }
      *     }
      */
-    'equipment-model': {
-      '@type': 'equipment-model';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-model': components['schemas']['resource'] & {
       /**
        * @description The name of the equipment model.
        * @example 8360R
@@ -903,7 +893,7 @@ export interface components {
       make?: components['schemas']['equipment-make'];
       type?: components['schemas']['equipment-type'];
       isgType?: components['schemas']['equipment-isg-type'];
-    });
+    };
     /**
      * EquipmentModel
      * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
@@ -945,9 +935,7 @@ export interface components {
      *       "certified": false
      *     }
      */
-    'equipment-model-no-embed': {
-      '@type': 'equipment-model-no-embed';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'equipment-model-no-embed': components['schemas']['resource'] & {
       /**
        * @description The name of the equipment model.
        * @example 8360R
@@ -969,7 +957,7 @@ export interface components {
        * @example false
        */
       certified?: boolean;
-    });
+    };
     /**
      * Identifier of Equipment
      * @description Identifier of the Equipment like DE-13, DE-17, ERID...
@@ -1068,9 +1056,7 @@ export interface components {
      * Offsets
      * @description Represents the offsets of a device, including its variable and defined type representation values.
      */
-    offsets: {
-      '@type': 'offsets';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    offsets: components['schemas']['resource-embed'] & {
       /**
        * @description Offsets
        * @example Offsets
@@ -1079,7 +1065,7 @@ export interface components {
       '@type'?: 'Offsets';
       variableRepresentationValues?: components['schemas']['variableRepresentationValue'][];
       definedTypeRepresentationValues?: components['schemas']['definedTypeRepresentationValue'][];
-    });
+    };
     /**
      * DeviceMake
      * @description Represents the make of a device, including its name and unique identifier (ERID).
@@ -1088,9 +1074,7 @@ export interface components {
      *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
      *     }
      */
-    'device-make': {
-      '@type': 'device-make';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    'device-make': components['schemas']['resource-embed'] & {
       /**
        * @description DeviceMake
        * @example DeviceMake
@@ -1107,7 +1091,7 @@ export interface components {
        * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
        */
       ERID?: string;
-    });
+    };
     /**
      * DeviceType
      * @description Represents the type of a device, including its name, common name, and unique identifier (ERID).
@@ -1117,9 +1101,7 @@ export interface components {
      *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
      *     }
      */
-    'device-type': {
-      '@type': 'device-type';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    'device-type': components['schemas']['resource-embed'] & {
       /**
        * @description DeviceType
        * @example DeviceType
@@ -1141,7 +1123,7 @@ export interface components {
        * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
        */
       ERID?: string;
-    });
+    };
     /**
      * DeviceModel
      * @description Represents the model of a device, including its name, unique identifier (ERID), make, and type.
@@ -1159,9 +1141,7 @@ export interface components {
      *       }
      *     }
      */
-    'device-model': {
-      '@type': 'device-model';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    'device-model': components['schemas']['resource-embed'] & {
       /**
        * @description DeviceModel
        * @example DeviceModel
@@ -1180,7 +1160,7 @@ export interface components {
       ERID?: string;
       make?: components['schemas']['device-make'];
       type?: components['schemas']['device-type'];
-    });
+    };
     /**
      * Version
      * @description Represents the version of a device or software, including its name.
@@ -1188,9 +1168,7 @@ export interface components {
      *       "name": "3.16.1171"
      *     }
      */
-    version: {
-      '@type': 'version';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    version: components['schemas']['resource-embed'] & {
       /**
        * @description Version
        * @example Version
@@ -1202,25 +1180,21 @@ export interface components {
        * @example 3.16.1171
        */
       name?: string;
-    });
+    };
     /** InabilityDetail */
-    'inability-detail': {
-      '@type': 'inability-detail';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    'inability-detail': components['schemas']['resource'] & {
       /** @example RC14.8.1 */
       code?: string;
       /** @example REGISTRATION */
       type?: string;
       /** @example SIM registration is required */
       description?: string;
-    });
+    };
     /**
      * Capability
      * @description List of capabilities of the equipment.
      */
-    capability: {
-      '@type': 'capability';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    capability: components['schemas']['resource-embed'] & {
       /**
        * @description Capability
        * @example Capability
@@ -1244,14 +1218,12 @@ export interface components {
         | 'RDC'
         | 'REMOTE_START';
       inabilityDetails?: components['schemas']['inability-detail'][];
-    });
+    };
     /**
      * Equipment
      * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
      */
-    equipmentForList: {
-      '@type': 'equipmentForList';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    equipmentForList: components['schemas']['resource'] & {
       /**
        * @description Equipment | Machine | Implement
        * @example Equipment
@@ -1333,14 +1305,12 @@ export interface components {
        * @example true
        */
       isCsc?: boolean;
-    });
+    };
     /**
      * Equipment
      * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
      */
-    equipment: {
-      '@type': 'equipment';
-    } & (Omit<components['schemas']['resource'], '@type'> & {
+    equipment: components['schemas']['resource'] & {
       /**
        * @description Equipment | Machine | Implement
        * @example Equipment
@@ -1425,7 +1395,7 @@ export interface components {
        * @example true
        */
       isCsc?: boolean;
-    });
+    };
     /** Point */
     point: {
       /** Format: double */
@@ -1599,9 +1569,7 @@ export interface components {
      *       "ERID": "fb537c94-14f1-11ef-871b-1287bcef1111"
      *     }
      */
-    device: {
-      '@type': 'device';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    device: components['schemas']['resource-embed'] & {
       /**
        * @description Device | Display | PositionReceiver | TelematicsGateway
        * @example Device
@@ -1663,11 +1631,9 @@ export interface components {
        * @example 2021-03-10T19:19:46.420Z
        */
       archivedTimestamp?: string;
-    });
+    };
     /** Display */
-    display: {
-      '@type': 'display';
-    } & (Omit<components['schemas']['device'], '@type'> & {
+    display: components['schemas']['device'] & {
       /**
        * @description Display
        * @example Display
@@ -1675,11 +1641,9 @@ export interface components {
        */
       '@type'?: 'Display';
       monitors?: components['schemas']['display-monitors'][];
-    });
+    };
     /** Monitor */
-    'display-monitors': {
-      '@type': 'display-monitors';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    'display-monitors': components['schemas']['resource-embed'] & {
       /**
        * @description Monitor
        * @example Monitor
@@ -1694,11 +1658,9 @@ export interface components {
       resolutionWidth?: number;
       /** @example 600 */
       resolutionHeight?: number;
-    });
+    };
     /** PositionReceiver */
-    'position-receiver': {
-      '@type': 'position-receiver';
-    } & (Omit<components['schemas']['device'], '@type'> & Record<string, never>);
+    'position-receiver': components['schemas']['device'] & Record<string, never>;
     /**
      * CommunicationModule
      * @description Represents a communication module, including its serial number, IMEI, IMSI, ICCID, MSISDN, EID, type, service provider, state, and country calling code.
@@ -1715,9 +1677,7 @@ export interface components {
      *       "countryCallingCode": 1
      *     }
      */
-    'communication-module': {
-      '@type': 'communication-module';
-    } & (Omit<components['schemas']['resource-embed'], '@type'> & {
+    'communication-module': components['schemas']['resource-embed'] & {
       /**
        * @description CommunicationModule
        * @example CommunicationModule
@@ -1794,11 +1754,9 @@ export interface components {
        * @example 1
        */
       countryCallingCode?: string;
-    });
+    };
     /** TelematicsGateway */
-    'telematics-gateway': {
-      '@type': 'telematics-gateway';
-    } & (Omit<components['schemas']['device'], '@type'> & {
+    'telematics-gateway': components['schemas']['device'] & {
       /** @enum {string} */
       pairingStatus?: 'PAIRED' | 'PENDING_PAIRING';
       orderNumber?: string;
@@ -1806,19 +1764,15 @@ export interface components {
       genericConfigurationVersion?: components['schemas']['version'];
       messagesRestricted?: boolean;
       communicationModules?: components['schemas']['communication-module'][];
-    });
+    };
     /** Implement */
-    implement: {
-      '@type': 'implement';
-    } & (Omit<components['schemas']['equipment'], '@type'> & {
+    implement: components['schemas']['equipment'] & {
       machine?: components['schemas']['machine'];
-    });
+    };
     /** Machine */
-    machine: {
-      '@type': 'machine';
-    } & (Omit<components['schemas']['equipment'], '@type'> & {
+    machine: components['schemas']['equipment'] & {
       implements?: components['schemas']['implement'][];
-    });
+    };
     /** PatchDTO */
     'equipment-patch': {
       /** @enum {string} */

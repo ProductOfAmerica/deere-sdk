@@ -26,13 +26,13 @@ export class FarmsApi {
     orgId: string,
     params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['GetFarms']>> {
+  ): Promise<PaginatedResponse<components['schemas']['GetFarm']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['GetFarm']>>(
       this.spec,
       path,
       options
@@ -46,13 +46,13 @@ export class FarmsApi {
     orgId: string,
     params?: { embed?: string; recordFilter?: 'available' | 'archived' | 'all' },
     options?: RequestOptions
-  ): Promise<components['schemas']['GetFarms'][]> {
+  ): Promise<components['schemas']['GetFarm'][]> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['GetFarms']>(this.spec, path, options);
+    return this.client.getAll<components['schemas']['GetFarm']>(this.spec, path, options);
   }
 
   /**
