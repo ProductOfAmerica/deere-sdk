@@ -20,6 +20,7 @@ import {
   isDocumentationKey,
   sanitizePropertyKey,
   stripDocumentationMarkup,
+  stripTypeDiscriminators,
 } from './lib/spec-utils.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
@@ -719,6 +720,15 @@ function fixSpec(
   const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
   if (embedPatchCount > 0) {
     console.log(`  Applied ${embedPatchCount} embed-contract patch(es)`);
+  }
+
+  // Drop `@type` discriminators so openapi-typescript stops injecting a literal
+  // `"@type": "<schemaName>"` that conflicts with each child's own `@type` enum
+  // and collapses the generated schema to `never`. Runs after embed contracts
+  // (the last schema-mutating pass) and before the server-block transforms.
+  const strippedDiscriminators = stripTypeDiscriminators(spec);
+  if (strippedDiscriminators > 0) {
+    console.log(`  Stripped ${strippedDiscriminators} @type discriminator(s)`);
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs

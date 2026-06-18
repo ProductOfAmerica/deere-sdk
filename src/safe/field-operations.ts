@@ -77,14 +77,28 @@ type SafeGetParams = Omit<RawGetParams, 'embed'>;
 
 /** Shared contract-violation thrower. Runtime-validates that every returned
  *  operation carries the measurementTypes array the embed param is supposed
- *  to populate, and throws DeereError naming the offending op on drift. */
-function assertMeasurementsPresent<
-  T extends { id?: unknown; fieldOperationType?: unknown; measurementTypes?: unknown },
->(op: T, methodName: string): asserts op is T & { measurementTypes: FieldOperationMeasurement[] } {
-  if (op.measurementTypes === undefined) {
+ *  to populate, and throws DeereError naming the offending op on drift.
+ *
+ *  Takes `op: unknown` rather than a constrained generic so the three callers
+ *  keep compiling even if an upstream spec change degrades the raw return type
+ *  to `unknown` (the facade's whole point is drift-resistance). The runtime
+ *  guard proves the asserted shape: `op` must be a non-null object whose
+ *  `measurementTypes` is an array. An empty array is valid (the operation
+ *  exists with no recorded measurements yet); `undefined` or a non-array is a
+ *  contract violation. */
+function assertMeasurementsPresent(
+  op: unknown,
+  methodName: string
+): asserts op is { measurementTypes: FieldOperationMeasurement[] } {
+  const record = (typeof op === 'object' && op !== null ? op : {}) as {
+    id?: unknown;
+    fieldOperationType?: unknown;
+    measurementTypes?: unknown;
+  };
+  if (!Array.isArray(record.measurementTypes)) {
     throw new DeereError(
-      `deere-sdk contract violation in ${methodName}: field operation ${String(op.id ?? '(unknown id)')} ` +
-        `(type=${String(op.fieldOperationType ?? 'unknown')}) has no measurementTypes array ` +
+      `deere-sdk contract violation in ${methodName}: field operation ${String(record.id ?? '(unknown id)')} ` +
+        `(type=${String(record.fieldOperationType ?? 'unknown')}) has no measurementTypes array ` +
         `despite embed=measurementTypes being passed. JD's wire format may have drifted from the ` +
         `documented contract. Capture a fresh fixture and update scripts/embed-contracts.yaml if needed.`,
       0,
