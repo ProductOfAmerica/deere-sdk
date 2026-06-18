@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-06-18
+
+### Changed
+- Release artifacts are no longer cosign-signed; the `.tgz.sig` / `.tgz.pem` assets
+  are removed from GitHub Releases. Authenticity now comes from npm package provenance
+  (`npm audit signatures`) and GitHub build attestations (`gh attestation verify`,
+  online by default or offline via `--bundle`). A new "Verifying Releases" section in
+  the README documents both paths. This drops a brittle, redundant signing layer
+  (cosign v3 broke the legacy `sign-blob` flow, leaving the pipeline pinned to a
+  deprecated cosign v2 line); the npm package itself is unchanged.
+
 ## [2.2.0] - 2026-06-18
 
 ### Fixed
