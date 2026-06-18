@@ -820,6 +820,45 @@ gh workflow run release.yml --ref vX.Y.Z
 
 ---
 
+## Verifying Releases
+
+Every release produces **two independently verifiable artifacts**, and they are not byte-identical: the package on the npm registry (built and published by `publish.yml`) and the `.tgz` attached to the GitHub Release page (built by `release.yml`). They verify differently. `npm audit signatures` checks the copy you installed from the registry; it does **not** verify a tarball downloaded from the Release page. Both chains trace back to Sigstore through GitHub's OIDC identity, so there is no separate signing key to manage.
+
+### The npm package (what `npm install` pulls)
+
+```bash
+npm audit signatures
+```
+
+Verifies the registry signature and the SLSA build-provenance attestation for your installed packages, including `deere-sdk`.
+
+### The GitHub Release tarball (the `.tgz` on the Release page)
+
+```bash
+gh release download vX.Y.Z --repo ProductOfAmerica/deere-sdk --pattern '*.tgz'
+gh attestation verify deere-sdk-X.Y.Z.tgz \
+  --repo ProductOfAmerica/deere-sdk \
+  --signer-workflow ProductOfAmerica/deere-sdk/.github/workflows/release.yml \
+  --source-ref refs/tags/vX.Y.Z
+```
+
+`--source-ref` binds the check to the release tag. `--predicate-type` defaults to `https://slsa.dev/provenance/v1`, so it can be omitted. By default `gh attestation verify` fetches the attestation from GitHub's API (online).
+
+### Offline / air-gapped / mirrors
+
+Fetch the Sigstore bundle once while online, then verify with no further API calls:
+
+```bash
+gh attestation download deere-sdk-X.Y.Z.tgz --repo ProductOfAmerica/deere-sdk
+gh attestation verify deere-sdk-X.Y.Z.tgz \
+  --bundle <downloaded-bundle>.jsonl \
+  --repo ProductOfAmerica/deere-sdk \
+  --signer-workflow ProductOfAmerica/deere-sdk/.github/workflows/release.yml \
+  --source-ref refs/tags/vX.Y.Z
+```
+
+---
+
 ## Disclaimer
 
 > **This is an unofficial SDK** and is not affiliated with, endorsed by, or connected to John Deere or Deere & Company.

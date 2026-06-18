@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
 
     # contents: write for commit/push/tag. The tag push triggers release.yml,
-    # which handles npm publish and the (cosign-signed) GitHub release
-    # artifacts. Build provenance, tarball, and release attachment all live
+    # which handles npm publish and the GitHub release artifacts. Build
+    # provenance (the attestation), tarball, and release attachment all live
     # in release.yml; this job stops at "push tag" and lets the tag drive it.
     permissions:
       contents: write
@@ -195,9 +195,10 @@ jobs:
           git tag v${{ steps.version.outputs.new_version }}
           git push origin v${{ steps.version.outputs.new_version }}
 
-      # Tag push above triggers release.yml, which packs its own tarball, signs
-      # with cosign, generates checksums, creates the GitHub Release, and
-      # publishes to npm. We intentionally do not duplicate that work here:
+      # Tag push above triggers release.yml, which packs its own tarball,
+      # attests build provenance, generates checksums, creates the GitHub
+      # Release, and publishes to npm. We intentionally do not duplicate that
+      # work here:
       # `uses: ./.github/workflows/publish.yml` from this workflow checks out
       # the workflow's trigger SHA (pre-bump), which carries the previous
       # version in package.json and races release.yml to npm. Both failure
