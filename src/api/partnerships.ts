@@ -31,9 +31,9 @@ export class PartnershipsApi {
    */
   async list(
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Partnerships']>> {
+  ): Promise<PaginatedResponse<components['schemas']['Partnership']>> {
     const path = `/partnerships`;
-    return this.client.get<PaginatedResponse<components['schemas']['Partnerships']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['Partnership']>>(
       this.spec,
       path,
       options
@@ -43,9 +43,9 @@ export class PartnershipsApi {
    * Get all items (follows pagination automatically)
    * @generated from GET /partnerships
    */
-  async listAll(options?: RequestOptions): Promise<components['schemas']['Partnerships'][]> {
+  async listAll(options?: RequestOptions): Promise<components['schemas']['Partnership'][]> {
     const path = `/partnerships`;
-    return this.client.getAll<components['schemas']['Partnerships']>(this.spec, path, options);
+    return this.client.getAll<components['schemas']['Partnership']>(this.spec, path, options);
   }
 
   /**
@@ -102,9 +102,9 @@ export class PartnershipsApi {
   async listPermissions(
     token: string,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['Permissions']>> {
+  ): Promise<PaginatedResponse<components['schemas']['PermissionValue']>> {
     const path = `/partnerships/${token}/permissions`;
-    return this.client.get<PaginatedResponse<components['schemas']['Permissions']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['PermissionValue']>>(
       this.spec,
       path,
       options

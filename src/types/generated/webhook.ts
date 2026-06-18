@@ -92,7 +92,7 @@ export interface components {
     Link: {
       /** @example self */
       rel: string;
-      /** @example https://apidev.tal.deere.com/platform/users/grumpybear */
+      /** @example https://sandboxapi.deere.com/platform/users/USER */
       uri: string;
     };
     Errors: components['schemas']['Error'][];
@@ -142,7 +142,7 @@ export interface components {
       displayName?: string;
       /**
        * @description The client key used to create the subscription.
-       * @example johndeere-1234567898765432123456789876543212345678
+       * @example REDACTED
        */
       clientKey?: string;
       /**
@@ -233,7 +233,7 @@ export interface components {
       displayName?: string;
       /**
        * @description The client key used to create the subscription.
-       * @example johndeere-1234567898765432123456789876543212345678
+       * @example REDACTED
        */
       clientKey?: string;
       /**

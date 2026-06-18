@@ -24,8 +24,7 @@
  */
 
 import type { EquipmentApi } from '../api/equipment.js';
-import type { PaginatedResponse, RequestOptions } from '../client.js';
-import type { components } from '../types/generated/equipment.js';
+import type { RequestOptions } from '../client.js';
 
 // Helper types: take the raw method's params, drop `embed`, then re-add it
 // as a REQUIRED field. The resulting safe method refuses to compile if the
@@ -58,6 +57,13 @@ type RawGetEquipmentisgtypes2Params = NonNullable<
 >;
 type SafeGetEquipmentisgtypes2Params = RequireEmbed<RawGetEquipmentisgtypes2Params>;
 
+// Return types derive from the raw EquipmentApi methods via `ReturnType<...>`
+// instead of explicit `components['schemas'][...]` annotations. The facade only
+// makes `embed` required (see RequireEmbed); the response is identical to the raw
+// method by construction. Deriving the type keeps this file compiling when JD
+// perturbs an equipment response upstream. Explicit annotations here previously
+// resolved to `never` (a discriminator/`@type` enum conflict in JD's spec), so
+// any upstream change turned into a hard build failure in the daily sync.
 export class SafeEquipmentApi {
   constructor(private readonly raw: EquipmentApi) {}
 
@@ -77,7 +83,7 @@ export class SafeEquipmentApi {
   async getWithEmbed(
     params: SafeGetParams,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['equipmentForList']>> {
+  ): ReturnType<EquipmentApi['get']> {
     return this.raw.get(params, options);
   }
 
@@ -90,7 +96,7 @@ export class SafeEquipmentApi {
     id: string,
     params: SafeGetEquipmentParams,
     options?: RequestOptions
-  ): Promise<components['schemas']['equipment']> {
+  ): ReturnType<EquipmentApi['getEquipment']> {
     return this.raw.getEquipment(id, params, options);
   }
 
@@ -102,7 +108,7 @@ export class SafeEquipmentApi {
   async listEquipmentmodelsWithEmbed(
     params: SafeListEquipmentmodelsParams,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
+  ): ReturnType<EquipmentApi['listEquipmentmodels']> {
     return this.raw.listEquipmentmodels(params, options);
   }
 
@@ -114,7 +120,7 @@ export class SafeEquipmentApi {
   async listEquipmentisgtypesWithEmbed(
     params: SafeListEquipmentisgtypesParams,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
+  ): ReturnType<EquipmentApi['listEquipmentisgtypes']> {
     return this.raw.listEquipmentisgtypes(params, options);
   }
 
@@ -126,7 +132,7 @@ export class SafeEquipmentApi {
     equipmentMakeId: string,
     params: SafeGetEquipmentisgtypesParams,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['equipment-isg-type']>> {
+  ): ReturnType<EquipmentApi['getEquipmentisgtypes']> {
     return this.raw.getEquipmentisgtypes(equipmentMakeId, params, options);
   }
 
@@ -139,7 +145,7 @@ export class SafeEquipmentApi {
     equipmentISGTypeId: string,
     params: SafeGetEquipmentisgtypes2Params,
     options?: RequestOptions
-  ): Promise<components['schemas']['equipment-isg-type']> {
+  ): ReturnType<EquipmentApi['getEquipmentisgtypes2']> {
     return this.raw.getEquipmentisgtypes2(equipmentMakeId, equipmentISGTypeId, params, options);
   }
 }

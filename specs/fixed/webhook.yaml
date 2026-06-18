@@ -3,10 +3,6 @@ info:
   title: "Subscribe API"
   version: "0.0.1"
   description: "APIs to manage the subscription service"
-  contact:
-    name: "Peder Kopperud & Jeff Martin"
-    email: "KopperudPederO@JohnDeere.com,ISG_Red_October@JohnDeere.com"
-    url: "https://developer.deere.com/"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:
@@ -58,7 +54,7 @@ paths:
                     uri: "https://example.com/api/receiveEvents"
                   status: "Active"
                   displayName: "Org 123456 Seeding Field Ops Subscription"
-                  token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                  token: "REDACTED"
       responses:
         "200":
           $ref: "#/components/responses/CreatedSubscription"
@@ -116,7 +112,7 @@ paths:
                     uri: "https://website.com/api/receiveEvents"
                   status: "Active"
                   displayName: "Org 123456 Seeding Field Ops Subscription"
-                  token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                  token: "REDACTED"
                   links:
                     - rel: "user"
                       uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
@@ -256,8 +252,8 @@ components:
                   uri: "https://website.com/api/receiveEvents"
                 status: "Active"
                 displayName: "Org 123456 Seeding Field Ops Subscription"
-                clientKey: "deere-1234567898765432123456789876543212345678"
-                token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                clientKey: "REDACTED"
+                token: "REDACTED"
                 links:
                   - rel: "user"
                     uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
@@ -301,8 +297,8 @@ components:
                       uri: "https://example.com/api/receiveEvents"
                     status: "Active"
                     displayName: "Org123456SeedingFieldOpsSubscription"
-                    clientKey: "deere-1234567898765432123456789876543212345678"
-                    token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                    clientKey: "REDACTED"
+                    token: "REDACTED"
                     links:
                       - rel: "user"
                         uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
@@ -346,8 +342,8 @@ components:
                   uri: "https://website.com/api/receiveEvents"
                 status: "Active"
                 displayName: "Org 123456 Seeding Field Ops Subscription"
-                clientKey: "deere-1234567898765432123456789876543212345678"
-                token: "wVaS=dWgjKTyCg=g3RbDj0V51MWgG+ges9SVvpgIYlbOO2aqBqtSuivWonJY31vrSzf"
+                clientKey: "REDACTED"
+                token: "REDACTED"
                 links:
                   - rel: "self"
                     uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
@@ -446,7 +442,7 @@ components:
           example: "self"
         uri:
           type: "string"
-          example: "https://apidev.tal.deere.com/platform/users/grumpybear"
+          example: "https://sandboxapi.deere.com/platform/users/USER"
     Errors:
       type: "array"
       items:
@@ -488,7 +484,7 @@ components:
           description: "Human-readable name to easily identify the event subscription."
         clientKey:
           type: "string"
-          example: "johndeere-1234567898765432123456789876543212345678"
+          example: "REDACTED"
           description: "The client key used to create the subscription."
         token:
           type: "string"
@@ -589,7 +585,7 @@ components:
           description: "Human-readable name to easily identify the event subscription."
         clientKey:
           type: "string"
-          example: "johndeere-1234567898765432123456789876543212345678"
+          example: "REDACTED"
           description: "The client key used to create the subscription."
         token:
           type: "string"

@@ -31,7 +31,7 @@ export class FieldsApi {
       recordFilter?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FieldsResponse']>> {
+  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
     const query = new URLSearchParams();
     if (params?.clientName !== undefined) query.set('clientName', String(params.clientName));
     if (params?.farmName !== undefined) query.set('farmName', String(params.farmName));
@@ -40,7 +40,7 @@ export class FieldsApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldsResponse']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
       options
@@ -60,7 +60,7 @@ export class FieldsApi {
       recordFilter?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
     },
     options?: RequestOptions
-  ): Promise<components['schemas']['FieldsResponse'][]> {
+  ): Promise<components['schemas']['FieldResponse'][]> {
     const query = new URLSearchParams();
     if (params?.clientName !== undefined) query.set('clientName', String(params.clientName));
     if (params?.farmName !== undefined) query.set('farmName', String(params.farmName));
@@ -69,7 +69,7 @@ export class FieldsApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['FieldsResponse']>(this.spec, path, options);
+    return this.client.getAll<components['schemas']['FieldResponse']>(this.spec, path, options);
   }
 
   /**
@@ -150,12 +150,12 @@ export class FieldsApi {
     fieldId: string,
     params?: { embed?: string[] },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['GetFarms']>> {
+  ): Promise<PaginatedResponse<components['schemas']['GetFarm']>> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/farms${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['GetFarms']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['GetFarm']>>(
       this.spec,
       path,
       options

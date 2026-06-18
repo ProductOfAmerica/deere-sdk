@@ -6,7 +6,7 @@
  */
 
 import type { SpecName } from '../api-servers.generated.js';
-import type { DeereClient, RequestOptions } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 
 export class GuidanceLinesApi {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
@@ -27,14 +27,14 @@ export class GuidanceLinesApi {
     fieldId: string,
     params?: { status?: string; recordFilter?: string; embed?: string },
     options?: RequestOptions
-  ): Promise<unknown> {
+  ): Promise<PaginatedResponse<unknown>> {
     const query = new URLSearchParams();
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(this.spec, path, options);
+    return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)

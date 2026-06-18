@@ -13,7 +13,13 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
-import { stripDocumentationMarkup } from './lib/spec-utils.js';
+import {
+  collectionItemType,
+  computeReturnType,
+  resolveContentSchemaRef,
+  usesPaginatedResponse,
+} from './lib/sdk-gen-utils.js';
+import { refName, stripDocumentationMarkup } from './lib/spec-utils.js';
 
 // ============================================================================
 // Configuration
@@ -73,6 +79,7 @@ interface SchemaObject {
   items?: SchemaObject;
   properties?: Record<string, SchemaObject>;
   enum?: string[];
+  allOf?: SchemaObject[];
 }
 
 interface ResponseObject {
@@ -195,11 +202,6 @@ function isCollectionEndpoint(path: string, method: string): boolean {
   return !lastSegment.startsWith('{');
 }
 
-function resolveRef(ref: string): string {
-  const parts = ref.split('/');
-  return parts[parts.length - 1];
-}
-
 function inferMethodName(op: ParsedOperation): string {
   const id = (op.operationId || '').toLowerCase();
 
@@ -271,50 +273,50 @@ function getSchemaType(schema: SchemaObject | undefined): string {
 // ============================================================================
 
 /**
- * Extracts schema reference from response/requestBody content.
- * Handles both direct schema refs and nested values.items refs (for collections).
- * Only returns refs that point to actual schemas (not responses or other components).
+ * Extracts the schema name referenced by response/requestBody content.
+ * Delegates the branch logic (direct `$ref`, collection-scoped wrapper unwrap,
+ * inline `values.items.$ref`) to the unit-tested `resolveContentSchemaRef`.
+ * `isCollection` gates only the named-wrapper unwrap; the inline path is
+ * unconditional. Request bodies pass `isCollection: false`.
  */
 function extractSchemaFromContent(
-  content?: Record<string, { schema?: SchemaObject }>
+  content: Record<string, { schema?: SchemaObject }> | undefined,
+  schemas: Record<string, SchemaObject> | undefined,
+  isCollection: boolean
 ): string | undefined {
   const c = content?.['application/vnd.deere.axiom.v3+json'] || content?.['application/json'];
-  if (!c?.schema) return undefined;
-
-  // Direct $ref to schema - only accept refs to components/schemas
-  if (c.schema.$ref?.includes('/schemas/')) {
-    return resolveRef(c.schema.$ref);
-  }
-
-  // Nested values.items.$ref pattern (common for collections)
-  if (c.schema.properties?.values?.items?.$ref?.includes('/schemas/')) {
-    return resolveRef(c.schema.properties.values.items.$ref);
-  }
-
-  return undefined;
+  return resolveContentSchemaRef(c?.schema, schemas, isCollection);
 }
 
 /**
  * Resolves response schema, handling both $ref responses and inline responses.
+ * `isCollection` enables named-collection-wrapper unwrapping (see
+ * resolveContentSchemaRef).
  */
 function resolveResponseSchema(
   response: ResponseObject | { $ref: string },
-  spec: OpenAPISpec
+  spec: OpenAPISpec,
+  isCollection: boolean
 ): string | undefined {
   // If it's a $ref, resolve it from components.responses
   if ('$ref' in response && response.$ref) {
-    const responseName = resolveRef(response.$ref);
+    const responseName = refName(response.$ref);
     const resolved = spec.components?.responses?.[responseName];
     if (!resolved) return undefined;
-    return extractSchemaFromContent(resolved.content);
+    return extractSchemaFromContent(resolved.content, spec.components?.schemas, isCollection);
   }
 
   // If it's an inline response
-  return extractSchemaFromContent((response as ResponseObject).content);
+  return extractSchemaFromContent(
+    (response as ResponseObject).content,
+    spec.components?.schemas,
+    isCollection
+  );
 }
 
 /**
  * Resolves request body schema, handling both $ref and inline requestBodies.
+ * Never a collection context, so wrapper unwrapping is disabled.
  */
 function resolveRequestBodySchema(
   requestBody: RequestBodyObject | { $ref: string },
@@ -322,14 +324,18 @@ function resolveRequestBodySchema(
 ): string | undefined {
   // If it's a $ref, resolve it from components.requestBodies
   if ('$ref' in requestBody && requestBody.$ref) {
-    const name = resolveRef(requestBody.$ref);
+    const name = refName(requestBody.$ref);
     const resolved = spec.components?.requestBodies?.[name];
     if (!resolved) return undefined;
-    return extractSchemaFromContent(resolved.content);
+    return extractSchemaFromContent(resolved.content, spec.components?.schemas, false);
   }
 
   // If it's an inline request body
-  return extractSchemaFromContent((requestBody as RequestBodyObject).content);
+  return extractSchemaFromContent(
+    (requestBody as RequestBodyObject).content,
+    spec.components?.schemas,
+    false
+  );
 }
 
 // ============================================================================
@@ -384,8 +390,8 @@ function parseSpec(specPath: string): GeneratedApi | null {
 
       for (const param of allParams) {
         if ('$ref' in param && param.$ref) {
-          const refName = resolveRef(param.$ref);
-          const resolved = spec.components?.parameters?.[refName];
+          const paramName = refName(param.$ref);
+          const resolved = spec.components?.parameters?.[paramName];
           if (resolved && resolved.in === 'query') {
             queryParams.push({
               name: resolved.name,
@@ -416,11 +422,15 @@ function parseSpec(specPath: string): GeneratedApi | null {
         requestBodySchemaRef = resolveRequestBodySchema(operation.requestBody, spec);
       }
 
-      // Extract response schema reference (handles both $ref and inline responses)
+      const isCollection = isCollectionEndpoint(path, method);
+
+      // Extract response schema reference (handles both $ref and inline
+      // responses, and unwraps named collection wrappers to their item type
+      // when this is a collection endpoint).
       let responseSchemaRef: string | undefined;
       const response200 = operation.responses?.['200'] || operation.responses?.['201'];
       if (response200) {
-        responseSchemaRef = resolveResponseSchema(response200, spec);
+        responseSchemaRef = resolveResponseSchema(response200, spec, isCollection);
       }
 
       operations.push({
@@ -434,7 +444,7 @@ function parseSpec(specPath: string): GeneratedApi | null {
         hasRequestBody,
         requestBodySchemaRef,
         responseSchemaRef,
-        isCollection: isCollectionEndpoint(path, method),
+        isCollection,
       });
     }
   }
@@ -498,21 +508,10 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
 
   params.push('options?: RequestOptions');
 
-  let returnType = 'unknown';
-  if (op.method === 'delete') {
-    // DELETE typically returns 204 No Content
-    returnType = 'void';
-  } else if (op.responseSchemaRef) {
-    // Use response schema for GET, POST, PUT, PATCH when available
-    if (op.isCollection && op.method === 'get') {
-      returnType = `PaginatedResponse<components['schemas']['${op.responseSchemaRef}']>`;
-    } else {
-      returnType = `components['schemas']['${op.responseSchemaRef}']`;
-    }
-  } else if (op.method === 'post' || op.method === 'put' || op.method === 'patch') {
-    // No response schema defined - return void
-    returnType = 'void';
-  }
+  // Return-type decision lives in the unit-tested sdk-gen-utils helper. A
+  // collection GET whose item schema can't be resolved degrades to
+  // PaginatedResponse<unknown>, not bare unknown.
+  const returnType = computeReturnType(op);
 
   let pathTemplate = op.path;
   for (const pp of op.pathParams) {
@@ -559,21 +558,18 @@ function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): stri
 
   let listAllMethod = '';
   if (op.isCollection && op.method === 'get' && methodName === 'list') {
-    const listAllReturnType = op.responseSchemaRef
-      ? `components['schemas']['${op.responseSchemaRef}'][]`
-      : 'unknown[]';
+    const itemType = collectionItemType(op);
 
     const getAllLines = [...lines];
-    getAllLines[getAllLines.length - 1] = `    return this.client.getAll<${
-      op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown'
-    }>(this.spec, path, options);`;
+    getAllLines[getAllLines.length - 1] =
+      `    return this.client.getAll<${itemType}>(this.spec, path, options);`;
 
     listAllMethod = `
   /**
    * Get all items (follows pagination automatically)
    * @generated from ${op.method.toUpperCase()} ${op.path}
    */
-  async listAll(${params.join(', ')}): Promise<${listAllReturnType}> {
+  async listAll(${params.join(', ')}): Promise<${itemType}[]> {
 ${getAllLines.join('\n')}
   }`;
   }
@@ -589,17 +585,18 @@ function generateApiClass(api: GeneratedApi): string {
 
   const methods = api.operations.map((op) => generateMethod(op, usedMethodNames)).join('\n\n');
 
-  // Determine which imports are actually used
-  const usesPaginatedResponse = api.operations.some(
-    (op) => op.isCollection && op.method === 'get' && op.responseSchemaRef
-  );
+  // Determine which imports are actually used. PaginatedResponse is needed by
+  // EVERY collection GET, including the PaginatedResponse<unknown> fallback for
+  // ones whose item schema didn't resolve, which would otherwise reference an
+  // unimported type and fail to compile.
+  const needsPaginatedResponse = usesPaginatedResponse(api.operations);
   const usesComponents = api.operations.some(
     (op) => op.requestBodySchemaRef || op.responseSchemaRef
   );
 
   // Build client imports (only include what's used)
   const clientImports = ['DeereClient', 'RequestOptions'];
-  if (usesPaginatedResponse) {
+  if (needsPaginatedResponse) {
     clientImports.push('PaginatedResponse');
   }
 

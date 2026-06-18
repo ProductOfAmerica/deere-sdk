@@ -17,8 +17,7 @@
  */
 
 import type { ProductsApi } from '../api/products.js';
-import type { PaginatedResponse, RequestOptions } from '../client.js';
-import type { components } from '../types/generated/products.js';
+import type { RequestOptions } from '../client.js';
 
 type RequireEmbed<P> = P extends { embed?: infer E }
   ? Omit<P, 'embed'> & { embed: NonNullable<E> }
@@ -33,6 +32,11 @@ type SafeListAllParams = RequireEmbed<RawListAllParams>;
 type RawGetParams = NonNullable<Parameters<ProductsApi['get']>[2]>;
 type SafeGetParams = RequireEmbed<RawGetParams>;
 
+// Return types derive from the raw ProductsApi methods via `ReturnType<...>`
+// rather than hard-coded `components['schemas'][...]` annotations. The methods
+// are pass-throughs, so the return type equals the raw method's by construction;
+// this keeps the facade compiling when JD perturbs a products response upstream.
+// Same rationale as SafeEquipmentApi.
 export class SafeProductsApi {
   constructor(private readonly raw: ProductsApi) {}
 
@@ -45,7 +49,7 @@ export class SafeProductsApi {
     organizationId: string,
     params: SafeListParams,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['VarietyCollection']>> {
+  ): ReturnType<ProductsApi['list']> {
     return this.raw.list(organizationId, params, options);
   }
 
@@ -57,7 +61,7 @@ export class SafeProductsApi {
     organizationId: string,
     params: SafeListAllParams,
     options?: RequestOptions
-  ): Promise<components['schemas']['VarietyCollection'][]> {
+  ): ReturnType<ProductsApi['listAll']> {
     return this.raw.listAll(organizationId, params, options);
   }
 
@@ -70,7 +74,7 @@ export class SafeProductsApi {
     erid: string,
     params: SafeGetParams,
     options?: RequestOptions
-  ): Promise<components['schemas']['Variety']> {
+  ): ReturnType<ProductsApi['get']> {
     return this.raw.get(organizationId, erid, params, options);
   }
 }

@@ -26,12 +26,12 @@ export class ConnectionManagementApi {
   async list(
     params?: { createdAfter?: string },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ConnectionsResponse']>> {
+  ): Promise<PaginatedResponse<components['schemas']['Connection']>> {
     const query = new URLSearchParams();
     if (params?.createdAfter !== undefined) query.set('createdAfter', String(params.createdAfter));
     const queryString = query.toString();
     const path = `/connections${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ConnectionsResponse']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['Connection']>>(
       this.spec,
       path,
       options
@@ -44,16 +44,12 @@ export class ConnectionManagementApi {
   async listAll(
     params?: { createdAfter?: string },
     options?: RequestOptions
-  ): Promise<components['schemas']['ConnectionsResponse'][]> {
+  ): Promise<components['schemas']['Connection'][]> {
     const query = new URLSearchParams();
     if (params?.createdAfter !== undefined) query.set('createdAfter', String(params.createdAfter));
     const queryString = query.toString();
     const path = `/connections${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['ConnectionsResponse']>(
-      this.spec,
-      path,
-      options
-    );
+    return this.client.getAll<components['schemas']['Connection']>(this.spec, path, options);
   }
 
   /**

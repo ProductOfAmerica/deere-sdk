@@ -2,9 +2,6 @@ openapi: "3.0.0"
 info:
   title: "Fields API"
   version: "3.0"
-  contact:
-    name: "Land"
-    email: "ISGLand@JohnDeere.com"
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:
@@ -1043,7 +1040,7 @@ components:
         uri:
           x-required-boolean: true
           type: "string"
-          example: "https://apiqa.tal.deere.com/platform/users/grumpybear"
+          example: "https://sandboxapi.deere.com/platform/users/USER"
     FieldGuidSearches:
       type: "object"
       properties:

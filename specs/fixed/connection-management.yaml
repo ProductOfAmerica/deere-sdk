@@ -2,9 +2,6 @@ openapi: "3.0.3"
 info:
   description: "Allows CSCs to see all of their connections and remove connections outside of any particular user token"
   version: "1.0.0"
-  contact:
-    name: "SOUP Team"
-    email: "ISG_SOUPERFRIENDS@JohnDeere.com"
   title: "CSC Connection Management"
 servers:
   - url: "https://{environment}.deere.com/platform"

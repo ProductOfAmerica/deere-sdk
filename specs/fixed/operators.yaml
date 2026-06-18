@@ -4,9 +4,6 @@ x-zally-ignore:
 info:
   description: "These are the endpoints for managing equipment operators"
   version: "1.0.0"
-  contact:
-    name: "SOUP Team"
-    email: "ISG_SOUPERFRIENDS@JohnDeere.com"
   title: "Operator API"
 servers:
   - url: "https://{environment}.deere.com/platform"

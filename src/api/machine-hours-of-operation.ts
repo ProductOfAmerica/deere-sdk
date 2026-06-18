@@ -37,7 +37,7 @@ export class MachineHoursOfOperationApi {
       summarizeDuration?: string;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['HoursOfOperation_Response']>> {
+  ): Promise<PaginatedResponse<components['schemas']['HoursOfOperation']>> {
     const query = new URLSearchParams();
     if (params?.organizationId !== undefined)
       query.set('organizationId', String(params.organizationId));
@@ -49,7 +49,7 @@ export class MachineHoursOfOperationApi {
       query.set('summarizeDuration', String(params.summarizeDuration));
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['HoursOfOperation_Response']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['HoursOfOperation']>>(
       this.spec,
       path,
       options
@@ -69,7 +69,7 @@ export class MachineHoursOfOperationApi {
       summarizeDuration?: string;
     },
     options?: RequestOptions
-  ): Promise<components['schemas']['HoursOfOperation_Response'][]> {
+  ): Promise<components['schemas']['HoursOfOperation'][]> {
     const query = new URLSearchParams();
     if (params?.organizationId !== undefined)
       query.set('organizationId', String(params.organizationId));
@@ -81,11 +81,7 @@ export class MachineHoursOfOperationApi {
       query.set('summarizeDuration', String(params.summarizeDuration));
     const queryString = query.toString();
     const path = `/machines/${principalId}/hoursOfOperation${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['HoursOfOperation_Response']>(
-      this.spec,
-      path,
-      options
-    );
+    return this.client.getAll<components['schemas']['HoursOfOperation']>(this.spec, path, options);
   }
 }
 

@@ -89,7 +89,7 @@ paths:
                 value:
                   links:
                     - rel: "toPartnership"
-                      uri: "mailto:partnerorg@gmail.com"
+                      uri: "mailto:redacted@example.com"
                     - rel: "fromPartnership"
                       uri: "https://partnerapi.deere.com/platform/organizations/orgId"
       responses:

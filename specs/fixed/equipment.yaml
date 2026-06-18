@@ -679,8 +679,6 @@ components:
           x-required-boolean: true
           description: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
-      discriminator:
-        propertyName: "@type"
     resource:
       type: "object"
       title: "Resource"
@@ -698,8 +696,6 @@ components:
           description: "Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           x-required-boolean: true
-      discriminator:
-        propertyName: "@type"
     resource-embed:
       type: "object"
       title: "Resource"
@@ -713,8 +709,6 @@ components:
           x-required-boolean: true
           description: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
           example: "Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other"
-      discriminator:
-        propertyName: "@type"
     organization-embed:
       type: "object"
       title: "Resource"
@@ -728,8 +722,6 @@ components:
           x-required-boolean: true
           description: "Resource"
           example: "Resource"
-      discriminator:
-        propertyName: "@type"
     equipment-make-embed:
       type: "object"
       title: "EquipmentMake"

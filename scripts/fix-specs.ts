@@ -15,10 +15,13 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './embed-contracts.js';
+import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
+  refName,
   sanitizePropertyKey,
   stripDocumentationMarkup,
+  stripTypeDiscriminators,
 } from './lib/spec-utils.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'raw');
@@ -98,7 +101,7 @@ function getDefinedSchemas(spec: Record<string, unknown>): Set<string> {
 }
 
 function createStubSchema(refPath: string): Record<string, unknown> {
-  const name = refPath.split('/').pop() || 'Unknown';
+  const name = refName(refPath) || 'Unknown';
 
   if (name.endsWith('Collection') || name.endsWith('List')) {
     return {
@@ -629,12 +632,13 @@ function fixSpec(
 ): string {
   console.log(`\nProcessing: ${filename}`);
 
+  const redactedContent = redactSpecContent(content);
   let spec: Record<string, unknown>;
   try {
-    spec = yaml.parse(content) as Record<string, unknown>;
+    spec = yaml.parse(redactedContent) as Record<string, unknown>;
   } catch (e) {
     console.log(`  Failed to parse YAML: ${e}`);
-    return content;
+    return redactedContent;
   }
 
   // Fix incorrect swagger version (notifications.yaml has "swagger: '3.0.0'" instead of "openapi: '3.0.0'")
@@ -717,6 +721,15 @@ function fixSpec(
   const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
   if (embedPatchCount > 0) {
     console.log(`  Applied ${embedPatchCount} embed-contract patch(es)`);
+  }
+
+  // Drop `@type` discriminators so openapi-typescript stops injecting a literal
+  // `"@type": "<schemaName>"` that conflicts with each child's own `@type` enum
+  // and collapses the generated schema to `never`. Runs after embed contracts
+  // (the last schema-mutating pass) and before the server-block transforms.
+  const strippedDiscriminators = stripTypeDiscriminators(spec);
+  if (strippedDiscriminators > 0) {
+    console.log(`  Stripped ${strippedDiscriminators} @type discriminator(s)`);
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs

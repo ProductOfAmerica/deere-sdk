@@ -4,6 +4,15 @@
  */
 
 /**
+ * Last path segment of a JSON `$ref`.
+ * e.g. "#/components/schemas/Foo" -> "Foo"
+ */
+export function refName(ref: string): string {
+  const parts = ref.split('/');
+  return parts[parts.length - 1];
+}
+
+/**
  * Checks if a property key is entirely an HTML documentation marker.
  * e.g., "<b>Location</b>" or "<span>Section</span>"
  */
@@ -116,4 +125,40 @@ export function stripDocumentationMarkup(
  */
 export function sanitizePropertyKey(key: string): string {
   return stripDocumentationMarkup(key, { dropTagContent: ['sup'] });
+}
+
+/**
+ * Remove `discriminator: { propertyName: '@type' }` from every schema in
+ * `components.schemas` that declares it. Returns the number removed.
+ *
+ * John Deere base schemas (`resource`, `resource-embed`, `resourcewithoutLinks`,
+ * `organization-embed`) carry a `@type` discriminator. openapi-typescript turns
+ * that into a literal `"@type": "<childSchemaName>"` injected into every child
+ * that `allOf`-extends the base, which then conflicts with the child's own
+ * `@type` enum (`"Equipment" | "Machine" | ...`). The intersection
+ * `"equipment" & ("Equipment" | ...)` reduces to `never`, collapsing the whole
+ * generated schema. The faithful type is the enum, so we drop the discriminator
+ * (the enum property stays). Keyed on `propertyName === '@type'` so a future
+ * legitimately-discriminated union on some other property is untouched.
+ */
+export function stripTypeDiscriminators(spec: Record<string, unknown>): number {
+  const components = spec.components as Record<string, unknown> | undefined;
+  const schemas = components?.schemas as Record<string, unknown> | undefined;
+  if (!schemas || typeof schemas !== 'object') return 0;
+
+  let removed = 0;
+  for (const value of Object.values(schemas)) {
+    if (!value || typeof value !== 'object') continue;
+    const schema = value as Record<string, unknown>;
+    const discriminator = schema.discriminator as { propertyName?: unknown } | undefined;
+    if (
+      discriminator &&
+      typeof discriminator === 'object' &&
+      discriminator.propertyName === '@type'
+    ) {
+      delete schema.discriminator;
+      removed += 1;
+    }
+  }
+  return removed;
 }

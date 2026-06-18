@@ -6,7 +6,7 @@
  */
 
 import type { SpecName } from '../api-servers.generated.js';
-import type { DeereClient, RequestOptions } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/map-layers.js';
 
 export class MapLayersApi {
@@ -28,14 +28,14 @@ export class MapLayersApi {
     id: string,
     params?: { includePartialSummaries?: boolean; embed?: string },
     options?: RequestOptions
-  ): Promise<unknown> {
+  ): Promise<PaginatedResponse<unknown>> {
     const query = new URLSearchParams();
     if (params?.includePartialSummaries !== undefined)
       query.set('includePartialSummaries', String(params.includePartialSummaries));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(this.spec, path, options);
+    return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)

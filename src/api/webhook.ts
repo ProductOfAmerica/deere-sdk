@@ -6,7 +6,7 @@
  */
 
 import type { SpecName } from '../api-servers.generated.js';
-import type { DeereClient, RequestOptions } from '../client.js';
+import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
 import type { components } from '../types/generated/webhook.js';
 
 export class WebhookApi {
@@ -24,9 +24,9 @@ export class WebhookApi {
    * subscriptions.
    * @generated from GET /eventSubscriptions
    */
-  async list(options?: RequestOptions): Promise<unknown> {
+  async list(options?: RequestOptions): Promise<PaginatedResponse<unknown>> {
     const path = `/eventSubscriptions`;
-    return this.client.get<unknown>(this.spec, path, options);
+    return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
   /**
    * Get all items (follows pagination automatically)

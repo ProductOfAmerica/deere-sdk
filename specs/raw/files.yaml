@@ -3,9 +3,6 @@ info:
   description: This is file management service for managing files
   version: 4.0.0
   title: Files
-  contact:
-    email: ISG_HalpDesk@JohnDeere.com
-    name: Halp Desk
 servers:
   - url: 'https://api.deere.com/platform'
     description: 'Production API endpoint'
@@ -103,7 +100,7 @@ paths:
                   'PUT: https://sandboxapi.deere.com/platform/files/fileID
                   <br/>
                   <br/>Accept: application/vnd.deere.axiom.v3+json
-                  <br/>Authorization: OAuth realm="",oauth_timestamp="1406138640", oauth_nonce="I2sX0Z", oauth_consumer_key="com.deere.example", oauth_token="a5633e06-bd09-43a5-942a-2e1255681ca9", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", oauth_signature="CX7E9KJra9ok5WpIejjFpafh8lE%3D"
+                  <br/>Authorization: OAuth realm="",oauth_timestamp="REDACTED", oauth_nonce="REDACTED", oauth_consumer_key="REDACTED", oauth_token="REDACTED", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", oauth_signature="REDACTED"
                   <br/>Content-Type: application/octet-stream'
 
           Update a file:

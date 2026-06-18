@@ -4,6 +4,7 @@ import {
   isDocumentationKey,
   sanitizePropertyKey,
   stripDocumentationMarkup,
+  stripTypeDiscriminators,
 } from '../scripts/lib/spec-utils.js';
 
 describe('fix-specs utilities', () => {
@@ -95,6 +96,64 @@ describe('fix-specs utilities', () => {
         }),
         'first\nsecond\nthird'
       );
+    });
+  });
+
+  describe('stripTypeDiscriminators', () => {
+    it('removes only discriminators whose propertyName is @type', () => {
+      const spec = {
+        components: {
+          schemas: {
+            resource: {
+              type: 'object',
+              properties: { '@type': { type: 'string' } },
+              discriminator: { propertyName: '@type' },
+            },
+            // A legitimately-discriminated union on some other property is kept.
+            shape: {
+              type: 'object',
+              discriminator: { propertyName: 'kind' },
+            },
+            plain: { type: 'object', properties: { id: { type: 'string' } } },
+          },
+        },
+      };
+
+      const removed = stripTypeDiscriminators(spec);
+
+      assert.strictEqual(removed, 1);
+      assert.strictEqual('discriminator' in spec.components.schemas.resource, false);
+      // The rest of the schema is preserved.
+      assert.deepStrictEqual(spec.components.schemas.resource.properties, {
+        '@type': { type: 'string' },
+      });
+      // Non-@type discriminator untouched.
+      assert.deepStrictEqual(spec.components.schemas.shape.discriminator, {
+        propertyName: 'kind',
+      });
+      // Plain schema untouched.
+      assert.deepStrictEqual(spec.components.schemas.plain, {
+        type: 'object',
+        properties: { id: { type: 'string' } },
+      });
+    });
+
+    it('counts every @type discriminator across schemas', () => {
+      const spec = {
+        components: {
+          schemas: {
+            a: { discriminator: { propertyName: '@type' } },
+            b: { discriminator: { propertyName: '@type' } },
+            c: {},
+          },
+        },
+      };
+      assert.strictEqual(stripTypeDiscriminators(spec), 2);
+    });
+
+    it('is a no-op for specs without components.schemas', () => {
+      assert.strictEqual(stripTypeDiscriminators({}), 0);
+      assert.strictEqual(stripTypeDiscriminators({ components: {} }), 0);
     });
   });
 });

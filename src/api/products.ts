@@ -30,13 +30,13 @@ export class ProductsApi {
       embed?: 'documents' | 'showMergedProducts';
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['VarietyCollection']>> {
+  ): Promise<PaginatedResponse<components['schemas']['Variety']>> {
     const query = new URLSearchParams();
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['VarietyCollection']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['Variety']>>(
       this.spec,
       path,
       options
@@ -53,13 +53,13 @@ export class ProductsApi {
       embed?: 'documents' | 'showMergedProducts';
     },
     options?: RequestOptions
-  ): Promise<components['schemas']['VarietyCollection'][]> {
+  ): Promise<components['schemas']['Variety'][]> {
     const query = new URLSearchParams();
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['VarietyCollection']>(this.spec, path, options);
+    return this.client.getAll<components['schemas']['Variety']>(this.spec, path, options);
   }
 
   /**
@@ -158,7 +158,7 @@ export class ProductsApi {
       countryCode?: string;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>> {
+  ): Promise<PaginatedResponse<components['schemas']['ReferenceVariety']>> {
     const query = new URLSearchParams();
     if (params?.searchString !== undefined) query.set('searchString', String(params.searchString));
     if (params?.cropName !== undefined) query.set('cropName', String(params.cropName));
@@ -169,7 +169,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
     const path = `/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ReferenceVarietyCollection']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['ReferenceVariety']>>(
       this.spec,
       path,
       options
@@ -198,9 +198,9 @@ export class ProductsApi {
   async listDocuments(
     erid: string,
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['DocumentCollection']>> {
+  ): Promise<PaginatedResponse<components['schemas']['Document']>> {
     const path = `/varieties/${erid}/documents`;
-    return this.client.get<PaginatedResponse<components['schemas']['DocumentCollection']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['Document']>>(
       this.spec,
       path,
       options
