@@ -13,7 +13,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
-    # contents: write for softprops/action-gh-release; id-token + attestations for cosign + build provenance.
+    # contents: write for softprops/action-gh-release; id-token + attestations for build provenance.
     permissions:
       contents: write
       id-token: write
@@ -72,29 +72,8 @@ jobs:
         with:
           subject-path: '*.tgz'
 
-      - name: Install cosign
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-        with:
-          # Pin to the last cosign v2.x. The installer otherwise defaults to the
-          # latest cosign, and v3.x changed `sign-blob`: the legacy
-          # --output-signature/--output-certificate form now tries to write a
-          # Sigstore bundle to an empty path and fails ("create bundle file:
-          # open : no such file or directory"), which broke the v2.1.11 release.
-          # TODO: migrate signing to the cosign v3 bundle format and drop this pin.
-          cosign-release: 'v2.5.3'
-
-      - name: Sign artifacts with Sigstore
-        run: |
-          for file in *.tgz; do
-            cosign sign-blob --yes --output-signature "${file}.sig" --output-certificate "${file}.pem" "$file"
-          done
-        env:
-          COSIGN_EXPERIMENTAL: "true"
-
       - name: Generate checksums
-        run: |
-          sha256sum *.tgz > checksums-sha256.txt
-          cosign sign-blob --yes --output-signature checksums-sha256.txt.sig --output-certificate checksums-sha256.txt.pem checksums-sha256.txt
+        run: sha256sum *.tgz > checksums-sha256.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
@@ -104,8 +83,6 @@ jobs:
           generate_release_notes: false
           files: |
             *.tgz
-            *.sig
-            *.pem
             checksums-sha256.txt
 
   publish:
