@@ -2362,8 +2362,7 @@ components:
             type: "object"
             properties:
               values:
-                items:
-                  $ref: "#/components/schemas/equipmentForList"
+                type: "array"
           examples:
             No Header:
               value:
@@ -2511,8 +2510,7 @@ components:
             type: "object"
             properties:
               values:
-                items:
-                  $ref: "#/components/schemas/equipment"
+                type: "array"
           examples:
             No Header:
               value:
