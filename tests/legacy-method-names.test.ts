@@ -59,7 +59,7 @@ describe('legacy-method-names', () => {
     it('get* containing "all" anywhere is excluded from the get branch by the includes("all") guard', () => {
       // Preserved quirk: the guard is `!id.includes('all')`, not a narrower
       // `!id.startsWith('getall')`. isCollection: true makes this
-      // discriminating -- if the guard were broken this would incorrectly
+      // discriminating: if the guard were broken this would incorrectly
       // return 'get' instead of falling through to the HTTP-method
       // fallback's 'list'.
       assert.strictEqual(
@@ -245,7 +245,7 @@ describe('legacy-method-names', () => {
     });
 
     // ORDER SENSITIVITY (deliberate): this test freezes the bug this branch
-    // exists to remove. It documents CURRENT behavior only -- feeding the
+    // exists to remove. It documents CURRENT behavior only. Feeding the
     // same two colliding ops in reversed order silently swaps which one
     // gets the bare 'get' name. This test (and the module it tests) is
     // deleted once the manifest-based naming lands in a later commit.
@@ -287,7 +287,7 @@ describe('legacy-method-names', () => {
     // committed src/api/equipment.ts. GET /equipment and GET /equipment/{id}
     // have no operationId in the spec, so parseSpec's synthesized fallback
     // ("get" + path letters only) applies. GET /equipmentMakes is not one of
-    // the five asserted names below -- it is required scaffolding: it is
+    // the five asserted names below. It is required scaffolding: it is
     // what claims the bare 'list' name first, which is why GET
     // /equipmentISGTypes collides into 'listEquipmentisgtypes' instead of
     // staying 'list'.
