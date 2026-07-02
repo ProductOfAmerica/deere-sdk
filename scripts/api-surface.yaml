@@ -372,13 +372,13 @@ specs:
     - op: GET /varieties/{erid}/documents
       name: listDocuments
     - op: PATCH /chemicals/{erid}/setOverridesForOrg/{organizationId}
-      name: patchSetOverridesForOrg
+      name: patchChemicalsSetOverridesForOrg
     - op: PATCH /fertilizers/{erid}/setOverridesForOrg/{organizationId}
       name: patchFertilizersSetOverridesForOrg
     - op: PATCH /varieties/{erid}/setOverridesForOrg/{organizationId}
       name: patch
     - op: POST /chemicals/{erid}/associateToOrg/{organizationId}
-      name: createAssociateToOrg
+      name: createChemicalsAssociateToOrg
     - op: POST /fertilizers/{erid}/associateToOrg/{organizationId}
       name: createFertilizersAssociateToOrg
     - op: POST /organizations/{organizationId}/chemicals

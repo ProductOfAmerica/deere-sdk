@@ -19,6 +19,7 @@ import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
   refName,
+  restoreEquipmentItemRefs,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -730,6 +731,20 @@ function fixSpec(
   const strippedDiscriminators = stripTypeDiscriminators(spec);
   if (strippedDiscriminators > 0) {
     console.log(`  Stripped ${strippedDiscriminators} @type discriminator(s)`);
+  }
+
+  // Restore the two equipment list-envelope item refs that JD's 2026-07
+  // equipment-doc edit dropped (GetEquipment -> equipmentForList,
+  // GetEquipmentById -> equipment), which collapsed EquipmentApi.get and
+  // getEquipment returns to unknown. Guarded to equipment.yaml and
+  // self-neutralizing (see restoreEquipmentItemRefs); no-ops once JD repairs
+  // the doc or removes the target schemas. Runs in the schema-mutation region,
+  // after the discriminator strip and before the server-block transforms.
+  if (specName === 'equipment') {
+    const restoredItemRefs = restoreEquipmentItemRefs(spec);
+    if (restoredItemRefs > 0) {
+      console.log(`  Restored ${restoredItemRefs} equipment list-envelope item ref(s)`);
+    }
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs

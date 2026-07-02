@@ -860,6 +860,8 @@ components:
             properties:
               values:
                 type: "array"
+                items:
+                  $ref: "#/components/schemas/equipmentForList"
           examples:
             No Header:
               value:
@@ -1008,6 +1010,8 @@ components:
             properties:
               values:
                 type: "array"
+                items:
+                  $ref: "#/components/schemas/equipment"
           examples:
             No Header:
               value:

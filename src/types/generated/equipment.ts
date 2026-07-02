@@ -1829,7 +1829,7 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown[];
+          values?: components['schemas']['equipmentForList'][];
         };
       };
     };
@@ -1840,7 +1840,7 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown[];
+          values?: components['schemas']['equipment'][];
         };
       };
     };

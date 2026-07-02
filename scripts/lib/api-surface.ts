@@ -115,9 +115,12 @@ function describeType(value: unknown): string {
 export function loadApiSurface(filePath: string = DEFAULT_SURFACE_PATH): ApiSurface {
   if (!existsSync(filePath)) {
     fail(
-      `manifest file missing at ${filePath}. Seed it with scripts/seed-api-surface.ts ` +
-        `(pnpm tsx scripts/seed-api-surface.ts) and commit scripts/api-surface.yaml. ` +
-        `The generator never auto-seeds: seeding from freshly fetched specs is the incident this pipeline prevents.`
+      `manifest file missing at ${filePath}. scripts/api-surface.yaml is committed and ` +
+        `version-controlled; restore it from git history (for example, ` +
+        `git restore --source <ref> scripts/api-surface.yaml) rather than re-deriving it from ` +
+        `the current specs. The generator never auto-seeds: re-deriving names from freshly ` +
+        `fetched specs could pin names an upstream reorder has already rebound, which is the ` +
+        `incident this pipeline prevents.`
     );
   }
   let raw: string;

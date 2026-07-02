@@ -105,7 +105,7 @@ export class ProductsApi {
    * that can be overridden.
    * @generated from POST /chemicals/{erid}/associateToOrg/{organizationId}
    */
-  async createAssociateToOrg(
+  async createChemicalsAssociateToOrg(
     erid: string,
     organizationId: string,
     data: components['schemas']['PostReferenceChemical'],
@@ -143,7 +143,7 @@ export class ProductsApi {
    * endpoints will include the attributes that can be overridden.
    * @generated from PATCH /chemicals/{erid}/setOverridesForOrg/{organizationId}
    */
-  async patchSetOverridesForOrg(
+  async patchChemicalsSetOverridesForOrg(
     erid: string,
     organizationId: string,
     data: components['schemas']['CommonReferenceChemical'],

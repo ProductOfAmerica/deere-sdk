@@ -121,14 +121,17 @@ specs:
     ]);
   });
 
-  it('throws a clear error when the manifest file is missing (points at the seed script)', () => {
+  it('throws a clear error when the manifest file is missing (points at git history, not a seed script)', () => {
     withTempDir((dir) => {
       const missing = join(dir, 'nope.yaml');
       assert.throws(
         () => loadApiSurface(missing),
         (err: Error) => {
           assert.match(err.message, /manifest file missing/);
-          assert.match(err.message, /seed-api-surface\.ts/);
+          assert.match(err.message, /committed and version-controlled/);
+          assert.match(err.message, /git history/);
+          // The seed script was deleted; the remediation must not point at it.
+          assert.doesNotMatch(err.message, /seed-api-surface/);
           assert.match(err.message, /nope\.yaml/);
           return true;
         }

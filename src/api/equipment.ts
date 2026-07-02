@@ -47,7 +47,7 @@ export class EquipmentApi {
       itemLimit?: number;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<unknown>> {
+  ): Promise<PaginatedResponse<components['schemas']['equipmentForList']>> {
     const query = new URLSearchParams();
     if (params?.ids !== undefined) query.set('ids', String(params.ids));
     if (params?.serialNumbers !== undefined)
@@ -65,7 +65,11 @@ export class EquipmentApi {
     if (params?.itemLimit !== undefined) query.set('itemLimit', String(params.itemLimit));
     const queryString = query.toString();
     const path = `/equipment${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
+    return this.client.get<PaginatedResponse<components['schemas']['equipmentForList']>>(
+      this.spec,
+      path,
+      options
+    );
   }
 
   /**
@@ -80,12 +84,12 @@ export class EquipmentApi {
       embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
     },
     options?: RequestOptions
-  ): Promise<unknown> {
+  ): Promise<components['schemas']['equipment']> {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
     const path = `/equipment/${id}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(this.spec, path, options);
+    return this.client.get<components['schemas']['equipment']>(this.spec, path, options);
   }
 
   /**
