@@ -4,8 +4,8 @@
  * The library is the committed operation-identity manifest: it maps
  * (HTTP method, normalized path) to public method names so an upstream spec
  * reorder cannot silently rebind a name. These tests cover loader validation,
- * deterministic serialization + round-trip, shared op extraction, the
- * deterministic name proposer, order-independent resolution, and run
+ * deterministic serialization + round-trip, the deterministic name proposer,
+ * order-independent resolution, and run
  * classification. Style follows tests/fix-specs-embed.test.ts (node:test +
  * node:assert + mkdtempSync for the file-backed cases) and tests/fuzz.test.ts
  * (fast-check properties).
@@ -21,7 +21,6 @@ import {
   type ApiSurface,
   buildSyncReport,
   classifyRun,
-  extractOps,
   loadApiSurface,
   normalizePathPattern,
   opKey,
@@ -348,51 +347,6 @@ describe('serializeApiSurface', () => {
 });
 
 // ---------------------------------------------------------------------------
-// extractOps
-// ---------------------------------------------------------------------------
-
-describe('extractOps', () => {
-  it('synthesizes operationIds, flags isCollection, and honors explicit ids', () => {
-    const spec = {
-      paths: {
-        '/widgets': {
-          get: {}, // no operationId -> synthesized; collection GET
-          post: { operationId: 'createWidget' }, // POST -> not a collection
-        },
-        '/widgets/{id}': {
-          get: { operationId: 'getWidgetById' }, // item GET -> not a collection
-        },
-      },
-    };
-    const ops = extractOps(spec);
-    const byKey = new Map(ops.map((o) => [`${o.method.toUpperCase()} ${o.path}`, o]));
-
-    const list = byKey.get('GET /widgets');
-    assert.ok(list);
-    assert.strictEqual(list.operationId, 'getwidgets');
-    assert.strictEqual(list.isCollection, true);
-
-    const create = byKey.get('POST /widgets');
-    assert.ok(create);
-    assert.strictEqual(create.operationId, 'createWidget');
-    assert.strictEqual(create.isCollection, false);
-
-    const item = byKey.get('GET /widgets/{id}');
-    assert.ok(item);
-    assert.strictEqual(item.operationId, 'getWidgetById');
-    assert.strictEqual(item.isCollection, false);
-  });
-
-  it('tolerates missing / empty / malformed paths', () => {
-    assert.deepStrictEqual(extractOps({}), []);
-    assert.deepStrictEqual(extractOps({ paths: {} }), []);
-    assert.deepStrictEqual(extractOps({ paths: null }), []);
-    assert.deepStrictEqual(extractOps(null), []);
-    assert.deepStrictEqual(extractOps('nope'), []);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // proposeName
 // ---------------------------------------------------------------------------
 
@@ -478,6 +432,22 @@ describe('proposeName', () => {
     const op: SurfaceOp = { operationId: '', method: 'get', path: '/{id}', isCollection: false };
     assert.strictEqual(proposeName(op, new Set()), 'getItem');
     assert.strictEqual(proposeName(op, new Set(['getItem'])), 'getItemById');
+  });
+
+  it('falls back to Item for an all-punctuation segment instead of a bare verb', () => {
+    // A non-param segment with no alphanumerics strips to '' under capHump,
+    // which would otherwise leave a bare "delete"; the suffix falls back to Item.
+    const op: SurfaceOp = { operationId: '', method: 'delete', path: '/!!!', isCollection: false };
+    assert.strictEqual(proposeName(op, new Set()), 'deleteItem');
+    // The By<Param> tiebreak still chains off the Item fallback.
+    const withParam: SurfaceOp = {
+      operationId: '',
+      method: 'delete',
+      path: '/!!!/{id}',
+      isCollection: false,
+    };
+    assert.strictEqual(proposeName(withParam, new Set()), 'deleteItem');
+    assert.strictEqual(proposeName(withParam, new Set(['deleteItem'])), 'deleteItemById');
   });
 
   it('throws when every candidate is taken, naming the op and the candidates', () => {

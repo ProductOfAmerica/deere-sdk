@@ -200,6 +200,39 @@ describe('fix-specs utilities', () => {
       });
     });
 
+    it('restores through the vnd.deere.axiom media type, preferring it over application/json', () => {
+      // The generator resolves a response's schema from the vnd media type first
+      // (extractSchemaFromContent prefers application/vnd.deere.axiom.v3+json),
+      // so restoreEquipmentItemRefs must land the ref there. Declare BOTH media
+      // types and prove only the preferred vnd envelope is touched.
+      const vndValues: ValuesEnvelope = { type: 'array' };
+      const jsonValues: ValuesEnvelope = { type: 'array' };
+      const getEquipment = {
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            schema: { type: 'object', properties: { values: vndValues } },
+          },
+          'application/json': {
+            schema: { type: 'object', properties: { values: jsonValues } },
+          },
+        },
+      };
+      const spec = {
+        components: {
+          schemas: { equipmentForList: { type: 'object' } },
+          responses: { GetEquipment: getEquipment },
+        },
+      };
+
+      const restored = restoreEquipmentItemRefs(spec);
+
+      assert.strictEqual(restored, 1);
+      // The preferred vnd envelope gets the ref...
+      assert.deepStrictEqual(vndValues.items, { $ref: '#/components/schemas/equipmentForList' });
+      // ...and the application/json envelope is left untouched.
+      assert.strictEqual(jsonValues.items, undefined);
+    });
+
     it('no-ops when the item ref is already present (does not overwrite a repaired doc)', () => {
       const getEquipment = envelopeResponse({
         items: { $ref: '#/components/schemas/equipmentForList' },

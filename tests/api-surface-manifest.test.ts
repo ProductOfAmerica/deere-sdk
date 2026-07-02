@@ -7,9 +7,10 @@
  * rebind if an upstream spec ever reorders its paths block.
  *
  * Tests run from the repo root, so the default cwd-based path in
- * loadApiSurface() resolves to the real scripts/api-surface.yaml. The
- * manifest itself is produced by scripts/seed-api-surface.ts (a one-time
- * entrypoint, not unit tested); see that file for provenance.
+ * loadApiSurface() resolves to the real scripts/api-surface.yaml. The manifest
+ * was originally seeded by a one-time script (since removed) and is now
+ * maintained by generate-sdk's additive auto-append; see the file's git history
+ * for its provenance.
  *
  * Pinned pairs were verified against the "@generated from" JSDoc lines in
  * the committed src/api/field-operations-api.ts, src/api/equipment.ts,

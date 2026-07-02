@@ -4,6 +4,19 @@
  */
 
 /**
+ * True when `value` is a non-null, plain object (a JSON record), excluding
+ * `null` (which is `typeof 'object'`) and arrays. Narrows to
+ * `Record<string, unknown>` so callers can index keys safely. This is the one
+ * structural guard shared across the spec pipeline's tree walks: the
+ * multi-doc merge, the canonicalizer, fetch-time validation, and the
+ * api-surface loader all classified objects identically, so they share this
+ * definition rather than each keeping a private copy.
+ */
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
  * Last path segment of a JSON `$ref`.
  * e.g. "#/components/schemas/Foo" -> "Foo"
  */

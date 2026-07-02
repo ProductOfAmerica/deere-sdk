@@ -172,6 +172,37 @@ describe('mergeSpecDocs: paths', () => {
     );
   });
 
+  it('reports a differing non-method path-item member as a member, not a "method"', () => {
+    // A path item can carry non-method members (description, parameters, ...).
+    // When one differs across docs the conflict must name it as a "path item
+    // member", not mislabel it a method with an uppercased key.
+    const primary = {
+      info: {},
+      paths: { '/x': { get: { operationId: 'getX' }, description: 'one' } },
+    };
+    const secondary = {
+      info: {},
+      paths: { '/x': { description: 'two' } },
+    };
+    assert.throws(
+      () =>
+        mergeSpecDocs('products', [
+          { endPointName: 'varieties', id: 1, doc: primary },
+          { endPointName: 'chemicals', id: 2, doc: secondary },
+        ]),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /path item member/);
+        assert.match(error.message, /"description"/);
+        // Guard against regressing to the old wording, which uppercased the key
+        // and called every conflicting member a "method".
+        assert.doesNotMatch(error.message, /DESCRIPTION/);
+        assert.doesNotMatch(error.message, /path and method/);
+        return true;
+      }
+    );
+  });
+
   it('keeps normalized-pattern siblings as two distinct paths without error', () => {
     // /x/{name} and /x/{id} share a normalized pattern but are different literal
     // paths; the manifest's ambiguous-group matching resolves them downstream.
@@ -487,6 +518,31 @@ describe('mergeSpecDocs: servers', () => {
     assert.deepStrictEqual(merged.servers, [{ url: 'https://sandboxapi.deere.com' }]);
   });
 
+  it('treats an apex deere.com host (no subdomain) as platform-family', () => {
+    // A server url whose host is exactly deere.com (no subdomain label) must
+    // count as platform-family via the label-boundary check, so pairing it with
+    // a platform block does not throw, the primary (apex) wins, and nothing is
+    // rejected as junk.
+    const primary = { info: {}, paths: {}, servers: [{ url: 'https://deere.com/platform' }] };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const warnings: string[] = [];
+    const merged = mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'chemicals', id: 2, doc: secondary },
+      ],
+      { onWarning: (message: string) => warnings.push(message) }
+    ) as MergedSpec;
+
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://deere.com/platform' }]);
+    assert.deepStrictEqual(warnings, [], 'an apex deere host is not rejected, so no warning');
+  });
+
   it('resolves a templated + static platform mix to the primary block', () => {
     const primary = {
       info: {},
@@ -547,6 +603,68 @@ describe('mergeSpecDocs: servers', () => {
     assert.ok(/products/.test(warnings[0]), 'warning names the slug');
     assert.ok(/documents/.test(warnings[0]), 'warning names the endPointName');
     assert.ok(/server\.com/.test(warnings[0]), 'warning names the placeholder url');
+  });
+
+  it('warns when a doc declares only url-less/malformed server entries', () => {
+    // A servers block whose entries carry no usable url string declares nothing,
+    // exactly like a placeholder-only block, so it must warn rather than be
+    // dropped to non-declaring silently.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ description: 'no url here' }, {}],
+    };
+    const warnings: string[] = [];
+    const merged = mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'documents', id: 2, doc: secondary },
+      ],
+      { onWarning: (message: string) => warnings.push(message) }
+    ) as MergedSpec;
+
+    // The url-less block is non-declaring; the primary block wins.
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
+    // But it is surfaced, naming the slug and the offending document.
+    assert.strictEqual(warnings.length, 1);
+    assert.ok(/products/.test(warnings[0]), 'warning names the slug');
+    assert.ok(/documents/.test(warnings[0]), 'warning names the endPointName');
+  });
+
+  it('labels an http:// deere host as non-https, not "no deere.com host"', () => {
+    // An http (non-https) deere host is rejected for its scheme, not its host.
+    // The warning must name the offending url with the real reason and must not
+    // misstate that there is no deere.com host.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'http://sandboxapi.deere.com/platform' }],
+    };
+    const warnings: string[] = [];
+    mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'documents', id: 2, doc: secondary },
+      ],
+      { onWarning: (message: string) => warnings.push(message) }
+    );
+
+    assert.strictEqual(warnings.length, 1);
+    assert.ok(/sandboxapi\.deere\.com/.test(warnings[0]), 'names the offending url');
+    assert.ok(/non-https/.test(warnings[0]), 'states the real reason');
+    assert.ok(!/no deere\.com host/.test(warnings[0]), 'does not misstate the reason');
   });
 
   it('keeps two identical OTHER-family blocks without throwing', () => {

@@ -25,6 +25,7 @@ import * as yaml from 'yaml';
 import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
 import { canonicalizeSpec, stringifySpec } from './lib/spec-canonicalize.js';
 import { type FetchedDoc, mergeSpecDocs } from './lib/spec-merge.js';
+import { isRecord } from './lib/spec-utils.js';
 
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');
@@ -114,10 +115,6 @@ function parseSlugDocs(slug: string, docs: ValidatedFetchedDoc[]): FetchedDoc[] 
     console.error(`  Failed to parse fetched YAML for ${where}: ${error}`);
     return null;
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**

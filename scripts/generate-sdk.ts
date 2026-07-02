@@ -15,6 +15,7 @@ import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 import {
   buildSyncReport,
+  displayOp,
   loadApiSurface,
   normalizePathPattern,
   resolveMethodNames,
@@ -540,7 +541,8 @@ function generateApiClass(api: GeneratedApi, names: Map<string, string>): string
     .map((op) => {
       // resolveMethodNames keys its map by each op's raw display string
       // (`METHOD /path` with real param names), NOT the normalized opKey.
-      const key = `${op.method.toUpperCase()} ${op.path}`;
+      // displayOp is the shared builder of that exact key.
+      const key = displayOp(op);
       const methodName = names.get(key);
       if (!methodName) {
         throw new Error(

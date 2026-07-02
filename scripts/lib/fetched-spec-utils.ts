@@ -1,5 +1,6 @@
 import * as yaml from 'yaml';
 import { redactSpecContent } from './spec-redactor.js';
+import { isRecord } from './spec-utils.js';
 
 export interface ValidatedFetchedDoc {
   slug: string;
@@ -7,10 +8,6 @@ export interface ValidatedFetchedDoc {
   name: string;
   endPointName: string;
   ymlContent: string;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function isOpenApiDocument(content: string): boolean {
