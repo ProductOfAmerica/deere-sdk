@@ -191,21 +191,41 @@ specs:
     );
   });
 
-  it('throws on duplicate normalized opKey within a spec (param-name churn collapses)', () => {
+  it('loads sibling entries sharing a normalized key when their raw paths differ', () => {
+    // crop-types declares GET /cropTypes/{name} and GET /cropTypes/{id} as two
+    // distinct operations. Both normalize to GET /cropTypes/{_}, but their raw
+    // paths differ, so the manifest may legally carry both: param names are the
+    // only feature distinguishing these siblings.
+    const surface = loadYaml(`
+version: 1
+specs:
+  crop-types:
+    - op: GET /cropTypes/{name}
+      name: get
+    - op: GET /cropTypes/{id}
+      name: getCroptypes
+`);
+    assert.deepStrictEqual(surface.specs['crop-types'], [
+      { op: 'GET /cropTypes/{name}', name: 'get' },
+      { op: 'GET /cropTypes/{id}', name: 'getCroptypes' },
+    ]);
+  });
+
+  it('throws on a duplicate raw op string within a spec (identical method + exact path)', () => {
     assert.throws(
       () =>
         loadYaml(`
 version: 1
 specs:
-  organizations:
-    - op: GET /orgs/{orgId}
-      name: a
-    - op: GET /orgs/{organizationId}
-      name: b
+  crop-types:
+    - op: GET /cropTypes/{name}
+      name: getA
+    - op: GET /cropTypes/{name}
+      name: getB
 `),
       (err: Error) => {
-        assert.match(err.message, /spec "organizations"/);
-        assert.match(err.message, /duplicate operation identity/);
+        assert.match(err.message, /spec "crop-types"/);
+        assert.match(err.message, /duplicate operation/);
         return true;
       }
     );
@@ -315,6 +335,9 @@ describe('serializeApiSurface', () => {
     assert.match(out, /removed/);
     assert.match(out, /camel/);
     assert.match(out, /listAll/);
+    // The identity paragraph states the sibling-param exception (crop-types).
+    assert.match(out, /sibling operations/);
+    assert.match(out, /cropTypes/);
     assert.ok(!out.includes('—') && !out.includes('–'), 'no em or en dashes in header');
     assert.ok(!out.includes(' -- '), 'no dash-substitute in header');
   });
@@ -499,9 +522,113 @@ describe('resolveMethodNames', () => {
     ];
     const { names, newEntries, missing } = resolveMethodNames('field-operations-api', ops, surface);
     // Heuristic would say getFieldOperations; the manifest pins it to get.
-    assert.strictEqual(names.get('GET /fieldOperations/{_}'), 'get');
+    // names is keyed by the op's raw path (real param names), not the normalized key.
+    assert.strictEqual(names.get('GET /fieldOperations/{operationId}'), 'get');
     assert.deepStrictEqual(newEntries, []);
     assert.deepStrictEqual(missing, []);
+  });
+
+  it('pins both sibling ops sharing a normalized key by exact raw path (crop-types shape)', () => {
+    const surface: ApiSurface = {
+      version: 1,
+      specs: {
+        'crop-types': [
+          { op: 'GET /cropTypes/{name}', name: 'get' },
+          { op: 'GET /cropTypes/{id}', name: 'getCroptypes' },
+        ],
+      },
+    };
+    const ops: SurfaceOp[] = [
+      { operationId: 'a', method: 'get', path: '/cropTypes/{name}', isCollection: false },
+      { operationId: 'b', method: 'get', path: '/cropTypes/{id}', isCollection: false },
+    ];
+    const { names, newEntries, missing } = resolveMethodNames('crop-types', ops, surface);
+    assert.strictEqual(names.get('GET /cropTypes/{name}'), 'get');
+    assert.strictEqual(names.get('GET /cropTypes/{id}'), 'getCroptypes');
+    assert.deepStrictEqual(newEntries, []);
+    assert.deepStrictEqual(missing, []);
+  });
+
+  it('surfaces a param rename inside an ambiguous group as breaking (exact match only)', () => {
+    // Manifest still declares both siblings; upstream renamed {id} -> {code}.
+    const surface: ApiSurface = {
+      version: 1,
+      specs: {
+        'crop-types': [
+          { op: 'GET /cropTypes/{name}', name: 'get' },
+          { op: 'GET /cropTypes/{id}', name: 'getCroptypes' },
+        ],
+      },
+    };
+    const ops: SurfaceOp[] = [
+      { operationId: 'a', method: 'get', path: '/cropTypes/{name}', isCollection: false },
+      { operationId: 'b', method: 'get', path: '/cropTypes/{code}', isCollection: false },
+    ];
+    const { names, newEntries, missing } = resolveMethodNames('crop-types', ops, surface);
+    // {name} still pins by exact match.
+    assert.strictEqual(names.get('GET /cropTypes/{name}'), 'get');
+    // {id} entry has no exact op -> missing (the breaking signal).
+    assert.deepStrictEqual(missing, [{ op: 'GET /cropTypes/{id}', name: 'getCroptypes' }]);
+    // {code} op has no exact entry -> new.
+    assert.strictEqual(newEntries.length, 1);
+    assert.strictEqual(newEntries[0].op, 'GET /cropTypes/{code}');
+    assert.strictEqual(names.get('GET /cropTypes/{code}'), newEntries[0].name);
+    assert.strictEqual(classifyRun({ newEntries, missing }), 'breaking');
+  });
+
+  it('absorbs a param rename in a single-entry group (orgId -> organizationId)', () => {
+    const surface: ApiSurface = {
+      version: 1,
+      specs: {
+        'field-operations-api': [{ op: 'GET /organizations/{orgId}/fields', name: 'listFields' }],
+      },
+    };
+    const ops: SurfaceOp[] = [
+      {
+        operationId: 'x',
+        method: 'get',
+        path: '/organizations/{organizationId}/fields',
+        isCollection: true,
+      },
+    ];
+    const { names, newEntries, missing } = resolveMethodNames('field-operations-api', ops, surface);
+    // One entry + one op sharing a normalized key: the rename is absorbed silently.
+    assert.strictEqual(names.get('GET /organizations/{organizationId}/fields'), 'listFields');
+    assert.deepStrictEqual(newEntries, []);
+    assert.deepStrictEqual(missing, []);
+  });
+
+  it('ambiguity growth: one entry vs two ops pins the exact match, flags the other new', () => {
+    const surface: ApiSurface = {
+      version: 1,
+      specs: { spec: [{ op: 'GET /x/{a}', name: 'foo' }] },
+    };
+    const ops: SurfaceOp[] = [
+      { operationId: '1', method: 'get', path: '/x/{a}', isCollection: false },
+      { operationId: '2', method: 'get', path: '/x/{b}', isCollection: false },
+    ];
+    const { names, newEntries, missing } = resolveMethodNames('spec', ops, surface);
+    assert.strictEqual(names.get('GET /x/{a}'), 'foo'); // exact match pins
+    assert.deepStrictEqual(missing, []);
+    assert.strictEqual(newEntries.length, 1);
+    assert.strictEqual(newEntries[0].op, 'GET /x/{b}'); // no exact entry -> new
+    assert.strictEqual(classifyRun({ newEntries, missing }), 'additive');
+  });
+
+  it('ambiguity growth with no exact match: the entry is missing and both ops are new', () => {
+    const surface: ApiSurface = {
+      version: 1,
+      specs: { spec: [{ op: 'GET /x/{a}', name: 'foo' }] },
+    };
+    const ops: SurfaceOp[] = [
+      { operationId: '1', method: 'get', path: '/x/{b}', isCollection: false },
+      { operationId: '2', method: 'get', path: '/x/{c}', isCollection: false },
+    ];
+    const { newEntries, missing } = resolveMethodNames('spec', ops, surface);
+    // Two ops make the group ambiguous; the single entry has no exact-path op.
+    assert.deepStrictEqual(missing, [{ op: 'GET /x/{a}', name: 'foo' }]);
+    assert.deepStrictEqual(newEntries.map((e) => e.op).sort(), ['GET /x/{b}', 'GET /x/{c}']);
+    assert.strictEqual(classifyRun({ newEntries, missing }), 'breaking');
   });
 
   it('proposes names for new ops and reports them as newEntries', () => {
@@ -638,10 +765,11 @@ describe('resolveMethodNames properties', () => {
             s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
             return s % 2 === 0;
           })
-          .map((op) => ({
-            op: `${op.method.toUpperCase()} ${op.path}`,
-            name: base.get(opKey(op.method, op.path)) as string,
-          }));
+          .map((op) => {
+            // names is keyed by the op's raw path, so pin against that key.
+            const raw = `${op.method.toUpperCase()} ${op.path}`;
+            return { op: raw, name: base.get(raw) as string };
+          });
         const surface: ApiSurface = { version: 1, specs: { spec: pinned } };
         assert.deepStrictEqual(
           namesObject('spec', ops, surface),
@@ -655,6 +783,105 @@ describe('resolveMethodNames properties', () => {
   it('resolved names never collide with each other', () => {
     fc.assert(
       fc.property(opsArb, (ops) => {
+        const { names } = resolveMethodNames('spec', ops, { version: 1, specs: {} });
+        const values = [...names.values()];
+        assert.strictEqual(new Set(values).size, values.length);
+      }),
+      { numRuns: 60 }
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property tests with SIBLING ops (same normalized key, distinct param names).
+// These exercise the ambiguous-group matching branch: crop-types is the real
+// case where two operations differ only by path-param name.
+// ---------------------------------------------------------------------------
+
+/** Param names drawn from a set disjoint from paramArb, so a sibling's last
+ *  param always differs from the base's and their raw paths are guaranteed
+ *  distinct (never a same-raw-path duplicate). */
+const siblingParamArb = fc.constantFrom('name', 'code', 'key');
+
+interface SiblingShape {
+  base: OpShape;
+  siblingParam: string | null;
+}
+
+const siblingShapeArb = fc.record<SiblingShape>({
+  base: shapeArb,
+  siblingParam: fc.option(siblingParamArb, { nil: null }),
+});
+
+/**
+ * Expand shapes into ops. For any base op that ends in a path param, optionally
+ * emit a SIBLING op with the last param renamed. The sibling shares the base's
+ * normalized key (all params collapse to {_}) but has a distinct raw path, so
+ * some generated ops share a normalized key while others do not.
+ */
+function shapesToOpsWithSiblings(shapes: SiblingShape[]): SurfaceOp[] {
+  const ops: SurfaceOp[] = [];
+  shapes.forEach((shape, i) => {
+    const base = shapeToOp(i, shape.base);
+    ops.push(base);
+    if (shape.siblingParam && base.path.endsWith('}')) {
+      const siblingPath = base.path.replace(/\{[^}]+\}$/, `{${shape.siblingParam}}`);
+      ops.push({
+        operationId: `op${i}sibling`,
+        method: base.method,
+        path: siblingPath,
+        isCollection: false,
+      });
+    }
+  });
+  return ops;
+}
+
+const opsWithSiblingsArb = fc
+  .array(siblingShapeArb, { minLength: 1, maxLength: 8 })
+  .map(shapesToOpsWithSiblings);
+
+describe('resolveMethodNames properties with sibling ops', () => {
+  it('names are invariant under ops order when siblings share a normalized key (empty surface)', () => {
+    fc.assert(
+      fc.property(opsWithSiblingsArb, fc.integer(), (ops, seed) => {
+        const surface: ApiSurface = { version: 1, specs: {} };
+        assert.deepStrictEqual(
+          namesObject('spec', ops, surface),
+          namesObject('spec', seededShuffle(ops, seed), surface)
+        );
+      }),
+      { numRuns: 60 }
+    );
+  });
+
+  it('names are invariant under ops order with siblings (surface pinning a random subset)', () => {
+    fc.assert(
+      fc.property(opsWithSiblingsArb, fc.integer(), fc.integer(), (ops, pinSeed, shufSeed) => {
+        const base = resolveMethodNames('spec', ops, { version: 1, specs: {} }).names;
+        let s = pinSeed >>> 0 || 1;
+        const pinned = ops
+          .filter(() => {
+            s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+            return s % 2 === 0;
+          })
+          .map((op) => {
+            const raw = `${op.method.toUpperCase()} ${op.path}`;
+            return { op: raw, name: base.get(raw) as string };
+          });
+        const surface: ApiSurface = { version: 1, specs: { spec: pinned } };
+        assert.deepStrictEqual(
+          namesObject('spec', ops, surface),
+          namesObject('spec', seededShuffle(ops, shufSeed), surface)
+        );
+      }),
+      { numRuns: 60 }
+    );
+  });
+
+  it('resolved names never collide even with sibling ops', () => {
+    fc.assert(
+      fc.property(opsWithSiblingsArb, (ops) => {
         const { names } = resolveMethodNames('spec', ops, { version: 1, specs: {} });
         const values = [...names.values()];
         assert.strictEqual(new Set(values).size, values.length);
