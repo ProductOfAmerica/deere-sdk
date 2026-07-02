@@ -13,6 +13,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
+import { normalizePathPattern } from './lib/api-surface.js';
 import { resolveLegacyMethodNames } from './lib/legacy-method-names.js';
 import {
   collectionItemType,
@@ -696,16 +697,6 @@ interface HateoasEntry {
   parentPath: string;
   rel: string;
   parentSpec: string;
-}
-
-/**
- * Normalize a path pattern by replacing every `{paramName}` with `{_}` so
- * path-param name differences (e.g. `{orgId}` vs `{organizationId}`) collapse
- * into the same key. Used for pathOwner index lookups — HATEOAS entries
- * should match regardless of which variable name a spec uses.
- */
-function normalizePathPattern(path: string): string {
-  return path.replace(/\{[^}]+\}/g, '{_}');
 }
 
 /**
