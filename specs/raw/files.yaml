@@ -1,610 +1,1069 @@
-openapi: 3.0.0
+openapi: "3.0.0"
 info:
-  description: This is file management service for managing files
-  version: 4.0.0
-  title: Files
+  description: "This is file management service for managing files"
+  version: "4.0.0"
+  title: "Files"
 servers:
-  - url: 'https://api.deere.com/platform'
-    description: 'Production API endpoint'
-
-  - url: 'https://apicert.deere.com/platform'
-    description: 'Certification API endpoint'
-
-  - url: 'https://apiqa.tal.deere.com/platform'
-    description: 'Quality API endpoint'
-
-  - url: 'https://apidev.tal.deere.com/platform'
-    description: 'Development API endpoint'
+  - url: "https://api.deere.com/platform"
+    description: "Production API endpoint"
+  - url: "https://apicert.deere.com/platform"
+    description: "Certification API endpoint"
+  - url: "https://apiqa.tal.deere.com/platform"
+    description: "Quality API endpoint"
+  - url: "https://apidev.tal.deere.com/platform"
+    description: "Development API endpoint"
 paths:
-  '/files':
+  /fileTransfers:
     get:
-      summary: List Files
-      description: 'This resource retrieves the list of available files. For each file, the response will link to the following resources:
-                     <ul>
-                     <li><strong>owningOrganization</strong>: View the org that owns the file.</li>
-                     <li><strong>partnerships</strong>: View the partners this file is shared with.</li>
-                     </ul>'
+      summary: "List File Transfer Requests"
+      description: "This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
+      parameters:
+        - $ref: "#/components/parameters/Source2"
+        - $ref: "#/components/parameters/X-deere-signature_FileTransfers"
       security:
-        - OAuth2: [ files, ag3 ]
-      parameters:
-        - $ref: '#/components/parameters/FilterOptional'
-        - $ref: '#/components/parameters/FileTypeOptional'
-        - $ref: '#/components/parameters/Transferable'
-        - $ref: '#/components/parameters/X-deere-signatureOptional'
+        - OAuth2:
+            - "files"
       responses:
-        '200':
-          $ref: '#/components/responses/FileListResponse'
-        '400':
-          description: Invalid filter value.
-        '403':
-          description: Invalid to access files for organization.
-  '/files/{fileId}':
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileValue"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/fileTransfers"
+                    total: 2
+                    values:
+                      - file:
+                          name: "transferedFile1.zip"
+                          type: "SETUP"
+                          createdTime: "2014-01-13T12:15:51.159Z"
+                          modifiedTime: "2014-01-13T12:16:09.443Z"
+                          nativeSize: 927025
+                          source: "FitzwilliamDarcy"
+                          status: "READY"
+                          archived: false
+                          links:
+                            - rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/7456"
+                          id: "51234"
+                        source: "HOST"
+                        transferInitiationTime: "2014-01-13T12:16:15.924Z"
+                        lastUpdatedTime: "2014-01-13T12:16:15.924Z"
+                        status: "WDT_IN_PROCESS"
+                        links:
+                          - rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/612"
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/1523"
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/6234"
+                        id: "4799048"
+                      - file:
+                          name: "transferedFile2.zip"
+                          type: "SETUP"
+                          createdTime: "2015-01-17T15:15:55.732Z"
+                          modifiedTime: "2015-01-17T15:15:56.242Z"
+                          nativeSize: 6813
+                          source: "LydiaBennett"
+                          status: "READY"
+                          archived: false
+                          links:
+                            - rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/12345"
+                          id: "1219063"
+                        source: "HOST"
+                        transferInitiationTime: "2013-01-17T15:18:41.512Z"
+                        lastUpdatedTime: "2013-05-02T20:06:43.732Z"
+                        status: "WDT_OPERATOR_REJECTED"
+                        links:
+                          - rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/615"
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/243"
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/7354"
+                        id: "1219096"
+  /fileTransfers/{id}:
     get:
-      summary: View/Download A File
-      description: "This resource allows the client to view or download a file.
-                    <p><strong>Note</strong>: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the <strong>Range</strong> request header, or the <strong>offset</strong> and <strong>size</strong> request parameters. If both are used, the request header will take precedence.</p>
-
-                    <p>To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources:
-                        <ul>
-                              <li><strong>owningOrganization</strong>: View the org that owns the file.</li>
-                              <li><strong>partnerships</strong>: View a list of the partnerships through which the file is shared, if applicable.</li>
-                              <li><strong>initiateFileTransfer</strong>: Request to send this file to a specified machine.</li>
-                              <li><strong>wdtCapableMachines</strong>: View a list of machines in the org which can receive this file.</li>
-                        </ul>
-                    </p>"
-      note: '<b>Request Header</b>
-              <p>To download the file in chunks of bytes, you can use the range header with the following form: <b>Range:bytes=startIndex-endIndex</b></p>
-              <p>Sample Header: <b>Range:bytes=0-1000</b></p>'
+      summary: "View a File Transfer Request"
+      description: "This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
       parameters:
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Size'
-        - $ref: '#/components/parameters/FileId'
+        - $ref: "#/components/parameters/Source"
+        - $ref: "#/components/parameters/Id"
+      security:
+        - OAuth2:
+            - "files"
+      responses:
+        "200":
+          description: "File Transfer by ID."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersValue"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    file:
+                      name: "transferredFile1.zip"
+                      type: "SETUP"
+                      createdTime: "2015-06-09T09:42:55.817Z"
+                      modifiedTime: "2015-06-09T09:43:01.693Z"
+                      nativeSize: 9440
+                      source: "FitzwilliamDarcy"
+                      status: "READY"
+                      archived: false
+                      links:
+                        - rel: "self"
+                          uri: "https://sandboxapi.deere.com/platform/files/15234"
+                      id: "15234"
+                    source: "HOST"
+                    transferInitiationTime: "2015-06-09T09:43:01.381Z"
+                    lastUpdatedTime: "2015-06-09T09:43:01.384Z"
+                    status: "WDT_IN_PROCESS"
+                    links:
+                      - rel: "file"
+                        uri: "https://sandboxapi.deere.com/platform/files/15234"
+                      - rel: "machine"
+                        uri: "https://sandboxapi.deere.com/platform/machines/8237"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/fileTransfers/61243"
+                    id: "571637605"
+  /files:
+    get:
+      summary: "List Files"
+      description: "This resource retrieves the list of available files. For each file, the response will link to the following resources: <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partners this file is shared with.</li> </ul>"
+      security:
+        - OAuth2:
+            - "files"
+            - "ag3"
+      parameters:
+        - $ref: "#/components/parameters/FilterOptional"
+        - $ref: "#/components/parameters/FileTypeOptional"
+        - $ref: "#/components/parameters/Transferable"
+        - $ref: "#/components/parameters/X-deere-signatureOptional"
+      responses:
+        "200":
+          $ref: "#/components/responses/FileListResponse"
+        "400":
+          description: "Invalid filter value."
+        "403":
+          description: "Invalid to access files for organization."
+  /files/{fileId}:
+    get:
+      summary: "View/Download A File"
+      description: "This resource allows the client to view or download a file. <p><strong>Note</strong>: Only files smaller than 50 MB can be downloaded at once. Larger files will need to be downloaded in chunks. To download in chunks, you can use the <strong>Range</strong> request header, or the <strong>offset</strong> and <strong>size</strong> request parameters. If both are used, the request header will take precedence.</p>
+
+        <p>To view a file's metadata, choose the application/vnd.deere.axiom.v3+json Accept Header. To download the file to the client software, choose a /zip or octet-stream Accept Header. The following example will show a GET call to view a files metadata. The response will contain links to the following resources: <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View a list of the partnerships through which the file is shared, if applicable.</li> <li><strong>initiateFileTransfer</strong>: Request to send this file to a specified machine.</li> <li><strong>wdtCapableMachines</strong>: View a list of machines in the org which can receive this file.</li> </ul> </p>"
+      note: "<b>Request Header</b> <p>To download the file in chunks of bytes, you can use the range header with the following form: <b>Range:bytes=startIndex-endIndex</b></p> <p>Sample Header: <b>Range:bytes=0-1000</b></p>"
+      parameters:
+        - $ref: "#/components/parameters/Offset"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/FileId"
       contentType:
-        description: The request body used to create or update a client
+        description: "The request body used to create or update a client"
         content:
           application/vnd.deere.axiom.v3+json:
             schema: {}
       security:
-        - OAuth2: [ files, ag3 ]
+        - OAuth2:
+            - "files"
+            - "ag3"
       responses:
-        '200':
-          $ref: '#/components/responses/FileIdGet'
-        '403':
-          description: Unauthorized to access file
-        '404':
-          description: File is not present
+        "200":
+          $ref: "#/components/responses/FileIdGet"
+        "403":
+          description: "Unauthorized to access file"
+        "404":
+          description: "File is not present"
     put:
-      summary: Upload/Update A File
+      summary: "Upload/Update A File"
       security:
-        - OAuth2: [ files, ag3 ]
-      description: 'This resource allows the client to upload or update a file. The client must <a href="/dev-docs/files#/organizations/{orgId}/files/post" target="_blank">create a file ID</a> before uploading a file.'
-      note: '<b>Note</b>: In your sample request for uploading a file, the content-type can be any of the following:
-              <ul>
-                <li>application/octet-stream</li>
-                <li>application/zip</li>
-                <li>application/x-zip</li>
-                <li>application/x-zip-compressed</li>
-                <li>multipart/form-data</li>
-                <li>multipart/mixed</li>
-              </ul>
-            '
+        - OAuth2:
+            - "files"
+            - "ag3"
+      description: "This resource allows the client to upload or update a file. The client must <a href=\"/dev-docs/files#/organizations/{orgId}/files/post\" target=\"_blank\">create a file ID</a> before uploading a file."
+      note: "<b>Note</b>: In your sample request for uploading a file, the content-type can be any of the following: <ul> <li>application/octet-stream</li> <li>application/zip</li> <li>application/x-zip</li> <li>application/x-zip-compressed</li> <li>multipart/form-data</li> <li>multipart/mixed</li> </ul> "
       requestBody:
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
-              $ref: '#/components/schemas/EditableFileDetails'
+              $ref: "#/components/schemas/EditableFileDetails"
           Upload a file:
             examples:
               Upload a file:
-                description:
-                  'PUT: https://sandboxapi.deere.com/platform/files/fileID
-                  <br/>
-                  <br/>Accept: application/vnd.deere.axiom.v3+json
-                  <br/>Authorization: OAuth realm="",oauth_timestamp="REDACTED", oauth_nonce="REDACTED", oauth_consumer_key="REDACTED", oauth_token="REDACTED", oauth_version="1.0", oauth_signature_method="HMAC-SHA1", oauth_signature="REDACTED"
-                  <br/>Content-Type: application/octet-stream'
-
+                description: "PUT: https://sandboxapi.deere.com/platform/files/fileID <br/> <br/>Accept: application/vnd.deere.axiom.v3+json <br/>Authorization: OAuth realm=\"\",oauth_timestamp=\"REDACTED\", oauth_nonce=\"REDACTED\", oauth_consumer_key=\"REDACTED\", oauth_token=\"REDACTED\", oauth_version=\"1.0\", oauth_signature_method=\"HMAC-SHA1\", oauth_signature=\"REDACTED\" <br/>Content-Type: application/octet-stream"
           Update a file:
             examples:
               Update a file:
-                description: 'PUT https://partnerapi.deere.com/platform/files/fileID
-                              <br/>
-                              <br/>Accept: application/vnd.deere.axiom.v3+json
-                              <br/>Authorization: {
-                              <br/>Bearer
-                              <br/>}
-                              <br/>Content-Type: application/vnd.deere.axiom.v3+json'
+                description: "PUT https://partnerapi.deere.com/platform/files/fileID <br/> <br/>Accept: application/vnd.deere.axiom.v3+json <br/>Authorization: { <br/>Bearer <br/>} <br/>Content-Type: application/vnd.deere.axiom.v3+json"
                 value:
-                  id: 'fileID'
+                  id: "fileID"
                   archived: true
                   delayProcessing: false
-
           application/vnd.deere.axiom.v3+xml:
             schema:
-              $ref: '#/components/schemas/EditableFileDetails'
-
+              $ref: "#/components/schemas/EditableFileDetails"
       responses:
-        200:
-          description: Successful operation
+        "200":
+          description: "Successful operation"
           content:
             application/vnd.deere.axiom.v3+json:
               schema:
                 properties:
                   total:
-                    type: integer
+                    type: "integer"
                     example: 1
-                    format: int32
-        204:
-          description: Created. No Content
+                    format: "int32"
+        "204":
+          description: "Created. No Content"
           content:
             application/vnd.deere.axiom.v3+json:
               schema:
-                properties: { }
+                properties: {}
               examples:
                 Headers:
-                  description: '204 No Content
-                                <br/>
-                                <br/>Pragma: no-cache
-                                <br/>Date: Wed, 23 Jul 2014 18:04:00 GMT
-                                <br/>Server: Apache-Coyote/1.1
-                                <br/>X-Deere-Handling-Server: ldxtc1
-                                <br/>X-Deere-Elapsed-Ms: 645
-                                <br/>Transfer-Encoding: chunked
-                                <br/>Content-Language: en-US
-                                <br/>Content-Type: application/vnd.deere.axiom.v3+json;charset=UTF-8
-                                <br/>Cache-Control: no-cache, no-store, max-age=0
-                                <br/>Connection: Keep-Alive
-                                <br/>Keep-Alive: timeout=5, max=100
-                                <br/>Expires: Thu, 01 Jan 1970 00:00:00 GMT'
-        '400':
-          description: Invalid file name or cannot delay processing after processing has begun
-        '403':
-          description: Unauthorized to update file.
-        '404':
-          description: File is not present.
+                  description: "204 No Content <br/> <br/>Pragma: no-cache <br/>Date: Wed, 23 Jul 2014 18:04:00 GMT <br/>Server: Apache-Coyote/1.1 <br/>X-Deere-Handling-Server: ldxtc1 <br/>X-Deere-Elapsed-Ms: 645 <br/>Transfer-Encoding: chunked <br/>Content-Language: en-US <br/>Content-Type: application/vnd.deere.axiom.v3+json;charset=UTF-8 <br/>Cache-Control: no-cache, no-store, max-age=0 <br/>Connection: Keep-Alive <br/>Keep-Alive: timeout=5, max=100 <br/>Expires: Thu, 01 Jan 1970 00:00:00 GMT"
+        "400":
+          description: "Invalid file name or cannot delay processing after processing has begun"
+        "403":
+          description: "Unauthorized to update file."
+        "404":
+          description: "File is not present."
       statusCode:
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
-              $ref: '#/components/schemas/PutFiles'
-  '/organizations/{orgId}/files':
-    get:
-      summary: List an Org's Files
-      description: "View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources:
-                                            <p>
-                                            <ul>
-                                            <li><strong>owningOrganization</strong>: View the org that owns the file.</li>
-                                            <li><strong>partnerships</strong>: View the partnerships through which the file is shared, if applicable.</li>
-                                            <li><strong>initiateFileTransfer</strong>: Submit a transfer request for the specified file.</li>
-                                            <li><strong>machinesEligibleToReceiveFile</strong>: List of WDT-capable machines that the specified file can be sent to.</li>
-                                            <li><strong>sendFileToMachine</strong>: The same as \"initiateFileTransfer.\"</li>
-                                            <li><strong>wdtCapableMachines</strong>: The same as \"machinesEligibleToReceiveFile.\"</li>
-                                            </ul>
-                                            </p>"
-
-      parameters:
-        - $ref: '#/components/parameters/Filter'
-        - $ref: '#/components/parameters/StartDate'
-        - $ref: '#/components/parameters/EndDate'
-        - $ref: '#/components/parameters/FileType'
-        - $ref: '#/components/parameters/Archived'
-        - $ref: '#/components/parameters/Status'
-        - $ref: '#/components/parameters/OrganizationID3'
-        - $ref: '#/components/parameters/X-deere-signature'
-      security:
-        - OAuth2: [ files, ag3 ]
-      responses:
-        '200':
-          $ref: '#/components/responses/FileListResponse'
-
-        '400':
-          description: Invalid filter value.
-        '403':
-          description: Unauthorized to access any file type.
-        '404':
-          description: Organization id does not exist.
-
+              $ref: "#/components/schemas/PutFiles"
+  /organizations/{orgId}/fileTransfers:
     post:
-      summary: Create A File ID
-
-      description: 'The POST call below shows the creation of file id "55" in organization "73" in Operation Center. The response "location" header will return the new file ID in the link returned. The client software will then use the new file ID, to <a href="/dev-docs/files#/files/{fileId}/put" target="_blank">upload the file.</a>'
+      summary: "Submit a File Transfer Request"
+      description: "This resource allows you to select a file and machine, and use the client software to submit a file transfer request. After that, MyJohnDeere API v3's infrastructure transfers the selected file to the selected machine, where it becomes available for the machine operator to use. The response links to the following resources: <ul> <li><strong>file</strong>: The file for which the transfer is being requested.</li> <li><strong>machine</strong>: The machine to which the transfer is being requested.</li> </ul>"
+      note: "<b>Note there is a 800MB file size limit. Files larger than 800MB cannot be transferred using this API.</b>"
+      parameters:
+        - $ref: "#/components/parameters/OrgId2"
       security:
-        - OAuth2: [ files, ag3 ]
+        - OAuth2:
+            - "files"
       requestBody:
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
-              $ref: '#/components/schemas/PostableFileDetails'
+              $ref: "#/components/schemas/FileTransfersPost"
+            examples:
+              Example with file and equipment link:
+                summary: "Example with file and equipment link"
+                value:
+                  links:
+                    - rel: "file"
+                      uri: "https://sandboxapi.deere.com/platform/files/{fileId}"
+                    - rel: "equipment"
+                      uri: "https://equipmentapi.deere.com/isg/equipment?principalIds={machinePrincipalId}"
+      responses:
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                $ref: "#/components/schemas/PostFileTransfersResponse"
+    get:
+      summary: "Get File Transfer List by Organization"
+      description: "This resource will retrieve list of all File Transfer by an Organization. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
+      note: "Please Note: This API does not support eTags."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/Source"
+      security:
+        - OAuth2:
+            - "files"
+      responses:
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersValue"
+              examples:
+                No Header:
+                  description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/fileTransfers?source=ORGANIZATION"
+                    total: 2
+                    values:
+                      - "@type": "FileTransfer"
+                        file:
+                          "@type": "File"
+                          name: "1H0S670SAE0765947_032020180053.zip"
+                          type: "SETUP"
+                          createdTime: "2018-03-20T05:53:47.476Z"
+                          modifiedTime: "2018-03-20T21:10:41.325Z"
+                          nativeSize: 80480
+                          source: "1H0S670SAE0765947"
+                          status: "READY"
+                          archived: false
+                          id: "73391610"
+                          links:
+                            - "@type": "Link"
+                              rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                        source: "HOST"
+                        transferInitiationTime: "2018-03-20T18:52:22.155Z"
+                        lastUpdatedTime: "2018-03-20T21:11:35.519Z"
+                        status: "WDT_AVAILABLE_TO_DISPLAY"
+                        id: "73416642"
+                        links:
+                          - "@type": "Link"
+                            rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                          - "@type": "Link"
+                            rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/8257"
+                          - "@type": "Link"
+                            rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/2551"
+                          - "@type": "Link"
+                            rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/73416642"
+                      - "@type": "FileTransfer"
+                        file:
+                          "@type": "File"
+                          name: "1H0S670SAE0765947_032020180053.zip"
+                          type: "SETUP"
+                          createdTime: "2018-03-20T05:53:47.476Z"
+                          modifiedTime: "2018-03-20T21:10:41.325Z"
+                          nativeSize: 80480
+                          source: "1H0S670SAE0765947"
+                          status: "READY"
+                          archived: false
+                          id: "73391610"
+                          links:
+                            - "@type": "Link"
+                              rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/73391610"
+                        source: "HOST"
+                        transferInitiationTime: "2018-03-20T18:52:22.071Z"
+                        lastUpdatedTime: "2018-03-20T21:11:34.379Z"
+                        status: "WDT_AVAILABLE_TO_DISPLAY"
+                        id: "73416640"
+                        links:
+                          - "@type": "Link"
+                            rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                          - "@type": "Link"
+                            rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/8257"
+                          - "@type": "Link"
+                            rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/2551"
+                          - "@type": "Link"
+                            rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/73416640"
+  /organizations/{orgId}/files:
+    get:
+      summary: "List an Org's Files"
+      description: "View a list of an org's files. This resource allows for pagination. For each returned file, the response will link to the following resources: <p> <ul> <li><strong>owningOrganization</strong>: View the org that owns the file.</li> <li><strong>partnerships</strong>: View the partnerships through which the file is shared, if applicable.</li> <li><strong>initiateFileTransfer</strong>: Submit a transfer request for the specified file.</li> <li><strong>machinesEligibleToReceiveFile</strong>: List of WDT-capable machines that the specified file can be sent to.</li> <li><strong>sendFileToMachine</strong>: The same as \"initiateFileTransfer.\"</li> <li><strong>wdtCapableMachines</strong>: The same as \"machinesEligibleToReceiveFile.\"</li> </ul> </p>"
+      parameters:
+        - $ref: "#/components/parameters/Filter"
+        - $ref: "#/components/parameters/StartDate"
+        - $ref: "#/components/parameters/EndDate"
+        - $ref: "#/components/parameters/FileType"
+        - $ref: "#/components/parameters/Archived"
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/OrganizationID3"
+        - $ref: "#/components/parameters/X-deere-signature"
+      security:
+        - OAuth2:
+            - "files"
+            - "ag3"
+      responses:
+        "200":
+          $ref: "#/components/responses/FileListResponse"
+        "400":
+          description: "Invalid filter value."
+        "403":
+          description: "Unauthorized to access any file type."
+        "404":
+          description: "Organization id does not exist."
+    post:
+      summary: "Create A File ID"
+      description: "The POST call below shows the creation of file id \"55\" in organization \"73\" in Operation Center. The response \"location\" header will return the new file ID in the link returned. The client software will then use the new file ID, to <a href=\"/dev-docs/files#/files/{fileId}/put\" target=\"_blank\">upload the file.</a>"
+      security:
+        - OAuth2:
+            - "files"
+            - "ag3"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/PostableFileDetails"
             examples:
               No Header:
                 value:
-                  name: 'back40Seeding.zip'
-
+                  name: "back40Seeding.zip"
           application/vnd.deere.axiom.v3+xml:
             schema:
-              $ref: '#/components/schemas/PostableFileDetails'
+              $ref: "#/components/schemas/PostableFileDetails"
       contentType:
-        description: The request body used to create or update a client
+        description: "The request body used to create or update a client"
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
               properties:
-                Content-Type: 'application/vnd.deere.axiom.v3+json'
+                Content-Type: "application/vnd.deere.axiom.v3+json"
       parameters:
-        - $ref: '#/components/parameters/OrganizationID2'
-        - $ref: '#/components/parameters/Name'
-        - $ref: '#/components/parameters/DelayProcessing'
-        - $ref: '#/components/parameters/Links'
-
+        - $ref: "#/components/parameters/OrganizationID2"
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/DelayProcessing"
+        - $ref: "#/components/parameters/Links"
       responses:
-        201:
-          description: Created
+        "201":
+          description: "Created"
           content:
             application/vnd.deere.axiom.v3+json:
               schema:
                 properties:
                   total:
-                    type: integer
+                    type: "integer"
                     example: 1
-                    format: int32
+                    format: "int32"
               examples:
                 Headers:
-                  description:
-                    'HTTP/1.1: 201 Created
-                    <br/>
-                    <br/>Date: Wed, 31 Aug 2016 16:18:22 GMT
-                    <br/>Content-Encoding: gzip
-                    <br/>X-Deere-Handling-Server: ldxx90tc5
-                    <br/>X-Frame-Options: SAMEORIGIN
-                    <br/>X-Deere-Elapsed-Ms: 257
-                    <br/>Vary: Accept-Encoding
-                    <br/>Content-Type: text/plain
-                    <br/>Location: https://sandboxapi.deere.com/platform/files/55
-                    <br/>Cache-Control: max-age=0, no-cache
-                    <br/>Connection: keep-alive
-                    <br/>Content-Length: 20
-                    <br/>Expires: Wed, 31 Aug 2016 16:18:22 GMT'
-        '400':
-          description: |
-            Invalid file name. File name must be 5-69 characters:
+                  description: "HTTP/1.1: 201 Created <br/> <br/>Date: Wed, 31 Aug 2016 16:18:22 GMT <br/>Content-Encoding: gzip <br/>X-Deere-Handling-Server: ldxx90tc5 <br/>X-Frame-Options: SAMEORIGIN <br/>X-Deere-Elapsed-Ms: 257 <br/>Vary: Accept-Encoding <br/>Content-Type: text/plain <br/>Location: https://sandboxapi.deere.com/platform/files/55 <br/>Cache-Control: max-age=0, no-cache <br/>Connection: keep-alive <br/>Content-Length: 20 <br/>Expires: Wed, 31 Aug 2016 16:18:22 GMT"
+        "400":
+          description: "Invalid file name. File name must be 5-69 characters:
+
             + alphanumeric
+
             + .
+
             + ,
-            + \-
+
+            + \\-
+
             + _
 
-            Also when invalid file type.
-        '403':
-          description: >-
-            Unauthorized to create file. Also when organization has not opted in
-            to Operational Data Processing.
-        '404':
-          description: Organization does not exists.
+
+            Also when invalid file type.\n"
+        "403":
+          description: "Unauthorized to create file. Also when organization has not opted in to Operational Data Processing."
+        "404":
+          description: "Organization does not exists."
       statusCode:
         content:
           application/vnd.deere.axiom.v3+json:
             schema:
-              $ref: '#/components/schemas/PostFiles'
+              $ref: "#/components/schemas/PostFiles"
 components:
-  securitySchemes:
-    OAuth2:
-      type: oauth2
-      flows:
-        clientCredentials:
-          scopes:
-            files: 'files'
-            ag3: 'ag3'
   parameters:
-    OrganizationID:
-      in: path
-      name: orgId
-      description: Organization
+    Archived:
+      name: "archived"
+      in: "query"
+      description: "Allows client to filter files according to whether they have been archived. TRUE returns only archived files."
+      schema:
+        type: "boolean"
+        default: "false"
+        example: "true"
+    DelayProcessing:
+      name: "delayProcessing"
+      in: "body"
+      description: "Set to false to force the file to be processed if it would otherwise delay processing. Can only be used with a copyFrom link."
+      schema:
+        type: "boolean"
+        example: "false"
+    EndDate:
+      name: "endDate"
+      in: "query"
+      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard"
+      schema:
+        type: "dateTime"
+        default: "N/A"
+        example: "2015-02-03T10:42:24.282Z"
+    FileId:
+      name: "fileId"
+      in: "path"
+      description: "File Id."
       required: true
       schema:
-        type: string
-        default: 'N/A'
+        type: "string"
+        default: "N/A"
+        example: 577499742
+    FileType:
+      in: "query"
+      name: "fileType<sup><a href=\"#additional\">1</a></sup>"
+      description: "Takes a number that identifies the file type."
+      required: false
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: "0"
+    FileTypeOptional:
+      in: "query"
+      name: "fileType<sup><a href=\"#additional\">1</a></sup>"
+      description: "Takes the file type number."
+      required: "Optional"
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: "0"
+    Filter:
+      in: "query"
+      name: "filter"
+      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
+      required: false
+      schema:
+        type: "string"
+        default: "ALL"
+        format: "int64"
+        example: "MACHINE"
+    FilterOptional:
+      in: "query"
+      name: "filter"
+      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
+      required: "Optional"
+      schema:
+        type: "string"
+        default: "ALL"
+        format: "int64"
+        example: "MACHINE"
+    Id:
+      name: "id"
+      in: "path"
+      description: "File Transfer ID"
+      required: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 1628996
+    Links:
+      name: "links"
+      description: "Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization."
+      in: "body"
+      schema:
+        type: "Array of Links"
+        example: "[{\"rel\": \"copyFrom\", \"uri\": \"/files/12345\"}]"
+    Name:
+      name: "name"
+      in: "body"
+      description: "File name."
+      required: true
+      schema:
+        example: "back40Seeding.zip"
+        type: "string"
+    Offset:
+      name: "offset"
+      in: ""
+      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter offset point (in bytes) in this parameter."
+      required: true
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: -1
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Organization"
+      required: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 1234
+    OrgId2:
+      name: "orgId"
+      in: "path"
+      description: "Organization"
+      required: true
+      schema:
+        type: "string"
+        example: 1234
+    OrganizationID:
+      in: "path"
+      name: "orgId"
+      description: "Organization"
+      required: true
+      schema:
+        type: "string"
+        default: "N/A"
         example: 73
     OrganizationID2:
-      in: path
-      name: orgId
-      description: Organization
+      in: "path"
+      name: "orgId"
+      description: "Organization"
       required: true
       schema:
-        type: string
+        type: "string"
         example: 73
     OrganizationID3:
-      in: path
-      name: orgId
-      description: Organization
+      in: "path"
+      name: "orgId"
+      description: "Organization"
       required: true
       schema:
-        type: string
-        default: 'N/A'
-        example: '5343535'
-    Filter:
-      in: query
-      name: filter
-      description: Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host.
-      required: false
-      schema:
-        type: string
-        default: 'ALL'
-        format: int64
-        example: MACHINE
-    FilterOptional:
-      in: query
-      name: filter
-      description: Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host.
-      required: Optional
-      schema:
-        type: string
-        default: 'ALL'
-        format: int64
-        example: MACHINE
-    FileType:
-      in: query
-      name: 'fileType<sup><a href="#additional">1</a></sup>'
-      description: Takes a number that identifies the file type.
-      required: false
-      schema:
-        type: integer
-        default: 'N/A'
-        example: '0'
-    FileTypeOptional:
-      in: query
-      name: 'fileType<sup><a href="#additional">1</a></sup>'
-      description: Takes the file type number.
-      required: Optional
-      schema:
-        type: integer
-        default: 'N/A'
-        example: '0'
-    X-deere-signature:
-      name: x-deere-signature
-      in: header
-      required: false
-      description: x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time.
-      schema:
-        type: string
-        example: 520122365ebb4870a344784570d202c7
-    X-deere-signatureOptional:
-      name: x-deere-signature
-      in: header
-      required: Optional
-      description: x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time.
-      schema:
-        type: string
-        example: 520122365ebb4870a344784570d202c7
-    Transferable:
-      in: query
-      name: transferable
-      description: Filters by whether a file is transferable
-      required: Optional
-      schema:
-        type: boolean
-        default: 'N/A'
-        example: 'true'
-    Offset:
-      name: offset
-      in: ''
-      description: Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter offset point (in bytes) in this parameter.
-      required: true
-      schema:
-        type: integer
-        default: 'N/A'
-        example: -1
+        type: "string"
+        default: "N/A"
+        example: "5343535"
     Size:
-      name: size
-      in: ''
-      description: Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter size (in bytes) in this parameter.
+      name: "size"
+      in: ""
+      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter size (in bytes) in this parameter."
       required: true
       schema:
-        type: integer
-        default: 'N/A'
+        type: "integer"
+        default: "N/A"
         example: -1
-    FileId:
-      name: fileId
-      in: path
-      description: File Id.
-      required: true
+    Source:
+      name: "source"
+      in: "query"
+      description: "The source of the file transfer. Takes the values ORGANIZATION or MACHINE."
       schema:
-        type: string
-        default: 'N/A'
-        example: 577499742
+        type: "string"
+        default: "N/A"
+        example: "ORGANIZATION"
+    Source2:
+      name: "source"
+      in: "query"
+      description: "The source of the file transfer. Takes the values ORGANIZATION or MACHINE."
+      schema:
+        type: "string"
+        example: "ORGANIZATION"
     StartDate:
-      name: startDate
-      in: query
-      description: 'Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard.'
+      name: "startDate"
+      in: "query"
+      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
       schema:
-        type: datetime
-        default: 'N/A'
-        example: 2013-01-04T14:08:51.104Z
-    EndDate:
-      name: endDate
-      in: query
-      description: 'Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> standard'
-      schema:
-        type: dateTime
-        default: 'N/A'
-        example: 2015-02-03T10:42:24.282Z
+        type: "datetime"
+        default: "N/A"
+        example: "2013-01-04T14:08:51.104Z"
     Status:
-      name: status
-      in: query
-      description: Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE.
+      name: "status"
+      in: "query"
+      description: "Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE."
       schema:
-        type: string
-        default: 'N/A'
-        example: TRANSFERABLE
-    Archived:
-      name: archived
-      in: query
-      description: Allows client to filter files according to whether they have been archived. TRUE returns only archived files.
+        type: "string"
+        default: "N/A"
+        example: "TRANSFERABLE"
+    Transferable:
+      in: "query"
+      name: "transferable"
+      description: "Filters by whether a file is transferable"
+      required: "Optional"
       schema:
-        type: boolean
-        default: 'false'
-        example: 'true'
-    Name:
-      name: name
-      in: body
-      description: File name.
-      required: true
+        type: "boolean"
+        default: "N/A"
+        example: "true"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      required: false
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
       schema:
-        example: back40Seeding.zip
-        type: string
-    DelayProcessing:
-      name: delayProcessing
-      in: body
-      description: Set to false to force the file to be processed if it would otherwise delay processing. Can only be used with a copyFrom link.
+        type: "string"
+        example: "520122365ebb4870a344784570d202c7"
+    X-deere-signatureOptional:
+      name: "x-deere-signature"
+      in: "header"
+      required: "Optional"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
       schema:
-        type: boolean
-        example: 'false'
-    Links:
-      name: links
-      description: Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization.
-      in: body
+        type: "string"
+        example: "520122365ebb4870a344784570d202c7"
+    X-deere-signature_FileTransfers:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
       schema:
-        type: Array of Links
-        example: '[{"rel": "copyFrom", "uri": "/files/12345"}]'
-
+        type: "string"
+        example: "877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
   responses:
-    FileListResponse:
-      description: Successful operation
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            properties:
-              links:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FilesLink'
-              total:
-                type: number
-                format: double
-                description: 'Total number of files matching the request'
-                example: 123
-              values:
-                items:
-                  $ref: '#/components/schemas/FilesGet'
-          examples:
-            No Header:
-              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 520122365ebb4870a344784570d202c7'
-              value:
-                links:
-                  - rel: self
-                    uri: https://sandboxapi.deere.com/platform/files
-                total: 1
-                values:
-                  links:
-                    - rel: self
-                      uri: https://sandboxapi.deere.com/platform/files
-                  total: 1
-                  values:
-                    - links:
-                        - rel: owningOrganization
-                          uri: https://sandboxapi.deere.com/platform/organizations/1234
-                        - rel: partnerships
-                          uri: https://sandboxapi.deere.com/platform/files/466578633/partnerships
-                        - rel: self
-                          uri: https://sandboxapi.deere.com/platform/files/466578633
-                      id: '577499742'
-                      name: back40.zip
-                      type: SETUP
-                      createdTime: '2013-01-04T14:08:51.104Z'
-                      modifiedTime: '2013-01-04T14:08:51.104Z'
-                      nativeSize: '72946'
-                      source: JohnDoe
-                      transferPending: 'false'
-                      visibleViaShare: owned
-                      shared: 'false'
-                      status: UPLOAD_PENDING
-                      archived: 'false'
-                      assigned: 'false'
-                      new: 'false'
     FileIdGet:
-      description: Successful operation
+      description: "Successful operation"
       content:
         application/zip:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
         application/octet-stream:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
         application/x-zip:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
         application/x-zip-compressed:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
         multipart/mixed:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
         application/vnd.deere.axiom.v3+json:
           schema:
-            description: 'Based on value of embed request param one of the above response object is returned'
+            description: "Based on value of embed request param one of the above response object is returned"
             properties:
               links:
                 items:
-                  $ref: '#/components/schemas/FilesLink'
+                  $ref: "#/components/schemas/FilesLink"
               values:
                 items:
-                  $ref: '#/components/schemas/ValueFileIdGet'
+                  $ref: "#/components/schemas/ValueFileIdGet"
           examples:
             No Header:
-              description: '200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json'
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
               value:
-                id: '577499742'
-                name: back40.zip
-                type: SETUP
-                createdTime: '2015-02-03T10:42:24.282Z'
-                modifiedTime: '2015-02-03T10:42:24.282Z'
-                nativeSize: '72946'
-                source: JohnDoe
-                transferPending: 'false'
-                visibleViaShare: owned
-                shared: 'false'
-                status: UPLOAD_PENDING
-                archived: 'false'
-                assigned: 'false'
-                new: 'false'
+                id: "577499742"
+                name: "back40.zip"
+                type: "SETUP"
+                createdTime: "2015-02-03T10:42:24.282Z"
+                modifiedTime: "2015-02-03T10:42:24.282Z"
+                nativeSize: "72946"
+                source: "JohnDoe"
+                transferPending: "false"
+                visibleViaShare: "owned"
+                shared: "false"
+                status: "UPLOAD_PENDING"
+                archived: "false"
+                assigned: "false"
+                new: "false"
                 links:
-                  - rel: owningOrganization
-                    uri: https://sandboxapi.deere.com/platform/organizations/2101
-                  - rel: self
-                    uri: https://sandboxapi.deere.com/platform/files/466578633
-
+                  - rel: "owningOrganization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/2101"
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/files/466578633"
+    FileListResponse:
+      description: "Successful operation"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FilesLink"
+              total:
+                type: "number"
+                format: "double"
+                description: "Total number of files matching the request"
+                example: 123
+              values:
+                items:
+                  $ref: "#/components/schemas/FilesGet"
+          examples:
+            No Header:
+              description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json<br/>x-deere-signature: 520122365ebb4870a344784570d202c7"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/files"
+                total: 1
+                values:
+                  links:
+                    - rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/files"
+                  total: 1
+                  values:
+                    - links:
+                        - rel: "owningOrganization"
+                          uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                        - rel: "partnerships"
+                          uri: "https://sandboxapi.deere.com/platform/files/466578633/partnerships"
+                        - rel: "self"
+                          uri: "https://sandboxapi.deere.com/platform/files/466578633"
+                      id: "577499742"
+                      name: "back40.zip"
+                      type: "SETUP"
+                      createdTime: "2013-01-04T14:08:51.104Z"
+                      modifiedTime: "2013-01-04T14:08:51.104Z"
+                      nativeSize: "72946"
+                      source: "JohnDoe"
+                      transferPending: "false"
+                      visibleViaShare: "owned"
+                      shared: "false"
+                      status: "UPLOAD_PENDING"
+                      archived: "false"
+                      assigned: "false"
+                      new: "false"
   schemas:
+    EditableFileDetails:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "RW8360R907628_12062012.zip"
+        archived:
+          type: "boolean"
+          description: "Indicates whether the file has been archived."
+          example: false
+        delayProcessing:
+          type: "boolean"
+          description: "If set to true, then processing of the file will be delayed until this is toggled to false."
+          example: false
+    FileLinkGet:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/612"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/1523"
+          description: "Machines Link."
+    FileTransfersLink:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/fileID"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/machineID"
+          description: "Machines Link."
+    FileTransfersLinkAPIInteractions:
+      properties:
+        Status:
+          description: "Status."
+        location:
+          description: "The url of the created resources"
+          schema:
+            type: "string"
+            example: "https://sandboxapi.deere.com/platform/FileTransfer/7482"
+    FileTransfersLinkGet:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/15234"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/8237"
+          description: "Machines Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organization Link."
+    FileTransfersPost:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              rel:
+                type: "string"
+                enum:
+                  - "file"
+                  - "equipment"
+                required: true
+              uri:
+                type: "string"
+                format: "uri"
+                required: true
+    FileTransfersValue:
+      properties:
+        file:
+          description: "Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived."
+          example: "See sample response below."
+          type: "---"
+        id:
+          type: "string"
+          description: "File Transfer ID"
+          example: 1628996
+        source:
+          type: "string"
+          description: "File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST."
+          example: "HOST"
+        transferInitiationTime:
+          type: "datetime"
+          description: "Timestamp of when the file transfer was initiated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2015-06-09T09:43:01.381Z"
+        lastUpdatedTime:
+          type: "datetime"
+          description: "Timestamp of when the file transfer was last updated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2015-06-09T09:43:01.384Z"
+        status<sup><a href="#file-transfer-additional">1</a></sup>:
+          type: "string"
+          description: "Status of the file transfer."
+          example: "WDT_AVAILABLE_TO_DISPLAY"
     FileType:
-      type: string
+      type: "string"
       enum:
-        - SETUP
-        - PRESCRIPTION
-        - INVALID
-        - UNKNOWN
-        - DOC
-        - JDBACKUP
-        - HIC
-        - TIMBERLINK
-        - EXPORT
-        - TIMBERMATIC
-        - PDF
-        - ISO_SETUP
-        - BOUNDARY
-        - EXCEL
-      example: SETUP
-
+        - "SETUP"
+        - "PRESCRIPTION"
+        - "INVALID"
+        - "UNKNOWN"
+        - "DOC"
+        - "JDBACKUP"
+        - "HIC"
+        - "TIMBERLINK"
+        - "EXPORT"
+        - "TIMBERMATIC"
+        - "PDF"
+        - "ISO_SETUP"
+        - "BOUNDARY"
+        - "EXCEL"
+      example: "SETUP"
+    FileValue:
+      properties:
+        x-deere-signature:
+          type: "string"
+          example: "877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+        file:
+          description: "Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived."
+          example: "See sample response below."
+          type: "object"
+        id:
+          type: "string"
+          default: "N/A"
+          description: "File Transfer ID"
+          example: 51234
+        source:
+          type: "string"
+          default: "N/A"
+          description: "File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST."
+          example: "HOST"
+        transferInitiationTime:
+          type: "string"
+          description: "Timestamp of when the file transfer was initiated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2018-03-20T18:52:22.155Z"
+        lastUpdatedTime:
+          type: "string"
+          description: "Timestamp of when the file transfer was last updated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2018-03-20T21:11:35.519Z"
+        status<sup><a href="#file-transfer-additional">1</a></sup>:
+          type: "string"
+          description: "Status of the file transfer."
+          example: "WDT_IN_PROCESS"
+    FilesGet:
+      type: "object"
+      properties:
+        x-deere-signature:
+          type: "string"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+          example: "520122365ebb4870a344784570d202c7"
+        id:
+          type: "string"
+          example: 577499742
+          description: "The id of the file."
+        name:
+          type: "string"
+          example: "back40.zip"
+          description: "The name of the file."
+        type<sup><a href='#additional-type'>1</a></sup>:
+          type: "string"
+          description: "The type of the file."
+          example: "SETUP"
+        createdTime<sup><a href='#additional-date-time'>2</a></sup>:
+          type: "datetime"
+          format: "date-time"
+          example: "2015-02-03T10:42:24.282Z"
+          description: "Time at which the file was created."
+        modifiedTime<sup><a href='#additional-date-time'>2</a></sup>:
+          x-zally-ignore:
+            - "D010"
+          type: "datetime"
+          format: "date-time"
+          description: "Time at which the file was last modified."
+          example: "2015-02-03T10:42:24.282Z"
+        nativeSize:
+          type: "integer"
+          format: "int64"
+          description: "Size of the file."
+          example: 72946
+        source:
+          type: "string"
+          example: "JohnDoe"
+          description: "Account with which the file was created."
+        transferPending:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is currently in a pending transfer to a machine."
+        visibleViaShare:
+          type: "string"
+          example: "owned"
+          description: "Indicates whether you own the file, or it was shared with you. The value will be either \"owned\" or \"manual\"."
+        shared:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is shared with another org."
+        status:
+          type: "string"
+          example: "UPLOAD_PENDING"
+          description: "Indicates whether the file can be transferred to a machine. Possible values are: Upload Pending, Ready, and In Progress."
+        archived:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file has been archived."
+        new<sup>DEPRECATED</sup>:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is new."
+        format:
+          type: "string"
+          example: "IntegraVersaPlugin"
+          description: "Indicates the plugin type."
+        manufacturer:
+          type: "string"
+          example: "AgLeader"
+          description: "Indicates the manufacturer."
+    FilesLink:
+      properties:
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organization Link."
+        partnerships:
+          example: "https://sandboxapi.deere.com/platform/files/466578633/partnerships"
+          description: "Partnership Link."
+    PostFileTransfersResponse:
+      description: "File Transfers Post Api Response."
+      properties:
+        Location:
+          description: "The URL of the created resource."
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/fileTransfers/7482"
+    PostFiles:
+      properties:
+        "201":
+          description: "The file was successfully created."
+          example: "Created"
+        "400":
+          description: "File names must be between 5 and 69 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
+          example: "<ul> <li>Must be between 5 and 69 characters</li> <li>Should not contain invalid characters.</li> </ul>"
     PostableFileDetails:
       allOf:
-        - $ref: '#/components/schemas/EditableFileDetails'
-        - type: 'object'
+        - $ref: "#/components/schemas/EditableFileDetails"
+        - type: "object"
           properties:
             type:
-              $ref: '#/components/schemas/FileType'
+              $ref: "#/components/schemas/FileType"
             source:
-              type: string
-              description: 'The source of the file (e.g., the display type or user that uploaded it)'
-              example: 'myUserName'
+              type: "string"
+              description: "The source of the file (e.g., the display type or user that uploaded it)"
+              example: "myUserName"
             contextMetadata:
-              type: object
-              description: 'Contextual metadata for the file, such as frequency, report type, machines, and fields'
+              type: "object"
+              description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
               example:
                 frequency: "DAILY"
                 reportType: "CONNECTIVITY"
@@ -615,8 +1074,8 @@ components:
                   - "3341fe33-4825-464b-8442-3f17fa876cd1"
                   - "3341fe33-4825-464b-8442-3f17fa876cd1"
             customMetadata:
-              type: object
-              description: 'Additional custom metadata for the file'
+              type: "object"
+              description: "Additional custom metadata for the file"
               example:
                 time_range_start: "2025-07-01T00:00:00Z"
                 time_range_end: "2025-07-28T00:00:00Z"
@@ -625,177 +1084,90 @@ components:
                 unit_of_measure: "XYZ"
                 user_type: "Admin"
                 schedule_id: "124jsg"
-    EditableFileDetails:
-      type: 'object'
-      properties:
-        name:
-          type: string
-          example: RW8360R907628_12062012.zip
-        archived:
-          type: boolean
-          description: Indicates whether the file has been archived.
-          example: false
-        delayProcessing:
-          type: 'boolean'
-          description: 'If set to true, then processing of the file will be delayed until this is toggled to false.'
-          example: false
-    FilesLink:
-      properties:
-        owningOrganization:
-          example: https://sandboxapi.deere.com/platform/organizations/1234
-          description: Organization Link.
-        partnerships:
-          example: 	https://sandboxapi.deere.com/platform/files/466578633/partnerships
-          description: Partnership Link.
-    FilesGet:
-      type: 'object'
-      properties:
-        x-deere-signature:
-          type: string
-          description: A new x-deere-signature response header will be included if the response has changed since last api call.
-          example: 520122365ebb4870a344784570d202c7
-        id:
-          type: string
-          example: 577499742
-          description: The id of the file.
-        name:
-          type: string
-          example: back40.zip
-          description: The name of the file.
-        type<sup><a href='#additional-type'>1</a></sup>:
-          type: string
-          description: The type of the file.
-          example: SETUP
-        createdTime<sup><a href='#additional-date-time'>2</a></sup>:
-          type: 'datetime'
-          format: 'date-time'
-          example: '2015-02-03T10:42:24.282Z'
-          description: Time at which the file was created.
-        modifiedTime<sup><a href='#additional-date-time'>2</a></sup>:
-          x-zally-ignore: [D010]
-          type: 'datetime'
-          format: 'date-time'
-          description: 'Time at which the file was last modified.'
-          example: '2015-02-03T10:42:24.282Z'
-        nativeSize:
-          type: integer
-          format: 'int64'
-          description: 	Size of the file.
-          example: 72946
-        source:
-          type: string
-          example: JohnDoe
-          description: Account with which the file was created.
-        transferPending:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file is currently in a pending transfer to a machine.
-        visibleViaShare:
-          type: string
-          example: owned
-          description: 	Indicates whether you own the file, or it was shared with you. The value will be either "owned" or "manual".
-        shared:
-          type: boolean
-          example: 'false'
-          description: 	Indicates whether the file is shared with another org.
-        status:
-          type: string
-          example: UPLOAD_PENDING
-          description: 'Indicates whether the file can be transferred to a machine. Possible values are: Upload Pending, Ready, and In Progress.'
-        archived:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file has been archived.
-        new<sup>DEPRECATED</sup>:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file is new.
-        format:
-          type: string
-          example: IntegraVersaPlugin
-          description: Indicates the plugin type.
-        manufacturer:
-          type: string
-          example: AgLeader
-          description: Indicates the manufacturer.
-    ValueFileIdGet:
-      type: 'object'
-      properties:
-        id:
-          type: string
-          example: 577499742
-          description: The id of the file.
-        name:
-          type: string
-          example: back40.zip
-          description: The name of the file.
-        type<sup><a href='#additional-type'>1</a></sup>:
-          type: string
-          description: The type of the file.
-          example: SETUP
-        createdTime<sup><a href='#additional-date-time'>2</a></sup>:
-          type: 'datetime'
-          format: 'date-time'
-          example: '2015-02-03T10:42:24.282Z'
-          description: Time at which the file was created.
-        modifiedTime<sup><a href='#additional-date-time'>2</a></sup>:
-          x-zally-ignore: [ D010 ]
-          type: 'datetime'
-          format: 'date-time'
-          description: 'Time at which the file was last modified.'
-          example: '2015-02-03T10:42:24.282Z'
-        nativeSize:
-          type: integer
-          format: 'int64'
-          description: Size of the file.
-          example: 72946
-        source:
-          type: string
-          example: JohnDoe
-          description: Account with which the file was created.
-        transferPending:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file is currently in a pending transfer to a machine.
-        visibleViaShare:
-          type: string
-          example: owned
-          description: Indicates whether you own the file, or it was shared with you. The value will be either "owned" or "manual".
-        shared:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file is shared with another org.
-        status:
-          type: string
-          example: UPLOAD_PENDING
-          description: 'Indicates whether the file can be transferred to a machine. Possible values are: Upload Pending, Ready, and In Progress.'
-        archived:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file has been archived.
-        new<sup>DEPRECATED</sup>:
-          type: boolean
-          example: 'false'
-          description: Indicates whether the file is new.
-    PostFiles:
-      properties:
-        201:
-          description: The file was successfully created.
-          example: Created
-        400:
-          description: 'File names must be between 5 and 69 characters and may only contain international alphanumeric characters, spaces, and any of the following: ".,-_". Specifically, it must match the following Unicode regular expression: ^[\p{N}\p{L}.,_ \-]+$'
-          example: '<ul>
-                      <li>Must be between 5 and 69 characters</li>
-                      <li>Should not contain invalid characters.</li>
-                    </ul>'
     PutFiles:
       properties:
-        204:
-          description: The file was updated.
-          example: No Content
-        400:
-          description: 'File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: ".,-_". Specifically, it must match the following Unicode regular expression: ^[\p{N}\p{L}.,_ \-]+$'
-          example: '<ul>
-                      <li>Must be between 1 and 45 characters</li>
-                      <li>Should not contain invalid characters.</li>
-                    </ul>'
+        "204":
+          description: "The file was updated."
+          example: "No Content"
+        "400":
+          description: "File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
+          example: "<ul> <li>Must be between 1 and 45 characters</li> <li>Should not contain invalid characters.</li> </ul>"
+    ValueFileIdGet:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: 577499742
+          description: "The id of the file."
+        name:
+          type: "string"
+          example: "back40.zip"
+          description: "The name of the file."
+        type<sup><a href='#additional-type'>1</a></sup>:
+          type: "string"
+          description: "The type of the file."
+          example: "SETUP"
+        createdTime<sup><a href='#additional-date-time'>2</a></sup>:
+          type: "datetime"
+          format: "date-time"
+          example: "2015-02-03T10:42:24.282Z"
+          description: "Time at which the file was created."
+        modifiedTime<sup><a href='#additional-date-time'>2</a></sup>:
+          x-zally-ignore:
+            - "D010"
+          type: "datetime"
+          format: "date-time"
+          description: "Time at which the file was last modified."
+          example: "2015-02-03T10:42:24.282Z"
+        nativeSize:
+          type: "integer"
+          format: "int64"
+          description: "Size of the file."
+          example: 72946
+        source:
+          type: "string"
+          example: "JohnDoe"
+          description: "Account with which the file was created."
+        transferPending:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is currently in a pending transfer to a machine."
+        visibleViaShare:
+          type: "string"
+          example: "owned"
+          description: "Indicates whether you own the file, or it was shared with you. The value will be either \"owned\" or \"manual\"."
+        shared:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is shared with another org."
+        status:
+          type: "string"
+          example: "UPLOAD_PENDING"
+          description: "Indicates whether the file can be transferred to a machine. Possible values are: Upload Pending, Ready, and In Progress."
+        archived:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file has been archived."
+        new<sup>DEPRECATED</sup>:
+          type: "boolean"
+          example: "false"
+          description: "Indicates whether the file is new."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+            ag3: "ag3"
+    OAuth2_FileTransfers:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+x-source-documents:
+  - endPointName: "files-api"
+    id: 18
+  - endPointName: "file-transfers"
+    id: 19

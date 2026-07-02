@@ -14,12 +14,20 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 import {
+  buildSyncReport,
+  loadApiSurface,
+  normalizePathPattern,
+  resolveMethodNames,
+  type SurfaceEntry,
+  serializeApiSurface,
+} from './lib/api-surface.js';
+import {
   collectionItemType,
   computeReturnType,
   resolveContentSchemaRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
-import { refName, stripDocumentationMarkup } from './lib/spec-utils.js';
+import { refName, stripDocumentationMarkup, toCamelCase, toPascalCase } from './lib/spec-utils.js';
 
 // ============================================================================
 // Configuration
@@ -133,13 +141,6 @@ interface GeneratedApi {
 // Parsing Utilities
 // ============================================================================
 
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_.]/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
-}
-
 // Input is trusted JD spec param names; output is a TS identifier, not HTML. Stripping tags is safe here.
 function toSafeIdentifier(str: string): string {
   const stripped = stripDocumentationMarkup(str);
@@ -153,11 +154,6 @@ function toSafeIdentifier(str: string): string {
 // Output flows to emitted TS source (type unions, URLSearchParams keys), not HTML.
 function cleanParamName(str: string): string {
   return stripDocumentationMarkup(str);
-}
-
-function toCamelCase(str: string): string {
-  const pascal = toPascalCase(str);
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
 }
 
 function toClassName(specName: string): string {
@@ -200,36 +196,6 @@ function isCollectionEndpoint(path: string, method: string): boolean {
   if (method !== 'get') return false;
   const lastSegment = path.split('/').pop() || '';
   return !lastSegment.startsWith('{');
-}
-
-function inferMethodName(op: ParsedOperation): string {
-  const id = (op.operationId || '').toLowerCase();
-
-  if (id.startsWith('getall') || id.startsWith('list') || id.match(/^get[a-z]+s$/)) {
-    return 'list';
-  }
-  if (id.startsWith('get') && !id.includes('all')) {
-    return 'get';
-  }
-  if (id.startsWith('create') || (id.startsWith('post') && !id.includes('get'))) {
-    return 'create';
-  }
-  if (id.startsWith('update') || id.startsWith('put')) {
-    return 'update';
-  }
-  if (id.startsWith('delete') || id.startsWith('remove')) {
-    return 'delete';
-  }
-
-  if (op.method === 'get') {
-    return op.isCollection ? 'list' : 'get';
-  }
-  if (op.method === 'post') return 'create';
-  if (op.method === 'put') return 'update';
-  if (op.method === 'patch') return 'patch';
-  if (op.method === 'delete') return 'delete';
-
-  return toCamelCase(op.operationId || `${op.method}Unknown`);
 }
 
 function getSchemaType(schema: SchemaObject | undefined): string {
@@ -462,22 +428,7 @@ function parseSpec(specPath: string): GeneratedApi | null {
 // Code Generation
 // ============================================================================
 
-function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): string {
-  let methodName = inferMethodName(op);
-
-  if (usedMethodNames.has(methodName)) {
-    const pathParts = op.path.split('/').filter((p) => !p.startsWith('{') && p);
-    const suffix = toPascalCase(pathParts[pathParts.length - 1] || 'Item');
-    methodName = `${methodName}${suffix}`;
-
-    let counter = 2;
-    while (usedMethodNames.has(methodName)) {
-      methodName = `${methodName}${counter}`;
-      counter++;
-    }
-  }
-  usedMethodNames.add(methodName);
-
+function generateMethod(op: ParsedOperation, methodName: string): string {
   const params: string[] = [];
 
   for (const pp of op.pathParams) {
@@ -580,10 +531,33 @@ ${lines.join('\n')}
   }${listAllMethod}`;
 }
 
-function generateApiClass(api: GeneratedApi): string {
-  const usedMethodNames = new Set<string>();
-
-  const methods = api.operations.map((op) => generateMethod(op, usedMethodNames)).join('\n\n');
+function generateApiClass(api: GeneratedApi, names: Map<string, string>): string {
+  // The ops array drives emission order (stable, same as the spec's paths
+  // block); the names map is only ever consulted by key, never iterated,
+  // because its iteration order is not canonical.
+  const emitted = new Set<string>();
+  const methods = api.operations
+    .map((op) => {
+      // resolveMethodNames keys its map by each op's raw display string
+      // (`METHOD /path` with real param names), NOT the normalized opKey.
+      const key = `${op.method.toUpperCase()} ${op.path}`;
+      const methodName = names.get(key);
+      if (!methodName) {
+        throw new Error(
+          `generate-sdk: no resolved method name for ${key} in spec "${api.specName}". ` +
+            `resolveMethodNames must return a name for every operation it is handed.`
+        );
+      }
+      if (emitted.has(methodName)) {
+        throw new Error(
+          `generate-sdk: method name "${methodName}" would be emitted twice in class ${api.className} ` +
+            `(second occurrence at ${key}); public method names must be unique within a class.`
+        );
+      }
+      emitted.add(methodName);
+      return generateMethod(op, methodName);
+    })
+    .join('\n\n');
 
   // Determine which imports are actually used. PaginatedResponse is needed by
   // EVERY collection GET, including the PaginatedResponse<unknown> fallback for
@@ -750,16 +724,6 @@ interface HateoasEntry {
   parentPath: string;
   rel: string;
   parentSpec: string;
-}
-
-/**
- * Normalize a path pattern by replacing every `{paramName}` with `{_}` so
- * path-param name differences (e.g. `{orgId}` vs `{organizationId}`) collapse
- * into the same key. Used for pathOwner index lookups — HATEOAS entries
- * should match regardless of which variable name a spec uses.
- */
-function normalizePathPattern(path: string): string {
-  return path.replace(/\{[^}]+\}/g, '{_}');
 }
 
 /**
@@ -949,6 +913,7 @@ async function main() {
   console.log(`Found ${yamlFiles.length} OpenAPI specs\n`);
 
   const apis: GeneratedApi[] = [];
+  const parseFailures: string[] = [];
 
   for (const yamlFile of yamlFiles) {
     const specPath = join(SPECS_DIR, yamlFile);
@@ -960,16 +925,96 @@ async function main() {
       console.log(` OK (${api.operations.length} operations)`);
     } else {
       console.log(' FAILED');
+      parseFailures.push(yamlFile);
     }
+  }
+
+  // A spec that fails to parse silently vanishes from generation AND from the
+  // missing-operation detector below (its manifest entries are never checked),
+  // so a corrupt fixed spec could auto-publish an SDK missing an entire API
+  // class without ever tripping the breaking classification. Fail loudly and
+  // immediately, before any name resolution, manifest write, or file emission.
+  if (parseFailures.length > 0) {
+    console.error(
+      `\ngenerate-sdk: ${parseFailures.length} spec(s) failed to parse; aborting before generation so a dropped spec cannot silently ship:`
+    );
+    for (const file of parseFailures) {
+      console.error(`  ${file}`);
+    }
+    process.exit(1);
   }
 
   console.log(
     `\nParsed ${apis.length} APIs with ${apis.reduce((sum, a) => sum + a.operations.length, 0)} operations\n`
   );
 
+  // Resolve every public method name from the committed operation-identity
+  // manifest. loadApiSurface hard-fails when the manifest is absent: the
+  // generator never auto-seeds, because seeding from freshly fetched specs is
+  // the exact incident this pipeline exists to prevent.
+  const surface = loadApiSurface();
+
+  const namesBySpec = new Map<string, Map<string, string>>();
+  const perSpec: Array<{ specName: string; newEntries: SurfaceEntry[]; missing: SurfaceEntry[] }> =
+    [];
+  for (const api of apis) {
+    const { names, newEntries, missing } = resolveMethodNames(
+      api.specName,
+      api.operations,
+      surface
+    );
+    namesBySpec.set(api.specName, names);
+    perSpec.push({ specName: api.specName, newEntries, missing });
+  }
+
+  // The workflow's classify step reads sync-report.json unconditionally, so
+  // write it on EVERY run, before any generated file or the manifest.
+  const report = buildSyncReport(perSpec);
+  const reportPath = join(process.cwd(), 'sync-report.json');
+  writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  console.log(`Sync classification: ${report.classification} (wrote ${reportPath})\n`);
+
+  if (report.classification === 'breaking') {
+    console.error(
+      'BREAKING: manifest operations are missing upstream. Nothing was generated, ' +
+        'and the manifest was left untouched.\n'
+    );
+    const remediation =
+      "upstream renamed the path: edit this entry's op: in scripts/api-surface.yaml " +
+      'to the new path to keep the name; endpoint removed upstream: delete the entry, ' +
+      'understanding the public method disappears, a major-version consideration';
+    for (const op of report.missingOperations) {
+      console.error(`  ${op.spec}: ${op.method} ${op.path}`);
+      console.error(`    bound method name: ${op.name}`);
+      console.error(`    remediation: ${remediation}`);
+    }
+    process.exit(1);
+  }
+
+  // Additive: fold newly discovered operations into the manifest and persist
+  // it, so their proposed names become pinned identity from now on. A
+  // brand-new spec file gets its key created here.
+  const additive = perSpec.filter((r) => r.newEntries.length > 0);
+  if (additive.length > 0) {
+    console.log('New operations discovered; updating scripts/api-surface.yaml:');
+    for (const { specName, newEntries } of additive) {
+      surface.specs[specName] = [...(surface.specs[specName] ?? []), ...newEntries];
+      for (const entry of newEntries) {
+        console.log(`  ${specName}: ${entry.op} -> ${entry.name}`);
+      }
+    }
+    const surfacePath = join(process.cwd(), 'scripts', 'api-surface.yaml');
+    writeFileSync(surfacePath, serializeApiSurface(surface));
+    console.log(`  Wrote ${surfacePath}\n`);
+  }
+
   console.log('Generating API wrapper classes...');
   for (const api of apis) {
-    const code = generateApiClass(api);
+    const names = namesBySpec.get(api.specName);
+    if (!names) {
+      throw new Error(`generate-sdk: no resolved names for spec "${api.specName}"`);
+    }
+    const code = generateApiClass(api, names);
     const outputPath = join(OUTPUT_DIR, `${api.specName}.ts`);
     writeFileSync(outputPath, code);
     console.log(`  ${api.className} -> ${api.specName}.ts`);
@@ -1005,4 +1050,7 @@ async function main() {
   console.log('\nNext: Run `pnpm build` to compile TypeScript');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

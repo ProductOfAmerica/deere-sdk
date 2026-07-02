@@ -18,30 +18,6 @@ servers:
           - "partnerapiqa"
           - "sandboxapiqa"
 paths:
-  /organizations/{orgId}/fields/{fieldId}/fieldOperations:
-    get:
-      summary: "List Field Operations"
-      description: "This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation."
-      parameters:
-        - $ref: "#/components/parameters/OrgId"
-        - $ref: "#/components/parameters/FieldId"
-        - $ref: "#/components/parameters/CropSeason"
-        - $ref: "#/components/parameters/FieldOperationType"
-        - $ref: "#/components/parameters/StartDate"
-        - $ref: "#/components/parameters/EndDate"
-        - $ref: "#/components/parameters/FieldEmbed"
-        - $ref: "#/components/parameters/WorkPlanIds"
-        - $ref: "#/components/parameters/X-deere-signature"
-      security:
-        - OAuth2:
-            - "ag2"
-      responses:
-        "200":
-          $ref: "#/components/responses/FieldOperations"
-        "403":
-          $ref: "#/components/responses/DoesNotHaveAccessToFieldOperations"
-        "404":
-          $ref: "#/components/responses/RequestedResourceNotFound"
   /fieldOperations/{operationId}:
     get:
       summary: "View a Field Operation"
@@ -59,6 +35,36 @@ paths:
           $ref: "#/components/responses/DoesNotHaveAccessToFieldOperations"
         "404":
           $ref: "#/components/responses/InputFieldOperationValueIsInvalid"
+  /fieldOperations/{operationId}/measurementTypes:
+    get:
+      summary: "Field Operation Measurements"
+      description: "Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). Please refer . \"carting\" operations as well as construction operations \"constructionmilling\", \"constructionpaving\", \"constructioncompacting\", \"constructioncrushing\", \"constructionstabilizingrecycling\" are not supported at this time."
+      parameters:
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/MeasurementType_MeasurementType"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldOperationMeasurement"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToFieldOperationMeasurements"
+        "404":
+          $ref: "#/components/responses/InputOrganizationOrFieldOperationIsInvalid"
+  /fieldOperations/{operationId}/measurementTypes/{measurementType}:
+    get:
+      summary: "Field Operation Measurement"
+      description: "Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). To view the different responses for each field operation type, view the documentation above. Please refer Note: This API has two possible accept headers. One will give a response with totals, and the other will give a response with a Base64 encoded image. For the image layer, A map image is available for each measurement offering a visual depiction of the data. Argonomic data points are grouped either by label (such as variety name) or numerical range, and this information provided in the JSON response as a map legend."
+      parameters:
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/MeasurementType_MeasurementType"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldOperationMeasurementOrImage_MeasurementType"
   /fieldOps/{operationId}:
     get:
       summary: "Asynchronous Shapefile Download"
@@ -84,64 +90,61 @@ paths:
           $ref: "#/components/responses/InputFieldOperationValueIsInvalid"
         "406":
           $ref: "#/components/responses/RequestHasNotBeenAccepted"
+  /organizations/{orgId}/fields/{fieldId}/fieldOperations:
+    get:
+      summary: "List Field Operations"
+      description: "This resource returns logical data structures representing the agronomic operations performed in a field. Supported field operation types include Seeding, Application, and Harvest. A single field operation may potentially span consecutive days depending on the type of operation. Each field operation may have one or more measurements, listed as links from the field operation itself. Each field operation will include links to: organization: The organization which owns this data. field: The field in which this operation was performed. self: The field operation."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/CropSeason"
+        - $ref: "#/components/parameters/FieldOperationType"
+        - $ref: "#/components/parameters/StartDate"
+        - $ref: "#/components/parameters/EndDate"
+        - $ref: "#/components/parameters/FieldEmbed"
+        - $ref: "#/components/parameters/WorkPlanIds"
+        - $ref: "#/components/parameters/X-deere-signature"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldOperations"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToFieldOperations"
+        "404":
+          $ref: "#/components/responses/RequestedResourceNotFound"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            ag2: "ag2"
   parameters:
-    OrgId:
-      name: "orgId"
-      in: "path"
-      description: "Owning Organization ID"
-      x-required-boolean: true
+    Accept-UOM-System:
+      name: "Accept-UOM-System"
+      in: "header"
+      description: "Unit of measure system to use for numeric values in the shapefiles. Accepted values are \"METRIC\", \"ENGLISH\", and \"MIXED\".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with ."
       schema:
         type: "string"
-        format: "int64"
-        example: 12345
-    FieldId:
-      name: "fieldId"
-      in: "path"
-      x-required-boolean: true
-      description: "Field ID"
+        example: "METRIC"
+    Accept-UOM-System_MeasurementType:
+      name: "Accept-UOM-System"
+      in: "header"
+      description: "Desired unit system. Takes ENGLISH or METRIC."
       schema:
         type: "string"
-        format: "guid"
-        example: "d01111d6-1fa4-4659-943a-3df4a6b7933c"
-    OperationId:
-      name: "operationId"
-      in: "path"
-      x-required-boolean: true
-      description: "Operation ID"
+        example: "ENGLISH"
+    Accept-Yield-Preference:
+      name: "Accept-Yield-Preference"
+      in: "header"
+      description: "Desired yield representation (unit) type. Accepted values are VOLUME or MASS."
+      x-required-boolean: false
       schema:
         type: "string"
-        example: "MTIzNF81NjFiZGY1"
-    WorkNoteId:
-      name: "workNoteId"
-      in: "path"
-      x-required-boolean: true
-      description: "The identifier for a work note. The work note id will be used to identify unique work notes."
+        example: "VOLUME"
+    Accept-Yield-Preference_MeasurementType:
+      name: "Accept-Yield-Preference"
+      in: "header"
+      description: "Desired yield representation (unit) type. Takes VOLUME or MASS."
       schema:
         type: "string"
-        format: "guid"
-        example: "306d497f-e5e1-4921-8841-3c5f582e3a2e"
-    MeasurementType:
-      name: "measurementType"
-      in: "path"
-      description: "The measurementType within field operation by machine"
-      x-required-boolean: true
-      schema:
-        $ref: "#/components/schemas/FieldOperationMeasurementTypesEnum"
-    OperationLayerName:
-      name: "layerName"
-      in: "path"
-      description: "The operation layer name for a given field operation"
-      x-required-boolean: true
-      schema:
-        $ref: "#/components/schemas/FieldOperationLayersEnum"
+        example: "MASS"
     CompareType:
       in: "path"
       x-required-boolean: true
@@ -151,56 +154,15 @@ components:
         type: "string"
         enum:
           - "dataAnalysis"
-    FieldOperationType:
+    Contour:
+      name: "contour"
       in: "query"
-      name: "fieldOperationType"
-      description: "Filter results by field operation type. Takes the values \"APPLICATION\", \"HARVEST\", \"SEEDING\", and \"TILLAGE\"."
+      description: "A percentage value representing how much smoothing/contouring will be applied to the image. Higher numbers mean more contouring."
       schema:
-        $ref: "#/components/schemas/FieldOperationTypesEnum"
-    FieldOperationTypes:
-      name: "fieldOperationTypes"
-      in: "query"
-      description: "The type of operations. If the request param is not supplied, no filtering by fieldOperationType will happen"
-      schema:
-        type: "array"
-        items:
-          $ref: "#/components/schemas/FieldOperationTypesEnum"
-    FieldEmbed:
-      in: "query"
-      name: "embed"
-      description: "List available operation measurement types and totals."
-      schema:
-        type: "array"
-        items:
-          type: "string"
-        enum:
-          - "measurementTypes"
-    WorkPlanIds:
-      name: "workPlanIds"
-      in: "query"
-      description: "Query by one or more workPlanIds(comma separated)"
-      x-required-boolean: false
-      schema:
-        type: "List Of GUID"
-        example: "[\"d6166574-4ede-404e-8a68-85d4284b869d\"]"
-    X-deere-signature:
-      name: "x-deere-signature"
-      in: "header"
-      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: "520122365ebb4870a344784570d202c7"
-    RoundMeasurements:
-      description: "Set to true for standard Deere rounded measurements. Set to false for not rounded measurements."
-      in: "header"
-      name: "Round-Measurements"
-      schema:
-        default: true
-        enum:
-          - true
-          - false
-        type: "boolean"
+        type: "number"
+        minimum: 0
+        maximum: 100
+        example: 50.37
     CropSeason:
       in: "query"
       name: "cropSeason"
@@ -213,57 +175,6 @@ components:
       description: "Retrieve operations for a specific crop seasons (years)."
       schema:
         $ref: "#/components/schemas/CropSeasons"
-    SplitShapeFile:
-      name: "splitShapeFile"
-      in: "query"
-      description: "If true, this will download the shapefile in small 20MB pieces"
-      schema:
-        type: "boolean"
-        example: "false"
-    ShapeType:
-      name: "shapeType"
-      in: "query"
-      description: "Choose between point-based and polygon-based shapefiles. Accepted values are \"Point\" and \"Polygon\"."
-      schema:
-        type: "string"
-        example: "Polygon"
-        enum:
-          - "Point"
-          - "Polygon"
-    Resolution:
-      name: "resolution"
-      in: "query"
-      description: "Choose a data resolution for the shapefile. Accepted values are \"EachSection\", \"EachSensor\", and \"OneHertz\"."
-      schema:
-        type: "string"
-        example: "EachSensor"
-        enum:
-          - "EachSection"
-          - "EachSensor"
-          - "OneHertz"
-    Accept-UOM-System:
-      name: "Accept-UOM-System"
-      in: "header"
-      description: "Unit of measure system to use for numeric values in the shapefiles. Accepted values are \"METRIC\", \"ENGLISH\", and \"MIXED\".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with ."
-      schema:
-        type: "string"
-        example: "METRIC"
-    Accept-Yield-Preference:
-      name: "Accept-Yield-Preference"
-      in: "header"
-      description: "Desired yield representation (unit) type. Accepted values are VOLUME or MASS."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: "VOLUME"
-    StartDate:
-      in: "query"
-      name: "startDate"
-      description: "Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive."
-      schema:
-        type: "string"
-        format: "date-time"
-        example: "2018-04-25T15:18:15.205Z"
     EndDate:
       name: "endDate"
       in: "query"
@@ -272,15 +183,59 @@ components:
         type: "string"
         format: "date-time"
         example: "2018-04-26T15:18:15.205Z"
-    Contour:
-      name: "contour"
+    FieldEmbed:
       in: "query"
-      description: "A percentage value representing how much smoothing/contouring will be applied to the image. Higher numbers mean more contouring."
+      name: "embed"
+      description: "List available operation measurement types and totals."
       schema:
-        type: "number"
-        minimum: 0
-        maximum: 100
-        example: 50.37
+        type: "array"
+        items:
+          type: "string"
+        enum:
+          - "measurementTypes"
+    FieldId:
+      name: "fieldId"
+      in: "path"
+      x-required-boolean: true
+      description: "Field ID"
+      schema:
+        type: "string"
+        format: "guid"
+        example: "d01111d6-1fa4-4659-943a-3df4a6b7933c"
+    FieldOperationLayerLegendEmbed:
+      name: "embed"
+      in: "query"
+      description: "Include additional subelements in response."
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "image"
+    FieldOperationMachineEmbed:
+      name: "embed"
+      in: "query"
+      description: "Include additional subelements in response."
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "machine"
+    FieldOperationType:
+      in: "query"
+      name: "fieldOperationType"
+      description: "Filter results by field operation type. Takes the values \"APPLICATION\", \"CARTING\", \"HARVEST\", \"SEEDING\", and \"TILLAGE\"."
+      schema:
+        $ref: "#/components/schemas/FieldOperationTypesEnum"
+    FieldOperationTypes:
+      name: "fieldOperationTypes"
+      in: "query"
+      description: "The type of operations. If the request param is not supplied, no filtering by fieldOperationType will happen"
+      schema:
+        type: "array"
+        items:
+          $ref: "#/components/schemas/FieldOperationTypesEnum"
     FieldOperationsEmbed:
       name: "embed"
       in: "query"
@@ -301,26 +256,29 @@ components:
             - "refreshInProgress"
             - "fieldOperationWorkNotes"
             - "operationLayers"
-    FieldOperationMachineEmbed:
-      name: "embed"
-      in: "query"
-      description: "Include additional subelements in response."
+    MeasurementType:
+      name: "measurementType"
+      in: "path"
+      description: "The measurementType within field operation by machine"
+      x-required-boolean: true
       schema:
-        type: "array"
-        items:
-          type: "string"
-          enum:
-            - "machine"
-    FieldOperationLayerLegendEmbed:
-      name: "embed"
-      in: "query"
-      description: "Include additional subelements in response."
+        $ref: "#/components/schemas/FieldOperationMeasurementTypesEnum"
+    MeasurementType_MeasurementType:
+      name: "measurementType"
+      in: "path"
+      description: "Measurement Type"
+      x-required-boolean: false
       schema:
-        type: "array"
-        items:
-          type: "string"
-          enum:
-            - "image"
+        example: "HarvestYield"
+        type: "string"
+    OperationId:
+      name: "operationId"
+      in: "path"
+      x-required-boolean: true
+      description: "Operation ID"
+      schema:
+        type: "string"
+        example: "MTIzNF81NjFiZGY1"
     OperationIds:
       name: "operationIds"
       in: "query"
@@ -331,27 +289,94 @@ components:
         items:
           type: "string"
           example: "306d497f-e5e1-4921-8841-3c5f582e3a2e"
-  requestBodies:
-    FieldOperationLayerImageRequest:
+    OperationLayerName:
+      name: "layerName"
+      in: "path"
+      description: "The operation layer name for a given field operation"
       x-required-boolean: true
-      description: "Request body for generating an image for a field operation layer."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/FieldOperationLayerImageRequest"
-          examples:
-            RequestImageWithLegend:
-              summary: "Requesting an image using a legend"
-              value:
-                ranges:
-                  - minimum: 13.15
-                    maximum: 17.95
-                    hexColor: "#cc0000"
-                    percent: 0.15
-                  - minimum: 0
-                    maximum: 13.14
-                    hexColor: "#cc00aa"
-                    percent: 0.85
+      schema:
+        $ref: "#/components/schemas/FieldOperationLayersEnum"
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Owning Organization ID"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        format: "int64"
+        example: 12345
+    Resolution:
+      name: "resolution"
+      in: "query"
+      description: "Choose a data resolution for the shapefile. Accepted values are \"EachSection\", \"EachSensor\", and \"OneHertz\"."
+      schema:
+        type: "string"
+        example: "EachSensor"
+        enum:
+          - "EachSection"
+          - "EachSensor"
+          - "OneHertz"
+    RoundMeasurements:
+      description: "Set to true for standard Deere rounded measurements. Set to false for not rounded measurements."
+      in: "header"
+      name: "Round-Measurements"
+      schema:
+        default: true
+        enum:
+          - true
+          - false
+        type: "boolean"
+    ShapeType:
+      name: "shapeType"
+      in: "query"
+      description: "Choose between point-based and polygon-based shapefiles. Accepted values are \"Point\" and \"Polygon\"."
+      schema:
+        type: "string"
+        example: "Polygon"
+        enum:
+          - "Point"
+          - "Polygon"
+    SplitShapeFile:
+      name: "splitShapeFile"
+      in: "query"
+      description: "If true, this will download the shapefile in small 20MB pieces"
+      schema:
+        type: "boolean"
+        example: "false"
+    StartDate:
+      in: "query"
+      name: "startDate"
+      description: "Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive."
+      schema:
+        type: "string"
+        format: "date-time"
+        example: "2018-04-25T15:18:15.205Z"
+    WorkNoteId:
+      name: "workNoteId"
+      in: "path"
+      x-required-boolean: true
+      description: "The identifier for a work note. The work note id will be used to identify unique work notes."
+      schema:
+        type: "string"
+        format: "guid"
+        example: "306d497f-e5e1-4921-8841-3c5f582e3a2e"
+    WorkPlanIds:
+      name: "workPlanIds"
+      in: "query"
+      description: "Query by one or more workPlanIds(comma separated)"
+      x-required-boolean: false
+      schema:
+        type: "List Of GUID"
+        example: "[\"d6166574-4ede-404e-8a68-85d4284b869d\"]"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        example: "520122365ebb4870a344784570d202c7"
+  requestBodies:
     FieldOperationCompareStatisticsRequest:
       x-required-boolean: true
       description: "Request to get comparison stats for field operations"
@@ -378,6 +403,63 @@ components:
                           - 10
                         - - -10
                           - -10
+    FieldOperationLayerImageRequest:
+      x-required-boolean: true
+      description: "Request body for generating an image for a field operation layer."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationLayerImageRequest"
+          examples:
+            RequestImageWithLegend:
+              summary: "Requesting an image using a legend"
+              value:
+                ranges:
+                  - minimum: 13.15
+                    maximum: 17.95
+                    hexColor: "#cc0000"
+                    percent: 0.15
+                  - minimum: 0
+                    maximum: 13.14
+                    hexColor: "#cc00aa"
+                    percent: 0.85
+    FieldOperationWorkNote:
+      x-required-boolean: true
+      description: "Payload for the FieldOperationWorkNote to create field operation work note."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              note:
+                type: "string"
+                example: "note1"
+              timestamp:
+                type: "string"
+                format: "date-time"
+                description: "Timestamp of the work note."
+                example: "2018-08-27T08:08:08.000Z"
+              gpsLocation:
+                description: "GPS location where the the work note was taken."
+                $ref: "#/components/schemas/Point"
+    FieldOperationWorkNoteUpdate:
+      x-required-boolean: true
+      description: "Payload for FieldOperationWorkNote to update field operation work note."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              note:
+                type: "string"
+                example: "note1"
+    SearchFieldOperations:
+      x-required-boolean: true
+      description: "Payload for the FieldOperationSearch to retrive field operations for provided organization, field ids and duration."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationsSearch"
     UpdateFieldOperationLayerStatisticsRequest:
       x-required-boolean: true
       description: "See the examples for valid manual data edits. Data edits cannot be combined. Data edits may have cascading effects on layers and measurements not specified in the request. For synchronous edits, clients may fetch the Field Operation totals immediately to see the full impact. For asynchronous edits, clients may poll the Field Operation totals to wait for the specified value to be reflected. A status API may be added in the future."
@@ -428,13 +510,6 @@ components:
                       edited: false
                     averageValue:
                       edited: false
-    UpdateFieldOperationRequest:
-      x-required-boolean: true
-      description: "Update a field operation."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/UpdateFieldOperation"
     UpdateFieldOperationMachinesRequest:
       x-required-boolean: true
       description: "Update field operation machines."
@@ -453,44 +528,22 @@ components:
                   calibrationFactor: 0.75
                 - GUID: "6117580e-0222-4c06-96df-76a53451e69c"
                   calibrationFactor: 1.05
-    SearchFieldOperations:
+    UpdateFieldOperationRequest:
       x-required-boolean: true
-      description: "Payload for the FieldOperationSearch to retrive field operations for provided organization, field ids and duration."
+      description: "Update a field operation."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
-            $ref: "#/components/schemas/FieldOperationsSearch"
-    FieldOperationWorkNote:
-      x-required-boolean: true
-      description: "Payload for the FieldOperationWorkNote to create field operation work note."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              note:
-                type: "string"
-                example: "note1"
-              timestamp:
-                type: "string"
-                format: "date-time"
-                description: "Timestamp of the work note."
-                example: "2018-08-27T08:08:08.000Z"
-              gpsLocation:
-                description: "GPS location where the the work note was taken."
-                $ref: "#/components/schemas/Point"
-    FieldOperationWorkNoteUpdate:
-      x-required-boolean: true
-      description: "Payload for FieldOperationWorkNote to update field operation work note."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              note:
-                type: "string"
-                example: "note1"
+            $ref: "#/components/schemas/UpdateFieldOperation"
   responses:
+    CreatedWorkNote:
+      description: "Created work note"
+      headers:
+        Location:
+          description: "The uri of the newly created resource"
+          schema:
+            type: "string"
+            format: "uri"
     CropSeasonSummaries:
       description: "A collection of field with crop season and FieldOprationType"
       content:
@@ -511,6 +564,595 @@ components:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/CropSeasonSummary"
+    DoesNotHaveAccessToFieldOperation:
+      description: "The user has not been provided access to the field operation specified by id."
+    DoesNotHaveAccessToFieldOperationLayers:
+      description: "The user has not been provided access to the Field Operation Layers for this organization."
+    DoesNotHaveAccessToFieldOperationMeasurements:
+      description: "The user has not been provided access to the Field Operation Measurements for this organization."
+    DoesNotHaveAccessToFieldOperations:
+      description: "The user has not been provided access to the field operations for this organization."
+    FieldOperation:
+      description: "A field operation object"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinkGETFieldOperations"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperation"
+    FieldOperationDataAnalysisStatistics:
+      description: "Field Operation Statistics broken down according to the legend for another context."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/MapRangeWithLayerStatistics"
+          examples:
+            YieldByVariety:
+              summary: "Yield by Variety statistics"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
+                total: 1
+                values:
+                  - "@type": "MapRangeWithLayerStatistics"
+                    label: "Variety 1"
+                    statistics:
+                      "@type": "LayerStatistics"
+                      averageValue:
+                        "@type": "EventMeasurement"
+                        value: 156.13
+                        unitId: "bu1ac-1"
+                  - "@type": "MapRangeWithLayerStatistics"
+                    label: "Variety 2"
+                    statistics:
+                      "@type": "LayerStatistics"
+                      averageValue:
+                        "@type": "EventMeasurement"
+                        value: 184.17
+                        unitId: "bu1ac-1"
+            YieldBySeedingRate:
+              summary: "Yield by Seeding Rate statistics"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
+                total: 1
+                values:
+                  - "@type": "MapRangeWithLayerStatistics"
+                    minimum: 13.15
+                    maximum: 17.95
+                    statistics:
+                      "@type": "LayerStatistics"
+                      averageValue:
+                        "@type": "EventMeasurement"
+                        value: 156.13
+                        unitId: "bu1ac-1"
+                  - "@type": "MapRangeWithLayerStatistics"
+                    minimum: 17.95
+                    maximum: 20.05
+                    statistics:
+                      "@type": "LayerStatistics"
+                      averageValue:
+                        "@type": "EventMeasurement"
+                        value: 184.17
+                        unitId: "bu1ac-1"
+    FieldOperationId:
+      description: "A field operation object"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinkGETFieldOperationsId"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationId"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                "@type": "FieldOperation"
+                fieldOperationType: "tillage"
+                adaptMachineType: "unknown"
+                cropSeason: "2012"
+                modifiedTime: "2018-05-16T15:04:24.787Z"
+                fieldOperationMachines:
+                  - "@type": "FieldOperationMachine"
+                    GUID: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
+                    erid: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
+                    machineId: 637795
+                    operators:
+                      - "@type": "Operator"
+                        operatorId: "OPERATOR_ID"
+                        license: "OPERATOR_LICENSE"
+                        name: "OPERATOR_NAME"
+                    vin: "WXYEJKB73894JE3"
+                id: "MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw"
+                links:
+                  - "@type": "Link"
+                    rel: "organization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw"
+                  - "@type": "Link"
+                    rel: "measurementTypes"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
+                  - "@type": "Link"
+                    rel: "tillageDepthTarget"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageDepthTarget"
+                  - "@type": "Link"
+                    rel: "tillageDepthResult"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageDepthResult"
+                  - "@type": "Link"
+                    rel: "tillagePressureTarget"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureTarget"
+                  - "@type": "Link"
+                    rel: "tillagePressureResult"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
+                  - "@type": "Link"
+                    rel: "tillageSpeedResult"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageSpeedResult"
+                  - "@type": "Link"
+                    rel: "client"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
+                  - "@type": "Link"
+                    rel: "farm"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
+                  - "@type": "Link"
+                    rel: "workPlans"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e"
+    FieldOperationLayerImage:
+      description: "An Object of Field Operation layer image"
+      headers:
+        x-minimum-longitude:
+          description: "The minimum longitude represented in the image"
+          schema:
+            type: "number"
+            format: "double"
+          example: -96.776622
+        x-minimum-latitude:
+          description: "The minimum latitude represented in the image"
+          schema:
+            type: "number"
+            format: "double"
+          example: 40.282002
+        x-maximum-longitude:
+          description: "The maximum longitude represented in the image"
+          schema:
+            type: "number"
+            format: "double"
+          example: -90.047496
+        x-maximum-latitude:
+          description: "The maximum latitude represented in the image"
+          schema:
+            type: "number"
+            format: "double"
+          example: 43.542938
+      content:
+        image/png:
+          x-zally-ignore:
+            - "D005"
+            - "D012"
+          schema:
+            type: "string"
+            format: "binary"
+    FieldOperationLayerLegend:
+      description: "An Object of Field Operation layer legend"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              id:
+                $ref: "#/components/schemas/FieldOperationLayersEnum"
+              unitId:
+                type: "string"
+                description: "The unit associated to the quantity measured"
+                example: "gal1ac-1."
+              variableRepresentation:
+                type: "string"
+                example: "vrSolutionRateLiquid"
+              ranges:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/MapRange"
+              image:
+                description: "embedable base64 encoded PNG image"
+                type: "object"
+                properties:
+                  data:
+                    type: "string"
+                    example: "data:image/png;base64,{base64EncodedContent}"
+                  extent:
+                    $ref: "#/components/schemas/MapExtent"
+          examples:
+            HarvestYield:
+              summary: "Harvest yield map image and legends"
+              value:
+                id: "YieldByVolume"
+                unitId: "bu1ac-1"
+                variableRepresentation: "vrYieldVolumePerArea"
+                legends:
+                  - "@type": "MapLegendItem"
+                    hexColor: "#cc0000"
+                    percent: 0.15
+                    minimum: 13.15
+                    maximum: 17.95
+                  - "@type": "MapLegendItem"
+                    hexColor: "#cc0011"
+                    percent: 0.15
+                    minimum: 11.15
+                    maximum: 19.95
+                image:
+                  data: "data:image/png;base64,{base64EncodedContent}"
+                  extent:
+                    minimumLatitude: 41.66470503009207
+                    maximumLatitude: 41.67086022030498
+                    minimumLongitude: -93.15582275390625
+                    maximumLongitude: -93.1475830078125
+    FieldOperationLayerStatistics:
+      description: "An Object of Field Operation Statistics"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                $ref: "#/components/schemas/FieldOperationLayerStatistics"
+    FieldOperationLayers:
+      description: "An Object of Field Operation Layers"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                $ref: "#/components/schemas/FieldOperationLayers"
+          examples:
+            HarvestOperation:
+              summary: "Harvest OperationLayers"
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
+                total: 2
+                values:
+                  - "@type": "FieldOperationLayer"
+                    id: "YieldByVolume"
+                    links:
+                      - rel: "LayerImage"
+                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/YieldByVolume/image"
+                      - rel: "LayerLegend"
+                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/YieldByVolume/legend"
+                  - "@type": "FieldOperationLayer"
+                    id: "Speed"
+                    links:
+                      - rel: "LayerImage"
+                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/Speed/image"
+                      - rel: "LayerLegend"
+                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/Speed/legend"
+    FieldOperationMachines:
+      description: "A collection of field operation machines"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMachine"
+    FieldOperationMeasurement:
+      description: "An object of Field Operation Measurements or image"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+    FieldOperationMeasurementOrImage:
+      description: "An object of Field Operation Measurements or image"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationMeasurement"
+        application/vnd.deere.axiom.v3.image+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationPNGImage"
+        application/vnd.deere.axiom.v3.location+tif+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationGeoTIFFLocation"
+    FieldOperationMeasurementOrImage_MeasurementType:
+      description: "An object of Field Operation Measurements or image"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          note: 123
+          summary: "Field Operation Measurement"
+          description: "Field Operations"
+          schema:
+            summary: "Field Operation Measurement"
+            description: "Field Operations"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurementType"
+        application/vnd.deere.axiom.v3.image+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurement_MeasurementType"
+          examples:
+            application/vnd.deere.axiom.v3+json:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                "@type": "FieldOperationMeasurement"
+                measurementName: "TillageDepthTarget"
+                measurementCategory: "Target"
+                area:
+                  "@type": "EventMeasurement"
+                  value: 0.72
+                  unitId: "ha"
+                averageDepth:
+                  "@type": "EventMeasurement"
+                  value: 15.24
+                  unitId: "cm"
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                  - "@type": "Link"
+                    rel: "mapImage"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                  - "@type": "Link"
+                    rel: "organization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                  - "@type": "Link"
+                    rel: "fieldOperation"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+            application/vnd.deere.axiom.v3.image+json:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3.image+json"
+              value:
+                name: "fieldOperationMapImage"
+                declaredType: "com.deere.api.axiom.generated.v3.FieldOperationMapImage"
+                scope: "javax.xml.bind.JAXBElement$GlobalScope"
+                value:
+                  image: "data:image/png;base64..."
+                  legend:
+                    "@type": "MapLegend"
+                    unitId: "cm"
+                    ranges:
+                      - "@type": "MapLegendItem"
+                        label: "15"
+                        hexColor: "#4B0082"
+                        percent: 1
+                  extent:
+                    "@type": "MapExtent"
+                    minimumLatitude: 41.66625903184001
+                    maximumLatitude: 41.669542228078
+                    minimumLongitude: -93.15431597923825
+                    maximumLongitude: -93.15009035584056
+                  links:
+                    - "@type": "Link"
+                      rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                    - "@type": "Link"
+                      rel: "organization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                    - "@type": "Link"
+                      rel: "fieldOperation"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+                    - "@type": "Link"
+                      rel: "measurementType"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                nil: false
+                globalScope: true
+                typeSubstituted: false
+    FieldOperationMeasurements:
+      description: "A collection of Field Operation Measurements"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurement"
+    FieldOperationMeasurements_MeasurementType:
+      description: "A collection of Field Operation Measurements"
+      content:
+        application/vnd.deere.axiom.v3.image+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurement_MeasurementType"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                name: "fieldOperationMapImage"
+                declaredType: "com.deere.api.axiom.generated.v3.FieldOperationMapImage"
+                scope: "javax.xml.bind.JAXBElement$GlobalScope"
+                value:
+                  image: "data:image/png;base64..."
+                  legend:
+                    "@type": "MapLegend"
+                    unitId: "cm"
+                    ranges:
+                      - "@type": "MapLegendItem"
+                        label: "15"
+                        hexColor: "#4B0082"
+                        percent: 1
+                  extent:
+                    "@type": "MapExtent"
+                    minimumLatitude: 41.66625903184001
+                    maximumLatitude: 41.669542228078
+                    minimumLongitude: -93.15431597923825
+                    maximumLongitude: -93.15009035584056
+                  links:
+                    - "@type": "Link"
+                      rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                    - "@type": "Link"
+                      rel: "organization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                    - "@type": "Link"
+                      rel: "fieldOperation"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+                    - "@type": "Link"
+                      rel: "measurementType"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                nil: false
+                globalScope: true
+                typeSubstituted: false
+    FieldOperationWorkNote:
+      description: "A field operation work note object"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/FieldOperationWorkNote"
+    FieldOperationWorkNotes:
+      description: "A collection of field operation work notes"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Link"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 10
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationWorkNote"
     FieldOperations:
       description: "A collection of field operations"
       content:
@@ -644,553 +1286,43 @@ components:
                       - "@type": "Link"
                         rel: "workPlans"
                         uri: "https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e"
-    FieldOperation:
-      description: "A field operation object"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/LinkGETFieldOperations"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/FieldOperation"
-    FieldOperationId:
-      description: "A field operation object"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/LinkGETFieldOperationsId"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/FieldOperationId"
-          examples:
-            No Header:
-              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
-              value:
-                "@type": "FieldOperation"
-                fieldOperationType: "tillage"
-                adaptMachineType: "unknown"
-                cropSeason: "2012"
-                modifiedTime: "2018-05-16T15:04:24.787Z"
-                fieldOperationMachines:
-                  - "@type": "FieldOperationMachine"
-                    GUID: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
-                    erid: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
-                    machineId: 637795
-                    operators:
-                      - "@type": "Operator"
-                        operatorId: "OPERATOR_ID"
-                        license: "OPERATOR_LICENSE"
-                        name: "OPERATOR_NAME"
-                    vin: "WXYEJKB73894JE3"
-                id: "MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw"
-                links:
-                  - "@type": "Link"
-                    rel: "organization"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/123456"
-                  - "@type": "Link"
-                    rel: "field"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
-                  - "@type": "Link"
-                    rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw"
-                  - "@type": "Link"
-                    rel: "measurementTypes"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
-                  - "@type": "Link"
-                    rel: "tillageDepthTarget"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageDepthTarget"
-                  - "@type": "Link"
-                    rel: "tillageDepthResult"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageDepthResult"
-                  - "@type": "Link"
-                    rel: "tillagePressureTarget"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureTarget"
-                  - "@type": "Link"
-                    rel: "tillagePressureResult"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
-                  - "@type": "Link"
-                    rel: "tillageSpeedResult"
-                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillageSpeedResult"
-                  - "@type": "Link"
-                    rel: "client"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
-                  - "@type": "Link"
-                    rel: "farm"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
-                  - "@type": "Link"
-                    rel: "workPlans"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e"
-    FieldOperationMachines:
-      description: "A collection of field operation machines"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/FieldOperationMachine"
-    FieldOperationWorkNotes:
-      description: "A collection of field operation work notes"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 10
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/FieldOperationWorkNote"
-    FieldOperationWorkNote:
-      description: "A field operation work note object"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/FieldOperationWorkNote"
-    FieldOperationMeasurements:
-      description: "A collection of Field Operation Measurements"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/FieldOperationMeasurement"
-    FieldOperationMeasurementOrImage:
-      description: "An object of Field Operation Measurements or image"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/FieldOperationMeasurement"
-        application/vnd.deere.axiom.v3.image+json:
-          schema:
-            $ref: "#/components/schemas/FieldOperationPNGImage"
-        application/vnd.deere.axiom.v3.location+tif+json:
-          schema:
-            $ref: "#/components/schemas/FieldOperationGeoTIFFLocation"
-    FieldOperationLayerStatistics:
-      description: "An Object of Field Operation Statistics"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                $ref: "#/components/schemas/FieldOperationLayerStatistics"
-    FieldOperationDataAnalysisStatistics:
-      description: "Field Operation Statistics broken down according to the legend for another context."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/MapRangeWithLayerStatistics"
-          examples:
-            YieldByVariety:
-              summary: "Yield by Variety statistics"
-              value:
-                links:
-                  - rel: "self"
-                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
-                total: 1
-                values:
-                  - "@type": "MapRangeWithLayerStatistics"
-                    label: "Variety 1"
-                    statistics:
-                      "@type": "LayerStatistics"
-                      averageValue:
-                        "@type": "EventMeasurement"
-                        value: 156.13
-                        unitId: "bu1ac-1"
-                  - "@type": "MapRangeWithLayerStatistics"
-                    label: "Variety 2"
-                    statistics:
-                      "@type": "LayerStatistics"
-                      averageValue:
-                        "@type": "EventMeasurement"
-                        value: 184.17
-                        unitId: "bu1ac-1"
-            YieldBySeedingRate:
-              summary: "Yield by Seeding Rate statistics"
-              value:
-                links:
-                  - rel: "self"
-                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
-                total: 1
-                values:
-                  - "@type": "MapRangeWithLayerStatistics"
-                    minimum: 13.15
-                    maximum: 17.95
-                    statistics:
-                      "@type": "LayerStatistics"
-                      averageValue:
-                        "@type": "EventMeasurement"
-                        value: 156.13
-                        unitId: "bu1ac-1"
-                  - "@type": "MapRangeWithLayerStatistics"
-                    minimum: 17.95
-                    maximum: 20.05
-                    statistics:
-                      "@type": "LayerStatistics"
-                      averageValue:
-                        "@type": "EventMeasurement"
-                        value: 184.17
-                        unitId: "bu1ac-1"
-    FieldOperationLayers:
-      description: "An Object of Field Operation Layers"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              links:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Link"
-              total:
-                description: "Number of results in the list"
-                type: "integer"
-                format: "int64"
-                example: 70
-              values:
-                $ref: "#/components/schemas/FieldOperationLayers"
-          examples:
-            HarvestOperation:
-              summary: "Harvest OperationLayers"
-              value:
-                links:
-                  - rel: "self"
-                    uri: "https://api.deere.com/platform/self/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
-                total: 2
-                values:
-                  - "@type": "FieldOperationLayer"
-                    id: "YieldByVolume"
-                    links:
-                      - rel: "LayerImage"
-                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/YieldByVolume/image"
-                      - rel: "LayerLegend"
-                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/YieldByVolume/legend"
-                  - "@type": "FieldOperationLayer"
-                    id: "Speed"
-                    links:
-                      - rel: "LayerImage"
-                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/Speed/image"
-                      - rel: "LayerLegend"
-                        uri: "https://api.deere.com/platform/fieldOperations/e48a7dd0-9af2-44e1-81b4-435d494f7cd5/operationLayers/Speed/legend"
-    FieldOperationLayerLegend:
-      description: "An Object of Field Operation layer legend"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              id:
-                $ref: "#/components/schemas/FieldOperationLayersEnum"
-              unitId:
-                type: "string"
-                description: "The unit associated to the quantity measured"
-                example: "gal1ac-1."
-              variableRepresentation:
-                type: "string"
-                example: "vrSolutionRateLiquid"
-              ranges:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/MapRange"
-              image:
-                description: "embedable base64 encoded PNG image"
-                type: "object"
-                properties:
-                  data:
-                    type: "string"
-                    example: "data:image/png;base64,{base64EncodedContent}"
-                  extent:
-                    $ref: "#/components/schemas/MapExtent"
-          examples:
-            HarvestYield:
-              summary: "Harvest yield map image and legends"
-              value:
-                id: "YieldByVolume"
-                unitId: "bu1ac-1"
-                variableRepresentation: "vrYieldVolumePerArea"
-                legends:
-                  - "@type": "MapLegendItem"
-                    hexColor: "#cc0000"
-                    percent: 0.15
-                    minimum: 13.15
-                    maximum: 17.95
-                  - "@type": "MapLegendItem"
-                    hexColor: "#cc0011"
-                    percent: 0.15
-                    minimum: 11.15
-                    maximum: 19.95
-                image:
-                  data: "data:image/png;base64,{base64EncodedContent}"
-                  extent:
-                    minimumLatitude: 41.66470503009207
-                    maximumLatitude: 41.67086022030498
-                    minimumLongitude: -93.15582275390625
-                    maximumLongitude: -93.1475830078125
-    FieldOperationLayerImage:
-      description: "An Object of Field Operation layer image"
-      headers:
-        x-minimum-longitude:
-          description: "The minimum longitude represented in the image"
-          schema:
-            type: "number"
-            format: "double"
-          example: -96.776622
-        x-minimum-latitude:
-          description: "The minimum latitude represented in the image"
-          schema:
-            type: "number"
-            format: "double"
-          example: 40.282002
-        x-maximum-longitude:
-          description: "The maximum longitude represented in the image"
-          schema:
-            type: "number"
-            format: "double"
-          example: -90.047496
-        x-maximum-latitude:
-          description: "The maximum latitude represented in the image"
-          schema:
-            type: "number"
-            format: "double"
-          example: 43.542938
-      content:
-        image/png:
-          x-zally-ignore:
-            - "D005"
-            - "D012"
-          schema:
-            type: "string"
-            format: "binary"
+    InputFieldOperationValueIsInvalid:
+      description: "The specified field operation does not exist."
+    InputOrgValueIsInvalid:
+      description: "The specified organization does not exist."
+    InputOrganizationOrFieldOperationIsInvalid:
+      description: "The specified organization or field operation does not exist."
+    InputOrganizationOrFieldOperationOrLayerIsInvalid:
+      description: "The specified organization, field operation, or layer does not exist."
+    InputOrganizationOrFieldOperationOrMeasurementIsInvalid:
+      description: "The specified organization, field operation, or measurement name does not exist."
+    InputOrganizationOrMeasurementTypeIsInvalid:
+      description: "The specified organization or measurement Type does not exist."
+    RedirectToPreSignedURL:
+      description: "Temporary Redirect. The location will be a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to that URL. Do not include an Authorization header in this request, as the authorization is provided via the pre-signed nature of the URL."
     RequestHasBeenAccepted:
       description: "Accepted"
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             type: "object"
-    UpdatedResponse:
-      description: "Updated successfully"
     RequestHasNotBeenAccepted:
       description: "Not Acceptable. Expected in case of TILLAGE operation."
-    RedirectToPreSignedURL:
-      description: "Temporary Redirect. The location will be a pre-signed URL that is valid for no less than one hour. To download the file, perform a GET request to that URL. Do not include an Authorization header in this request, as the authorization is provided via the pre-signed nature of the URL."
-    DoesNotHaveAccessToFieldOperations:
-      description: "The user has not been provided access to the field operations for this organization."
-    DoesNotHaveAccessToFieldOperation:
-      description: "The user has not been provided access to the field operation specified by id."
-    DoesNotHaveAccessToFieldOperationMeasurements:
-      description: "The user has not been provided access to the Field Operation Measurements for this organization."
-    DoesNotHaveAccessToFieldOperationLayers:
-      description: "The user has not been provided access to the Field Operation Layers for this organization."
-    InputOrgValueIsInvalid:
-      description: "The specified organization does not exist."
-    InputFieldOperationValueIsInvalid:
-      description: "The specified field operation does not exist."
     RequestedOperationNotSupported:
       description: "The layer you are trying to edit cannot be edited."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/Errors"
-    InputOrganizationOrFieldOperationIsInvalid:
-      description: "The specified organization or field operation does not exist."
-    InputOrganizationOrMeasurementTypeIsInvalid:
-      description: "The specified organization or measurement Type does not exist."
-    InputOrganizationOrFieldOperationOrLayerIsInvalid:
-      description: "The specified organization, field operation, or layer does not exist."
-    InputOrganizationOrFieldOperationOrMeasurementIsInvalid:
-      description: "The specified organization, field operation, or measurement name does not exist."
     RequestedResourceNotFound:
       description: "The requested resource was not found."
-    CreatedWorkNote:
-      description: "Created work note"
-      headers:
-        Location:
-          description: "The uri of the newly created resource"
-          schema:
-            type: "string"
-            format: "uri"
+    UpdatedResponse:
+      description: "Updated successfully"
   schemas:
-    Operators:
-      type: "object"
-      description: "Operators that performed work using this machine"
-      properties:
-        operatorId:
-          type: "string"
-          description: "Unique identifier for this operator"
-          example: "657b4391-79b3-4012-a617-7ceba7111ad0"
-        name:
-          type: "string"
-          description: "Name of the operator"
-          example: "John Doe"
-        license:
-          type: "string"
-          description: "Operator license number"
-          example: "ABC123"
-    FieldOperationMachines:
-      type: "object"
-      description: "Machines utilized during this operation"
-      properties:
-        erid:
-          type: "string"
-          example: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
-          description: "Doc File based Field Operation Machine erid."
-        Operators:
-          $ref: "#/components/schemas/Operators"
-        machineId:
-          type: "integer"
-          description: "PrincipalId of the machine"
-          format: "int64"
-          example: 637795
-          nullable: true
-        vin:
-          type: "string"
-          description: "VIN of the machine"
-          example: "WXYEJKB73894JE3"
-    LinkGETFieldOperations:
-      properties:
-        organization:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456"
-          description: "Organizations Link."
-        field:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
-          description: "Fields Link."
-        measurementTypes:
-          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
-          description: "Field Operation Measurements Link."
-        measurement:
-          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
-          description: "zero or more field operation measurements links. These will vary by the type of operation"
-        client:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
-          description: "Clients Link."
-        farm:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
-          description: "Farms Link."
-        shapeFileAsync:
-          example: "https://sandboxapi.deere.com/platform/fieldOps/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNg"
-          description: "Asynchronous Shapefiles Link."
-        workPlans:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e"
-          description: "Link to work plan associated to the operation."
-    LinkGETFieldOperationsId:
-      properties:
-        organization:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456"
-          description: "Organizations Link."
-        field:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
-          description: "Fields Link."
-        measurementTypes:
-          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
-          description: "Field Operation Measurements Link."
-        measurement:
-          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
-          description: "zero or more field operation measurements links. These will vary by the type of operation"
-        client:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
-          description: "Clients Link."
-        farm:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
-          description: "Farms Link."
-    Link:
+    AgencyRegistrationNumber:
       type: "string"
-      properties:
-        uri: null
-    FieldLink:
-      type: "object"
-      description: "A link provides a URI to access resources that are related to the response."
-      properties:
-        rel:
-          type: "string"
-          description: "The relation of the object to the linked resource."
-          example: "field"
-        uri:
-          type: "string"
-          format: "uri"
-          description: "The URI to the related resource."
-          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
-    FieldOperationTypesEnum:
-      type: "string"
-      description: "The type of operation"
-      example: "HARVEST"
+      description: "The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency"
+      example: "0084229-00011-AA-0000000"
     Client:
       type: "object"
       description: "The client associated with this FieldOperation. Populated only when the associated embed is requested."
@@ -1210,6 +1342,169 @@ components:
         archived:
           type: "boolean"
           example: false
+    Component:
+      type: "object"
+      description: "An individual product combined with others in a tank mix."
+      properties:
+        "@type":
+          type: "string"
+          example: "Component"
+        guid:
+          type: "string"
+          description: "Display recorded Component GUID."
+          example: "fa14f029-831c-456b-a76e-2d3c26207c19"
+        name:
+          type: "string"
+          description: "The general name of the product."
+          example: "Water"
+        agencyRegistrationNumber:
+          $ref: "#/components/schemas/AgencyRegistrationNumber"
+        rate:
+          $ref: "#/components/schemas/EventMeasurement"
+    ConnectMobileEnum:
+      type: "string"
+      description: "The type of display"
+      enum:
+        - "OneAppMobile"
+    CropSeason:
+      type: "integer"
+      description: "Filter results by crop season."
+      example: 2016
+    CropSeasonSummary:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FieldLink"
+        fieldOperationType:
+          $ref: "#/components/schemas/FieldOperationTypesEnum"
+        cropSeasons:
+          $ref: "#/components/schemas/CropSeasons"
+    CropSeasons:
+      type: "array"
+      description: "The crop seasons (year) of the recent operation"
+      example:
+        - "2016"
+        - "2015"
+      items:
+        $ref: "#/components/schemas/CropSeason"
+    CropToken:
+      type: "string"
+      description: "- A unique textual identifier for a type of Crop - EnumList is based on ISG_Shared/blob/master/crops/crops.xml - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids."
+      example: "ALFALFA"
+    DisplayTypeEnum:
+      x-zally-ignore:
+        - "D012"
+      allOf:
+        - $ref: "#/components/schemas/JohnDeereDisplayTypeEnum"
+        - $ref: "#/components/schemas/ConnectMobileEnum"
+        - $ref: "#/components/schemas/ThirdPartyDisplayTypeEnum"
+    EridToEridEdit:
+      type: "object"
+      description: "Describes an edit that should change the id of any object that matches the fromGuid"
+      properties:
+        fromGuid:
+          $ref: "#/components/schemas/ProductErid"
+        toGuid:
+          $ref: "#/components/schemas/ProductErid"
+    Error:
+      type: "object"
+      properties:
+        guid:
+          type: "string"
+          format: "guid"
+          example: "11111111-2222-3333-4444-555555555555"
+        message:
+          type: "string"
+          description: "An english description of the error"
+          example: "was invalid because"
+        code:
+          type: "string"
+          description: "A string constant representing the type of error"
+          example: 400
+        field:
+          type: "string"
+          description: "The name of the property or parameter deemed invalid"
+          example: "example-field"
+        invalidValue:
+          type: "string"
+          description: "The value that was supplied for this field in the request"
+          example: "Bad value"
+    Errors:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Error"
+    EventMeasurement:
+      type: "object"
+      description: "A general representation of quantity and unit."
+      example:
+        "@type": "EventMeasurement"
+        value: 17.13
+        unitId: "gal1ac-1"
+      properties:
+        "@type":
+          type: "string"
+          example: "EventMeasurement"
+        value:
+          type: "number"
+          format: "double"
+          description: "The quantity represented by this measurement."
+        unitId:
+          type: "string"
+          description: "The unit associated to the quantity measured"
+          example: "gal1ac-1."
+        variableRepresentation:
+          type: "string"
+          example: "vrSolutionRateLiquid"
+        edited:
+          type: "boolean"
+          description: "Indicates whether a manual data edit was directly applied to this value. If a data edit for a different layer affected this value, it *will not be set*. May not be serialized if false."
+          example: false
+    EventMeasurementStats:
+      type: "object"
+      description: "Relevant stats for a measurement recorded during the operation."
+      properties:
+        "@type":
+          type: "string"
+          example: "EventMeasurementStats"
+        areaRecorded:
+          $ref: "#/components/schemas/EventMeasurement"
+        averageValue:
+          $ref: "#/components/schemas/EventMeasurement"
+        totalValue:
+          $ref: "#/components/schemas/EventMeasurement"
+        minValue:
+          $ref: "#/components/schemas/EventMeasurement"
+        maxValue:
+          $ref: "#/components/schemas/EventMeasurement"
+        firstValue:
+          $ref: "#/components/schemas/EventMeasurement"
+        lastValue:
+          $ref: "#/components/schemas/EventMeasurement"
+    EventObservation:
+      type: "object"
+      description: "A general representation of an observed value."
+      properties:
+        "@type":
+          type: "string"
+          example: "EventObservation"
+        value:
+          type: "string"
+          description: "The observed value, e.g. NW wind direction."
+          example: "NW"
+    EventObservationStats:
+      type: "object"
+      description: "Relevant stats for the values for an observation during the operation."
+      properties:
+        areaRecorded:
+          $ref: "#/components/schemas/EventMeasurement"
+        firstObservation:
+          $ref: "#/components/schemas/EventObservation"
+        lastObservation:
+          $ref: "#/components/schemas/EventObservation"
+        predominantObservation:
+          $ref: "#/components/schemas/EventObservation"
     Farm:
       type: "object"
       description: "The farm associated with this FieldOperation. Populated only when the associated embed is requested."
@@ -1252,280 +1547,19 @@ components:
           type: "string"
           format: "date-time"
           example: "2020-09-21T15:41:15.205Z"
-    OrgId:
-      type: "integer"
-      description: "The organization owning the fields and associated operations"
-      format: "int64"
-      example: 123456
-    TankMixProduct:
+    FieldLink:
       type: "object"
+      description: "A link provides a URI to access resources that are related to the response."
       properties:
-        guid:
-          $ref: "#/components/schemas/ProductErid"
-        tankMix:
-          type: "boolean"
-          description: "Flag indicating whether the product is a tank mix (true) or a single component (false)."
-          example: true
-        rate:
-          $ref: "#/components/schemas/EventMeasurement"
-        carrier:
-          $ref: "#/components/schemas/Component"
-        components:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Component"
-    NonTankMixProduct:
-      type: "object"
-      properties:
-        "@type":
+        rel:
           type: "string"
-          example: "Product"
-        guid:
-          $ref: "#/components/schemas/ProductErid"
-        productType:
-          $ref: "#/components/schemas/FieldOperationProductTypesEnum"
-        name:
+          description: "The relation of the object to the linked resource."
+          example: "field"
+        uri:
           type: "string"
-          description: "The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier, for APPLICATION operations."
-          example: "Priaxor"
-        brand:
-          type: "string"
-          description: "The brand name of product."
-          example: "BrandForProducts"
-        agencyRegistrationNumber:
-          $ref: "#/components/schemas/AgencyRegistrationNumber"
-        tankMix:
-          type: "boolean"
-          description: "Flag indicating whether the product is a tank mix (true) or a single component (false)."
-          example: false
-    Component:
-      type: "object"
-      description: "An individual product combined with others in a tank mix."
-      properties:
-        "@type":
-          type: "string"
-          example: "Component"
-        guid:
-          type: "string"
-          description: "Display recorded Component GUID."
-          example: "fa14f029-831c-456b-a76e-2d3c26207c19"
-        name:
-          type: "string"
-          description: "The general name of the product."
-          example: "Water"
-        agencyRegistrationNumber:
-          $ref: "#/components/schemas/AgencyRegistrationNumber"
-        rate:
-          $ref: "#/components/schemas/EventMeasurement"
-    AgencyRegistrationNumber:
-      type: "string"
-      description: "The product identifier managed by regulatory agency. e.g. EPA registration number of product issued by the US Environmental Protection Agency"
-      example: "0084229-00011-AA-0000000"
-    JohnDeereDisplayTypeEnum:
-      type: "string"
-      description: "The type of display"
-      enum:
-        - "GS4_4600"
-        - "GS3_2630"
-        - "GS2_2600"
-        - "GS2_1800"
-        - "GS2_CommandCenter"
-    ConnectMobileEnum:
-      type: "string"
-      description: "The type of display"
-      enum:
-        - "OneAppMobile"
-    ThirdPartyDisplayTypeEnum:
-      type: "string"
-      description: "The type of display"
-      enum:
-        - "IntegraVersa"
-        - "ProtobufV36"
-        - "ProtobufV41"
-        - "TrimbleFMX"
-        - "Unknown"
-    DisplayTypeEnum:
-      x-zally-ignore:
-        - "D012"
-      allOf:
-        - $ref: "#/components/schemas/JohnDeereDisplayTypeEnum"
-        - $ref: "#/components/schemas/ConnectMobileEnum"
-        - $ref: "#/components/schemas/ThirdPartyDisplayTypeEnum"
-    CropToken:
-      type: "string"
-      description: "- A unique textual identifier for a type of Crop - EnumList is based on ISG_Shared/blob/master/crops/crops.xml - You may use com.deere.ads.utility.CropTokenLookup in platform to retrieve crop ids."
-      example: "ALFALFA"
-    CropSeason:
-      type: "integer"
-      description: "Filter results by crop season."
-      example: 2016
-    CropSeasons:
-      type: "array"
-      description: "The crop seasons (year) of the recent operation"
-      example:
-        - "2016"
-        - "2015"
-      items:
-        $ref: "#/components/schemas/CropSeason"
-    CropSeasonSummary:
-      type: "object"
-      properties:
-        links:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/FieldLink"
-        fieldOperationType:
-          $ref: "#/components/schemas/FieldOperationTypesEnum"
-        cropSeasons:
-          $ref: "#/components/schemas/CropSeasons"
-    FieldOperationProductTypesEnum:
-      type: "string"
-      description: "FieldOperation Product Types TODO Enum"
-      enum:
-        - "OTHER"
-        - "CHEMICAL"
-        - "SEED"
-        - "FEED"
-        - "FERTILIZER"
-    FieldOperationMeasurementTypesEnum:
-      allOf:
-        - type: "string"
-          description: "FieldOperation Measurement Types"
-        - $ref: "#/components/schemas/FieldOperationMeasurementTypesInFullRelease"
-        - $ref: "#/components/schemas/FieldOperationMeasurementTypesInAgreportsApi"
-    FieldOperationMeasurementTypesInFullRelease:
-      type: "string"
-      description: "FieldOperation Measurement Types supported in the HDP versions of the endpoints and therefore fully released."
-      enum:
-        - "SeedingRateTarget"
-        - "SeedingRateResult"
-        - "SeedingSpeedResult"
-        - "SeedingVarietiesTarget"
-        - "SeedingVarietiesResult"
-        - "ApplicationRateTarget"
-        - "ApplicationRateResult"
-        - "ApplicationSpeedResult"
-        - "HarvestYieldResult"
-        - "HarvestYieldContourResult"
-        - "HarvestSpecialtyGrossYieldResult"
-        - "HarvestWetMassResult"
-        - "HarvestMoistureResult"
-        - "HarvestTrashResult"
-        - "HarvestSpeedResult"
-        - "HarvestAdfResult"
-        - "HarvestNdfResult"
-        - "HarvestCrudeProteinResult"
-        - "HarvestStarchResult"
-        - "HarvestSugarResult"
-        - "TillageDepthResult"
-        - "TillagePressureResult"
-        - "TillageSpeedResult"
-        - "TillageDepthTarget"
-        - "TillagePressureTarget"
-    FieldOperationMeasurementTypesInAgreportsApi:
-      type: "string"
-      description: "FieldOperation Measurement Types supported in the Agreports/DataLake versions of the endpoints. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints."
-      enum:
-        - "ElevationResult"
-        - "ApplicationHeightTarget"
-        - "FuelRateResult"
-        - "WindSpeed"
-        - "AirTemperature"
-        - "TemperatureDifference"
-        - "RelativeHumidity"
-        - "SoilTemperature"
-        - "RatePrescription"
-        - "PressurePrescription"
-        - "DepthPrescription"
-        - "SeedDepthTarget"
-        - "SprayPressure"
-        - "InoculantDosing"
-        - "LengthOfCut"
-        - "GaugeWheelMargin"
-        - "DownforceResult"
-        - "RideQuality"
-        - "SeedSpacingVariation"
-        - "GroundContact"
-        - "Singulation"
-        - "SkyCondition"
-        - "SoilMoisture"
-        - "TargetQuality"
-        - "PrescriptionQuality"
-    FieldOperationMeasurementCategoryEnum:
-      type: "string"
-      description: "FieldOperation Measurement Category"
-      enum:
-        - "Target"
-        - "Result"
-        - "Prescription"
-    FieldOperationLayersEnum:
-      allOf:
-        - type: "string"
-          description: "Possible layerNames used in FieldOperation Layers and statistics. These are not 1-1 with FieldOperationMeasurementTypesEnum and are designed to be easier to understand."
-        - $ref: "#/components/schemas/FieldOperationMeasurementLayersEnum"
-        - $ref: "#/components/schemas/FieldOperationIndexLayersEnum"
-        - $ref: "#/components/schemas/FieldOperationCompositeLayersEnum"
-    FieldOperationMeasurementLayersEnum:
-      type: "string"
-      description: "Layers based on variable rate measurements recorded during the field operation. They will use EventMeasurementStats for statistics."
-      enum:
-        - "AreaWorked"
-        - "Speed"
-        - "Elevation"
-        - "FuelRate"
-        - "FuelConsumption"
-        - "DieselExhaustFluid"
-        - "EngineHours"
-        - "YieldByVolume"
-        - "YieldByMass"
-        - "WetMass"
-        - "Moisture"
-        - "Trash"
-        - "AcidDetergentFiber"
-        - "NeutralDetergentFiber"
-        - "CrudeProtein"
-        - "Starch"
-        - "Sugar"
-        - "RateResult"
-        - "RateTarget"
-        - "RatePrescription"
-        - "InoculantDosing"
-        - "LengthOfCut"
-        - "GaugeWheelMargin"
-        - "DownforceResult"
-        - "GroundContact"
-        - "RideQuality"
-        - "SeedSpacingVariation"
-        - "Singulation"
-        - "ApplicationHeight"
-        - "SprayPressure"
-        - "PressureTarget"
-        - "PressureResult"
-        - "PressurePrescription"
-        - "DepthResult"
-        - "DepthTarget"
-        - "DepthPrescription"
-        - "WindSpeed"
-        - "AirTemperature"
-        - "TemperatureDifference"
-        - "RelativeHumidity"
-        - "SoilTemperature"
-    FieldOperationIndexLayersEnum:
-      type: "string"
-      description: "Layers based on defined types recorded or entered during the field operation. They will use EventObservationStats for statistics."
-      enum:
-        - "RateResultByProduct"
-        - "RateTargetByProduct"
-        - "WindDirection"
-        - "SkyCondition"
-        - "SoilMoisture"
-        - "Varieties"
-    FieldOperationCompositeLayersEnum:
-      type: "string"
-      description: "Layers based on defined comparisons of other layers"
-      enum:
-        - "QualityTarget"
-        - "QualityPrescription"
+          format: "uri"
+          description: "The URI to the related resource."
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/e48a7dd0-9af2-44e1-81b4-435d494f7cd5"
     FieldOperation:
       type: "object"
       properties:
@@ -1610,6 +1644,43 @@ components:
           items:
             $ref: "#/components/schemas/FieldOperationMeasurement"
       x-embed-contract-applied: true
+    FieldOperationCompareStatisticsRequest:
+      type: "object"
+      required:
+        - "compareOperationIds"
+        - "baseLayer"
+        - "compareLayer"
+      properties:
+        compareOperationIds:
+          type: "array"
+          description: "The field operation ids that we are comparing so for Yield By Variety the target is the Seeding field operation(s)"
+          items:
+            type: "string"
+            example: "17826sd23-e5e1-4921-8841-3c5f582e3a2e"
+        baseLayer:
+          $ref: "#/components/schemas/FieldOperationLayersEnum"
+        compareLayer:
+          $ref: "#/components/schemas/FieldOperationLayersEnum"
+        boundary:
+          $ref: "#/components/schemas/Polygon"
+    FieldOperationCompositeLayersEnum:
+      type: "string"
+      description: "Layers based on defined comparisons of other layers"
+      enum:
+        - "QualityTarget"
+        - "QualityPrescription"
+    FieldOperationGeoTIFFLocation:
+      type: "object"
+      properties:
+        location:
+          description: "AWS S3 Presigned URL of Resource. Use gzip for best compression."
+          type: "string"
+          format: "uri"
+          example: "https://s3.us-east-2.amazonaws.com/s3-bucket-path/49f35d8a-ff54-4b83-81c4-0f45b7b47eba"
+        mapLegend:
+          $ref: "#/components/schemas/MapLegend"
+        extent:
+          $ref: "#/components/schemas/MapExtent"
     FieldOperationId:
       type: "object"
       properties:
@@ -1652,24 +1723,67 @@ components:
           items:
             $ref: "#/components/schemas/FieldOperationMeasurement"
       x-embed-contract-applied: true
-    UpdateFieldOperation:
+    FieldOperationIndexLayersEnum:
+      type: "string"
+      description: "Layers based on defined types recorded or entered during the field operation. They will use EventObservationStats for statistics."
+      enum:
+        - "RateResultByProduct"
+        - "RateTargetByProduct"
+        - "WindDirection"
+        - "SkyCondition"
+        - "SoilMoisture"
+        - "Varieties"
+    FieldOperationLayer:
       type: "object"
+      required:
+        - "id"
       properties:
-        cropSeason:
-          $ref: "#/components/schemas/CropSeason"
-        cropName:
-          $ref: "#/components/schemas/CropToken"
-        varieties:
+        "@type":
+          type: "string"
+          example: "FieldOperationLayer"
+        id:
+          $ref: "#/components/schemas/FieldOperationLayersEnum"
+        links:
           type: "array"
           items:
-            oneOf:
-              - $ref: "#/components/schemas/NameToEridEdit"
-              - $ref: "#/components/schemas/EridToEridEdit"
-        product:
-          type: "object"
-          properties:
-            guid:
-              $ref: "#/components/schemas/ProductErid"
+            $ref: "#/components/schemas/Link"
+    FieldOperationLayerImageRequest:
+      type: "object"
+      properties:
+        ranges:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MapRange"
+    FieldOperationLayerStatistics:
+      description: "Includes the summarized values for all layers on a field operation"
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          "@type":
+            type: "string"
+            example: "FieldOperationLayerStatistics"
+          links:
+            description: "Links to associated data."
+            type: "array"
+            items:
+              $ref: "#/components/schemas/Link"
+          layerName:
+            $ref: "#/components/schemas/FieldOperationLayersEnum"
+          statistics:
+            $ref: "#/components/schemas/LayerStatistics"
+    FieldOperationLayers:
+      type: "array"
+      description: "Describe an reponse of operaton layers"
+      items:
+        $ref: "#/components/schemas/FieldOperationLayer"
+    FieldOperationLayersEnum:
+      allOf:
+        - type: "string"
+          description: "Possible layerNames used in FieldOperation Layers and statistics. These are not 1-1 with FieldOperationMeasurementTypesEnum and are designed to be easier to understand."
+        - $ref: "#/components/schemas/FieldOperationMeasurementLayersEnum"
+        - $ref: "#/components/schemas/FieldOperationIndexLayersEnum"
+        - $ref: "#/components/schemas/FieldOperationCompositeLayersEnum"
     FieldOperationMachine:
       type: "object"
       properties:
@@ -1756,242 +1870,92 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Link"
-    UpdateFieldOperationMachine:
+    FieldOperationMachines:
       type: "object"
+      description: "Machines utilized during this operation"
       properties:
         erid:
           type: "string"
           example: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
           description: "Doc File based Field Operation Machine erid."
-        calibrationFactor:
-          type: "number"
-          format: "double"
-          description: "The calibration factor for this machine"
-          example: "1.25"
-    FieldOperationWorkNote:
-      type: "object"
-      required:
-        - "id"
-        - "note"
-      properties:
-        "@type":
-          type: "string"
-          example: "FieldOperationWorkNote"
-        id:
-          type: "string"
-          format: "guid"
-          example: "3df13267-c5ee-4cc3-ab79-7cf013dc1e98"
-          description: "eventId of the work note."
-        note:
-          type: "string"
-          example: "note1"
-        timestamp:
-          type: "string"
-          format: "date-time"
-          description: "Timestamp of the work note."
-          example: "2018-08-27T08:08:08.000Z"
-        gpsLocation:
-          description: "GPS location where the the work note was taken."
-          $ref: "#/components/schemas/Point"
-    MapRangeForIndex:
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "MapLegendItem"
-        label:
-          description: "The string label for this range. Used for images that are not based on numerical values"
-          type: "string"
-          example: "Variety 1"
-        hexColor:
-          description: "The color used in the image for this rage"
-          type: "string"
-          example: "#cc0000"
-        percent:
-          description: "The proportion of the field operation matching this range (not actually a percentage)."
-          type: "number"
-          format: "double"
-          example: 0.15
-        key:
-          description: "This is a placeholder for various index key"
+        Operators:
+          $ref: "#/components/schemas/Operators"
+        machineId:
           type: "integer"
+          description: "PrincipalId of the machine"
           format: "int64"
-          example: 55
-    MapRangeForMeasurement:
-      type: "object"
-      properties:
-        "@type":
+          example: 637795
+          nullable: true
+        vin:
           type: "string"
-          example: "MapLegendItem"
-        minimum:
-          description: "The inclusive minimum value included in this range"
-          type: "number"
-          format: "double"
-          example: 13.15
-        maximum:
-          description: "The exclusive maximum value included in this range"
-          type: "number"
-          format: "double"
-          example: 17.95
-        hexColor:
-          description: "The color used in the image for this rage"
-          type: "string"
-          example: "#cc0000"
-        percent:
-          description: "The proportion of the field operation matching this range (not actually a percentage)."
-          type: "number"
-          format: "double"
-          example: 0.15
-    MapRangeForGeoTiff:
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "MapLegendItem"
-        label:
-          description: "The string label for this range. Used for images that are not based on numerical values"
-          type: "string"
-          example: "Variety 1"
-        key:
-          description: "This is a placeholder for GeoTiff based Index Key"
-          type: "integer"
-          format: "int64"
-          example: 1
-    MapRange:
-      allOf:
-        - $ref: "#/components/schemas/MapRangeForGeoTiff"
-        - $ref: "#/components/schemas/MapRangeForIndex"
-        - $ref: "#/components/schemas/MapRangeForMeasurement"
-    MapRangeWithLayerStatistics:
-      allOf:
-        - type: "object"
-        - $ref: "#/components/schemas/MapRange"
-        - description: "Field Operation Layer Statistics broken down according to the legend for another context."
-          properties:
-            "@type":
-              type: "string"
-              example: "MapRangeWithLayerStatistics"
-            statistics:
-              $ref: "#/components/schemas/LayerStatistics"
-    MapLegend:
-      type: "object"
-      description: "Describes the breaks and their colors for an image"
-      properties:
-        "@type":
-          type: "string"
-          example: "MapLegend"
-        layerName:
-          $ref: "#/components/schemas/FieldOperationLayersEnum"
-        unitId:
-          description: "Units for the legend"
-          type: "string"
-          example: "lb1ac-1"
-        ranges:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/MapRange"
-    MapExtent:
-      type: "object"
-      description: "The GPS extents of a map image"
-      properties:
-        minimumLatitude:
-          type: "number"
-          format: "double"
-          example: 41.66470503009207
-        maximumLatitude:
-          type: "number"
-          format: "double"
-          example: 41.67086022030498
-        minimumLongitude:
-          type: "number"
-          format: "double"
-          example: -93.15582275390625
-        maximumLongitude:
-          type: "number"
-          format: "double"
-          example: -93.1475830078125
-    FieldOperationPNGImage:
-      type: "object"
-      properties:
-        image:
-          description: "Base64 encoded PNG image"
-          type: "string"
-          example: "data:image/png;base64,{base64EncodedContent}"
-        mapLegend:
-          $ref: "#/components/schemas/MapLegend"
-        extent:
-          $ref: "#/components/schemas/MapExtent"
-    FieldOperationGeoTIFFLocation:
-      type: "object"
-      properties:
-        location:
-          description: "AWS S3 Presigned URL of Resource. Use gzip for best compression."
-          type: "string"
-          format: "uri"
-          example: "https://s3.us-east-2.amazonaws.com/s3-bucket-path/49f35d8a-ff54-4b83-81c4-0f45b7b47eba"
-        mapLegend:
-          $ref: "#/components/schemas/MapLegend"
-        extent:
-          $ref: "#/components/schemas/MapExtent"
-    FieldOperationLayerStatistics:
-      description: "Includes the summarized values for all layers on a field operation"
-      type: "array"
-      items:
-        type: "object"
-        properties:
-          "@type":
-            type: "string"
-            example: "FieldOperationLayerStatistics"
-          links:
-            description: "Links to associated data."
-            type: "array"
-            items:
-              $ref: "#/components/schemas/Link"
-          layerName:
-            $ref: "#/components/schemas/FieldOperationLayersEnum"
-          statistics:
-            $ref: "#/components/schemas/LayerStatistics"
-    LayerStatistics:
-      description: "The statistics for a given layer context."
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "LayerStatistics"
-      oneOf:
-        - $ref: "#/components/schemas/EventMeasurementStats"
-        - $ref: "#/components/schemas/EventObservationStats"
-    FieldOperationLayerImageRequest:
-      type: "object"
-      properties:
-        ranges:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/MapRange"
-    FieldOperationCompareStatisticsRequest:
-      type: "object"
-      required:
-        - "compareOperationIds"
-        - "baseLayer"
-        - "compareLayer"
-      properties:
-        compareOperationIds:
-          type: "array"
-          description: "The field operation ids that we are comparing so for Yield By Variety the target is the Seeding field operation(s)"
-          items:
-            type: "string"
-            example: "17826sd23-e5e1-4921-8841-3c5f582e3a2e"
-        baseLayer:
-          $ref: "#/components/schemas/FieldOperationLayersEnum"
-        compareLayer:
-          $ref: "#/components/schemas/FieldOperationLayersEnum"
-        boundary:
-          $ref: "#/components/schemas/Polygon"
+          description: "VIN of the machine"
+          example: "WXYEJKB73894JE3"
     FieldOperationMeasurement:
       allOf:
         - description: "An object representing the measurements the API has decided are relevant to a particular map image."
         - $ref: "#/components/schemas/FieldOperationMeasurementInFullRelease"
         - $ref: "#/components/schemas/FieldOperationMeasurementFromAgreportsApi"
+    FieldOperationMeasurementCategoryEnum:
+      type: "string"
+      description: "FieldOperation Measurement Category"
+      enum:
+        - "Target"
+        - "Result"
+        - "Prescription"
+    FieldOperationMeasurementFromAgreportsApi:
+      description: "Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints."
+      type: "object"
+      properties:
+        elevation:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        fuelRate:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        applicationHeight:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        windSpeed:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        temperature:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        temperatureDifference:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        humidity:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        windDirection:
+          $ref: "#/components/schemas/EventObservationStats"
+        skyCondition:
+          $ref: "#/components/schemas/EventObservationStats"
+        soilMoisture:
+          $ref: "#/components/schemas/EventObservationStats"
+        rate:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        pressure:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        depth:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        dosing:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        cutLength:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        gaugeWheelMargin:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        downforce:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        groundContact:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        rideQuality:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        seedSpacingVariation:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        singulation:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        doubles:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        skips:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        yieldVolume:
+          $ref: "#/components/schemas/EventMeasurementStats"
+        quality:
+          $ref: "#/components/schemas/EventMeasurementStats"
     FieldOperationMeasurementInFullRelease:
       type: "object"
       description: "The fully released portion of the FieldOperationMeasurement."
@@ -2067,130 +2031,541 @@ components:
           items:
             $ref: "#/components/schemas/ApplicationProductTotal"
       x-embed-contract-applied: true
-    FieldOperationMeasurementFromAgreportsApi:
-      description: "Properties added to FieldOperationMeasurement when trying to add the measurementTypes in FieldOperationMeasurementTypesInAgreportsApi via agreports-api. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints."
-      type: "object"
+    FieldOperationMeasurementLayersEnum:
+      type: "string"
+      description: "Layers based on variable rate measurements recorded during the field operation. They will use EventMeasurementStats for statistics."
+      enum:
+        - "AreaWorked"
+        - "Speed"
+        - "Elevation"
+        - "FuelRate"
+        - "FuelConsumption"
+        - "DieselExhaustFluid"
+        - "EngineHours"
+        - "YieldByVolume"
+        - "YieldByMass"
+        - "WetMass"
+        - "Moisture"
+        - "Trash"
+        - "AcidDetergentFiber"
+        - "NeutralDetergentFiber"
+        - "CrudeProtein"
+        - "Starch"
+        - "Sugar"
+        - "RateResult"
+        - "RateTarget"
+        - "RatePrescription"
+        - "InoculantDosing"
+        - "LengthOfCut"
+        - "GaugeWheelMargin"
+        - "DownforceResult"
+        - "GroundContact"
+        - "RideQuality"
+        - "SeedSpacingVariation"
+        - "Singulation"
+        - "ApplicationHeight"
+        - "SprayPressure"
+        - "PressureTarget"
+        - "PressureResult"
+        - "PressurePrescription"
+        - "DepthResult"
+        - "DepthTarget"
+        - "DepthPrescription"
+        - "WindSpeed"
+        - "AirTemperature"
+        - "TemperatureDifference"
+        - "RelativeHumidity"
+        - "SoilTemperature"
+    FieldOperationMeasurementType:
       properties:
-        elevation:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        fuelRate:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        applicationHeight:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        windSpeed:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        temperature:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        temperatureDifference:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        humidity:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        windDirection:
-          $ref: "#/components/schemas/EventObservationStats"
-        skyCondition:
-          $ref: "#/components/schemas/EventObservationStats"
-        soilMoisture:
-          $ref: "#/components/schemas/EventObservationStats"
-        rate:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        pressure:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        depth:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        dosing:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        cutLength:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        gaugeWheelMargin:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        downforce:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        groundContact:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        rideQuality:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        seedSpacingVariation:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        singulation:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        doubles:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        skips:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        yieldVolume:
-          $ref: "#/components/schemas/EventMeasurementStats"
-        quality:
-          $ref: "#/components/schemas/EventMeasurementStats"
-    EventMeasurement:
-      type: "object"
-      description: "A general representation of quantity and unit."
-      example:
-        "@type": "EventMeasurement"
-        value: 17.13
-        unitId: "gal1ac-1"
-      properties:
-        "@type":
+        measurementName:
           type: "string"
-          example: "EventMeasurement"
+          example: "TillageDepthTarget"
+          description: "Measurement Name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3+json"
+        measurementCategory:
+          type: "string"
+          example: "Target"
+          description: "Measurement Category."
+        area:
+          example: "See sample response below"
+          description: "The area covered for this measurement. Includes value, and unitId."
+        averageDepth:
+          example: "See sample response below"
+          description: "The average depth observed across the area covered. Includes value, and unitId."
         value:
-          type: "number"
-          format: "double"
-          description: "The quantity represented by this measurement."
+          type: "integer"
+          example: 15.24
+          description: "Numeric measurement value."
         unitId:
           type: "string"
-          description: "The unit associated to the quantity measured"
-          example: "gal1ac-1."
-        variableRepresentation:
+          example: "cm"
+          description: "Unit of measurement."
+    FieldOperationMeasurementTypesEnum:
+      allOf:
+        - type: "string"
+          description: "FieldOperation Measurement Types"
+        - $ref: "#/components/schemas/FieldOperationMeasurementTypesInFullRelease"
+        - $ref: "#/components/schemas/FieldOperationMeasurementTypesInAgreportsApi"
+    FieldOperationMeasurementTypesInAgreportsApi:
+      type: "string"
+      description: "FieldOperation Measurement Types supported in the Agreports/DataLake versions of the endpoints. These are released to some clients but, *will never* be released to all clients. Similar data will be available from layer and statistics endpoints."
+      enum:
+        - "ElevationResult"
+        - "ApplicationHeightTarget"
+        - "FuelRateResult"
+        - "WindSpeed"
+        - "AirTemperature"
+        - "TemperatureDifference"
+        - "RelativeHumidity"
+        - "SoilTemperature"
+        - "RatePrescription"
+        - "PressurePrescription"
+        - "DepthPrescription"
+        - "SeedDepthTarget"
+        - "SprayPressure"
+        - "InoculantDosing"
+        - "LengthOfCut"
+        - "GaugeWheelMargin"
+        - "DownforceResult"
+        - "RideQuality"
+        - "SeedSpacingVariation"
+        - "GroundContact"
+        - "Singulation"
+        - "SkyCondition"
+        - "SoilMoisture"
+        - "TargetQuality"
+        - "PrescriptionQuality"
+    FieldOperationMeasurementTypesInFullRelease:
+      type: "string"
+      description: "FieldOperation Measurement Types supported in the HDP versions of the endpoints and therefore fully released."
+      enum:
+        - "SeedingRateTarget"
+        - "SeedingRateResult"
+        - "SeedingSpeedResult"
+        - "SeedingVarietiesTarget"
+        - "SeedingVarietiesResult"
+        - "ApplicationRateTarget"
+        - "ApplicationRateResult"
+        - "ApplicationSpeedResult"
+        - "HarvestYieldResult"
+        - "HarvestYieldContourResult"
+        - "HarvestSpecialtyGrossYieldResult"
+        - "HarvestWetMassResult"
+        - "HarvestMoistureResult"
+        - "HarvestTrashResult"
+        - "HarvestSpeedResult"
+        - "HarvestAdfResult"
+        - "HarvestNdfResult"
+        - "HarvestCrudeProteinResult"
+        - "HarvestStarchResult"
+        - "HarvestSugarResult"
+        - "TillageDepthResult"
+        - "TillagePressureResult"
+        - "TillageSpeedResult"
+        - "TillageDepthTarget"
+        - "TillagePressureTarget"
+    FieldOperationMeasurement_MeasurementType:
+      properties:
+        name:
+          example: "fieldOperationMapImage"
           type: "string"
-          example: "vrSolutionRateLiquid"
-        edited:
+          description: "Field Operation name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3.image+json"
+        declaredType:
+          example: "See sample response below."
+          description: ""
+        scope:
+          example: "See sample response below."
+          description: ""
+        image:
+          example: "See sample response below."
+          type: "Base64 encoded PNG image"
+          description: "The PNG image file."
+        legends:
+          example: "See sample response below."
+          description: "The legend used to render the map image. Includes unitId and ranges."
+        extent:
+          example: "See sample response below."
+          description: "Two coordinates that represent the corners of the image when overlaid onto a Web Mercator projection1. Includes minimumLatitude, minimumLongitude, maximumLatitude, and maximumLongitude."
+        unitId:
+          type: "string"
+          description: "Numeric values in the legend's ranges are measurements in this unit. The unit depends on the Accept-UOM-System header for the MapImage request."
+          example: "cm"
+        ranges:
+          example: "See sample response below."
+          description: "The ranges contained in the legend. Includes either a label (for non-numeric ranges), or minimum, maximum, hexColor, and percent."
+        label:
+          type: "string"
+          example: 15
+          description: "A label associated with the legend item. May be omitted for ranges with numeric values."
+        hexColor:
+          type: "string"
+          example: "#4B0082"
+          description: "The HEX color value of the legend item."
+        percent:
+          type: "number"
+          example: 1
+          description: "The percentage of agronomic data points that are represented by this legend item. For example, 0.05 means that 5% of the operation's measurements fall into this legend range."
+        nil:
           type: "boolean"
-          description: "Indicates whether a manual data edit was directly applied to this value. If a data edit for a different layer affected this value, it *will not be set*. May not be serialized if false."
+          example: "false"
+        globalScope:
+          type: "boolean"
+          example: "true"
+        typeSubstituted:
+          type: "boolean"
+          example: "false"
+    FieldOperationPNGImage:
+      type: "object"
+      properties:
+        image:
+          description: "Base64 encoded PNG image"
+          type: "string"
+          example: "data:image/png;base64,{base64EncodedContent}"
+        mapLegend:
+          $ref: "#/components/schemas/MapLegend"
+        extent:
+          $ref: "#/components/schemas/MapExtent"
+    FieldOperationProductTypesEnum:
+      type: "string"
+      description: "FieldOperation Product Types TODO Enum"
+      enum:
+        - "OTHER"
+        - "CHEMICAL"
+        - "SEED"
+        - "FEED"
+        - "FERTILIZER"
+    FieldOperationSearchErrors:
+      type: "object"
+      format: "Errors/FieldOperationContextException"
+      properties:
+        guid:
+          type: "string"
+          format: "guid"
+          example: "17826sd23-e5e1-4921-8841-3c5f582e3a2e"
+        message:
+          type: "string"
+          description: "The value that was supplied for this field in the request"
+          example: "invalid/unsupported geojson"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            example:
+              message: "this_part_of_the_request_was_wrong"
+          properties:
+            message:
+              type: "string"
+              description: "The value that was supplied for this field in the request"
+              example: "invalid/unsupported geojson"
+    FieldOperationTypesEnum:
+      type: "string"
+      description: "The type of operation"
+      example: "HARVEST"
+    FieldOperationWorkNote:
+      type: "object"
+      required:
+        - "id"
+        - "note"
+      properties:
+        "@type":
+          type: "string"
+          example: "FieldOperationWorkNote"
+        id:
+          type: "string"
+          format: "guid"
+          example: "3df13267-c5ee-4cc3-ab79-7cf013dc1e98"
+          description: "eventId of the work note."
+        note:
+          type: "string"
+          example: "note1"
+        timestamp:
+          type: "string"
+          format: "date-time"
+          description: "Timestamp of the work note."
+          example: "2018-08-27T08:08:08.000Z"
+        gpsLocation:
+          description: "GPS location where the the work note was taken."
+          $ref: "#/components/schemas/Point"
+    FieldOperationsSearch:
+      type: "object"
+      properties:
+        fieldIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+            example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
+        fieldOperationTypes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FieldOperationTypesEnum"
+        cropTypes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/CropToken"
+        displayTypes:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/DisplayTypeEnum"
+        startDate:
+          type: "string"
+          format: "date-time"
+          description: "The starting date of the operation in ISO-8601 format."
+          example: "2018-08-27T08:08:08.000Z"
+          x-zally-ignore:
+            - "D010"
+        endDate:
+          type: "string"
+          format: "date-time"
+          description: "The ending date of the operation in ISO-8601 format."
+          example: "2019-08-27T08:08:08.000Z"
+          x-zally-ignore:
+            - "D010"
+        embed:
+          type: "array"
+          items:
+            type: "string"
+            enum:
+              - "client"
+              - "farm"
+              - "field"
+              - "fieldOperationMachines"
+              - "measurementTypes"
+    JohnDeereDisplayTypeEnum:
+      type: "string"
+      description: "The type of display"
+      enum:
+        - "GS4_4600"
+        - "GS3_2630"
+        - "GS2_2600"
+        - "GS2_1800"
+        - "GS2_CommandCenter"
+    LayerStatistics:
+      description: "The statistics for a given layer context."
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "LayerStatistics"
+      oneOf:
+        - $ref: "#/components/schemas/EventMeasurementStats"
+        - $ref: "#/components/schemas/EventObservationStats"
+    Link:
+      type: "string"
+      properties:
+        uri: null
+    LinkGETFieldOperations:
+      properties:
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+          description: "Fields Link."
+        measurementTypes:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
+          description: "Field Operation Measurements Link."
+        measurement:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
+          description: "zero or more field operation measurements links. These will vary by the type of operation"
+        client:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
+          description: "Clients Link."
+        farm:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
+          description: "Farms Link."
+        shapeFileAsync:
+          example: "https://sandboxapi.deere.com/platform/fieldOps/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNg"
+          description: "Asynchronous Shapefiles Link."
+        workPlans:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/workPlans/2fac815e-5696-4ff6-86a0-39093b7dbf7e"
+          description: "Link to work plan associated to the operation."
+    LinkGETFieldOperationsId:
+      properties:
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+          description: "Fields Link."
+        measurementTypes:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes"
+          description: "Field Operation Measurements Link."
+        measurement:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkMw/measurementTypes/TillagePressureResult"
+          description: "zero or more field operation measurements links. These will vary by the type of operation"
+        client:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/clients/46234f43-0000-1000-4014-e1e1e11124e0"
+          description: "Clients Link."
+        farm:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
+          description: "Farms Link."
+    LinksGet:
+      properties:
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+          description: "Fields Link."
+        fieldOperation:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+          description: "Field Operations Link."
+        measurementType:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+          description: "Field Operation Measurements Link."
+    MapExtent:
+      type: "object"
+      description: "The GPS extents of a map image"
+      properties:
+        minimumLatitude:
+          type: "number"
+          format: "double"
+          example: 41.66470503009207
+        maximumLatitude:
+          type: "number"
+          format: "double"
+          example: 41.67086022030498
+        minimumLongitude:
+          type: "number"
+          format: "double"
+          example: -93.15582275390625
+        maximumLongitude:
+          type: "number"
+          format: "double"
+          example: -93.1475830078125
+    MapLegend:
+      type: "object"
+      description: "Describes the breaks and their colors for an image"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegend"
+        layerName:
+          $ref: "#/components/schemas/FieldOperationLayersEnum"
+        unitId:
+          description: "Units for the legend"
+          type: "string"
+          example: "lb1ac-1"
+        ranges:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MapRange"
+    MapRange:
+      allOf:
+        - $ref: "#/components/schemas/MapRangeForGeoTiff"
+        - $ref: "#/components/schemas/MapRangeForIndex"
+        - $ref: "#/components/schemas/MapRangeForMeasurement"
+    MapRangeForGeoTiff:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegendItem"
+        label:
+          description: "The string label for this range. Used for images that are not based on numerical values"
+          type: "string"
+          example: "Variety 1"
+        key:
+          description: "This is a placeholder for GeoTiff based Index Key"
+          type: "integer"
+          format: "int64"
+          example: 1
+    MapRangeForIndex:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegendItem"
+        label:
+          description: "The string label for this range. Used for images that are not based on numerical values"
+          type: "string"
+          example: "Variety 1"
+        hexColor:
+          description: "The color used in the image for this rage"
+          type: "string"
+          example: "#cc0000"
+        percent:
+          description: "The proportion of the field operation matching this range (not actually a percentage)."
+          type: "number"
+          format: "double"
+          example: 0.15
+        key:
+          description: "This is a placeholder for various index key"
+          type: "integer"
+          format: "int64"
+          example: 55
+    MapRangeForMeasurement:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "MapLegendItem"
+        minimum:
+          description: "The inclusive minimum value included in this range"
+          type: "number"
+          format: "double"
+          example: 13.15
+        maximum:
+          description: "The exclusive maximum value included in this range"
+          type: "number"
+          format: "double"
+          example: 17.95
+        hexColor:
+          description: "The color used in the image for this rage"
+          type: "string"
+          example: "#cc0000"
+        percent:
+          description: "The proportion of the field operation matching this range (not actually a percentage)."
+          type: "number"
+          format: "double"
+          example: 0.15
+    MapRangeWithLayerStatistics:
+      allOf:
+        - type: "object"
+        - $ref: "#/components/schemas/MapRange"
+        - description: "Field Operation Layer Statistics broken down according to the legend for another context."
+          properties:
+            "@type":
+              type: "string"
+              example: "MapRangeWithLayerStatistics"
+            statistics:
+              $ref: "#/components/schemas/LayerStatistics"
+    NameToEridEdit:
+      type: "object"
+      description: "Describes an edit that should change the id of any object that matches the name"
+      properties:
+        fromName:
+          type: "string"
+          description: "The name to match against"
+          example: "Variety A"
+        toGuid:
+          $ref: "#/components/schemas/ProductErid"
+    NonTankMixProduct:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Product"
+        guid:
+          $ref: "#/components/schemas/ProductErid"
+        productType:
+          $ref: "#/components/schemas/FieldOperationProductTypesEnum"
+        name:
+          type: "string"
+          description: "The general name of the product, or 'Tank Mix' for a product consisting of multiple components in a carrier, for APPLICATION operations."
+          example: "Priaxor"
+        brand:
+          type: "string"
+          description: "The brand name of product."
+          example: "BrandForProducts"
+        agencyRegistrationNumber:
+          $ref: "#/components/schemas/AgencyRegistrationNumber"
+        tankMix:
+          type: "boolean"
+          description: "Flag indicating whether the product is a tank mix (true) or a single component (false)."
           example: false
-    EventMeasurementStats:
-      type: "object"
-      description: "Relevant stats for a measurement recorded during the operation."
-      properties:
-        "@type":
-          type: "string"
-          example: "EventMeasurementStats"
-        areaRecorded:
-          $ref: "#/components/schemas/EventMeasurement"
-        averageValue:
-          $ref: "#/components/schemas/EventMeasurement"
-        totalValue:
-          $ref: "#/components/schemas/EventMeasurement"
-        minValue:
-          $ref: "#/components/schemas/EventMeasurement"
-        maxValue:
-          $ref: "#/components/schemas/EventMeasurement"
-        firstValue:
-          $ref: "#/components/schemas/EventMeasurement"
-        lastValue:
-          $ref: "#/components/schemas/EventMeasurement"
-    EventObservation:
-      type: "object"
-      description: "A general representation of an observed value."
-      properties:
-        "@type":
-          type: "string"
-          example: "EventObservation"
-        value:
-          type: "string"
-          description: "The observed value, e.g. NW wind direction."
-          example: "NW"
-    EventObservationStats:
-      type: "object"
-      description: "Relevant stats for the values for an observation during the operation."
-      properties:
-        areaRecorded:
-          $ref: "#/components/schemas/EventMeasurement"
-        firstObservation:
-          $ref: "#/components/schemas/EventObservation"
-        lastObservation:
-          $ref: "#/components/schemas/EventObservation"
-        predominantObservation:
-          $ref: "#/components/schemas/EventObservation"
     Operator:
       type: "object"
       properties:
@@ -2207,6 +2582,27 @@ components:
         license:
           type: "string"
           example: "OPERATOR_LICENSE"
+    Operators:
+      type: "object"
+      description: "Operators that performed work using this machine"
+      properties:
+        operatorId:
+          type: "string"
+          description: "Unique identifier for this operator"
+          example: "657b4391-79b3-4012-a617-7ceba7111ad0"
+        name:
+          type: "string"
+          description: "Name of the operator"
+          example: "John Doe"
+        license:
+          type: "string"
+          description: "Operator license number"
+          example: "ABC123"
+    OrgId:
+      type: "integer"
+      description: "The organization owning the fields and associated operations"
+      format: "int64"
+      example: 123456
     Point:
       type: "object"
       properties:
@@ -2259,6 +2655,10 @@ components:
               example:
                 - 42.3
                 - -82.5
+    ProductErid:
+      type: "string"
+      description: "Recorded Product Erid."
+      example: "fa14f029-831c-456b-a76e-2d3c26207c19"
     ProductTotal:
       type: "object"
       description: "The ProductTotal associated with this FieldOperation."
@@ -2319,6 +2719,62 @@ components:
           $ref: "#/components/schemas/EventMeasurement"
         maxSugar:
           $ref: "#/components/schemas/EventMeasurement"
+    TankMixProduct:
+      type: "object"
+      properties:
+        guid:
+          $ref: "#/components/schemas/ProductErid"
+        tankMix:
+          type: "boolean"
+          description: "Flag indicating whether the product is a tank mix (true) or a single component (false)."
+          example: true
+        rate:
+          $ref: "#/components/schemas/EventMeasurement"
+        carrier:
+          $ref: "#/components/schemas/Component"
+        components:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Component"
+    ThirdPartyDisplayTypeEnum:
+      type: "string"
+      description: "The type of display"
+      enum:
+        - "IntegraVersa"
+        - "ProtobufV36"
+        - "ProtobufV41"
+        - "TrimbleFMX"
+        - "Unknown"
+    UpdateFieldOperation:
+      type: "object"
+      properties:
+        cropSeason:
+          $ref: "#/components/schemas/CropSeason"
+        cropName:
+          $ref: "#/components/schemas/CropToken"
+        varieties:
+          type: "array"
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/NameToEridEdit"
+              - $ref: "#/components/schemas/EridToEridEdit"
+        product:
+          type: "object"
+          properties:
+            guid:
+              $ref: "#/components/schemas/ProductErid"
+    UpdateFieldOperationMachine:
+      type: "object"
+      properties:
+        erid:
+          type: "string"
+          example: "t48a7dd0-as35-44e1-81b4-435d494f7cd5"
+          description: "Doc File based Field Operation Machine erid."
+        calibrationFactor:
+          type: "number"
+          format: "double"
+          description: "The calibration factor for this machine"
+          example: "1.25"
     VarietyTotal:
       type: "object"
       description: "The VarietyTotal associated with this FieldOperation."
@@ -2376,143 +2832,6 @@ components:
           $ref: "#/components/schemas/EventMeasurement"
         maxSugar:
           $ref: "#/components/schemas/EventMeasurement"
-    Errors:
-      type: "array"
-      items:
-        $ref: "#/components/schemas/Error"
-    Error:
-      type: "object"
-      properties:
-        guid:
-          type: "string"
-          format: "guid"
-          example: "11111111-2222-3333-4444-555555555555"
-        message:
-          type: "string"
-          description: "An english description of the error"
-          example: "was invalid because"
-        code:
-          type: "string"
-          description: "A string constant representing the type of error"
-          example: 400
-        field:
-          type: "string"
-          description: "The name of the property or parameter deemed invalid"
-          example: "example-field"
-        invalidValue:
-          type: "string"
-          description: "The value that was supplied for this field in the request"
-          example: "Bad value"
-    FieldOperationSearchErrors:
-      type: "object"
-      format: "Errors/FieldOperationContextException"
-      properties:
-        guid:
-          type: "string"
-          format: "guid"
-          example: "17826sd23-e5e1-4921-8841-3c5f582e3a2e"
-        message:
-          type: "string"
-          description: "The value that was supplied for this field in the request"
-          example: "invalid/unsupported geojson"
-        errors:
-          type: "array"
-          items:
-            type: "object"
-            format: "Error/ConstraintViolation"
-            example:
-              message: "this_part_of_the_request_was_wrong"
-          properties:
-            message:
-              type: "string"
-              description: "The value that was supplied for this field in the request"
-              example: "invalid/unsupported geojson"
-    FieldOperationsSearch:
-      type: "object"
-      properties:
-        fieldIds:
-          type: "array"
-          items:
-            type: "string"
-            format: "uuid"
-            example: "9369f3f6-2428-4bba-bf64-0a19cdaf007d"
-        fieldOperationTypes:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/FieldOperationTypesEnum"
-        cropTypes:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/CropToken"
-        displayTypes:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/DisplayTypeEnum"
-        startDate:
-          type: "string"
-          format: "date-time"
-          description: "The starting date of the operation in ISO-8601 format."
-          example: "2018-08-27T08:08:08.000Z"
-          x-zally-ignore:
-            - "D010"
-        endDate:
-          type: "string"
-          format: "date-time"
-          description: "The ending date of the operation in ISO-8601 format."
-          example: "2019-08-27T08:08:08.000Z"
-          x-zally-ignore:
-            - "D010"
-        embed:
-          type: "array"
-          items:
-            type: "string"
-            enum:
-              - "client"
-              - "farm"
-              - "field"
-              - "fieldOperationMachines"
-              - "measurementTypes"
-    ProductErid:
-      type: "string"
-      description: "Recorded Product Erid."
-      example: "fa14f029-831c-456b-a76e-2d3c26207c19"
-    NameToEridEdit:
-      type: "object"
-      description: "Describes an edit that should change the id of any object that matches the name"
-      properties:
-        fromName:
-          type: "string"
-          description: "The name to match against"
-          example: "Variety A"
-        toGuid:
-          $ref: "#/components/schemas/ProductErid"
-    EridToEridEdit:
-      type: "object"
-      description: "Describes an edit that should change the id of any object that matches the fromGuid"
-      properties:
-        fromGuid:
-          $ref: "#/components/schemas/ProductErid"
-        toGuid:
-          $ref: "#/components/schemas/ProductErid"
-    FieldOperationLayers:
-      type: "array"
-      description: "Describe an reponse of operaton layers"
-      items:
-        $ref: "#/components/schemas/FieldOperationLayer"
-    FieldOperationLayer:
-      type: "object"
-      required:
-        - "id"
-      properties:
-        "@type":
-          type: "string"
-          example: "FieldOperationLayer"
-        id:
-          $ref: "#/components/schemas/FieldOperationLayersEnum"
-        links:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Link"
     ApplicationProductTotal:
       type: "object"
       description: "One element of FieldOperationMeasurement.applicationProductTotals. Not documented in JD's spec; fields are provisional, verified against one Atrazine application wire trace on 2026-04-14. Matches JD's house style of keeping FieldOperationMeasurementInFullRelease fields all optional, so no required[] is declared here. Widen or tighten as additional wire traces arrive.\n"
@@ -2539,3 +2858,15 @@ components:
           items:
             $ref: "#/components/schemas/ProductTotal"
       x-embed-contract-applied: true
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag2: "ag2"
+x-source-documents:
+  - endPointName: "field-operation"
+    id: 27
+  - endPointName: "measurement-type"
+    id: 28

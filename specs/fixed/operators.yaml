@@ -196,14 +196,14 @@ paths:
                   description: "204 No Content"
 components:
   parameters:
-    orgId:
-      in: "path"
-      name: "orgId"
-      description: "Organization ID"
-      x-required-boolean: true
+    embed:
+      in: "query"
+      name: "embed"
+      description: "Include operator metadata in the response."
+      x-required-boolean: false
       schema:
         type: "string"
-        example: 123456
+        example: "showRecordMetadata"
         format: "uuid"
     id:
       in: "path"
@@ -214,14 +214,23 @@ components:
         type: "string"
         example: "0235d40e-02d0-44cb-a126-fff21173fc1f"
         format: "uuid"
-    embed:
+    lastModifiedTime:
       in: "query"
-      name: "embed"
-      description: "Include operator metadata in the response."
+      name: "lastModifiedTime"
+      description: "Start of the range for timestamp filtering"
       x-required-boolean: false
       schema:
+        type: "dateTime"
+        example: "2019-01-01T00:00:00Z"
+        format: "uuid"
+    orgId:
+      in: "path"
+      name: "orgId"
+      description: "Organization ID"
+      x-required-boolean: true
+      schema:
         type: "string"
-        example: "showRecordMetadata"
+        example: 123456
         format: "uuid"
     recordFilter:
       in: "query"
@@ -232,24 +241,19 @@ components:
         type: "string"
         example: "ACTIVE"
         format: "uuid"
-    lastModifiedTime:
-      in: "query"
-      name: "lastModifiedTime"
-      description: "Start of the range for timestamp filtering"
-      x-required-boolean: false
-      schema:
-        type: "dateTime"
-        example: "2019-01-01T00:00:00Z"
-        format: "uuid"
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            org1: "org1"
-            org2: "org2"
   schemas:
+    ContentType:
+      properties: {}
+    GetAvailableLinks:
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/operators"
+          description: "Self Link"
+    GetOperatorAvailableLinks:
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f"
+          description: "Self Link"
     GetResponseDetails:
       properties:
         id:
@@ -294,8 +298,6 @@ components:
           example: "John Doe"
           description: "Operator Name"
           type: "string"
-    ContentType:
-      properties: {}
     PutOperator:
       properties:
         name:
@@ -307,13 +309,11 @@ components:
           example: "false"
           type: "string"
           description: "Archived Status"
-    GetAvailableLinks:
-      properties:
-        self:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/operators"
-          description: "Self Link"
-    GetOperatorAvailableLinks:
-      properties:
-        self:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f"
-          description: "Self Link"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            org1: "org1"
+            org2: "org2"

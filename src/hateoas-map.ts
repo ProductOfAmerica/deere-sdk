@@ -30,6 +30,11 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
     rel: 'locations',
     parentSpec: 'assets',
   },
+  '/chemicals/{erid}/documents': {
+    parentPath: '/chemicals/{erid}',
+    rel: 'documents',
+    parentSpec: 'products',
+  },
   '/equipmentMakes/{equipmentMakeId}/equipmentISGTypes': {
     parentPath: '/equipmentMakes/{equipmentMakeId}',
     rel: 'equipmentISGTypes',
@@ -45,19 +50,64 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
     rel: 'equipmentTypes',
     parentSpec: 'equipment',
   },
+  '/fertilizers/{erid}/documents': {
+    parentPath: '/fertilizers/{erid}',
+    rel: 'documents',
+    parentSpec: 'products',
+  },
   '/fieldOperations/{operationId}/boundary': {
     parentPath: '/fieldOperations/{operationId}',
     rel: 'boundary',
     parentSpec: 'field-operations-api',
+  },
+  '/fieldOperations/{operationId}/measurementTypes': {
+    parentPath: '/fieldOperations/{operationId}',
+    rel: 'measurementTypes',
+    parentSpec: 'field-operations-api',
+  },
+  '/mapLayers/{id}/fileResources': {
+    parentPath: '/mapLayers/{id}',
+    rel: 'fileResources',
+    parentSpec: 'map-layers',
+  },
+  '/mapLayerSummaries/{id}/mapLayers': {
+    parentPath: '/mapLayerSummaries/{id}',
+    rel: 'mapLayers',
+    parentSpec: 'map-layers',
+  },
+  '/organizations/{organizationId}/chemicals': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'chemicals',
+    parentSpec: 'organizations',
   },
   '/organizations/{organizationId}/cropTypes': {
     parentPath: '/organizations/{organizationId}',
     rel: 'cropTypes',
     parentSpec: 'organizations',
   },
+  '/organizations/{organizationId}/dryBlends': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'dryBlends',
+    parentSpec: 'organizations',
+  },
   '/organizations/{organizationId}/equipment': {
     parentPath: '/organizations/{organizationId}',
     rel: 'equipment',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{organizationId}/fertilizers': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'fertilizers',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{organizationId}/productCompanies': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'productCompanies',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{organizationId}/tankMixes': {
+    parentPath: '/organizations/{organizationId}',
+    rel: 'tankMixes',
     parentSpec: 'organizations',
   },
   '/organizations/{organizationId}/varieties': {
@@ -154,6 +204,21 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
     parentPath: '/organizations/{orgId}',
     rel: 'files',
     parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/fileTransfers': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'fileTransfers',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/flagCategories': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'flagCategories',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/flagCategories/{categoryId}/flagCategoryPreferences': {
+    parentPath: '/organizations/{orgId}/flagCategories/{categoryId}',
+    rel: 'flagCategoryPreferences',
+    parentSpec: 'flags',
   },
   '/organizations/{orgId}/flags': {
     parentPath: '/organizations/{orgId}',

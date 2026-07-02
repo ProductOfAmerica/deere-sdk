@@ -12,6 +12,18 @@ export function refName(ref: string): string {
   return parts[parts.length - 1];
 }
 
+export function toPascalCase(str: string): string {
+  return str
+    .split(/[-_.]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('');
+}
+
+export function toCamelCase(str: string): string {
+  const pascal = toPascalCase(str);
+  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
+}
+
 /**
  * Checks if a property key is entirely an HTML documentation marker.
  * e.g., "<b>Location</b>" or "<span>Section</span>"
@@ -161,4 +173,71 @@ export function stripTypeDiscriminators(spec: Record<string, unknown>): number {
     }
   }
   return removed;
+}
+
+/**
+ * The two equipment list responses whose `values.items.$ref` John Deere's
+ * 2026-07 doc edit dropped, paired with the item schema each historically
+ * referenced. `GetEquipment` feeds `EquipmentApi.get` on `GET /equipment`;
+ * `GetEquipmentById` feeds `EquipmentApi.getEquipment` on `GET /equipment/{id}`.
+ */
+const EQUIPMENT_LIST_ITEM_REFS: ReadonlyArray<{ response: string; schema: string }> = [
+  { response: 'GetEquipment', schema: 'equipmentForList' },
+  { response: 'GetEquipmentById', schema: 'equipment' },
+];
+
+/**
+ * Restore the `values.items.$ref` envelope on the two equipment list responses
+ * that John Deere's 2026-07 equipment-doc edit dropped. Returns the count
+ * restored.
+ *
+ * That edit rewrote `values: { items: { $ref: <schema> } }` down to a bare
+ * `values: { type: "array" }` on the 200 responses `GetEquipment` (item schema
+ * `equipmentForList`) and `GetEquipmentById` (item schema `equipment`), while
+ * leaving both target schemas defined in `components.schemas`. Without the ref
+ * the generator cannot recover the item type, so `EquipmentApi.get` collapses
+ * to `PaginatedResponse<unknown>` and `EquipmentApi.getEquipment` to `unknown`.
+ * The wire contract did not change; only JD's doc quality did (their equipment
+ * spec has prior form here: see stripTypeDiscriminators above).
+ *
+ * Guarded and self-neutralizing. For each registered response the ref is
+ * restored ONLY while (a) the envelope carries no `items.$ref` AND (b) the
+ * historically-correct target schema still exists. When JD repairs the doc the
+ * ref is already present and this no-ops; if JD ever removes the target schema
+ * the transform does not resurrect a ref to a nonexistent schema (the types
+ * then legitimately weaken and a human revisits). It is keyed on the two
+ * response names, so no other envelope is touched. The response's media type is
+ * resolved the same way generate-sdk's extractSchemaFromContent resolves it, so
+ * the restored ref lands on exactly the schema the generator reads.
+ */
+export function restoreEquipmentItemRefs(spec: Record<string, unknown>): number {
+  const components = spec.components as Record<string, unknown> | undefined;
+  const responses = components?.responses as Record<string, unknown> | undefined;
+  const schemas = components?.schemas as Record<string, unknown> | undefined;
+  if (!responses || !schemas) return 0;
+
+  let restored = 0;
+  for (const { response, schema } of EQUIPMENT_LIST_ITEM_REFS) {
+    // Guard (b): never resurrect a ref to a schema JD has removed.
+    if (!(schema in schemas)) continue;
+
+    const responseObj = responses[response] as { content?: Record<string, unknown> } | undefined;
+    const content = responseObj?.content;
+    if (!content) continue;
+
+    // Mirror generate-sdk's media-type preference so the ref lands where the
+    // generator looks for it.
+    const media = (content['application/vnd.deere.axiom.v3+json'] ?? content['application/json']) as
+      | { schema?: { properties?: Record<string, unknown> } }
+      | undefined;
+    const values = media?.schema?.properties?.values as { items?: { $ref?: unknown } } | undefined;
+    if (!values) continue;
+
+    // Guard (a): no-op when a ref is already present (JD repaired the doc).
+    if (typeof values.items?.$ref === 'string' && values.items.$ref.length > 0) continue;
+
+    values.items = { $ref: `#/components/schemas/${schema}` };
+    restored += 1;
+  }
+  return restored;
 }

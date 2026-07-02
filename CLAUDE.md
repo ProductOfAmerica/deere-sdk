@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Unofficial TypeScript SDK for John Deere Operations Center API. 28 APIs / 146 operations. Mostly generated code: specs
+Unofficial TypeScript SDK for John Deere Operations Center API. 28 APIs / 202 operations. Mostly generated code: specs
 are pulled from John Deere's portal, patched, and fed through a codegen pipeline into `src/api/*.ts`,
 `src/types/generated/*`, `src/api-servers.generated.ts`, and `src/hateoas-map.ts`.
 
@@ -37,13 +37,55 @@ runner (`node:test` / `node:assert`), not Jest or Vitest.
 ### Codegen pipeline (`pnpm generate`)
 
 ```
-fetch-specs → fix-specs → generate-api-servers → generate-types → generate-sdk
-  raw/*.yaml   fixed/*.yaml   api-servers.ts     types/generated   api/*.ts
+fetch-specs → redact-specs → fix-specs → generate-api-servers → generate-types → generate-sdk
+  raw/*.yaml    raw/*.yaml     fixed/*.yaml    api-servers.ts       types/generated    api/*.ts
 ```
 
-Each stage is independently runnable (e.g. `pnpm fix-specs`). Re-run the whole pipeline after pulling new specs; CI's
-`sync-api.yml` does this daily and opens a release if diffs appear under `specs/`, `src/api/`, or
-`src/types/generated/`.
+Each stage is independently runnable (e.g. `pnpm fix-specs`). Re-run the whole pipeline after pulling new specs.
+
+`fetch-specs` validates **every** document the portal returns for a slug. A slug can return more than one
+document; when it does, they are structurally merged into a single spec (`mergeSpecDocs` in
+`scripts/lib/spec-merge.ts`). The primary document is pinned by the repo-owned `PRIMARY_ENDPOINT_NAME` table
+(falling back to the slug-named document, else a loud error); the primary owns the merged `info` and its
+committed `components` names, so a portal reorder cannot silently rename the public type surface. The merged (or
+single) document is then canonicalized to a deterministic key order, so an upstream reorder of
+`paths`/`components` yields a byte-identical raw file instead of a misleading diff. Redaction runs per document
+before parse; `redact-specs` stays downstream as an idempotent safety net.
+
+Servers reconciliation is family-aware. Documents that differ only as environment instances or doc defects of
+the shared `https://{environment}.deere.com/platform` family resolve to the primary's servers block (`fix-specs`
+normalizes it to the templated form downstream); a genuinely different family (a deere host on a non-platform
+path, or mixed families) refuses to merge, preserving the per-family host trust boundary.
+
+#### The api-surface manifest (`scripts/api-surface.yaml`)
+
+Committed and version-controlled. It maps each operation's **identity** (HTTP method + normalized path) to the
+public method name the generator emits, so an upstream `paths` reorder cannot rebind a published method to a
+different endpoint (the failure that took the daily sync red on 2026-06-24: a `paths` reorder rebound
+`FieldOperationsApi.get` to a different endpoint). Identity
+normalizes every `{param}` to `{_}`, so a param rename (`{orgId}` becomes `{organizationId}`) is absorbed and
+the method name is preserved. The one exception is sibling operations that differ **only** by param name
+(crop-types declares both `GET /cropTypes/{name}` and `GET /cropTypes/{id}`): those match by exact raw path, so a
+rename inside such a set is not absorbed and surfaces as breaking for a human to reconcile. `listAll` never
+appears in the manifest; it is always derived from a `list` collection GET. New operations receive deterministic
+proposed names (verb plus the capitalized last non-param segment, with a documented tiebreak chain; no
+positional counters).
+
+Editing the `name:` values is how you approve an upstream change: repoint an entry's `op:` to a renamed path
+(the name, hence the public method, is preserved), or delete an entry to drop a removed endpoint's method (a
+major-version decision). A manifest entry with no matching operation fails the sync with per-entry diagnostics
+rather than silently dropping the method.
+
+Every run is classified into `sync-report.json` (gitignored) for the workflow:
+
+- **benign**: no new and no missing operations. No release.
+- **additive**: new operations, none missing. Minor release; `generate-sdk` rewrites the manifest, folding the
+  new entries in with their proposed names.
+- **breaking**: a manifest entry lost its operation. The sync fails and surfaces the missing operations; a human
+  reconciles the manifest before any release.
+
+CI's `sync-api.yml` runs the pipeline daily, reads the classification, and bumps accordingly: additive cuts a
+minor, benign spec churn a patch; a breaking run does not release.
 
 ## Architecture
 
@@ -139,6 +181,12 @@ To change any of them, edit the corresponding generator in `scripts/` and re-run
 - New spec-level patch → `scripts/fix-specs.ts`
 
 Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/index.ts`.
+
+`scripts/api-surface.yaml` sits between the two: it is committed and version-controlled, but `generate-sdk`
+rewrites it wholesale on additive runs. Only its `name:` values are meant to be hand-edited (the rename/removal
+approval point described above); per-entry hand comments do not survive a rewrite. `scripts/canonicalize-specs.ts`
+is a rerunnable, idempotent one-off that renormalizes committed `specs/raw/*.yaml` to the key order `fetch-specs`
+now emits, so live fetches diff cleanly against them.
 
 ## Testing conventions
 

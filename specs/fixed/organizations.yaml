@@ -200,6 +200,30 @@ paths:
           description: "Not found"
 components:
   parameters:
+    OrgId:
+      in: "query"
+      name: "orgId"
+      description: "Returns the name of the organization that corresponds with the given organization ID."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        example: 2101
+    OrgIdGet:
+      in: "path"
+      name: "orgId"
+      description: "Organization"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: 734561
+    OrgName:
+      in: "query"
+      name: "orgName"
+      description: "Returns a list of organizations that contain the given string in their name."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        example: "Smith Farms"
     UserName:
       in: "query"
       name: "userName"
@@ -216,22 +240,6 @@ components:
       schema:
         type: "string"
         example: "JohnDoe"
-    OrgId:
-      in: "query"
-      name: "orgId"
-      description: "Returns the name of the organization that corresponds with the given organization ID."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: 2101
-    OrgName:
-      in: "query"
-      name: "orgName"
-      description: "Returns a list of organizations that contain the given string in their name."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: "Smith Farms"
     X-deere-signature:
       in: "header"
       name: "x-deere-signature"
@@ -248,37 +256,7 @@ components:
       schema:
         type: "string"
         example: "4r5392615e4b4e1c92018026f47109bb"
-    OrgIdGet:
-      in: "path"
-      name: "orgId"
-      description: "Organization"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: 734561
   schemas:
-    OrganizationLink:
-      properties:
-        self:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234"
-          description: "Link to organization"
-        connections:
-          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/select-organizations"
-          description: "Redirect link to enable organization access"
-        manage_connections:
-          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234"
-          description: "Redirect link to manage organization access and permissions"
-    OrganizationLink2:
-      properties:
-        self:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234"
-          description: "Link to organization"
-        connections:
-          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations"
-          description: "Redirect link to enable organization access"
-        manage_connections:
-          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234"
-          description: "Redirect link to manage organization access and permissions"
     Organization:
       properties:
         x-deere-signature:
@@ -301,6 +279,28 @@ components:
           type: "boolean"
           example: "true"
           description: "TRUE means that the user is a member of the org."
+    OrganizationLink:
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Link to organization"
+        connections:
+          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/select-organizations"
+          description: "Redirect link to enable organization access"
+        manage_connections:
+          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234"
+          description: "Redirect link to manage organization access and permissions"
+    OrganizationLink2:
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Link to organization"
+        connections:
+          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations"
+          description: "Redirect link to enable organization access"
+        manage_connections:
+          example: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234"
+          description: "Redirect link to manage organization access and permissions"
     OrganizationView:
       properties:
         id:

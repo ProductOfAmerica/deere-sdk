@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   isDocumentationKey,
+  restoreEquipmentItemRefs,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -154,6 +155,117 @@ describe('fix-specs utilities', () => {
     it('is a no-op for specs without components.schemas', () => {
       assert.strictEqual(stripTypeDiscriminators({}), 0);
       assert.strictEqual(stripTypeDiscriminators({ components: {} }), 0);
+    });
+  });
+
+  describe('restoreEquipmentItemRefs', () => {
+    interface ValuesEnvelope {
+      type?: string;
+      items?: { $ref?: string };
+    }
+    type EnvelopeResponse = {
+      content: Record<string, { schema: { type: string; properties: { values: ValuesEnvelope } } }>;
+    };
+    // Mirror the two regressed 200 responses: a values-shaped envelope whose
+    // items ref JD's 2026-07 doc edit dropped down to a bare `type: array`.
+    function envelopeResponse(values: ValuesEnvelope = { type: 'array' }): EnvelopeResponse {
+      return {
+        content: {
+          'application/json': { schema: { type: 'object', properties: { values } } },
+        },
+      };
+    }
+    function itemsOf(response: EnvelopeResponse): { $ref?: string } | undefined {
+      return response.content['application/json'].schema.properties.values.items;
+    }
+
+    it('restores the item ref when it is absent and the target schema is present', () => {
+      const getEquipment = envelopeResponse();
+      const getEquipmentById = envelopeResponse();
+      const spec = {
+        components: {
+          schemas: { equipmentForList: { type: 'object' }, equipment: { type: 'object' } },
+          responses: { GetEquipment: getEquipment, GetEquipmentById: getEquipmentById },
+        },
+      };
+
+      const restored = restoreEquipmentItemRefs(spec);
+
+      assert.strictEqual(restored, 2);
+      assert.deepStrictEqual(itemsOf(getEquipment), {
+        $ref: '#/components/schemas/equipmentForList',
+      });
+      assert.deepStrictEqual(itemsOf(getEquipmentById), {
+        $ref: '#/components/schemas/equipment',
+      });
+    });
+
+    it('no-ops when the item ref is already present (does not overwrite a repaired doc)', () => {
+      const getEquipment = envelopeResponse({
+        items: { $ref: '#/components/schemas/equipmentForList' },
+      });
+      const spec = {
+        components: {
+          schemas: { equipmentForList: { type: 'object' } },
+          responses: { GetEquipment: getEquipment },
+        },
+      };
+
+      assert.strictEqual(restoreEquipmentItemRefs(spec), 0);
+      // The pre-existing ref is preserved, not rewritten.
+      assert.deepStrictEqual(itemsOf(getEquipment), {
+        $ref: '#/components/schemas/equipmentForList',
+      });
+    });
+
+    it('no-ops when the target schema is missing (never resurrects a dangling ref)', () => {
+      const getEquipment = envelopeResponse();
+      const spec = {
+        components: {
+          schemas: {},
+          responses: { GetEquipment: getEquipment },
+        },
+      };
+
+      assert.strictEqual(restoreEquipmentItemRefs(spec), 0);
+      assert.strictEqual(itemsOf(getEquipment), undefined);
+    });
+
+    it('touches only the two registered responses, leaving other envelopes alone', () => {
+      const getEquipment = envelopeResponse();
+      const getEquipmentById = envelopeResponse();
+      const somethingElse = envelopeResponse();
+      const spec = {
+        components: {
+          schemas: {
+            equipmentForList: { type: 'object' },
+            equipment: { type: 'object' },
+            other: { type: 'object' },
+          },
+          responses: {
+            GetEquipment: getEquipment,
+            GetEquipmentById: getEquipmentById,
+            SomethingElse: somethingElse,
+          },
+        },
+      };
+
+      const restored = restoreEquipmentItemRefs(spec);
+
+      assert.strictEqual(restored, 2);
+      assert.deepStrictEqual(itemsOf(getEquipment), {
+        $ref: '#/components/schemas/equipmentForList',
+      });
+      assert.deepStrictEqual(itemsOf(getEquipmentById), {
+        $ref: '#/components/schemas/equipment',
+      });
+      // An unregistered values-shaped response is left untouched.
+      assert.strictEqual(itemsOf(somethingElse), undefined);
+    });
+
+    it('is a no-op for specs without components.responses or components.schemas', () => {
+      assert.strictEqual(restoreEquipmentItemRefs({}), 0);
+      assert.strictEqual(restoreEquipmentItemRefs({ components: {} }), 0);
     });
   });
 });

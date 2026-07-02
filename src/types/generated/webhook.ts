@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+  '/eventSubscriptionDelivery': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Event Subscription Delivery
+     * @description This resource will return your event subscription delivery status
+     */
+    get: operations['getDelivery'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Event Subscription Delivery
+     * @description This resource will update an event subscription delivery
+     */
+    patch: operations['updateDelivery'];
+    trace?: never;
+  };
   '/eventSubscriptions': {
     parameters: {
       query?: never;
@@ -56,46 +80,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description A list of events */
-    HTTPTargetEndpointEventsContent: components['schemas']['HTTPTargetEndpointEventContent'][];
-    /** @description An event */
-    HTTPTargetEndpointEventContent: {
-      /**
-       * @description The client key that made the subscription
-       * @example johndeere-abcdef
-       */
-      clientKey: string;
-      /** @example fieldOperation */
-      eventTypeId: string;
-      /**
-       * Format: url
-       * @example https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
-       */
-      targetResource: string;
-      /**
-       * @description a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set.
-       * @example abc123ABC+/=
-       */
-      token?: string;
-      metadata: components['schemas']['HTTPTargetEndpointEventMetadata'][];
-      links: components['schemas']['Links'];
-    };
-    /** @description Generic key value pair */
-    HTTPTargetEndpointEventMetadata: {
-      /** @example orgId */
-      key?: string;
-      /** @example 12345 */
-      value?: string;
-    };
-    Links: components['schemas']['Link'][];
-    /** @description Link to another resource */
-    Link: {
-      /** @example self */
-      rel: string;
-      /** @example https://sandboxapi.deere.com/platform/users/USER */
-      uri: string;
-    };
-    Errors: components['schemas']['Error'][];
+    /**
+     * @description If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb.
+     * @example Bearer
+     */
+    AuthorizationHeader: string | null;
     CreatedSubscriptionLinks: {
       /**
        * @description The link back to the subscribed user.
@@ -156,6 +145,26 @@ export interface components {
        */
       links?: unknown[];
     };
+    /** @description Delivery */
+    DeliveryContent: {
+      /** @example johndeere-abcdef */
+      readonly clientKey?: string;
+      status?: components['schemas']['DeliveryStatus'];
+      authorizationHeaderValue?: components['schemas']['AuthorizationHeader'];
+      /**
+       * Format: int32
+       * @example 5
+       */
+      concurrentDeliveries?: number;
+      /**
+       * Format: int32
+       * @example 5
+       */
+      maxBatchSize?: number;
+      links?: components['schemas']['Links'];
+    };
+    /** @enum {string} */
+    DeliveryStatus: 'Active' | 'Paused';
     Error: {
       /**
        * Format: guid
@@ -183,6 +192,107 @@ export interface components {
        */
       invalidValue?: string;
     };
+    Error_EventSubscriptionDelivery: {
+      /**
+       * @description An english description of the error
+       * @example was invalid because
+       */
+      message?: string;
+      /**
+       * @description A string constant representing the type of error
+       * @example 400
+       */
+      code?: string;
+      /**
+       * @description The name of the property or parameter deemed invalid
+       * @example Machine.serialNumber
+       */
+      field?: string;
+      /**
+       * Format: uuid
+       * @description A reference to this encounter of the error, for traceability and troubleshooting
+       * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+       */
+      gud?: string;
+      /**
+       * @description The value that was supplied for this field in the request
+       * @example null
+       */
+      invalidValue?: string;
+    };
+    Errors: components['schemas']['Error'][];
+    Errors_EventSubscriptionDelivery: components['schemas']['Error_EventSubscriptionDelivery'][];
+    /**
+     * @description See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names
+     * @example exampleEvent
+     */
+    EventTypeId: string;
+    /** @description Consists of a key and list of values used to filter events based on metadata. */
+    Filter: {
+      /** @example orgId */
+      key: string;
+      values: string[];
+    };
+    /** @description An event */
+    HTTPTargetEndpointEventContent: {
+      /**
+       * @description The client key that made the subscription
+       * @example johndeere-abcdef
+       */
+      clientKey: string;
+      /** @example fieldOperation */
+      eventTypeId: string;
+      /**
+       * Format: url
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912
+       */
+      targetResource: string;
+      /**
+       * @description a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set.
+       * @example abc123ABC+/=
+       */
+      token?: string;
+      metadata: components['schemas']['HTTPTargetEndpointEventMetadata'][];
+      links: components['schemas']['Links'];
+    };
+    /** @description Generic key value pair */
+    HTTPTargetEndpointEventMetadata: {
+      /** @example orgId */
+      key?: string;
+      /** @example 12345 */
+      value?: string;
+    };
+    /** @description A list of events */
+    HTTPTargetEndpointEventsContent: components['schemas']['HTTPTargetEndpointEventContent'][];
+    /** @description A HTTPS subscription */
+    HttpsSubscription: {
+      /** @example https */
+      targetType: string;
+      /** @example https//example.com/callme */
+      uri: string;
+    };
+    /** @description Link to another resource */
+    Link: {
+      /** @example self */
+      rel: string;
+      /** @example https://sandboxapi.deere.com/platform/users/USER */
+      uri: string;
+    };
+    Links: components['schemas']['Link'][];
+    SubscriptionCollectionResponseContent: {
+      /**
+       * @description The link of the request.
+       * @example https://sandboxapi.deere.com/platform/eventSubscriptions
+       */
+      self?: unknown;
+    };
+    SubscriptionDeliveryLink: {
+      /**
+       * @description The link to the event subscription's delivery status.
+       * @example https://sandboxapi.deere.com/platform/eventSubscriptionDelivery
+       */
+      self?: unknown;
+    };
     /** @description A subscription request */
     SubscriptionRequestContent: {
       eventTypeId: components['schemas']['EventTypeId'];
@@ -201,18 +311,28 @@ export interface components {
        */
       token?: string;
     };
-    /** @description Consists of a key and list of values used to filter events based on metadata. */
-    Filter: {
-      /** @example orgId */
-      key: string;
-      values: string[];
-    };
-    SubscriptionCollectionResponseContent: {
+    /** @description A subscription response */
+    SubscriptionResponseContent: {
       /**
-       * @description The link of the request.
-       * @example https://sandboxapi.deere.com/platform/eventSubscriptions
+       * @description The postback endpoint that receives the event(s).
+       * @example See the sample request below Editable: Yes
        */
-      self?: unknown;
+      targetEndpoint?: Record<string, never>;
+      /**
+       * @description The status of the event subscription.
+       * @example active Editable: Yes
+       */
+      status?: string;
+      /**
+       * @description Human-readable name to easily identify the event subscription.
+       * @example My Data Subscription Editable: Yes
+       */
+      displayName?: string;
+      /**
+       * @description A string that was sent with each delivery to validate the sender.
+       * @example Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes
+       */
+      token?: string;
     };
     /** @description A subscription response */
     SubscriptionResponseContentPut: {
@@ -242,89 +362,58 @@ export interface components {
        */
       token?: string;
     };
-    /** @description A subscription response */
-    SubscriptionResponseContent: {
+    SubscriptionUpdateResponse: {
       /**
-       * @description The postback endpoint that receives the event(s).
-       * @example See the sample request below Editable: Yes
+       * @description Concurrency of the event subscription delivery (default: 1, min: 1, max: 10).
+       * @example 5 Editable: Yes
        */
-      targetEndpoint?: Record<string, never>;
+      concurrentDeliveries?: number;
       /**
-       * @description The status of the event subscription.
-       * @example active Editable: Yes
+       * @description The client key used to create the subscription.
+       * @example johndeere-1234567898765432123456789876543212345678 Editable: No
        */
-      status?: string;
+      clientKey?: string;
       /**
-       * @description Human-readable name to easily identify the event subscription.
-       * @example My Data Subscription Editable: Yes
+       * @description Links to other resources.
+       * @example See the sample request below Editable: No
        */
-      displayName?: string;
-      /**
-       * @description A string that was sent with each delivery to validate the sender.
-       * @example Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes
-       */
-      token?: string;
+      links?: unknown[];
     };
-    /** @description A HTTPS subscription */
-    HttpsSubscription: {
-      /** @example https */
-      targetType: string;
-      /** @example https//example.com/callme */
-      uri: string;
-    };
-    /**
-     * @description See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names
-     * @example exampleEvent
-     */
-    EventTypeId: string;
-    /** @description Delivery */
-    DeliveryContent: {
-      /** @example johndeere-abcdef */
-      readonly clientKey?: string;
-      status?: components['schemas']['DeliveryStatus'];
-      authorizationHeaderValue?: components['schemas']['AuthorizationHeader'];
+    SubscriptionUpdateResponseGet: {
       /**
-       * Format: int32
+       * @description Concurrency of the event subscription delivery (default: 1, min: 1, max: 10).
        * @example 5
        */
       concurrentDeliveries?: number;
       /**
-       * Format: int32
-       * @example 5
+       * @description The client key used to create the subscription.
+       * @example REDACTED
        */
-      maxBatchSize?: number;
-      links?: components['schemas']['Links'];
+      clientKey?: string;
+      /**
+       * @description Links to other resources.
+       * @example See the sample request below
+       */
+      links?: unknown[];
     };
-    /** @enum {string} */
-    DeliveryStatus: 'Active' | 'Paused';
-    /**
-     * @description If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb.
-     * @example Bearer
-     */
-    AuthorizationHeader: string | null;
   };
   responses: {
-    /** @description Subscription */
-    SubscriptionResponse: {
+    /** @description Bad Request */
+    BadRequestResponse: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        'application/vnd.deere.axiom.v3+json': {
-          links?: unknown;
-          values?: unknown;
-        };
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
       };
     };
-    /** @description Subscriptions */
-    SubscriptionCollectionResponse: {
+    /** @description Bad Request */
+    BadRequestResponse_EventSubscriptionDelivery: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        'application/vnd.deere.axiom.v3+json': {
-          links?: unknown;
-        };
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors_EventSubscriptionDelivery'];
       };
     };
     /** @description Created */
@@ -348,6 +437,55 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': unknown;
       };
     };
+    /** @description Delivery */
+    DeliveryResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          values?: unknown;
+          links?: unknown;
+        };
+      };
+    };
+    /** @description Does not have access */
+    DoesNotHaveAccessResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Not found */
+    InputValueIsInvalidResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Subscriptions */
+    SubscriptionCollectionResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+        };
+      };
+    };
+    /** @description Subscription */
+    SubscriptionResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          values?: unknown;
+        };
+      };
+    };
     /** @description Subscription */
     UpdatedResponse: {
       headers: {
@@ -364,59 +502,42 @@ export interface components {
         };
       };
     };
-    /** @description Not found */
-    InputValueIsInvalidResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Does not have access */
-    DoesNotHaveAccessResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Bad Request */
-    BadRequestResponse: {
+    /** @description Update Subscriptions delivery */
+    UpdatedResponse_EventSubscriptionDelivery: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+        };
       };
     };
   };
   parameters: {
-    /** @description Event Subscription ID as a GUID. */
-    Id: string;
+    /** @description Human-readable name to easily identify the event subscription. */
+    DisplayName: string;
     /** @description See for valid event type names. */
     EventTypeId: string;
     /** @description List of MetadataFilters to filter events on metadata. */
     Filters: unknown[];
-    /** @description The postback endpoint that receives the event(s). */
-    TargetEndpoint: Record<string, never>;
-    /** @description The status of the event subscription. Only a status of Active can be specified on subscription creation. */
-    Status: string;
-    /** @description Human-readable name to easily identify the event subscription. */
-    DisplayName: string;
-    /** @description A string that was sent with each delivery to validate the sender. */
-    Token: string;
     /** @description If set via the eventSubscriptionDelivery endpoint, we will include an Authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb. */
     HTTPTargetEndpointAuthorizationHeader: components['schemas']['AuthorizationHeader'];
+    /** @description Event Subscription ID as a GUID. */
+    Id: string;
+    /** @description The status of the event subscription. Only a status of Active can be specified on subscription creation. */
+    Status: string;
+    /** @description The postback endpoint that receives the event(s). */
+    TargetEndpoint: Record<string, never>;
+    /** @description A string that was sent with each delivery to validate the sender. */
+    Token: string;
   };
   requestBodies: {
-    SubscriptionRequest: {
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['SubscriptionRequestContent'];
-      };
-    };
-    SubscriptionUpdateRequest: {
-      content: {
-        '*/*'?: never;
-      };
-    };
     DeliveryUpdateRequest: {
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['DeliveryContent'];
@@ -427,12 +548,53 @@ export interface components {
         'application/json': components['schemas']['HTTPTargetEndpointEventsContent'];
       };
     };
+    SubscriptionRequest: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['SubscriptionRequestContent'];
+      };
+    };
+    SubscriptionUpdateRequest: {
+      content: {
+        '*/*'?: never;
+      };
+    };
   };
   headers: never;
   pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components['responses']['DeliveryResponse'];
+      403: components['responses']['DoesNotHaveAccessResponse'];
+    };
+  };
+  updateDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['SubscriptionUpdateResponse'];
+      };
+    };
+    responses: {
+      200: components['responses']['UpdatedResponse_EventSubscriptionDelivery'];
+      400: components['responses']['BadRequestResponse_EventSubscriptionDelivery'];
+      403: components['responses']['DoesNotHaveAccessResponse'];
+    };
+  };
   getSubscriptions: {
     parameters: {
       query?: never;

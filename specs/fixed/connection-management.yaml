@@ -59,14 +59,6 @@ components:
       schema:
         type: "string"
         example: "123456"
-    OrgId:
-      in: "path"
-      name: "orgId"
-      description: "Organization Id"
-      x-required-boolean: true
-      schema:
-        type: "integer"
-        example: 2101
     CreatedAfter:
       in: "query"
       name: "createdAfter"
@@ -75,9 +67,15 @@ components:
       schema:
         type: "string"
         example: "2021-10-15T08:00:00Z"
+    OrgId:
+      in: "path"
+      name: "orgId"
+      description: "Organization Id"
+      x-required-boolean: true
+      schema:
+        type: "integer"
+        example: 2101
   responses:
-    Forbidden:
-      description: "Requester not authorized to delete the requested connection"
     Deleted:
       description: "Deleted"
       content:
@@ -87,23 +85,9 @@ components:
           examples:
             Headers:
               description: "204 No Content, the connection has been deleted"
+    Forbidden:
+      description: "Requester not authorized to delete the requested connection"
   schemas:
-    Link:
-      description: "Link to the delete action"
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          default: "Link"
-          example: "Link"
-        rel:
-          x-required-boolean: true
-          type: "string"
-          example: "self"
-        uri:
-          x-required-boolean: true
-          type: "string"
-          example: "https://api.deere.com/platform/connections/abc123"
     Connection:
       type: "object"
       properties:
@@ -154,3 +138,19 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Connection"
+    Link:
+      description: "Link to the delete action"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          default: "Link"
+          example: "Link"
+        rel:
+          x-required-boolean: true
+          type: "string"
+          example: "self"
+        uri:
+          x-required-boolean: true
+          type: "string"
+          example: "https://api.deere.com/platform/connections/abc123"

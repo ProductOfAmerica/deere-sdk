@@ -18,6 +18,51 @@ export class FilesApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * List File Transfer Requests
+   * @description This resource allows the client to check the status of a file
+   * transfer request that has already been submitted. The response will contain
+   * links to the following resources: file: View the file for which the
+   * transfer was requested. machine: View the machine to which the transfer was
+   * requested.
+   * @generated from GET /fileTransfers
+   */
+  async listFileTransfers(
+    params?: { source?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FileValue']>> {
+    const query = new URLSearchParams();
+    if (params?.source !== undefined) query.set('source', String(params.source));
+    const queryString = query.toString();
+    const path = `/fileTransfers${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<PaginatedResponse<components['schemas']['FileValue']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
+   * View a File Transfer Request
+   * @description This resource allows the client to check the status of a file
+   * transfer request that has already been submitted. The response will contain
+   * links to the following resources: file: View the file for which the
+   * transfer was requested. machine: View the machine to which the transfer was
+   * requested.
+   * @generated from GET /fileTransfers/{id}
+   */
+  async getFileTransfers(
+    id: string,
+    params?: { source?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['FileTransfersValue']> {
+    const query = new URLSearchParams();
+    if (params?.source !== undefined) query.set('source', String(params.source));
+    const queryString = query.toString();
+    const path = `/fileTransfers/${id}${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<components['schemas']['FileTransfersValue']>(this.spec, path, options);
+  }
+
+  /**
    * List Files
    * @description This resource retrieves the list of available files. For each
    * file, the response will link to the following resources:
@@ -97,6 +142,55 @@ export class FilesApi {
   ): Promise<void> {
     const path = `/files/${fileId}`;
     await this.client.put(this.spec, path, data, options);
+  }
+
+  /**
+   * Get File Transfer List by Organization
+   * @description This resource will retrieve list of all File Transfer by an
+   * Organization. The response will contain links to the following resources:
+   * file: View the file for which the transfer was requested. machine: View the
+   * machine to which the transfer was requested.
+   * @generated from GET /organizations/{orgId}/fileTransfers
+   */
+  async listOrganizationsFileTransfers(
+    orgId: string,
+    params?: { source?: string },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FileTransfersValue']>> {
+    const query = new URLSearchParams();
+    if (params?.source !== undefined) query.set('source', String(params.source));
+    const queryString = query.toString();
+    const path = `/organizations/${orgId}/fileTransfers${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<PaginatedResponse<components['schemas']['FileTransfersValue']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
+   * Submit a File Transfer Request
+   * @description This resource allows you to select a file and machine, and use
+   * the client software to submit a file transfer request. After that,
+   * MyJohnDeere API v3's infrastructure transfers the selected file to the
+   * selected machine, where it becomes available for the machine operator to
+   * use. The response links to the following resources: file: The file for
+   * which the transfer is being requested. machine: The machine to which the
+   * transfer is being requested.
+   * @generated from POST /organizations/{orgId}/fileTransfers
+   */
+  async createFileTransfers(
+    orgId: string,
+    data: components['schemas']['FileTransfersPost'],
+    options?: RequestOptions
+  ): Promise<components['schemas']['PostFileTransfersResponse']> {
+    const path = `/organizations/${orgId}/fileTransfers`;
+    return this.client.post<components['schemas']['PostFileTransfersResponse']>(
+      this.spec,
+      path,
+      data,
+      options
+    );
   }
 
   /**

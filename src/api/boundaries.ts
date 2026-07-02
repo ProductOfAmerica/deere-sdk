@@ -18,6 +18,33 @@ export class BoundariesApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * Generate a Boundary from a FieldOperation
+   * @description Given a , this endpoint will generate and return a boundary
+   * that surrounds the area worked by that field operation. Any gaps in that
+   * field operation will be treated as interior rings. This endpoint returns
+   * the generated boundary, giving you the opportunity to change the boundary
+   * name, clean up any unwanted interiors, etc. before back into Operations
+   * Center. There are two cases where this API will return an HTTP 400 - Bad
+   * Request: If the field already has an active boundary. In this case, please
+   * use the existing boundary - it is likely more accurate than a generated
+   * boundary. If the field has been merged. In this case, a FieldOperation may
+   * only cover one part of the merged field, resulting in an inaccurate
+   * boundary.
+   * @generated from GET /fieldOperations/{operationId}/boundary
+   */
+  async get(
+    operationId: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
+    const path = `/fieldOperations/${operationId}/boundary`;
+    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
    * View Boundaries in an Org
    * @description View boundaries in an organization. fields: View the field
    * associated with these boundaries. owningOrganizations: View the
@@ -93,33 +120,6 @@ export class BoundariesApi {
   ): Promise<components['schemas']['PostBoundary']> {
     const path = `/organizations/${orgId}/fields/${fieldId}/boundaries`;
     return this.client.post<components['schemas']['PostBoundary']>(this.spec, path, data, options);
-  }
-
-  /**
-   * Generate a Boundary from a FieldOperation
-   * @description Given a , this endpoint will generate and return a boundary
-   * that surrounds the area worked by that field operation. Any gaps in that
-   * field operation will be treated as interior rings. This endpoint returns
-   * the generated boundary, giving you the opportunity to change the boundary
-   * name, clean up any unwanted interiors, etc. before back into Operations
-   * Center. There are two cases where this API will return an HTTP 400 - Bad
-   * Request: If the field already has an active boundary. In this case, please
-   * use the existing boundary - it is likely more accurate than a generated
-   * boundary. If the field has been merged. In this case, a FieldOperation may
-   * only cover one part of the merged field, resulting in an inaccurate
-   * boundary.
-   * @generated from GET /fieldOperations/{operationId}/boundary
-   */
-  async get(
-    operationId: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['BoundaryOrgId2']>> {
-    const path = `/fieldOperations/${operationId}/boundary`;
-    return this.client.get<PaginatedResponse<components['schemas']['BoundaryOrgId2']>>(
-      this.spec,
-      path,
-      options
-    );
   }
 
   /**

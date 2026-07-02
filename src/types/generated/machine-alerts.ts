@@ -54,104 +54,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    BadRequestResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '400';
-      /** @example The provided payload was invalid or malformed. */
-      message?: string;
-    };
-    UnauthorizedResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '401';
-      /** @example The request could not be authorized with the given credentials. */
-      message?: string;
-    };
-    ForbiddenResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '403';
-      /** @example The provided authorization is not allowed to access this resource. */
-      message?: string;
-    };
-    NotAcceptableResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '406';
-      /** @example The requested resource could not be produced in any acceptable format. */
-      message?: string;
-    };
-    NotFoundResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '404';
-      /** @example The requested resource could not be found. */
-      message?: string;
-    };
-    /**
-     * Format: uuid
-     * @description A unique string identifier.
-     * @example e7c52f93-4bb6-48bb-b808-11b7b4f23059
-     */
-    UID: string;
-    ErrorResponseBody: {
-      /**
-       * @description This is the type definition for this reference object.
-       * @enum {string}
-       */
-      readonly '@type'?: 'Errors';
-      errors?: {
-        /**
-         * @description This is the type definition for this reference object.
-         * @enum {string}
-         */
-        readonly '@type'?: 'Error';
-        /**
-         * Format: numeric
-         * @example 400
-         */
-        code?: string;
-        /**
-         * @description The field in the request body that is invalid.
-         * @example id
-         */
-        field?: string;
-        guid: components['schemas']['UID'];
-        /**
-         * @description The invalid value present in the field.
-         * @example b48da18c-c0e6-4bcc-a00e-581035beab3d
-         */
-        invalidValue?: string;
-        /** @example There was a problem with the request. */
-        message: string;
-      }[];
-      otherAttributes?: {
-        /** @example example_name */
-        name?: string;
-        /** @example example_value */
-        value?: string;
-      };
-    };
-    TooManyRequestsResponseBody: components['schemas']['ErrorResponseBody'] & {
-      /**
-       * Format: numeric
-       * @enum {string}
-       */
-      code?: '429';
-      /** @example The server has received too many requests. Try again at a later time. */
-      message?: string;
-    };
     AlertLink: {
       /**
        * @description Machines Link.
@@ -302,6 +204,104 @@ export interface components {
         description?: string;
       };
     };
+    BadRequestResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '400';
+      /** @example The provided payload was invalid or malformed. */
+      message?: string;
+    };
+    ErrorResponseBody: {
+      /**
+       * @description This is the type definition for this reference object.
+       * @enum {string}
+       */
+      readonly '@type'?: 'Errors';
+      errors?: {
+        /**
+         * @description This is the type definition for this reference object.
+         * @enum {string}
+         */
+        readonly '@type'?: 'Error';
+        /**
+         * Format: numeric
+         * @example 400
+         */
+        code?: string;
+        /**
+         * @description The field in the request body that is invalid.
+         * @example id
+         */
+        field?: string;
+        guid: components['schemas']['UID'];
+        /**
+         * @description The invalid value present in the field.
+         * @example b48da18c-c0e6-4bcc-a00e-581035beab3d
+         */
+        invalidValue?: string;
+        /** @example There was a problem with the request. */
+        message: string;
+      }[];
+      otherAttributes?: {
+        /** @example example_name */
+        name?: string;
+        /** @example example_value */
+        value?: string;
+      };
+    };
+    ForbiddenResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '403';
+      /** @example The provided authorization is not allowed to access this resource. */
+      message?: string;
+    };
+    NotAcceptableResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '406';
+      /** @example The requested resource could not be produced in any acceptable format. */
+      message?: string;
+    };
+    NotFoundResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '404';
+      /** @example The requested resource could not be found. */
+      message?: string;
+    };
+    TooManyRequestsResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '429';
+      /** @example The server has received too many requests. Try again at a later time. */
+      message?: string;
+    };
+    /**
+     * Format: uuid
+     * @description A unique string identifier.
+     * @example e7c52f93-4bb6-48bb-b808-11b7b4f23059
+     */
+    UID: string;
+    UnauthorizedResponseBody: components['schemas']['ErrorResponseBody'] & {
+      /**
+       * Format: numeric
+       * @enum {string}
+       */
+      code?: '401';
+      /** @example The request could not be authorized with the given credentials. */
+      message?: string;
+    };
   };
   responses: {
     /** @description The list of machines for a organization. */
@@ -331,15 +331,6 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': components['schemas']['BadRequestResponseBody'];
       };
     };
-    /** @description The request could not be authorized with the given credentials. */
-    Unauthorized: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['UnauthorizedResponseBody'];
-      };
-    };
     /** @description The provided authorization is not allowed to access this resource. */
     Forbidden: {
       headers: {
@@ -347,15 +338,6 @@ export interface components {
       };
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['ForbiddenResponseBody'];
-      };
-    };
-    /** @description The requested resource could not be found. */
-    NotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['NotFoundResponseBody'];
       };
     };
     /** @description The given Accept headers did not allow for the content type this resource produces. */
@@ -367,6 +349,15 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': components['schemas']['NotAcceptableResponseBody'];
       };
     };
+    /** @description The requested resource could not be found. */
+    NotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['NotFoundResponseBody'];
+      };
+    };
     /** @description The server has received too many requests and cannot fulfill them. Try again at a later time. */
     TooManyRequests: {
       headers: {
@@ -376,16 +367,25 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': components['schemas']['TooManyRequestsResponseBody'];
       };
     };
+    /** @description The request could not be authorized with the given credentials. */
+    Unauthorized: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['UnauthorizedResponseBody'];
+      };
+    };
   };
   parameters: {
-    /** @description Principal ID of the machine/equipment. */
-    principalId: string;
-    /** @description Returns alerts from a specified date onward. Requests are time-based with a maximum length of seven days. */
-    StartDate: string;
     /** @description Returns alerts until a specific date. Requests are time-based with a maximum length of seven days. */
     EndDate: string;
     /** @description Excludes acknowledged alerts if "true." */
     ExcludeAcknowledged: boolean;
+    /** @description Returns alerts from a specified date onward. Requests are time-based with a maximum length of seven days. */
+    StartDate: string;
+    /** @description Principal ID of the machine/equipment. */
+    principalId: string;
   };
   requestBodies: never;
   headers: never;

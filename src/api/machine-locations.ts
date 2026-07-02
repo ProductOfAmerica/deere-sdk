@@ -18,6 +18,33 @@ export class MachineLocationsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * Machine Breadcrumbs
+   * @description This resource allows the client to get the following details
+   * of a Machine: SpeedFuel LevelDirection of Machine (heading)Machine
+   * StateMachine State Defined Type IdCorrelation IdLocation
+   * AltitudeOriginCreated TimeStamp
+   * @generated from GET /machines/{principalId}/breadcrumbs
+   */
+  async listBreadcrumbs(
+    principalId: string,
+    params?: { orgId?: string; startDate?: string; endDate?: string; lastKnown?: boolean },
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['Breadcrumb']>> {
+    const query = new URLSearchParams();
+    if (params?.orgId !== undefined) query.set('orgId', String(params.orgId));
+    if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
+    if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
+    if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
+    const queryString = query.toString();
+    const path = `/machines/${principalId}/breadcrumbs${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<PaginatedResponse<components['schemas']['Breadcrumb']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
    * Machine Location History
    * @description The machine location service allows the client to view a list
    * of location reports for a machine.A location report will include the

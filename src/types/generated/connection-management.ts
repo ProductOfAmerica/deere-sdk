@@ -120,18 +120,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description Link to the delete action */
-    Link: {
-      /**
-       * @default Link
-       * @example Link
-       */
-      '@type': string;
-      /** @example self */
-      rel?: string;
-      /** @example https://api.deere.com/platform/connections/abc123 */
-      uri?: string;
-    };
     Connection: {
       /** @example abc123 */
       id?: string;
@@ -169,15 +157,20 @@ export interface components {
       total?: number;
       values?: components['schemas']['Connection'][];
     };
+    /** @description Link to the delete action */
+    Link: {
+      /**
+       * @default Link
+       * @example Link
+       */
+      '@type': string;
+      /** @example self */
+      rel?: string;
+      /** @example https://api.deere.com/platform/connections/abc123 */
+      uri?: string;
+    };
   };
   responses: {
-    /** @description Requester not authorized to delete the requested connection */
-    Forbidden: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
     /** @description Deleted */
     Deleted: {
       headers: {
@@ -187,14 +180,21 @@ export interface components {
         'application/json': Record<string, never>;
       };
     };
+    /** @description Requester not authorized to delete the requested connection */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
   };
   parameters: {
     /** @description The identifier of the connection */
     ConnectionId: string;
-    /** @description Organization Id */
-    OrgId: number;
     /** @description ISO 8601 DateTime to filter the responses to only those created after the supplied date */
     CreatedAfter: string;
+    /** @description Organization Id */
+    OrgId: number;
   };
   requestBodies: never;
   headers: never;

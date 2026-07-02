@@ -44,12 +44,14 @@ interface ApiHealthyResult {
   slug: ApiSlug;
   status: 'healthy';
   name: string;
+  docCount: number;
 }
 
 interface ApiEmptyResult {
   slug: ApiSlug;
   status: 'empty';
   name: string;
+  docCount: number;
 }
 
 interface ApiErrorResult {
@@ -84,11 +86,15 @@ async function checkApi(slug: ApiSlug): Promise<ApiResult> {
       return { slug, status: 'error', code: response.status };
     }
     const data = (await response.json()) as ApiSpecResponse[];
-    const hasContent = (data[0]?.yml_content?.length ?? 0) > 10;
+    const docs = Array.isArray(data) ? data : [];
+    // The portal returns multiple documents for 7 of 28 slugs; a slug is
+    // healthy only when every returned document carries real content.
+    const hasContent = docs.length > 0 && docs.every((doc) => (doc?.yml_content?.length ?? 0) > 10);
     return {
       slug,
       status: hasContent ? 'healthy' : 'empty',
-      name: data[0]?.name || slug,
+      name: docs[0]?.name || slug,
+      docCount: docs.length,
     };
   } catch (error) {
     return { slug, status: 'error', message: (error as Error).message };

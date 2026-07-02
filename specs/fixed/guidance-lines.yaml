@@ -180,15 +180,14 @@ paths:
           $ref: "#/components/responses/NotFound"
 components:
   parameters:
-    OrgId:
-      name: "orgId"
-      in: "path"
-      description: "The organization owning the guidance lines."
-      x-required-boolean: true
+    Embed:
+      name: "embed"
+      in: "query"
+      description: "Whether to return the track geometry for AB and Adaptive Curves. See"
+      x-required-boolean: false
       schema:
-        example: 127856
         type: "string"
-        format: "int64"
+        example: "shapes"
     FieldId:
       name: "fieldId"
       in: "path"
@@ -207,6 +206,22 @@ components:
         type: "string"
         example: "2fda92b1-7517-4b2a-8166-7616eb20eb02"
         format: "uuid"
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "The organization owning the guidance lines."
+      x-required-boolean: true
+      schema:
+        example: 127856
+        type: "string"
+        format: "int64"
+    RecordFilter:
+      name: "recordFilter"
+      in: "query"
+      description: "Filter results based on status; Will default to active"
+      schema:
+        type: "string"
+        example: "active, archived, all"
     Status:
       name: "status"
       in: "query"
@@ -215,35 +230,36 @@ components:
       schema:
         type: "string"
         example: "archived"
-    RecordFilter:
-      name: "recordFilter"
-      in: "query"
-      description: "Filter results based on status; Will default to active"
-      schema:
-        type: "string"
-        example: "active, archived, all"
-    Embed:
-      name: "embed"
-      in: "query"
-      description: "Whether to return the track geometry for AB and Adaptive Curves. See"
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: "shapes"
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            ag1: "ag1"
-            ag3: "ag3"
   requestBodies:
     PostRequest:
       $ref: "#/components/schemas/GuidanceLine"
     PutRequest:
       $ref: "#/components/schemas/GuidanceLinePut"
   responses:
+    BadRequest:
+      description: "Request Validation failure"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    Created:
+      description: "Created, with a Location header containing the URI of the newly created resource"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/LinkArrayPost"
+              total:
+                type: "integer"
+                format: "int32"
+                example: 1
+          examples:
+            Headers:
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
+    Forbidden:
+      description: "The user does not have sufficient privileges to access this resource."
     GuidanceLinesResponse:
       description: "A collection of guidance lines"
       content:
@@ -370,22 +386,6 @@ components:
                   - "@type": "Link"
                     rel: "field"
                     uri: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
-    Created:
-      description: "Created, with a Location header containing the URI of the newly created resource"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            properties:
-              links:
-                items:
-                  $ref: "#/components/schemas/LinkArrayPost"
-              total:
-                type: "integer"
-                format: "int32"
-                example: 1
-          examples:
-            Headers:
-              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c/guidanceLines/2fda92b1-7517-4b2a-8166-7616eb20eb02"
     NoContent:
       description: "No Content. Request Completed Succesfully."
       content:
@@ -399,14 +399,6 @@ components:
           examples:
             Headers:
               description: "204 No Content"
-    BadRequest:
-      description: "Request Validation failure"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/Errors"
-    Forbidden:
-      description: "The user does not have sufficient privileges to access this resource."
     NotFound:
       description: "The specified resource does not exist"
   schemas:
@@ -440,16 +432,6 @@ components:
       items:
         $ref: "#/components/schemas/Error"
       readOnly: true
-    LinksArrayGet:
-      properties:
-        field:
-          example: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
-          description: "Fields Link."
-    LinkArrayPost:
-      properties:
-        field:
-          example: "https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId"
-          description: "Fields Link."
     GuidanceLine:
       type: "object"
       properties:
@@ -548,3 +530,21 @@ components:
           type: "object"
           description: "Spatial Projection used for guidance object. See “dtProjectionType” in the John Deere representation system for possible values."
           example: "{ \"@type\": \"SpatialProjection\", \"projectionType\": \"dtiProjectionDeere\", \"elevation\": { \"@type\": \"MeasurementAsDouble\", \"valueAsDouble\": 0, \"vrDomainId\": \"vrElevation\", \"unit\": \"m\" } }"
+    LinkArrayPost:
+      properties:
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId"
+          description: "Fields Link."
+    LinksArrayGet:
+      properties:
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c"
+          description: "Fields Link."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: "ag1"
+            ag3: "ag3"

@@ -18,6 +18,28 @@ export class ClientsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * View a Client's Field
+   * @description View the field to which a specific client belongs. For the
+   * client, the response links to the following resources: boundaries: View the
+   * boundaries that belong to this field. clients: View the client that belongs
+   * to this field. farms: View the farms within this field. owningOrganization:
+   * View the organization that owns the field.
+   * @generated from GET /organizations/{orgID}/clients/{id}/fields
+   */
+  async listFields(
+    orgID: string,
+    id: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
+    const path = `/organizations/${orgID}/clients/${id}/fields`;
+    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
    * List Clients in an Org
    * @description Retrieve all of the clients for an organization
    * @generated from GET /organizations/{orgId}/clients
@@ -141,28 +163,6 @@ export class ClientsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/clients/${id}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FarmResponse']>>(
-      this.spec,
-      path,
-      options
-    );
-  }
-
-  /**
-   * View a Client's Field
-   * @description View the field to which a specific client belongs. For the
-   * client, the response links to the following resources: boundaries: View the
-   * boundaries that belong to this field. clients: View the client that belongs
-   * to this field. farms: View the farms within this field. owningOrganization:
-   * View the organization that owns the field.
-   * @generated from GET /organizations/{orgID}/clients/{id}/fields
-   */
-  async listFields(
-    orgID: string,
-    id: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
-    const path = `/organizations/${orgID}/clients/${id}/fields`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
       options

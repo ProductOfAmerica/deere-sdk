@@ -241,39 +241,17 @@ paths:
                 Headers:
                   description: "204 No Content"
 components:
-  parameters:
-    X-deere-signature:
-      name: "x-deere-signature"
-      in: "header"
-      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
-      schema:
-        type: "string"
-        example: "9f5396716e4b4e1c92018026f47109bb"
-    PartnershipId:
-      name: "token"
-      in: "path"
-      description: "Token Id"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        format: "uuid"
-        example: "2b1b34fc-2cc3-4a57-8120-28ea912113fc"
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            org1: "org1"
-            org2: "org2"
   examples:
-    TokenNotFound:
+    CreateInvalidPrimaryDealer:
       value:
         "@type": "Errors"
         errors:
           - "@type": "Error"
             guid: "123abc-123-abc-123-abc123"
-            message: "No Partnership exists with the given partnership token."
+            message: "Attempting to set a non-dealer organization as primary dealer."
+            code: "Attempting to set a non-dealer organization as primary dealer."
+            field: "uri"
+            invalidValue: "https://api.deere.com/platform/organizations/12345"
         otherAttributes: {}
     NoDealerAccountExists:
       value:
@@ -297,27 +275,32 @@ components:
             field: "dealerAccountId"
             invalidValue: "https://api.deere.com/platform/organizations/12345"
         otherAttributes: {}
-    CreateInvalidPrimaryDealer:
+    TokenNotFound:
       value:
         "@type": "Errors"
         errors:
           - "@type": "Error"
             guid: "123abc-123-abc-123-abc123"
-            message: "Attempting to set a non-dealer organization as primary dealer."
-            code: "Attempting to set a non-dealer organization as primary dealer."
-            field: "uri"
-            invalidValue: "https://api.deere.com/platform/organizations/12345"
+            message: "No Partnership exists with the given partnership token."
         otherAttributes: {}
+  parameters:
+    PartnershipId:
+      name: "token"
+      in: "path"
+      description: "Token Id"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        format: "uuid"
+        example: "2b1b34fc-2cc3-4a57-8120-28ea912113fc"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "9f5396716e4b4e1c92018026f47109bb"
   responses:
-    TokenNotFound:
-      description: "Not found"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/Errors"
-          examples:
-            Partnership Not Found:
-              $ref: "#/components/examples/TokenNotFound"
     BadCreateRequests:
       description: "Request body was invalid"
       content:
@@ -333,19 +316,16 @@ components:
               $ref: "#/components/examples/CreateInvalidPrimaryDealer"
     Forbidden:
       description: "Not authorized"
+    TokenNotFound:
+      description: "Not found"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+          examples:
+            Partnership Not Found:
+              $ref: "#/components/examples/TokenNotFound"
   schemas:
-    Errors:
-      description: "A list of errors"
-      properties:
-        "@type":
-          type: "string"
-          example: "Errors"
-        errors:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Error"
-        otherAttributes:
-          type: "object"
     Error:
       description: "An error object"
       properties:
@@ -368,6 +348,36 @@ components:
         invalidValue:
           type: "string"
           example: 1234123412341234
+    Errors:
+      description: "A list of errors"
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Error"
+        otherAttributes:
+          type: "object"
+    Partnership:
+      description: "A partnership object"
+      type: "object"
+      properties:
+        x-deere-signature:
+          type: "string"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+          example: "3b6402615e4b4e1c92013026f47109bb"
+        status:
+          type: "string"
+          example: "REJECTED"
+          description: "View the status of the partnership"
+    PartnershipId:
+      properties:
+        status:
+          type: "string"
+          example: "PENDING"
+          description: "View the status of the partnership"
     Partnerships:
       description: "A list of partnerships"
       type: "object"
@@ -385,32 +395,6 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Partnership"
-    Partnership:
-      description: "A partnership object"
-      type: "object"
-      properties:
-        x-deere-signature:
-          type: "string"
-          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
-          example: "3b6402615e4b4e1c92013026f47109bb"
-        status:
-          type: "string"
-          example: "REJECTED"
-          description: "View the status of the partnership"
-    PartnershipsLink:
-      properties:
-        fromPartnership:
-          example: "https://sandboxapi.deere.com/platform/organizations/0987"
-          description: "Organizations Link."
-        toPartnership:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234"
-          description: "Organizations Link."
-        permissions:
-          example: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
-          description: "Permissions Link."
-        contactInvitation:
-          example: "https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703"
-          description: "Partnerships Link."
     PartnershipsId:
       description: "A list of partnerships"
       type: "object"
@@ -428,8 +412,36 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/PartnershipId"
-    PartnershipId:
+    PartnershipsLink:
       properties:
+        fromPartnership:
+          example: "https://sandboxapi.deere.com/platform/organizations/0987"
+          description: "Organizations Link."
+        toPartnership:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organizations Link."
+        permissions:
+          example: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
+          description: "Permissions Link."
+        contactInvitation:
+          example: "https://sandboxapi.deere.com/platform/partnerships/c3cf441b-d814-400b-842c-44fb7ecad703"
+          description: "Partnerships Link."
+    PermissionPostValue:
+      properties:
+        type:
+          type: "string"
+          example: "viewDetailsAndMapLocation"
+          description: "The type of permission."
+        status:
+          type: "string"
+          example: "requested"
+          description: "Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved."
+    PermissionValue:
+      properties:
+        type:
+          type: "string"
+          example: "prescription Files"
+          description: "The type of permission."
         status:
           type: "string"
           example: "PENDING"
@@ -456,16 +468,6 @@ components:
         requestPermissions:
           example: "https://sandboxapi.deere.com/platform/partnerships/2b1b34fc-2cc3-4a57-8120-28ea912113fc/permissions"
           description: "Permissions Link."
-    PermissionValue:
-      properties:
-        type:
-          type: "string"
-          example: "prescription Files"
-          description: "The type of permission."
-        status:
-          type: "string"
-          example: "PENDING"
-          description: "View the status of the partnership"
     PermissionsPost:
       description: "A list of permissions"
       type: "object"
@@ -474,13 +476,11 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/PermissionPostValue"
-    PermissionPostValue:
-      properties:
-        type:
-          type: "string"
-          example: "viewDetailsAndMapLocation"
-          description: "The type of permission."
-        status:
-          type: "string"
-          example: "requested"
-          description: "Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            org1: "org1"
+            org2: "org2"

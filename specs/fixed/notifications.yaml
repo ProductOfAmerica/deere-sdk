@@ -4,6 +4,69 @@ info:
   title: "Notification API"
   description: "APIs for creating, monitoring the creation of, as well as the viewing of Notifications"
 paths:
+  /notificationEvents:
+    post:
+      description: "This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to source, which will define the event."
+      summary: "Create Notification Event"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/PostNotifications"
+            examples:
+              Target Resource Association:
+                value:
+                  links:
+                    - rel: "contributionDefinition"
+                      uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID"
+                  eventAssociation:
+                    links:
+                      - rel: "targetResource"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID"
+                  title: "Some Agronomy Title"
+                  text: "Detailed Agronomy Information"
+                  severity: "HIGH"
+                  eventType: "AGRONOMY"
+                  additionalDetails:
+                    - name: "some name"
+                      value: "some value"
+      responses:
+        "200":
+          description: "Created"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/Links"
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "201 Created Location: https://sandboxapi.deere.com/platform/notificationEvents/b89c2933-96da-45f4-9f93-880023611e07"
+  /notificationEvents/{sourceEvent}:
+    delete:
+      description: "This resource deletes a notification event that was previously posted to MJD as well as any generated notifications."
+      summary: "Delete a Notification Event"
+      parameters:
+        - $ref: "#/components/parameters/sourceEvent"
+      responses:
+        "200":
+          description: "Created"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+              examples:
+                Headers:
+                  description: "202 Accepted"
   /notifications/{sourceEvent}:
     get:
       summary: "Fetch single notification."
@@ -98,69 +161,6 @@ paths:
           description: "Not authorized"
         "404":
           description: "Not Found"
-  /notificationEvents:
-    post:
-      description: "This resource creates an event that Operations Center will use to generate notifications. These notifications will be received by anyone who is subscribed to your services. Each notification event will include a link to source, which will define the event."
-      summary: "Create Notification Event"
-      requestBody:
-        content:
-          application/vnd.deere.axiom.v3+json:
-            schema:
-              $ref: "#/components/schemas/PostNotifications"
-            examples:
-              Target Resource Association:
-                value:
-                  links:
-                    - rel: "contributionDefinition"
-                      uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID"
-                  eventAssociation:
-                    links:
-                      - rel: "targetResource"
-                        uri: "https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID"
-                  title: "Some Agronomy Title"
-                  text: "Detailed Agronomy Information"
-                  severity: "HIGH"
-                  eventType: "AGRONOMY"
-                  additionalDetails:
-                    - name: "some name"
-                      value: "some value"
-      responses:
-        "200":
-          description: "Created"
-          content:
-            application/vnd.deere.axiom.v3+json:
-              schema:
-                properties:
-                  links:
-                    items:
-                      $ref: "#/components/schemas/Links"
-                  total:
-                    type: "integer"
-                    example: 1
-                    format: "int32"
-              examples:
-                Headers:
-                  description: "201 Created Location: https://sandboxapi.deere.com/platform/notificationEvents/b89c2933-96da-45f4-9f93-880023611e07"
-  /notificationEvents/{sourceEvent}:
-    delete:
-      description: "This resource deletes a notification event that was previously posted to MJD as well as any generated notifications."
-      summary: "Delete a Notification Event"
-      parameters:
-        - $ref: "#/components/parameters/sourceEvent"
-      responses:
-        "200":
-          description: "Created"
-          content:
-            application/vnd.deere.axiom.v3+json:
-              schema:
-                properties:
-                  total:
-                    type: "integer"
-                    example: 1
-                    format: "int32"
-              examples:
-                Headers:
-                  description: "202 Accepted"
   /organizations/{orgId}/notifications/events:
     get:
       description: "This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: targetResource: View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example. contributionDefinition: View the definition of \"notification\"."
@@ -287,32 +287,6 @@ paths:
                             uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6"
 components:
   parameters:
-    sourceEvent:
-      in: "path"
-      name: "sourceEvent"
-      description: "Source Event"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
-        format: "uuid"
-    orgId:
-      in: "path"
-      name: "orgId"
-      description: "Organization"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: 123456
-    before:
-      in: "query"
-      name: "before"
-      description: "Criteria to search Notifications before event GUID"
-      x-required-boolean: false
-      schema:
-        type: "Notification event GUID"
-        example: "753b1ce2-74bd-4183-8e13-d0f03b9be20"
-        format: "uuid"
     after:
       in: "query"
       name: "after"
@@ -322,6 +296,15 @@ components:
         type: "Notification event GUID"
         example: "753b1ce2-74bd-4183-8e13-d0f03b9be20d"
         format: "uuid"
+    before:
+      in: "query"
+      name: "before"
+      description: "Criteria to search Notifications before event GUID"
+      x-required-boolean: false
+      schema:
+        type: "Notification event GUID"
+        example: "753b1ce2-74bd-4183-8e13-d0f03b9be20"
+        format: "uuid"
     count:
       in: "query"
       name: "count"
@@ -330,6 +313,15 @@ components:
       schema:
         type: "number"
         example: 100
+    endDate:
+      in: "query"
+      name: "endDate"
+      description: "Criteria to search for end date in time range."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        format: "date-time"
+        example: "2017-07-25T08:33:27.311Z"
     eventTypes:
       in: "query"
       name: "eventTypes"
@@ -338,6 +330,14 @@ components:
       schema:
         type: "List of String"
         example: "FILE, ORGANIZATION, ANNOUNCEMENT"
+    orgId:
+      in: "path"
+      name: "orgId"
+      description: "Organization"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: 123456
     severities:
       in: "query"
       name: "severities"
@@ -346,6 +346,15 @@ components:
       schema:
         type: "List of String"
         example: "NONE, LOW, MEDIUM"
+    sourceEvent:
+      in: "path"
+      name: "sourceEvent"
+      description: "Source Event"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
+        format: "uuid"
     sourceEvents:
       in: "query"
       name: "sourceEvents"
@@ -359,15 +368,6 @@ components:
       in: "query"
       name: "startDate"
       description: "Criteria to search for start date in time range."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        format: "date-time"
-        example: "2017-07-25T08:33:27.311Z"
-    endDate:
-      in: "query"
-      name: "endDate"
-      description: "Criteria to search for end date in time range."
       x-required-boolean: false
       schema:
         type: "string"
@@ -399,24 +399,52 @@ components:
           description: "The value that was supplied for this field in the request"
           example: null
       readOnly: true
-    ResponseDetails:
+    GetAvailableLinks:
       properties:
-        eventId:
+        contribution:
+          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6"
+          description: "Contribution Definitions Link."
+        targetResource:
+          example: "https://sandboxapi.deere.com/platform/machines/317783"
+          description: "Machines Link."
+    GetResponse:
+      properties:
+        title:
           type: "string"
-          example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
-          description: "Event ID"
-        eventStatusCode:
+          example: "Some Title"
+          description: "Event title."
+        geometries:
+          type: null
+          example: "See sample response below."
+          description: "GeoJSON representation of the location."
+        text:
           type: "string"
-          example: "SUCCESS"
-          description: "Event status code."
-        expectedNotificationCount:
-          type: "integer"
-          example: 2
-          description: "Number of notifications expected to generate from this event."
-        actualNotificationCount:
-          type: "integer"
-          example: 2
-          description: "Actual number of notifications generated from this event."
+          example: "Detailed event text."
+          description: "Event description."
+        severity:
+          type: "string"
+          example: "HIGH"
+          description: "Event severity."
+        eventType:
+          type: "string"
+          example: "AGRONOMY"
+          description: "Event type."
+        sourceEvent:
+          type: "Event GUID"
+          example: "2acf8953-8eaf-4487-9cd0-391059fcbfcf"
+          description: "Notification Event GUID"
+        minimizedNotifications:
+          type: "List of objects"
+          example: "See sample response below."
+          description: "Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource."
+    Links:
+      properties:
+        contributionDefinition:
+          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID"
+          description: "Contribution Definitions Link."
+        targetResource:
+          example: "https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID"
+          description: "Fields Link."
     PostNotifications:
       properties:
         title:
@@ -455,52 +483,24 @@ components:
               type: "string"
               example: "[{“rel”:”targetResource”,”/some/target/123”}]"
               description: "A link that contains the URI of the target resource. An event association can have multiple links."
-    GetResponse:
+    ResponseDetails:
       properties:
-        title:
+        eventId:
           type: "string"
-          example: "Some Title"
-          description: "Event title."
-        geometries:
-          type: null
-          example: "See sample response below."
-          description: "GeoJSON representation of the location."
-        text:
+          example: "b22956b7-0b43-40ea-a396-1fdc816ebb58"
+          description: "Event ID"
+        eventStatusCode:
           type: "string"
-          example: "Detailed event text."
-          description: "Event description."
-        severity:
-          type: "string"
-          example: "HIGH"
-          description: "Event severity."
-        eventType:
-          type: "string"
-          example: "AGRONOMY"
-          description: "Event type."
-        sourceEvent:
-          type: "Event GUID"
-          example: "2acf8953-8eaf-4487-9cd0-391059fcbfcf"
-          description: "Notification Event GUID"
-        minimizedNotifications:
-          type: "List of objects"
-          example: "See sample response below."
-          description: "Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource."
-    GetAvailableLinks:
-      properties:
-        contribution:
-          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6"
-          description: "Contribution Definitions Link."
-        targetResource:
-          example: "https://sandboxapi.deere.com/platform/machines/317783"
-          description: "Machines Link."
-    Links:
-      properties:
-        contributionDefinition:
-          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID"
-          description: "Contribution Definitions Link."
-        targetResource:
-          example: "https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID"
-          description: "Fields Link."
+          example: "SUCCESS"
+          description: "Event status code."
+        expectedNotificationCount:
+          type: "integer"
+          example: 2
+          description: "Number of notifications expected to generate from this event."
+        actualNotificationCount:
+          type: "integer"
+          example: 2
+          description: "Actual number of notifications generated from this event."
 servers:
   - url: "https://{environment}.deere.com/platform"
     variables:

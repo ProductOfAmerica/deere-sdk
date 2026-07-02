@@ -32,10 +32,13 @@ async function main() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const yamlFiles = readdirSync(SPECS_DIR).filter((f) => f.endsWith('.yaml'));
+  const yamlFiles = readdirSync(SPECS_DIR)
+    .filter((f) => f.endsWith('.yaml'))
+    .sort();
   console.log(`Found ${yamlFiles.length} OpenAPI specs\n`);
 
   const generated: { name: string; module: string; file: string }[] = [];
+  let failed = 0;
 
   for (const yamlFile of yamlFiles) {
     const inputPath = join(SPECS_DIR, yamlFile);
@@ -65,6 +68,7 @@ async function main() {
       generated.push({ name: yamlFile, module: moduleName, file: outputFile });
     } catch (error) {
       console.error(`Failed generating ${moduleName}:`, error);
+      failed++;
     }
   }
 
@@ -75,7 +79,7 @@ async function main() {
  * John Deere API TypeScript Types
  * Auto-generated from OpenAPI specifications
  *
- * @generated ${new Date().toISOString()}
+ * @generated
  */
 
 ${generated.map((g) => `export * as ${g.module} from './${basename(g.file, '.ts')}.js';`).join('\n')}
@@ -87,7 +91,19 @@ ${generated.map((g) => `export type { paths as ${g.module}Paths, components as $
 
   console.log(`\nGenerated ${generated.length} type modules`);
   console.log(`Output: ${OUTPUT_DIR}`);
+  // A per-file openapi-typescript failure (or the HTML-leak guard tripping)
+  // previously logged and continued with exit 0, shipping stale committed
+  // types. Fail the run when any file failed, mirroring fix-specs.
+  if (failed > 0) {
+    console.error(
+      `generate-types: ${failed} spec(s) failed to generate types; failing the run so CI cannot ship stale committed types.`
+    );
+    process.exitCode = 1;
+  }
   console.log('\nNext: Run `pnpm generate-sdk` to generate SDK wrappers');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

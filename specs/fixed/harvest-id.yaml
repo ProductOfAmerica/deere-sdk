@@ -65,39 +65,6 @@ paths:
           $ref: "#/components/responses/HidModuleIdIsInvalid"
 components:
   parameters:
-    AcceptJSON:
-      name: "Accept"
-      in: "header"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        enum:
-          - "application/vnd.deere.axiom.v3+json"
-    ModuleSerialNumber:
-      name: "moduleSerialNumber"
-      in: "path"
-      description: "Module Serial Number"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: 14404565493
-    OrgId:
-      name: "orgId"
-      in: "path"
-      description: "Organization ID"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        format: "int64"
-        example: 913523
-    Embed:
-      name: "embed"
-      in: "query"
-      description: "Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.)"
-      x-required-boolean: false
-      schema:
-        type: "string"
-        example: "clients,farms,field"
     Accept-UOM-System:
       name: "Accept-UOM-System"
       in: "METRIC"
@@ -118,6 +85,14 @@ components:
       schema:
         type: "string"
         example: "MASS"
+    AcceptJSON:
+      name: "Accept"
+      in: "header"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        enum:
+          - "application/vnd.deere.axiom.v3+json"
     DeereTags:
       name: "x-deere-signature"
       in: "header"
@@ -126,14 +101,31 @@ components:
         type: "string"
         format: "uuid"
         example: "d5837765-4499-47b0-b2ab-6dde098e0e83"
-    WrapStartDate:
-      name: "startDate"
+    Embed:
+      name: "embed"
       in: "query"
-      description: "Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter."
+      description: "Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.)"
+      x-required-boolean: false
       schema:
         type: "string"
-        format: "date-time"
-        example: "2019-01-01T00:00:00Z"
+        example: "clients,farms,field"
+    ModuleSerialNumber:
+      name: "moduleSerialNumber"
+      in: "path"
+      description: "Module Serial Number"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: 14404565493
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Organization ID"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        format: "int64"
+        example: 913523
     WrapEndDate:
       name: "endDate"
       in: "query"
@@ -142,15 +134,25 @@ components:
         type: "string"
         format: "date-time"
         example: "2020-01-01T00:00:00Z"
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            files: "files"
-            ag2: "ag2"
+    WrapStartDate:
+      name: "startDate"
+      in: "query"
+      description: "Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter."
+      schema:
+        type: "string"
+        format: "date-time"
+        example: "2019-01-01T00:00:00Z"
   responses:
+    BadDateRange:
+      description: "Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    DoesNotHaveAccessToFieldOperation:
+      description: "The user has not been provided access to the field operation specified by id."
+    DoesNotHaveAccessToOrg:
+      description: "The user has not been provided access to data in this organization"
     HIDCottonModules:
       description: "An array of HID Cotton modules"
       content:
@@ -226,6 +228,12 @@ components:
                     comment: "Here is a comment"
                     fieldId: "4dd005c7-0000-1000-4022-e1e1e113c667"
                     orgId: 12345
+    HidModuleIdIsInvalid:
+      description: "The specified organization or HID Cotton module does not exist"
+    InputFieldOpGuidInvalid:
+      description: "The specified field operation does not exist."
+    InputOrgIdInvalid:
+      description: "The specified Organization ID does not exist"
     SingleHIDCottonModule:
       description: "A single HID Cotton Module"
       content:
@@ -306,73 +314,40 @@ components:
             example:
               - 2018
               - 2020
-    BadDateRange:
-      description: "Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/Errors"
-    HidModuleIdIsInvalid:
-      description: "The specified organization or HID Cotton module does not exist"
-    InputOrgIdInvalid:
-      description: "The specified Organization ID does not exist"
-    DoesNotHaveAccessToOrg:
-      description: "The user has not been provided access to data in this organization"
-    DoesNotHaveAccessToFieldOperation:
-      description: "The user has not been provided access to the field operation specified by id."
-    InputFieldOpGuidInvalid:
-      description: "The specified field operation does not exist."
   schemas:
-    LinkHarvestIdentificationModules:
-      properties:
-        self:
-          description: "Self Link."
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules"
-    LinkSerialNumber:
-      properties:
-        self:
-          description: "Self Link."
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493"
-        field:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das"
-          description: "Field Link."
-        organization:
-          example: "https://sandboxapi.deere.com/platform/organizations/123456"
-          description: "Organizations Link."
-    Link:
+    Errors:
       type: "object"
-      required:
-        - "rel"
-        - "uri"
-      description: "A link provides a URI to access resources that are related to the response."
+      format: "Errors/DataValidationException"
       properties:
-        "@type":
-          type: "string"
-        rel:
-          type: "string"
-          description: "The relation of the object to the linked resource."
-          example: "self"
-        uri:
-          type: "string"
-          format: "uri"
-          description: "The URI to the related resource."
-          example: "https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564"
-    Point:
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "Point"
-        lat:
-          type: "number"
-          format: "double"
-          description: "The latitude of the point"
-          example: 43.6187
-        lon:
-          type: "number"
-          format: "double"
-          description: "The longitude of the point"
-          example: 116.2146
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
+              message:
+                type: "string"
+                description: "An english description of the error"
+                example: "End date should not be specified without start date"
+              code:
+                type: "string"
+                example: "validation_constraint_operation_end_date_without_start_date"
+                description: "A string constant representing the type of error"
+              field:
+                type: "string"
+                example: "startDate"
+                description: "The name of the property or parameter deemed invalid"
+              invalidValue:
+                type: "string"
+                example: "null"
+                description: "The value that was supplied for this field in the request"
     EventMeasurement:
       type: "object"
       description: "A general representation of quantity and unit."
@@ -471,36 +446,61 @@ components:
           type: "string"
           example: 1234
           description: "Organization ID"
-    Errors:
+    Link:
       type: "object"
-      format: "Errors/DataValidationException"
+      required:
+        - "rel"
+        - "uri"
+      description: "A link provides a URI to access resources that are related to the response."
       properties:
-        errors:
-          type: "array"
-          items:
-            type: "object"
-            format: "Error/ConstraintViolation"
-            properties:
-              "@type":
-                type: "string"
-                example: "Error"
-              guid:
-                type: "string"
-                format: "uuid"
-                example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
-              message:
-                type: "string"
-                description: "An english description of the error"
-                example: "End date should not be specified without start date"
-              code:
-                type: "string"
-                example: "validation_constraint_operation_end_date_without_start_date"
-                description: "A string constant representing the type of error"
-              field:
-                type: "string"
-                example: "startDate"
-                description: "The name of the property or parameter deemed invalid"
-              invalidValue:
-                type: "string"
-                example: "null"
-                description: "The value that was supplied for this field in the request"
+        "@type":
+          type: "string"
+        rel:
+          type: "string"
+          description: "The relation of the object to the linked resource."
+          example: "self"
+        uri:
+          type: "string"
+          format: "uri"
+          description: "The URI to the related resource."
+          example: "https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564"
+    LinkHarvestIdentificationModules:
+      properties:
+        self:
+          description: "Self Link."
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules"
+    LinkSerialNumber:
+      properties:
+        self:
+          description: "Self Link."
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493"
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das"
+          description: "Field Link."
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+    Point:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Point"
+        lat:
+          type: "number"
+          format: "double"
+          description: "The latitude of the point"
+          example: 43.6187
+        lon:
+          type: "number"
+          format: "double"
+          description: "The longitude of the point"
+          example: 116.2146
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+            ag2: "ag2"

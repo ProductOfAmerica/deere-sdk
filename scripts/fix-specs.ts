@@ -19,6 +19,7 @@ import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
   refName,
+  restoreEquipmentItemRefs,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -732,6 +733,20 @@ function fixSpec(
     console.log(`  Stripped ${strippedDiscriminators} @type discriminator(s)`);
   }
 
+  // Restore the two equipment list-envelope item refs that JD's 2026-07
+  // equipment-doc edit dropped (GetEquipment -> equipmentForList,
+  // GetEquipmentById -> equipment), which collapsed EquipmentApi.get and
+  // getEquipment returns to unknown. Guarded to equipment.yaml and
+  // self-neutralizing (see restoreEquipmentItemRefs); no-ops once JD repairs
+  // the doc or removes the target schemas. Runs in the schema-mutation region,
+  // after the discriminator strip and before the server-block transforms.
+  if (specName === 'equipment') {
+    const restoredItemRefs = restoreEquipmentItemRefs(spec);
+    if (restoredItemRefs > 0) {
+      console.log(`  Restored ${restoredItemRefs} equipment list-envelope item ref(s)`);
+    }
+  }
+
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs
   // concatenated with literal "GET" separators). Runs BEFORE
   // normalizePlatformDisguise because it has to fix the shape first.
@@ -816,8 +831,17 @@ async function main() {
   }
 
   console.log(`\nFixed ${fixed} specs, ${failed} failed`);
+  if (failed > 0) {
+    console.error(
+      `fix-specs: ${failed} spec(s) failed to process; failing the run so CI cannot ship stale fixed specs.`
+    );
+    process.exitCode = 1;
+  }
   console.log(`Output: ${OUTPUT_DIR}`);
   console.log('\nNext: Run `pnpm generate-types` to generate TypeScript types');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

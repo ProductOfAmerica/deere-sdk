@@ -104,14 +104,26 @@ paths:
         "404":
           description: "Machine does not exists with given machine id"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            eq1: "eq1"
   schemas:
+    EngineHours:
+      description: "Engine Hours"
+      type: "object"
+      properties:
+        reading:
+          x-required-boolean: true
+          description: "The number of hours the engine has been running."
+          example: "&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;"
+          type: "measurementAsDouble"
+        reportTime:
+          x-required-boolean: true
+          description: "Timestamp at which the report was created."
+          type: "string"
+          format: "date-time"
+          example: "2010-10-04T14:35:05.000Z"
+        source:
+          type: "string"
+          description: "Device which collected the data."
+          example: "CI"
     EngineHours_Response:
       description: "Page of engineHours information for the machine."
       type: "object"
@@ -139,22 +151,10 @@ components:
         machine:
           description: "Machines Link."
           example: "https://sandboxapi.deere.com/platform/machines/4321"
-    EngineHours:
-      description: "Engine Hours"
-      type: "object"
-      properties:
-        reading:
-          x-required-boolean: true
-          description: "The number of hours the engine has been running."
-          example: "&lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;"
-          type: "measurementAsDouble"
-        reportTime:
-          x-required-boolean: true
-          description: "Timestamp at which the report was created."
-          type: "string"
-          format: "date-time"
-          example: "2010-10-04T14:35:05.000Z"
-        source:
-          type: "string"
-          description: "Device which collected the data."
-          example: "CI"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"

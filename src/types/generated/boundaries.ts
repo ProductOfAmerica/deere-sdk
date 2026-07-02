@@ -4,6 +4,39 @@
  */
 
 export interface paths {
+  '/fieldOperations/{operationId}/boundary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Generate a Boundary from a FieldOperation
+     * @description Given a , this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before back into Operations Center. There are two cases where this API will return an HTTP 400 - Bad Request: If the field already has an active boundary. In this case, please use the existing boundary - it is likely more accurate than a generated boundary. If the field has been merged. In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['BoundariesResponse2'];
+        403: components['responses']['Forbidden'];
+        404: components['responses']['NotFound'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{orgId}/boundaries': {
     parameters: {
       query?: never;
@@ -115,39 +148,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/fieldOperations/{operationId}/boundary': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Generate a Boundary from a FieldOperation
-     * @description Given a , this endpoint will generate and return a boundary that surrounds the area worked by that field operation. Any gaps in that field operation will be treated as interior rings. This endpoint returns the generated boundary, giving you the opportunity to change the boundary name, clean up any unwanted interiors, etc. before back into Operations Center. There are two cases where this API will return an HTTP 400 - Bad Request: If the field already has an active boundary. In this case, please use the existing boundary - it is likely more accurate than a generated boundary. If the field has been merged. In this case, a FieldOperation may only cover one part of the merged field, resulting in an inaccurate boundary.
-     */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        200: components['responses']['BoundariesResponse2'];
-        403: components['responses']['Forbidden'];
-        404: components['responses']['NotFound'];
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/organizations/{orgId}/fields/{fieldId}/boundaries/{boundaryId}': {
     parameters: {
       query?: never;
@@ -246,200 +246,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
-    RecordMetadata: {
-      /**
-       * @default RecordMetadata
-       * @example RecordMetadata
-       */
-      '@type': string;
-      /**
-       * @description User involved in creating the entity. Only viewable with the RECORD_METADATA license
-       * @example XYZ_USER
-       */
-      createdByUser?: string;
-      /**
-       * @description User involved in modifying the entity. Only viewable with the RECORD_METADATA license
-       * @example XYZ_USER
-       */
-      lastModifiedByUser?: string;
-      /**
-       * @description Timestamp of entity creation
-       * @example 2018-04-30T10:23:50.000Z
-       */
-      readonly userCreationTimestamp?: string;
-      /**
-       * @description Timestamp of entity modification
-       * @example 2018-05-01T08:11:23.000Z
-       */
-      readonly userLastModifiedTimestamp?: string;
-      /**
-       * Format: uuid
-       * @description This is the specific instance of an application that created the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license.
-       * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
-       */
-      readonly createdBySourceNode?: string;
-      /**
-       * Format: uuid
-       * @description This is the specific instance of an application that modified the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license
-       * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
-       */
-      readonly lastModifiedSourceNode?: string;
-      /**
-       * @description Derived off of a client key (application that created) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
-       * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
-       */
-      readonly createdBySourceSystemUri?: string;
-      /**
-       * @description Derived off of a client key (application that did last modification) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
-       * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
-       */
-      readonly lastModifiedBySourceSystemUri?: string;
-    };
-    GPSDatum: {
-      /**
-       * @description Identifies the class
-       * @example GPS Datum
-       */
-      '@type'?: string;
-      gpsDatumValue?: components['schemas']['GPSDatumValue'];
-      horizontalUncertainty?: components['schemas']['MeasurementAsDouble'];
-      verticalUncertainty?: components['schemas']['MeasurementAsDouble'];
-      /** @example serialNumber */
-      serialNumber: string;
-    };
-    GPSDatumValue: {
-      /**
-       * @description Identifies the class
-       * @example GPS Datum values
-       */
-      '@type'?: string;
-      /** @example currentActiveDatum */
-      currentActiveDatum: string;
-      currentActiveEpochTime?: components['schemas']['MeasurementAsDouble'];
-      baseLocation?: components['schemas']['ThreeDPoint'];
-      /** @example status */
-      status: string;
-      /** @example referenceDatumValue */
-      referenceDatum: string;
-      referenceEpochTime?: components['schemas']['MeasurementAsDouble'];
-      referencePositionOffsets?: components['schemas']['ThreeDPoint'];
-      datumCreationTime?: components['schemas']['MeasurementAsDouble'];
-      /**
-       * @description Unique id for this datum
-       * @example 205ff5ba-8d63-4a66-bbfe-b2a31ebad0d3
-       */
-      datumUuid: string;
-    };
-    ThreeDPoint: {
-      /**
-       * @description Identifies the class
-       * @example 3-dimensional point
-       */
-      '@type'?: string;
-      /**
-       * Format: double
-       * @description The latitude of the point
-       * @example 32.118552
-       */
-      lat?: number;
-      /**
-       * Format: double
-       * @description The longitude of the point
-       * @example -81.260776
-       */
-      lon?: number;
-      /**
-       * Format: double
-       * @description The z-axis of the point
-       * @example 1
-       */
-      height?: number;
-    };
-    DatumRange: {
-      /**
-       * @description Identifies the class
-       * @example Datum Range
-       */
-      '@type'?: string;
-      /**
-       * Format: int32
-       * @description starting point index this datum applies to relative to the boundary
-       * @example 0
-       */
-      startPointIndex?: number;
-      /**
-       * Format: int32
-       * @description ending point index this datum applies to relative to the boundary
-       * @example 127
-       */
-      endPointIndex?: number;
-      datum?: components['schemas']['GPSDatum'];
-    };
-    LocationSourceRange: {
-      /**
-       * @description Identifies the class
-       * @example Location Source Range
-       */
-      '@type'?: string;
-      /**
-       * Format: int32
-       * @description starting point index this location source applies to relative to the boundary
-       * @example 0
-       */
-      startPointIndex?: number;
-      /**
-       * Format: int32
-       * @description ending point index this location source applies to relative to the boundary
-       * @example 127
-       */
-      endPointIndex?: number;
-      /**
-       * @description value of location source used
-       * @example "locationSource": "Computed from Rigid Kinematics"
-       */
-      locationSource?: string;
-    };
-    SignalTypeRange: {
-      /**
-       * @description Identifies the class
-       * @example Signal Type Range
-       */
-      '@type'?: string;
-      /**
-       * @description starting point index this signal type applies to relative to the boundary
-       * @example 0
-       */
-      startPointIndex?: number;
-      /**
-       * @description ending point index this signal type applies to relative to the boundary
-       * @example 127
-       */
-      endPointIndex?: number;
-      /**
-       * @description value of signal type used
-       * @example "signalType": "SFRTK"
-       */
-      signalType?: string;
-    };
-    SnapDistanceRange: {
-      /**
-       * @description Identifies the class
-       * @example Snap Distance Range
-       */
-      '@type'?: string;
-      /**
-       * @description starting point index this snap distance applies to relative to the boundary
-       * @example 0
-       */
-      startIndex?: number;
-      /**
-       * @description ending point index this snap distance applies to relative to the boundary
-       * @example 127
-       */
-      endIndex?: number;
-      snapDistance?: components['schemas']['MeasurementAsDouble'];
-    };
     AccuracyData: {
       /**
        * @description Identifies the class
@@ -458,140 +264,6 @@ export interface components {
       simplificationAlgorithm?: string;
       maxSnapDistance?: components['schemas']['MeasurementAsDouble'];
     };
-    Headland: {
-      /** @example headland_name */
-      name: string;
-      points?: components['schemas']['Point'][];
-      /** @description indicates if this is the active headland in a collection */
-      active: boolean;
-    };
-    Point: {
-      /**
-       * @description Identifies the class
-       * @example Point
-       */
-      '@type'?: string;
-      /**
-       * Format: double
-       * @description The latitude of the point
-       * @example 32.118552
-       */
-      lat?: number;
-      /**
-       * Format: double
-       * @description The longitude of the point
-       * @example -81.260776
-       */
-      lon?: number;
-    };
-    Extent: {
-      /**
-       * @description Identifies the class
-       * @example Extent
-       */
-      '@type'?: string;
-      topLeft?: components['schemas']['Point'];
-      bottomRight?: components['schemas']['Point'];
-    };
-    MeasurementAsDouble: {
-      /**
-       * @description Identifies the class
-       * @example MeasurementAsDouble
-       */
-      '@type'?: string;
-      /**
-       * Format: double
-       * @example 7.502938
-       */
-      valueAsDouble?: number;
-      /**
-       * @description The unit of measure for this value
-       * @example ha
-       */
-      unit?: string;
-    };
-    Polygon: {
-      rings?: {
-        /**
-         * @description identifier for polygon
-         * @example 1
-         */
-        id?: number;
-        /**
-         * @description id of associated ring
-         * @example 5
-         */
-        parentId?: number;
-        points?: components['schemas']['Point'][];
-        /**
-         * @description Describes whether this geometry is interior (e.g. a pond contained within a field) or exterior (e.g. a fence around the field)
-         * @enum {string}
-         */
-        type?: 'interior' | 'exterior';
-        /** @description Describes whether or not a machine may travel through this geometry (e.g. a road vs a stream) */
-        passable?: boolean;
-        /** @description A collection of headlands */
-        headlands?: components['schemas']['Headland'][];
-        accuracyData?: components['schemas']['AccuracyData'];
-        /**
-         * @description value of signal type used
-         * @example dtiSignalTypeRTK
-         */
-        signalType?: string;
-        /**
-         * @description To determine how their boundary was generated
-         * @example dtiBoundaryFromWebCoverage
-         */
-        creationMethod?: string;
-      }[];
-    };
-    /** Format: Errors/DataValidationException */
-    Errors: {
-      /** @example Errors */
-      '@type'?: string;
-      /** @example {} */
-      otherAttributes?: Record<string, never>;
-      errors?: {
-        /** @example Error */
-        '@type'?: string;
-        /** Format: uuid */
-        guid?: string;
-        /**
-         * @description An english description of the error
-         * @example Duplicate boundary name
-         */
-        message?: string;
-        /**
-         * @description A string constant representing the type of error
-         * @example some error code
-         */
-        code?: string;
-        /**
-         * @description The name of the property or parameter deemed invalid
-         * @example name
-         */
-        field?: string;
-        /**
-         * @description The value that was supplied for this field in the request
-         * @example some boundary name
-         */
-        invalidValue?: string;
-      }[];
-    };
-    /** @description Provides a reference to an associated object or list */
-    Link: {
-      /**
-       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
-       * @example self
-       */
-      rel: string;
-      /**
-       * Format: uri
-       * @description The location of the resource
-       * @example https://partnerapi.deere.com/platform/organizations/1/boundaries/00000000-0000-0000-0000-000000000000
-       */
-      uri: string;
-    };
     /** @description Indicates whether or not this boundary is Autonomous Ready. */
     AutonomousReady: {
       /**
@@ -599,6 +271,18 @@ export interface components {
        * @default false
        */
       boundaryAutonomousReady: boolean;
+    };
+    BoundariesLink: {
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+       */
+      field?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       */
+      owningOrganization?: unknown;
     };
     Boundary: {
       /**
@@ -786,6 +470,256 @@ export interface components {
        */
       irrigated?: boolean;
     };
+    DatumRange: {
+      /**
+       * @description Identifies the class
+       * @example Datum Range
+       */
+      '@type'?: string;
+      /**
+       * Format: int32
+       * @description starting point index this datum applies to relative to the boundary
+       * @example 0
+       */
+      startPointIndex?: number;
+      /**
+       * Format: int32
+       * @description ending point index this datum applies to relative to the boundary
+       * @example 127
+       */
+      endPointIndex?: number;
+      datum?: components['schemas']['GPSDatum'];
+    };
+    /** Format: Errors/DataValidationException */
+    Errors: {
+      /** @example Errors */
+      '@type'?: string;
+      /** @example {} */
+      otherAttributes?: Record<string, never>;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /** Format: uuid */
+        guid?: string;
+        /**
+         * @description An english description of the error
+         * @example Duplicate boundary name
+         */
+        message?: string;
+        /**
+         * @description A string constant representing the type of error
+         * @example some error code
+         */
+        code?: string;
+        /**
+         * @description The name of the property or parameter deemed invalid
+         * @example name
+         */
+        field?: string;
+        /**
+         * @description The value that was supplied for this field in the request
+         * @example some boundary name
+         */
+        invalidValue?: string;
+      }[];
+    };
+    Extent: {
+      /**
+       * @description Identifies the class
+       * @example Extent
+       */
+      '@type'?: string;
+      topLeft?: components['schemas']['Point'];
+      bottomRight?: components['schemas']['Point'];
+    };
+    GPSDatum: {
+      /**
+       * @description Identifies the class
+       * @example GPS Datum
+       */
+      '@type'?: string;
+      gpsDatumValue?: components['schemas']['GPSDatumValue'];
+      horizontalUncertainty?: components['schemas']['MeasurementAsDouble'];
+      verticalUncertainty?: components['schemas']['MeasurementAsDouble'];
+      /** @example serialNumber */
+      serialNumber: string;
+    };
+    GPSDatumValue: {
+      /**
+       * @description Identifies the class
+       * @example GPS Datum values
+       */
+      '@type'?: string;
+      /** @example currentActiveDatum */
+      currentActiveDatum: string;
+      currentActiveEpochTime?: components['schemas']['MeasurementAsDouble'];
+      baseLocation?: components['schemas']['ThreeDPoint'];
+      /** @example status */
+      status: string;
+      /** @example referenceDatumValue */
+      referenceDatum: string;
+      referenceEpochTime?: components['schemas']['MeasurementAsDouble'];
+      referencePositionOffsets?: components['schemas']['ThreeDPoint'];
+      datumCreationTime?: components['schemas']['MeasurementAsDouble'];
+      /**
+       * @description Unique id for this datum
+       * @example 205ff5ba-8d63-4a66-bbfe-b2a31ebad0d3
+       */
+      datumUuid: string;
+    };
+    Headland: {
+      /** @example headland_name */
+      name: string;
+      points?: components['schemas']['Point'][];
+      /** @description indicates if this is the active headland in a collection */
+      active: boolean;
+    };
+    /** @description Provides a reference to an associated object or list */
+    Link: {
+      /**
+       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
+       * @example self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The location of the resource
+       * @example https://partnerapi.deere.com/platform/organizations/1/boundaries/00000000-0000-0000-0000-000000000000
+       */
+      uri: string;
+    };
+    LocationSourceRange: {
+      /**
+       * @description Identifies the class
+       * @example Location Source Range
+       */
+      '@type'?: string;
+      /**
+       * Format: int32
+       * @description starting point index this location source applies to relative to the boundary
+       * @example 0
+       */
+      startPointIndex?: number;
+      /**
+       * Format: int32
+       * @description ending point index this location source applies to relative to the boundary
+       * @example 127
+       */
+      endPointIndex?: number;
+      /**
+       * @description value of location source used
+       * @example "locationSource": "Computed from Rigid Kinematics"
+       */
+      locationSource?: string;
+    };
+    MeasurementAsDouble: {
+      /**
+       * @description Identifies the class
+       * @example MeasurementAsDouble
+       */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @example 7.502938
+       */
+      valueAsDouble?: number;
+      /**
+       * @description The unit of measure for this value
+       * @example ha
+       */
+      unit?: string;
+    };
+    Point: {
+      /**
+       * @description Identifies the class
+       * @example Point
+       */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 32.118552
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example -81.260776
+       */
+      lon?: number;
+    };
+    Polygon: {
+      rings?: {
+        /**
+         * @description identifier for polygon
+         * @example 1
+         */
+        id?: number;
+        /**
+         * @description id of associated ring
+         * @example 5
+         */
+        parentId?: number;
+        points?: components['schemas']['Point'][];
+        /**
+         * @description Describes whether this geometry is interior (e.g. a pond contained within a field) or exterior (e.g. a fence around the field)
+         * @enum {string}
+         */
+        type?: 'interior' | 'exterior';
+        /** @description Describes whether or not a machine may travel through this geometry (e.g. a road vs a stream) */
+        passable?: boolean;
+        /** @description A collection of headlands */
+        headlands?: components['schemas']['Headland'][];
+        accuracyData?: components['schemas']['AccuracyData'];
+        /**
+         * @description value of signal type used
+         * @example dtiSignalTypeRTK
+         */
+        signalType?: string;
+        /**
+         * @description To determine how their boundary was generated
+         * @example dtiBoundaryFromWebCoverage
+         */
+        creationMethod?: string;
+      }[];
+    };
+    PostBoundary: {
+      /**
+       * @description Boundary Name.
+       * @example Boundary_Unique_Name
+       */
+      name?: string;
+      /**
+       * @description Indicates whether the boundary is active in this field.
+       * @example false
+       */
+      active?: boolean;
+      /**
+       * @description Indicates whether the boundary is archived.
+       * @example false
+       */
+      archive?: boolean;
+      /**
+       * @description Indicates whether the boundary is irrigated.
+       * @example false
+       */
+      irrigated?: boolean;
+      /**
+       * @description Polygon representation of the new boundary.
+       * @example See sample request below.
+       */
+      multipolygons?: unknown;
+      /**
+       * @description Describes the source of boundary (requires license to set).
+       * @example External
+       */
+      sourceType?: string;
+      /**
+       * @description Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
+       * @example dtiSignalTypeRTK
+       */
+      signalType?: string;
+    };
     PostBoundaryGet: {
       /**
        * Format: uuid
@@ -866,43 +800,6 @@ export interface components {
        */
       passable?: boolean;
     };
-    PostBoundary: {
-      /**
-       * @description Boundary Name.
-       * @example Boundary_Unique_Name
-       */
-      name?: string;
-      /**
-       * @description Indicates whether the boundary is active in this field.
-       * @example false
-       */
-      active?: boolean;
-      /**
-       * @description Indicates whether the boundary is archived.
-       * @example false
-       */
-      archive?: boolean;
-      /**
-       * @description Indicates whether the boundary is irrigated.
-       * @example false
-       */
-      irrigated?: boolean;
-      /**
-       * @description Polygon representation of the new boundary.
-       * @example See sample request below.
-       */
-      multipolygons?: unknown;
-      /**
-       * @description Describes the source of boundary (requires license to set).
-       * @example External
-       */
-      sourceType?: string;
-      /**
-       * @description Signal Type used when defining boundary. See “dtSignalType” in the John Deere representation system for possible values.
-       * @example dtiSignalTypeRTK
-       */
-      signalType?: string;
-    };
     PutBoundary: {
       /**
        * @description Boundary Name.
@@ -940,20 +837,132 @@ export interface components {
        */
       signalType?: string;
     };
-    BoundariesLink: {
+    /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
+    RecordMetadata: {
       /**
-       * @description Fields Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/209b3c20-f33a-4c96-9a2c-613def198e0c
+       * @default RecordMetadata
+       * @example RecordMetadata
        */
-      field?: unknown;
+      '@type': string;
       /**
-       * @description Organizations Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       * @description User involved in creating the entity. Only viewable with the RECORD_METADATA license
+       * @example XYZ_USER
        */
-      owningOrganization?: unknown;
+      createdByUser?: string;
+      /**
+       * @description User involved in modifying the entity. Only viewable with the RECORD_METADATA license
+       * @example XYZ_USER
+       */
+      lastModifiedByUser?: string;
+      /**
+       * @description Timestamp of entity creation
+       * @example 2018-04-30T10:23:50.000Z
+       */
+      readonly userCreationTimestamp?: string;
+      /**
+       * @description Timestamp of entity modification
+       * @example 2018-05-01T08:11:23.000Z
+       */
+      readonly userLastModifiedTimestamp?: string;
+      /**
+       * Format: uuid
+       * @description This is the specific instance of an application that created the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license.
+       * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
+       */
+      readonly createdBySourceNode?: string;
+      /**
+       * Format: uuid
+       * @description This is the specific instance of an application that modified the entity. At this time, it only applies to Displays. Only viewable with the RECORD_METADATA license
+       * @example 0235d40e-02d0-44cb-a126-fff21173fc1f
+       */
+      readonly lastModifiedSourceNode?: string;
+      /**
+       * @description Derived off of a client key (application that created) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+       * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
+       */
+      readonly createdBySourceSystemUri?: string;
+      /**
+       * @description Derived off of a client key (application that did last modification) via Application Registry lookup. The Application Registry ID for the Ops Center Unknown Application (43796410-2f2c-4321-a259-8dd8af04e973) will be used if no source application exists. Only viewable with the RECORD_METADATA license.
+       * @example https://api.deere.com/platform/connectedApplications/63bb4efd-0ec5-47d3-9092-7693909134f5
+       */
+      readonly lastModifiedBySourceSystemUri?: string;
+    };
+    SignalTypeRange: {
+      /**
+       * @description Identifies the class
+       * @example Signal Type Range
+       */
+      '@type'?: string;
+      /**
+       * @description starting point index this signal type applies to relative to the boundary
+       * @example 0
+       */
+      startPointIndex?: number;
+      /**
+       * @description ending point index this signal type applies to relative to the boundary
+       * @example 127
+       */
+      endPointIndex?: number;
+      /**
+       * @description value of signal type used
+       * @example "signalType": "SFRTK"
+       */
+      signalType?: string;
+    };
+    SnapDistanceRange: {
+      /**
+       * @description Identifies the class
+       * @example Snap Distance Range
+       */
+      '@type'?: string;
+      /**
+       * @description starting point index this snap distance applies to relative to the boundary
+       * @example 0
+       */
+      startIndex?: number;
+      /**
+       * @description ending point index this snap distance applies to relative to the boundary
+       * @example 127
+       */
+      endIndex?: number;
+      snapDistance?: components['schemas']['MeasurementAsDouble'];
+    };
+    ThreeDPoint: {
+      /**
+       * @description Identifies the class
+       * @example 3-dimensional point
+       */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 32.118552
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example -81.260776
+       */
+      lon?: number;
+      /**
+       * Format: double
+       * @description The z-axis of the point
+       * @example 1
+       */
+      height?: number;
     };
   };
   responses: {
+    /** @description Request Validation failure. The boundary name must be between 1-20 characters. There must be at least one exterior ring. Each ring must have 4 or more points. The first and last point must be the same for each ring. */
+    BadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
     /** @description A collection of boundaries */
     BoundariesResponse: {
       headers: {
@@ -1006,6 +1015,21 @@ export interface components {
       };
     };
     /** @description Created, with a Location header containing the URI of the newly created resource */
+    Create: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description Created, with a Location header containing the URI of the newly created resource */
     Created: {
       headers: {
         [name: string]: unknown;
@@ -1021,20 +1045,28 @@ export interface components {
         };
       };
     };
-    /** @description Created, with a Location header containing the URI of the newly created resource */
-    Create: {
+    /** @description The user does not have sufficient privileges to access this organization's boundaries. */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description No Content. Request Completed Succesfully. */
+    NoContent: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        'application/vnd.deere.axiom.v3+json': {
-          /**
-           * Format: int32
-           * @example 1
-           */
-          total?: number;
-        };
+        'No Content': unknown;
       };
+    };
+    /** @description The specified resource does not exist */
+    NotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
     };
     /** @description Updated, with a Location header containing the URI of the newly created resource */
     Update: {
@@ -1051,64 +1083,32 @@ export interface components {
         };
       };
     };
-    /** @description No Content. Request Completed Succesfully. */
-    NoContent: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'No Content': unknown;
-      };
-    };
-    /** @description Request Validation failure. The boundary name must be between 1-20 characters. There must be at least one exterior ring. Each ring must have 4 or more points. The first and last point must be the same for each ring. */
-    BadRequest: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
-      };
-    };
-    /** @description The user does not have sufficient privileges to access this organization's boundaries. */
-    Forbidden: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The specified resource does not exist */
-    NotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
   };
   parameters: {
-    /** @description Organization */
-    OrgId: string;
-    /** @description Organization */
-    OrgId3: string;
     /** @description Takes METRIC and ENGLISH. Converts measurements to the chosen system. */
     'Accept-UOM-System': string;
-    /** @description Organization ID */
-    OrgId2: string;
-    /** @description Populates response with data lineage information */
-    Embed: string;
-    /** @description Filter results based on status; defaults to active */
-    RecordFilter: string;
-    /** @description Field ID */
-    Id: string;
-    /** @description Field GUID */
-    FieldId: string;
-    /** @description Field Id */
-    FieldId2: string;
-    /** @description Boundary Id */
-    BoundaryId: string;
     /** @description Takes METRIC and ENGLISH. Converts measurements to the chosen system. */
     AcceptUOMSystem: 'ENGLISH' | 'METRIC';
     /** @description Allows filtering based on active boundaries */
     Active: boolean;
+    /** @description Boundary Id */
+    BoundaryId: string;
+    /** @description Populates response with data lineage information */
+    Embed: string;
+    /** @description Field GUID */
+    FieldId: string;
+    /** @description Field Id */
+    FieldId2: string;
+    /** @description Field ID */
+    Id: string;
+    /** @description Organization */
+    OrgId: string;
+    /** @description Organization ID */
+    OrgId2: string;
+    /** @description Organization */
+    OrgId3: string;
+    /** @description Filter results based on status; defaults to active */
+    RecordFilter: string;
   };
   requestBodies: {
     /** @description Specifies Boundary details */

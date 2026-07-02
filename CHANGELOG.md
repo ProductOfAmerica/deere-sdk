@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-02
+
+The first live multi-document fetch. John Deere's portal returns more than one
+OpenAPI document for several API slugs, and the pre-merge fetch kept only one
+document per slug, silently dropping the rest. The pipeline now validates and
+merges every document, surfacing 56 operations that were always live but never
+generated. The same work hardens codegen against the spec-reordering class of
+bug that took the daily sync down in June 2026.
+
+### Added
+
+- **56 operations from portal documents the fetch previously dropped.** Each API
+  slug can resolve to multiple OpenAPI documents; the multi-document merge now
+  folds every one of them into the generated spec instead of keeping a single
+  document. By family:
+  - **field-operations**: field-operation `measurementTypes` (list, get by type).
+  - **files**: `fileTransfers` (list, get, list by org, create).
+  - **flags**: `flagCategories` (list, get, create, update, delete) and
+    `flagCategoryPreferences` (list, get, update).
+  - **machine-locations**: machine `breadcrumbs` (list).
+  - **map-layers**: `mapLayers` and `fileResources` CRUD (get, list, create,
+    update, delete across both).
+  - **products**: `chemicals`, `fertilizers`, `dryBlends`, `tankMixes`,
+    `activeIngredients`, product `companies`, and `documents` (list/get plus the
+    org-scoped create/update and the associate-to-org / set-overrides actions).
+  - **webhook**: `eventSubscriptionDelivery` (list, patch).
+
+### Changed
+
+- **Codegen is now hardened against upstream spec reordering.** Public method
+  names are pinned to operation identity (HTTP method + normalized path) in the
+  committed `scripts/api-surface.yaml` manifest, so reordering a spec's `paths`
+  can no longer rebind a published method to a different endpoint. Multi-document
+  slugs are structurally merged (the primary document pinned by a repo-owned
+  table so the public type surface never silently renames), raw specs are
+  canonicalized to a deterministic key order so a portal reorder produces no
+  diff, and every run is classified benign / additive / breaking to gate
+  releases (additive auto-cuts a minor; breaking fails for a human to reconcile
+  the manifest).
+
+### Fixed
+
+- **The June 2026 daily-sync outage (red since 2026-06-24) is eliminated at its
+  root.** John Deere reordered and split the field-operations spec, which
+  silently rebound `FieldOperationsApi.get` to a different endpoint because method
+  names were assigned by document order; the `src/safe` facade then stopped
+  compiling and the sync died at build. Names are now keyed to operation identity,
+  so a reorder is inert. (Distinct from the 2026-06-07 equipment build break fixed
+  in 2.2.0.)
+- **Equipment return types restored against a John Deere doc regression.** JD's
+  2026-07 equipment-doc edit dropped the `values.items` `$ref` from two 200
+  responses while leaving the target schemas defined, collapsing
+  `EquipmentApi.get` to `PaginatedResponse<unknown>` and `EquipmentApi.getEquipment`
+  to `unknown`. A guarded `fix-specs` transform restores the refs while the
+  schemas exist and no-ops once JD repairs the doc.
+
 ## [2.3.1] - 2026-06-19
 
 ### Changed

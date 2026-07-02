@@ -226,6 +226,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    Organization: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 3b5392015e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The organization ID.
+       * @example 1234
+       */
+      id?: string;
+      /**
+       * @description The organization name.
+       * @example Smith Farms
+       */
+      name?: string;
+      /**
+       * @description The organization type: customer or dealer.
+       * @example customer
+       */
+      type?: string;
+      /**
+       * @description TRUE means that the user is a member of the org.
+       * @example true
+       */
+      member?: boolean;
+    };
     OrganizationLink: {
       /**
        * @description Link to organization
@@ -259,33 +286,6 @@ export interface components {
        * @example https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234
        */
       manage_connections?: unknown;
-    };
-    Organization: {
-      /**
-       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
-       * @example 3b5392015e4b4e1c92013026f47109bb
-       */
-      'x-deere-signature'?: string;
-      /**
-       * @description The organization ID.
-       * @example 1234
-       */
-      id?: string;
-      /**
-       * @description The organization name.
-       * @example Smith Farms
-       */
-      name?: string;
-      /**
-       * @description The organization type: customer or dealer.
-       * @example customer
-       */
-      type?: string;
-      /**
-       * @description TRUE means that the user is a member of the org.
-       * @example true
-       */
-      member?: boolean;
     };
     OrganizationView: {
       /**
@@ -366,20 +366,20 @@ export interface components {
   };
   responses: never;
   parameters: {
+    /** @description Returns the name of the organization that corresponds with the given organization ID. */
+    OrgId: string;
+    /** @description Organization */
+    OrgIdGet: string;
+    /** @description Returns a list of organizations that contain the given string in their name. */
+    OrgName: string;
     /** @description Returns a list of organizations of which a particular user is a member. */
     UserName: string;
     /** @description User Name. */
     UserName2: string;
-    /** @description Returns the name of the organization that corresponds with the given organization ID. */
-    OrgId: string;
-    /** @description Returns a list of organizations that contain the given string in their name. */
-    OrgName: string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
     'X-deere-signature': string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
     'X-deere-signature2': string;
-    /** @description Organization */
-    OrgIdGet: string;
   };
   requestBodies: never;
   headers: never;

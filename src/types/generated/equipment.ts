@@ -78,26 +78,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/organizations/{organizationId}/equipment': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Create equipment
-     * @description This resource allows the client to create a piece of equipment within a user’s organization. Getting Started The process of contributing equipment to John Deere can be broken down into three primary steps. Determine the Equipment’s model IDs Create the Equipment Contribute Measurements. Please see the for more information on uploading measurements for the created equipment. Determining the Equipment’s model Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require. Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”. Creating the Equipment Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment model IDs. type: Machine or Implement serialNumber: A string identifier that is 30 characters or fewer. Must be unique within an organization. name: The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization. model: The id for the Model of the vehicle, found from the API in the previous step of this document. A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345). If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.
-     */
-    post: operations['createEquipment'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/equipment/{id}': {
     parameters: {
       query?: never;
@@ -158,6 +138,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/equipmentISGTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get equipment ISG types
+     * @description This operation retrieves a list of Equipment ISG Types based on the supplied query parameters.
+     */
+    get: operations['getEquipmentISGTypes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/equipmentMakes': {
     parameters: {
       query?: never;
@@ -190,88 +190,6 @@ export interface paths {
      * @description This resource allows the client to view equipment makes by an equipment make ID.
      */
     get: operations['getEquipmentMakesById'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/equipmentMakes/{equipmentMakeId}/equipmentTypes': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get equipment types by make id
-     * @deprecated
-     * @description This resource allows the client to view equipment types by providing an equipment make ID.
-     */
-    get: operations['getEquipmentTypesByMakeId'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/equipmentTypes': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get equipment types
-     * @deprecated
-     * @description This resource allows the client to view equipment types and their associated IDs and names.
-     */
-    get: operations['getEquipmentTypes'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/equipmentModels': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get equipment models
-     * @description This resource allows the client to view equipment models in our reference database and their associated IDs and names.
-     */
-    get: operations['getEquipmentModels'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/equipmentISGTypes': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get equipment ISG types
-     * @description This operation retrieves a list of Equipment ISG Types based on the supplied query parameters.
-     */
-    get: operations['getEquipmentISGTypes'];
     put?: never;
     post?: never;
     delete?: never;
@@ -360,6 +278,88 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/equipmentMakes/{equipmentMakeId}/equipmentTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get equipment types by make id
+     * @deprecated
+     * @description This resource allows the client to view equipment types by providing an equipment make ID.
+     */
+    get: operations['getEquipmentTypesByMakeId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/equipmentModels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get equipment models
+     * @description This resource allows the client to view equipment models in our reference database and their associated IDs and names.
+     */
+    get: operations['getEquipmentModels'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/equipmentTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get equipment types
+     * @deprecated
+     * @description This resource allows the client to view equipment types and their associated IDs and names.
+     */
+    get: operations['getEquipmentTypes'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/equipment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create equipment
+     * @description This resource allows the client to create a piece of equipment within a user’s organization. Getting Started The process of contributing equipment to John Deere can be broken down into three primary steps. Determine the Equipment’s model IDs Create the Equipment Contribute Measurements. Please see the for more information on uploading measurements for the created equipment. Determining the Equipment’s model Call the GET /equipmentMakes API endpoint to get a list of all equipment makes and a respective “id” of the equipment make you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes endpoint to get a list of associated equipment ISG types for that specific equipment make and obtain a respective “id” for a specific ISG type you require. Call the GET /equipmentMakes/{id}/equipmentISGTypes/{id}/equipmentModels to obtain the final “id” of the equipment model you require. Alternatively, you may call the GET /equipmentModels endpoint if you know the model name you are searching for. For example /equipmentModels?equipmentModelName=9RX*&embed=make,isgType which will include all models with search string results and include make and isgType “id” as well as model “id”. Creating the Equipment Make a POST request to the /organizations/{orgId}/equipment API to create the piece of equipment in the user’s org. In this request you will provide the type of the equipment, a serialNumber (optional), name (displayed to the user in Operations Center), and the equipment model IDs. type: Machine or Implement serialNumber: A string identifier that is 30 characters or fewer. Must be unique within an organization. name: The name displayed in Operation Center, 30 characters or fewer. Must be unique within an organization. model: The id for the Model of the vehicle, found from the API in the previous step of this document. A successful POST will result in a 201 Created response. The “location” header in the response will contain the URI to the new equipment, with the final segment being the organization specific machine ID (ie “https://equipmentapi.deere.com/isg/equipment/12345” is a link to the machine 12345). If you attempt to create a machine with a serialNumber that already exists in that organization, you get a response code 400 Bad Request. The body will include the error information.
+     */
+    post: operations['createEquipment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -393,74 +393,6 @@ export interface components {
       invalidValue?: string;
     };
     Errors: components['schemas']['Error'][];
-    /** Link */
-    link: {
-      /** @example nextPage */
-      rel?: string;
-      /**
-       * @description This will be the relative URL. Users will prefix the base url as per their requirements.
-       * @example /equipment?pageOffset=10&itemSize=10
-       */
-      uri?: string;
-    };
-    /**
-     * EquipmentIsgType
-     * @description Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
-     * @example {
-     *       "name": "Tractor",
-     *       "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
-     *       "category": "Machine",
-     *       "allowsCustomModel": true,
-     *       "isgMarketSegment": "Agriculture",
-     *       "deprecated": false,
-     *       "recordMetaData": {
-     *         "createdBy": "user123",
-     *         "createdAt": "2023-10-01T12:00:00Z",
-     *         "updatedBy": "user456",
-     *         "updatedAt": "2023-10-02T12:00:00Z"
-     *       }
-     *     }
-     */
-    'equipment-isg-type': components['schemas']['resource'] & {
-      /**
-       * @description The name of the ISG equipment type.
-       * @example Tractor
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the ISG equipment type.
-       * @example 82115264-9385-460c-bfbe-177a59445fd9
-       */
-      ERID?: string;
-      /**
-       * @description The category of the ISG equipment type.
-       * @example Machine
-       * @enum {string}
-       */
-      category?: 'Machine' | 'Implement' | 'Unknown';
-      /**
-       * @description Indicates if the equipment ISG type allows custom models.
-       * @example true
-       */
-      allowsCustomModel?: boolean;
-      /**
-       * @description The ISG market segment of the equipment ISG type.
-       * @example Agriculture
-       * @enum {string}
-       */
-      isgMarketSegment?:
-        | 'Unknown'
-        | 'Agriculture'
-        | 'Construction'
-        | 'Engines & Components'
-        | 'Forestry'
-        | 'Turf';
-      /**
-       * @description Indicates if the ISG equipment type is deprecated.
-       * @example false
-       */
-      deprecated?: boolean;
-    };
     /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
     RecordMetadata: {
       /**
@@ -511,684 +443,10 @@ export interface components {
        */
       readonly lastModifiedBySourceSystemUri?: string;
     };
-    /** Resource */
-    resourcewithoutLinks: {
-      /**
-       * @description Unique id
-       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      id?: string;
-      /**
-       * @description Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       * @example Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       */
-      '@type'?: string;
-    };
-    /** Resource */
-    resource: {
-      links?: components['schemas']['link'][];
-      /**
-       * @description Unique id
-       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      id?: string;
-      /**
-       * @description Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       * @example Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       */
-      '@type'?: string;
-    };
-    /** Resource */
-    'resource-embed': {
-      /**
-       * @description Unique id
-       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      id?: string;
-      /**
-       * @description Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       * @example Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
-       */
-      '@type'?: string;
-    };
-    /** Resource */
-    'organization-embed': {
-      /**
-       * @description Unique id
-       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      id?: string;
-      /**
-       * @description Resource
-       * @example Resource
-       */
-      '@type'?: string;
-    };
-    /**
-     * EquipmentMake
-     * @description Represents the make of the equipment, including its name, unique identifier, and metadata.
-     */
-    'equipment-make-embed': {
-      /**
-       * @description EquipmentMake
-       * @example EquipmentMake
-       */
-      '@type'?: string;
-      /**
-       * @description Unique identifier for the equipment make.
-       * @example 1
-       */
-      id?: string;
-      /**
-       * @description The name of the equipment make.
-       * @example JOHN DEERE
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment make.
-       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
-       */
-      ERID?: string;
-      /**
-       * @description Indicates if the equipment make is certified.
-       * @example true
-       */
-      certified?: boolean;
-      /**
-       * @description Indicates if the equipment make is deereOrSubsidiary.
-       * @example true
-       */
-      deereOrSubsidiary?: boolean;
-    };
-    /**
-     * EquipmentMake
-     * @description Represents the make of the equipment, including its name, unique identifier, and metadata.
-     * @example {
-     *       "id": 1,
-     *       "name": "JOHN DEERE",
-     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
-     *       "certified": true,
-     *       "deereOrSubsidiary": true,
-     *       "deprecated": false,
-     *       "recordMetaData": {
-     *         "createdBy": "user123",
-     *         "createdAt": "2023-10-01T12:00:00Z",
-     *         "updatedBy": "user456",
-     *         "updatedAt": "2023-10-02T12:00:00Z"
-     *       }
-     *     }
-     */
-    'equipment-make': components['schemas']['resource'] & {
-      /**
-       * @description The name of the equipment make.
-       * @example JOHN DEERE
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment make.
-       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
-       */
-      ERID?: string;
-      /**
-       * @description Indicates if the equipment make is certified.
-       * @example true
-       */
-      certified?: boolean;
-      /**
-       * @description Indicates if the equipment make is deereOrSubsidiary.
-       * @example true
-       */
-      deereOrSubsidiary?: boolean;
-      /**
-       * @description Indicates if the equipment make is deprecated.
-       * @example false
-       */
-      deprecated?: boolean;
-    };
-    /**
-     * EquipmentType
-     * @deprecated
-     * @description Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
-     * @example {
-     *       "id": 217,
-     *       "name": "Two-wheel Drive Tractors - 140 Hp And Above",
-     *       "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
-     *       "category": "Machine",
-     *       "certified": true,
-     *       "marketSegment": "Agriculture",
-     *       "icon": {
-     *         "url": "https://example.com/icon.png",
-     *         "description": "Icon representing the equipment type"
-     *       },
-     *       "deprecated": false,
-     *       "allowsCustomModel": true,
-     *       "recordMetaData": {
-     *         "createdBy": "user123",
-     *         "createdAt": "2023-10-01T12:00:00Z",
-     *         "updatedBy": "user456",
-     *         "updatedAt": "2023-10-02T12:00:00Z"
-     *       }
-     *     }
-     */
-    'equipment-type': components['schemas']['resource'] & {
-      /**
-       * @description The name of the equipment type.
-       * @example Two-wheel Drive Tractors - 140 Hp And Above
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment type.
-       * @example 82115264-9385-460c-bfbe-177a59445fd9
-       */
-      ERID?: string;
-      /**
-       * @description The category of the equipment type.
-       * @example Machine
-       * @enum {string}
-       */
-      category?: 'Machine' | 'Implement' | 'Unknown';
-      /**
-       * @description Indicates if the equipment type is certified.
-       * @example true
-       */
-      certified?: boolean;
-      /**
-       * @description Indicates if the equipment type allows custom models.
-       * @example true
-       */
-      allowsCustomModel?: boolean;
-      /**
-       * @description The market segment of the equipment type.
-       * @example Agriculture
-       * @enum {string}
-       */
-      marketSegment?:
-        | 'Unknown'
-        | 'Agriculture'
-        | 'Commercial Worksite Products'
-        | 'Construction'
-        | 'Engines & Components'
-        | 'Forestry'
-        | 'Mining'
-        | 'Turf';
-      icon?: components['schemas']['equipment-icon'];
-      /**
-       * @description Indicates if the equipment type is deprecated.
-       * @example false
-       */
-      deprecated?: boolean;
-    };
-    /**
-     * EquipmentType
-     * @description Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
-     */
-    'equipment-type-embed': {
-      /**
-       * @description EquipmentType
-       * @example EquipmentType
-       */
-      '@type'?: string;
-      /**
-       * @description Unique identifier for the equipment type.
-       * @example 222
-       */
-      id?: string;
-      /**
-       * @description The name of the equipment type.
-       * @example Combine
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment type.
-       * @example 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
-       */
-      ERID?: string;
-    };
-    /**
-     * IconStyle
-     * @description icon style
-     */
-    'icon-style': {
-      /** @description primary color of the icon style */
-      primaryColor?: string;
-      /** @description secondary color of the icon style */
-      secondaryColor?: string;
-    };
-    /** EquipmentIcon */
-    'equipment-icon': components['schemas']['resource'] & {
-      /**
-       * @description The name of the equipment icon.
-       * @example JOHN DEERE
-       */
-      name?: string;
-      iconStyle?: components['schemas']['icon-style'];
-    };
-    /** EquipmentModel */
-    'equipment-model-details': {
-      /** @example 8360R */
-      name?: string;
-      /** @example 158df9ff-334a-4e0d-86cc-3adca17a9686 */
-      ERID?: string;
-      /** @enum {string} */
-      category?: 'Machine' | 'Implement' | 'Unknown';
-      make?: components['schemas']['equipment-make-embed'];
-      type?: components['schemas']['equipment-type-embed'];
-      icon?: components['schemas']['equipment-icon'];
-    };
-    /**
-     * EquipmentISGType
-     * @description Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
-     */
-    'equipment-isg-type-embed': {
-      /**
-       * @description EquipmentISGType
-       * @example EquipmentISGType
-       */
-      '@type'?: string;
-      /**
-       * @description Unique identifier for the ISG equipment type.
-       * @example 2
-       */
-      id?: string;
-      /**
-       * @description The name of the ISG equipment type.
-       * @example Combine
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the ISG equipment type.
-       * @example d8dce5b0-cc8d-4c34-afac-27d93793bd86
-       */
-      ERID?: string;
-    };
-    /**
-     * EquipmentModel
-     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
-     * @example {
-     *       "name": "8360R",
-     *       "ERID": "158df9ff-334a-4e0d-86cc-3adca17a9686",
-     *       "category": "Machine",
-     *       "deprecated": false,
-     *       "certified": false,
-     *       "make": {
-     *         "name": "JOHN DEERE",
-     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
-     *         "deprecated": false,
-     *         "recordMetaData": {
-     *           "createdBy": "user123",
-     *           "createdAt": "2023-10-01T12:00:00Z",
-     *           "updatedBy": "user456",
-     *           "updatedAt": "2023-10-02T12:00:00Z"
-     *         }
-     *       },
-     *       "type": {
-     *         "name": "Two-wheel Drive Tractors - 140 Hp And Above",
-     *         "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
-     *         "category": "Machine",
-     *         "certified": true,
-     *         "marketSegment": "Agriculture",
-     *         "icon": {
-     *           "url": "https://example.com/icon.png",
-     *           "description": "Icon representing the equipment type"
-     *         },
-     *         "deprecated": false,
-     *         "recordMetaData": {
-     *           "createdBy": "user123",
-     *           "createdAt": "2023-10-01T12:00:00Z",
-     *           "updatedBy": "user456",
-     *           "updatedAt": "2023-10-02T12:00:00Z"
-     *         }
-     *       },
-     *       "isgType": {
-     *         "name": "Tractor",
-     *         "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
-     *         "category": "Machine",
-     *         "deprecated": false,
-     *         "recordMetaData": {
-     *           "createdBy": "user123",
-     *           "createdAt": "2023-10-01T12:00:00Z",
-     *           "updatedBy": "user456",
-     *           "updatedAt": "2023-10-02T12:00:00Z"
-     *         }
-     *       },
-     *       "icon": {
-     *         "url": "https://example.com/icon.png",
-     *         "description": "Icon representing the equipment model"
-     *       },
-     *       "recordMetaData": {
-     *         "createdBy": "user123",
-     *         "createdAt": "2023-10-01T12:00:00Z",
-     *         "updatedBy": "user456",
-     *         "updatedAt": "2023-10-02T12:00:00Z"
-     *       }
-     *     }
-     */
-    'equipment-model': components['schemas']['resource'] & {
-      /**
-       * @description The name of the equipment model.
-       * @example 8360R
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment model.
-       * @example 158df9ff-334a-4e0d-86cc-3adca17a9686
-       */
-      ERID?: string;
-      /**
-       * @description The category of the equipment model.
-       * @example Machine
-       * @enum {string}
-       */
-      category?: 'Machine' | 'Implement' | 'Unknown';
-      /**
-       * @description Indicates if the equipment model is deprecated.
-       * @example false
-       */
-      deprecated?: boolean;
-      /**
-       * @description Indicates if the equipment model is certified.
-       * @example false
-       */
-      certified?: boolean;
-      make?: components['schemas']['equipment-make'];
-      type?: components['schemas']['equipment-type'];
-      isgType?: components['schemas']['equipment-isg-type'];
-    };
-    /**
-     * EquipmentModel
-     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
-     */
-    'equipment-model-embed': {
-      /**
-       * @description EquipmentModel
-       * @example EquipmentModel
-       */
-      '@type'?: string;
-      /**
-       * @description Unique identifier for the equipment model.
-       * @example 65985
-       */
-      id?: string;
-      /**
-       * @description The name of the equipment model.
-       * @example S680
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment model.
-       * @example f2e7d596-35c6-11e7-af34-123e49453e98
-       */
-      ERID?: string;
-      /**
-       * @description Indicates if the equipment model is certified.
-       * @example true
-       */
-      certified?: boolean;
-    };
-    /**
-     * EquipmentModel
-     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
-     * @example {
-     *       "name": "8360R",
-     *       "ERID": "158df9ff-334a-4e0d-86cc-3adca17a9686",
-     *       "category": "Machine",
-     *       "certified": false
-     *     }
-     */
-    'equipment-model-no-embed': components['schemas']['resource'] & {
-      /**
-       * @description The name of the equipment model.
-       * @example 8360R
-       */
-      name?: string;
-      /**
-       * @description Unique identifier for the equipment model.
-       * @example 158df9ff-334a-4e0d-86cc-3adca17a9686
-       */
-      ERID?: string;
-      /**
-       * @description The category of the equipment model.
-       * @example Machine
-       * @enum {string}
-       */
-      category?: 'Machine' | 'Implement' | 'Unknown';
-      /**
-       * @description Indicates if the equipment model is certified.
-       * @example false
-       */
-      certified?: boolean;
-    };
-    /**
-     * Identifier of Equipment
-     * @description Identifier of the Equipment like DE-13, DE-17, ERID...
-     */
-    identifier: {
-      /**
-       * @description Type of identifier.
-       * @enum {string}
-       */
-      type?: 'serialNumber' | 'ERID';
-      /**
-       * @description Value of identifier.
-       * @example RW8360R055358
-       */
-      value?: string;
-    };
-    /**
-     * OrganizationRole
-     * @description Represents the role of an organization, including its type, effective timestamp, and event.
-     * @example {
-     *       "type": "Controlling",
-     *       "effectiveTS": "2023-10-01T12:00:00Z",
-     *       "event": "CREATION"
-     *     }
-     */
-    'organization-role': {
-      /**
-       * @description The type of the organization role.
-       * @example Controlling
-       * @enum {string}
-       */
-      type?: 'Controlling' | 'NonControlling';
-      /**
-       * Format: date-time
-       * @description The timestamp when the role becomes effective.
-       * @example 2023-10-01T12:00:00Z
-       */
-      effectiveTS?: string;
-      /**
-       * @description The event associated with the organization role.
-       * @example CREATION
-       * @enum {string}
-       */
-      event?:
-        | 'CREATION'
-        | 'TRANSFER'
-        | 'SUBSCRIPTION'
-        | 'PAIRING'
-        | 'ORDER'
-        | 'COMMANDED'
-        | 'DECOMMISSION';
-      /** @example true */
-      inPossession?: boolean;
-    };
     /** AbstractMeasurement */
     abstractMeasurement: {
       type?: string;
       unit?: string;
-    };
-    /**
-     * MeasurementAsDouble
-     * @description measurement as double
-     */
-    measurementAsDouble: components['schemas']['abstractMeasurement'] & {
-      /** @description type of measurement */
-      type?: string;
-      /** @description unit of measurement */
-      unit?: string;
-      /**
-       * Format: double
-       * @description measurement value as double
-       */
-      valueAsDouble?: number;
-    };
-    /** VariableRepresentationValue */
-    variableRepresentationValue: {
-      variable?: components['schemas']['measurementAsDouble'];
-    };
-    /**
-     * MeasurementAsString
-     * @description measurement as string
-     */
-    measurementAsString: components['schemas']['abstractMeasurement'] & {
-      /** @description type of measurement */
-      type?: string;
-      /** @description unit of measurement */
-      unit?: string;
-      /** @description measurement value as string */
-      valueAsString?: string;
-    };
-    /** DefinedTypeRepresentationValue */
-    definedTypeRepresentationValue: {
-      value?: components['schemas']['measurementAsString'];
-    };
-    /**
-     * Offsets
-     * @description Represents the offsets of a device, including its variable and defined type representation values.
-     */
-    offsets: components['schemas']['resource-embed'] & {
-      /**
-       * @description Offsets
-       * @example Offsets
-       * @enum {string}
-       */
-      '@type'?: 'Offsets';
-      variableRepresentationValues?: components['schemas']['variableRepresentationValue'][];
-      definedTypeRepresentationValues?: components['schemas']['definedTypeRepresentationValue'][];
-    };
-    /**
-     * DeviceMake
-     * @description Represents the make of a device, including its name and unique identifier (ERID).
-     * @example {
-     *       "name": "JOHN DEERE",
-     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
-     *     }
-     */
-    'device-make': components['schemas']['resource-embed'] & {
-      /**
-       * @description DeviceMake
-       * @example DeviceMake
-       * @enum {string}
-       */
-      '@type'?: 'DeviceMake';
-      /**
-       * @description The name of the device make.
-       * @example JOHN DEERE
-       */
-      name?: string;
-      /**
-       * @description Unique identifier of the device make.
-       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
-       */
-      ERID?: string;
-    };
-    /**
-     * DeviceType
-     * @description Represents the type of a device, including its name, common name, and unique identifier (ERID).
-     * @example {
-     *       "name": "Modem",
-     *       "commonName": "TelematicsGateway",
-     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
-     *     }
-     */
-    'device-type': components['schemas']['resource-embed'] & {
-      /**
-       * @description DeviceType
-       * @example DeviceType
-       * @enum {string}
-       */
-      '@type'?: 'DeviceType';
-      /**
-       * @description The name of the device type.
-       * @example Modem
-       */
-      name?: string;
-      /**
-       * @description The common name of the device type.
-       * @example TelematicsGateway
-       */
-      commonName?: string;
-      /**
-       * @description Unique identifier of the device type.
-       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
-       */
-      ERID?: string;
-    };
-    /**
-     * DeviceModel
-     * @description Represents the model of a device, including its name, unique identifier (ERID), make, and type.
-     * @example {
-     *       "name": "JDLink Modem-4G",
-     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
-     *       "make": {
-     *         "name": "JOHN DEERE",
-     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
-     *       },
-     *       "type": {
-     *         "name": "Modem",
-     *         "commonName": "TelematicsGateway",
-     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
-     *       }
-     *     }
-     */
-    'device-model': components['schemas']['resource-embed'] & {
-      /**
-       * @description DeviceModel
-       * @example DeviceModel
-       * @enum {string}
-       */
-      '@type'?: 'DeviceModel';
-      /**
-       * @description The name of the device model.
-       * @example JDLink Modem-4G
-       */
-      name?: string;
-      /**
-       * @description Unique identifier of the device model.
-       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
-       */
-      ERID?: string;
-      make?: components['schemas']['device-make'];
-      type?: components['schemas']['device-type'];
-    };
-    /**
-     * Version
-     * @description Represents the version of a device or software, including its name.
-     * @example {
-     *       "name": "3.16.1171"
-     *     }
-     */
-    version: components['schemas']['resource-embed'] & {
-      /**
-       * @description Version
-       * @example Version
-       * @enum {string}
-       */
-      '@type'?: 'Version';
-      /**
-       * @description The name of the version.
-       * @example 3.16.1171
-       */
-      name?: string;
-    };
-    /** InabilityDetail */
-    'inability-detail': components['schemas']['resource'] & {
-      /** @example RC14.8.1 */
-      code?: string;
-      /** @example REGISTRATION */
-      type?: string;
-      /** @example SIM registration is required */
-      description?: string;
     };
     /**
      * Capability
@@ -1220,230 +478,131 @@ export interface components {
       inabilityDetails?: components['schemas']['inability-detail'][];
     };
     /**
-     * Equipment
-     * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
-     */
-    equipmentForList: components['schemas']['resource'] & {
-      /**
-       * @description Equipment | Machine | Implement
-       * @example Equipment
-       * @enum {string}
-       */
-      '@type'?: 'Equipment' | 'Machine' | 'Implement';
-      /**
-       * @description Equipment Name.
-       * @example Cates 8360R 055358
-       */
-      name?: string;
-      /**
-       * @description Unique 64-bit ISO NAME used to identify the controller during address claim.
-       * @example b00082000422ed1d
-       */
-      isoName?: string;
-      /**
-       * @description Serial Number of the Equipment and passed on the query parameter
-       * @example 1RW8360RLCD055358
-       */
-      serialNumber?: string;
-      /**
-       * @description VIN or PIN, more than Serial Number, of the Engine.
-       * @example RG6090L839275
-       */
-      engineSerialNumber?: string;
-      /**
-       * @description True if this is an official equipment (we have PI information about it).
-       * @example true
-       */
-      isSerialNumberCertified?: boolean;
-      /**
-       * @description Year of model.
-       * @example 2019
-       */
-      modelYear?: string;
-      make?: components['schemas']['equipment-make-embed'];
-      type?: components['schemas']['equipment-type-embed'];
-      isgType?: components['schemas']['equipment-isg-type-embed'];
-      model?: components['schemas']['equipment-model-embed'];
-      organization?: components['schemas']['organization-embed'];
-      /**
-       * @description Indicates if the equipment is capable of telematics.
-       * @example true
-       */
-      telematicsCapable?: boolean;
-      /**
-       * @description Indicates if the equipment is archived.
-       * @example true
-       */
-      archived?: boolean;
-      /**
-       * @description Unique id for principal equipment
-       * @example 12345
-       */
-      principalId?: string;
-      organizationRole?: components['schemas']['organization-role'];
-      /**
-       * @description Unique identifier of the Equipment.
-       * @example fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      ERID?: string;
-      /** @description List of alternate identifiers of the Equipment like DE-13, DE-17, ERID... */
-      alternateIdentifiers?: components['schemas']['identifier'][];
-      icon?: components['schemas']['equipment-icon'];
-      /** @description List of devices paired with the equipment. */
-      devices?: components['schemas']['device'][];
-      pairingDetails?: components['schemas']['pairing-details'];
-      /**
-       * Format: date-time
-       * @description Timestamp when the equipment was archived.
-       * @example 2021-03-10T19:19:46.420Z
-       */
-      archivedTimestamp?: string;
-      /** @description List of equipment that was merged. */
-      mergedEquipment?: components['schemas']['machine'][];
-      /**
-       * @description Indicates if the equipment is CSC equipment or not.
-       * @example true
-       */
-      isCsc?: boolean;
-    };
-    /**
-     * Equipment
-     * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
-     */
-    equipment: components['schemas']['resource'] & {
-      /**
-       * @description Equipment | Machine | Implement
-       * @example Equipment
-       * @enum {string}
-       */
-      '@type'?: 'Equipment' | 'Machine' | 'Implement';
-      /**
-       * @description Equipment Name.
-       * @example Cates 8360R 055358
-       */
-      name?: string;
-      /**
-       * @description Unique 64-bit ISO NAME used to identify the controller during address claim.
-       * @example b00082000422ed1d
-       */
-      isoName?: string;
-      /**
-       * @description Serial Number of the Equipment and passed on the query parameter
-       * @example 1RW8360RLCD055358
-       */
-      serialNumber?: string;
-      /**
-       * @description VIN or PIN, more than Serial Number, of the Engine.
-       * @example RG6090L839275
-       */
-      engineSerialNumber?: string;
-      /**
-       * @description True if this is an official equipment (we have PI information about it).
-       * @example true
-       */
-      isSerialNumberCertified?: boolean;
-      /**
-       * @description Year of model.
-       * @example 2019
-       */
-      modelYear?: string;
-      make?: components['schemas']['equipment-make-embed'];
-      type?: components['schemas']['equipment-type-embed'];
-      isgType?: components['schemas']['equipment-isg-type-embed'];
-      model?: components['schemas']['equipment-model-embed'];
-      organization?: components['schemas']['organization-embed'];
-      /**
-       * @description Indicates if the equipment is capable of telematics.
-       * @example true
-       */
-      telematicsCapable?: boolean;
-      /**
-       * @description Indicates if the equipment is archived.
-       * @example true
-       */
-      archived?: boolean;
-      /**
-       * @description Unique id for principal equipment
-       * @example 12345
-       */
-      principalId?: string;
-      organizationRole?: components['schemas']['organization-role'];
-      /**
-       * @description Unique identifier of the Equipment.
-       * @example fcdc83cb-8840-4215-84b5-1769889db932
-       */
-      ERID?: string;
-      /** @description List of alternate identifiers of the Equipment like DE-13, DE-17, ERID... */
-      alternateIdentifiers?: components['schemas']['identifier'][];
-      icon?: components['schemas']['equipment-icon'];
-      offsets?: components['schemas']['offsets'];
-      /** @description List of devices paired with the equipment. */
-      devices?: components['schemas']['device'][];
-      /** @description List of capabilities of the equipment. */
-      capabilities?: components['schemas']['capability'][];
-      pairingDetails?: components['schemas']['pairing-details'];
-      /**
-       * Format: date-time
-       * @description Timestamp when the equipment was archived.
-       * @example 2021-03-10T19:19:46.420Z
-       */
-      archivedTimestamp?: string;
-      /** @description List of equipment that was merged. */
-      mergedEquipment?: components['schemas']['machine'][];
-      /**
-       * @description Indicates if the equipment is CSC equipment or not.
-       * @example true
-       */
-      isCsc?: boolean;
-    };
-    /** Point */
-    point: {
-      /** Format: double */
-      lat?: number;
-      /** Format: double */
-      lon?: number;
-      /** Format: double */
-      slope?: number;
-    };
-    /**
-     * PairingDetails
-     * @description Represents the details of the pairing process, including timestamps and location.
+     * CommunicationModule
+     * @description Represents a communication module, including its serial number, IMEI, IMSI, ICCID, MSISDN, EID, type, service provider, state, and country calling code.
      * @example {
-     *       "paired": true,
-     *       "associationTimestamp": "2023-10-01T12:00:00Z",
-     *       "disassociationTimestamp": "2023-10-02T12:00:00Z",
-     *       "confirmationTimestamp": "2023-10-01T12:30:00Z",
-     *       "location": {
-     *         "latitude": 40.712776,
-     *         "longitude": -74.005974
-     *       }
+     *       "serialNumber": "PCS171B372381",
+     *       "imei": 123456789012345,
+     *       "imsi": 310150123456789,
+     *       "iccid": 89014103211118510000,
+     *       "msisdn": 15555551234,
+     *       "eid": 89014103211118510000,
+     *       "type": "GSM",
+     *       "serviceProvider": "ATT",
+     *       "state": "ACTIVE",
+     *       "countryCallingCode": 1
      *     }
      */
-    'pairing-details': {
+    'communication-module': components['schemas']['resource-embed'] & {
       /**
-       * @description Indicates if the equipment is paired.
-       * @example true
+       * @description CommunicationModule
+       * @example CommunicationModule
+       * @enum {string}
        */
-      paired?: boolean;
+      '@type'?: 'CommunicationModule';
       /**
-       * Format: date-time
-       * @description The timestamp when the equipment was paired.
-       * @example 2023-10-01T12:00:00Z
+       * @description Serial number of the communication gateway
+       * @example PCS171B372381
        */
-      associationTimestamp?: string;
+      serialNumber?: string;
       /**
-       * Format: date-time
-       * @description The timestamp when the equipment was un-paired.
-       * @example 2023-10-02T12:00:00Z
+       * @description International Mobile Equipment Identity of the communication module.
+       * @example 123456789012345
        */
-      disassociationTimestamp?: string;
+      imei?: string;
       /**
-       * Format: date-time
-       * @description The timestamp when the pairing was confirmed.
-       * @example 2023-10-01T12:30:00Z
+       * @description International Mobile Subscriber Identity of the communication module.
+       * @example 310150123456789
        */
-      confirmationTimestamp?: string;
-      location?: components['schemas']['point'];
+      imsi?: string;
+      /**
+       * @description Integrated Circuit Card Identifier of the communication module.
+       * @example 89014103211118510000
+       */
+      iccid?: string;
+      /**
+       * @description Mobile Station International Subscriber Directory Number of the communication module.
+       * @example 15555551234
+       */
+      msisdn?: string;
+      /**
+       * @description Embedded Identity Document of the communication module.
+       * @example 89014103211118510000
+       */
+      eid?: string;
+      /**
+       * @description Type of the communication module.
+       * @example GSM
+       * @enum {string}
+       */
+      type?: 'GSM' | 'SATELLITE' | 'CDMA' | 'COS';
+      /**
+       * @example ATT
+       * @enum {string}
+       */
+      serviceProvider?:
+        | 'IRIDIUM'
+        | 'ATT'
+        | 'JASPER'
+        | 'VERIZON'
+        | 'COS'
+        | 'COST'
+        | 'CUBIC'
+        | 'ATTIOT';
+      /**
+       * @description Subscription state of the communication gateway
+       * @example ACTIVE
+       * @enum {string}
+       */
+      state?:
+        | 'NEW'
+        | 'ACTIVE'
+        | 'INACTIVE'
+        | 'EXPIRED'
+        | 'PENDING_ACTIVE'
+        | 'PENDING_INACTIVE'
+        | 'PENDING_EXPIRED'
+        | 'PENDING_VERIFICATION'
+        | 'PENDING_WDT'
+        | 'TERMINATED';
+      /**
+       * @description Country calling code of the communication module.
+       * @example 1
+       */
+      countryCallingCode?: string;
+    };
+    /** Equipment Creation */
+    createEquipment: {
+      /**
+       * @description Equipment Name.
+       * @example Cates 8360R 055358
+       */
+      name?: string;
+      /**
+       * @description Serial Number of the Equipment and passed on the query parameter
+       * @example Must be unique string. Max character count is 30.
+       */
+      serialNumber?: string;
+      /**
+       * Model of the equipment.
+       * @description Model of the equipment.
+       */
+      model?: {
+        /**
+         * @description Unique id
+         * @example 3 | 158df9ff-334a-4e0d-86cc-3adca17a9686
+         */
+        id?: string;
+        /**
+         * @description EquipmentModel
+         * @example EquipmentModel
+         */
+        '@type'?: string;
+      };
+    };
+    /** DefinedTypeRepresentationValue */
+    definedTypeRepresentationValue: {
+      value?: components['schemas']['measurementAsString'];
     };
     /**
      * Device
@@ -1632,6 +791,101 @@ export interface components {
        */
       archivedTimestamp?: string;
     };
+    /**
+     * DeviceMake
+     * @description Represents the make of a device, including its name and unique identifier (ERID).
+     * @example {
+     *       "name": "JOHN DEERE",
+     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
+     *     }
+     */
+    'device-make': components['schemas']['resource-embed'] & {
+      /**
+       * @description DeviceMake
+       * @example DeviceMake
+       * @enum {string}
+       */
+      '@type'?: 'DeviceMake';
+      /**
+       * @description The name of the device make.
+       * @example JOHN DEERE
+       */
+      name?: string;
+      /**
+       * @description Unique identifier of the device make.
+       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+       */
+      ERID?: string;
+    };
+    /**
+     * DeviceModel
+     * @description Represents the model of a device, including its name, unique identifier (ERID), make, and type.
+     * @example {
+     *       "name": "JDLink Modem-4G",
+     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
+     *       "make": {
+     *         "name": "JOHN DEERE",
+     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
+     *       },
+     *       "type": {
+     *         "name": "Modem",
+     *         "commonName": "TelematicsGateway",
+     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
+     *       }
+     *     }
+     */
+    'device-model': components['schemas']['resource-embed'] & {
+      /**
+       * @description DeviceModel
+       * @example DeviceModel
+       * @enum {string}
+       */
+      '@type'?: 'DeviceModel';
+      /**
+       * @description The name of the device model.
+       * @example JDLink Modem-4G
+       */
+      name?: string;
+      /**
+       * @description Unique identifier of the device model.
+       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+       */
+      ERID?: string;
+      make?: components['schemas']['device-make'];
+      type?: components['schemas']['device-type'];
+    };
+    /**
+     * DeviceType
+     * @description Represents the type of a device, including its name, common name, and unique identifier (ERID).
+     * @example {
+     *       "name": "Modem",
+     *       "commonName": "TelematicsGateway",
+     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3"
+     *     }
+     */
+    'device-type': components['schemas']['resource-embed'] & {
+      /**
+       * @description DeviceType
+       * @example DeviceType
+       * @enum {string}
+       */
+      '@type'?: 'DeviceType';
+      /**
+       * @description The name of the device type.
+       * @example Modem
+       */
+      name?: string;
+      /**
+       * @description The common name of the device type.
+       * @example TelematicsGateway
+       */
+      commonName?: string;
+      /**
+       * @description Unique identifier of the device type.
+       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+       */
+      ERID?: string;
+    };
     /** Display */
     display: components['schemas']['device'] & {
       /**
@@ -1659,101 +913,869 @@ export interface components {
       /** @example 600 */
       resolutionHeight?: number;
     };
-    /** PositionReceiver */
-    'position-receiver': components['schemas']['device'] & Record<string, never>;
     /**
-     * CommunicationModule
-     * @description Represents a communication module, including its serial number, IMEI, IMSI, ICCID, MSISDN, EID, type, service provider, state, and country calling code.
-     * @example {
-     *       "serialNumber": "PCS171B372381",
-     *       "imei": 123456789012345,
-     *       "imsi": 310150123456789,
-     *       "iccid": 89014103211118510000,
-     *       "msisdn": 15555551234,
-     *       "eid": 89014103211118510000,
-     *       "type": "GSM",
-     *       "serviceProvider": "ATT",
-     *       "state": "ACTIVE",
-     *       "countryCallingCode": 1
-     *     }
+     * Equipment
+     * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
      */
-    'communication-module': components['schemas']['resource-embed'] & {
+    equipment: components['schemas']['resource'] & {
       /**
-       * @description CommunicationModule
-       * @example CommunicationModule
+       * @description Equipment | Machine | Implement
+       * @example Equipment
        * @enum {string}
        */
-      '@type'?: 'CommunicationModule';
+      '@type'?: 'Equipment' | 'Machine' | 'Implement';
       /**
-       * @description Serial number of the communication gateway
-       * @example PCS171B372381
+       * @description Equipment Name.
+       * @example Cates 8360R 055358
+       */
+      name?: string;
+      /**
+       * @description Unique 64-bit ISO NAME used to identify the controller during address claim.
+       * @example b00082000422ed1d
+       */
+      isoName?: string;
+      /**
+       * @description Serial Number of the Equipment and passed on the query parameter
+       * @example 1RW8360RLCD055358
        */
       serialNumber?: string;
       /**
-       * @description International Mobile Equipment Identity of the communication module.
-       * @example 123456789012345
+       * @description VIN or PIN, more than Serial Number, of the Engine.
+       * @example RG6090L839275
        */
-      imei?: string;
+      engineSerialNumber?: string;
       /**
-       * @description International Mobile Subscriber Identity of the communication module.
-       * @example 310150123456789
+       * @description True if this is an official equipment (we have PI information about it).
+       * @example true
        */
-      imsi?: string;
+      isSerialNumberCertified?: boolean;
       /**
-       * @description Integrated Circuit Card Identifier of the communication module.
-       * @example 89014103211118510000
+       * @description Year of model.
+       * @example 2019
        */
-      iccid?: string;
+      modelYear?: string;
+      make?: components['schemas']['equipment-make-embed'];
+      type?: components['schemas']['equipment-type-embed'];
+      isgType?: components['schemas']['equipment-isg-type-embed'];
+      model?: components['schemas']['equipment-model-embed'];
+      organization?: components['schemas']['organization-embed'];
       /**
-       * @description Mobile Station International Subscriber Directory Number of the communication module.
-       * @example 15555551234
+       * @description Indicates if the equipment is capable of telematics.
+       * @example true
        */
-      msisdn?: string;
+      telematicsCapable?: boolean;
       /**
-       * @description Embedded Identity Document of the communication module.
-       * @example 89014103211118510000
+       * @description Indicates if the equipment is archived.
+       * @example true
        */
-      eid?: string;
+      archived?: boolean;
       /**
-       * @description Type of the communication module.
-       * @example GSM
+       * @description Unique id for principal equipment
+       * @example 12345
+       */
+      principalId?: string;
+      organizationRole?: components['schemas']['organization-role'];
+      /**
+       * @description Unique identifier of the Equipment.
+       * @example fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      ERID?: string;
+      /** @description List of alternate identifiers of the Equipment like DE-13, DE-17, ERID... */
+      alternateIdentifiers?: components['schemas']['identifier'][];
+      icon?: components['schemas']['equipment-icon'];
+      offsets?: components['schemas']['offsets'];
+      /** @description List of devices paired with the equipment. */
+      devices?: components['schemas']['device'][];
+      /** @description List of capabilities of the equipment. */
+      capabilities?: components['schemas']['capability'][];
+      pairingDetails?: components['schemas']['pairing-details'];
+      /**
+       * Format: date-time
+       * @description Timestamp when the equipment was archived.
+       * @example 2021-03-10T19:19:46.420Z
+       */
+      archivedTimestamp?: string;
+      /** @description List of equipment that was merged. */
+      mergedEquipment?: components['schemas']['machine'][];
+      /**
+       * @description Indicates if the equipment is CSC equipment or not.
+       * @example true
+       */
+      isCsc?: boolean;
+    };
+    /** EquipmentIcon */
+    'equipment-icon': components['schemas']['resource'] & {
+      /**
+       * @description The name of the equipment icon.
+       * @example JOHN DEERE
+       */
+      name?: string;
+      iconStyle?: components['schemas']['icon-style'];
+    };
+    /**
+     * EquipmentIsgType
+     * @description Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
+     * @example {
+     *       "name": "Tractor",
+     *       "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
+     *       "category": "Machine",
+     *       "allowsCustomModel": true,
+     *       "isgMarketSegment": "Agriculture",
+     *       "deprecated": false,
+     *       "recordMetaData": {
+     *         "createdBy": "user123",
+     *         "createdAt": "2023-10-01T12:00:00Z",
+     *         "updatedBy": "user456",
+     *         "updatedAt": "2023-10-02T12:00:00Z"
+     *       }
+     *     }
+     */
+    'equipment-isg-type': components['schemas']['resource'] & {
+      /**
+       * @description The name of the ISG equipment type.
+       * @example Tractor
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the ISG equipment type.
+       * @example 82115264-9385-460c-bfbe-177a59445fd9
+       */
+      ERID?: string;
+      /**
+       * @description The category of the ISG equipment type.
+       * @example Machine
        * @enum {string}
        */
-      type?: 'GSM' | 'SATELLITE' | 'CDMA' | 'COS';
+      category?: 'Machine' | 'Implement' | 'Unknown';
       /**
-       * @example ATT
+       * @description Indicates if the equipment ISG type allows custom models.
+       * @example true
+       */
+      allowsCustomModel?: boolean;
+      /**
+       * @description The ISG market segment of the equipment ISG type.
+       * @example Agriculture
        * @enum {string}
        */
-      serviceProvider?:
-        | 'IRIDIUM'
-        | 'ATT'
-        | 'JASPER'
-        | 'VERIZON'
-        | 'COS'
-        | 'COST'
-        | 'CUBIC'
-        | 'ATTIOT';
+      isgMarketSegment?:
+        | 'Unknown'
+        | 'Agriculture'
+        | 'Construction'
+        | 'Engines & Components'
+        | 'Forestry'
+        | 'Turf';
       /**
-       * @description Subscription state of the communication gateway
-       * @example ACTIVE
-       * @enum {string}
+       * @description Indicates if the ISG equipment type is deprecated.
+       * @example false
        */
-      state?:
-        | 'NEW'
-        | 'ACTIVE'
-        | 'INACTIVE'
-        | 'EXPIRED'
-        | 'PENDING_ACTIVE'
-        | 'PENDING_INACTIVE'
-        | 'PENDING_EXPIRED'
-        | 'PENDING_VERIFICATION'
-        | 'PENDING_WDT'
-        | 'TERMINATED';
+      deprecated?: boolean;
+    };
+    /**
+     * EquipmentISGType
+     * @description Represents the ISG type of equipment, including its name, unique identifier, category, deprecation status, and metadata.
+     */
+    'equipment-isg-type-embed': {
       /**
-       * @description Country calling code of the communication module.
+       * @description EquipmentISGType
+       * @example EquipmentISGType
+       */
+      '@type'?: string;
+      /**
+       * @description Unique identifier for the ISG equipment type.
+       * @example 2
+       */
+      id?: string;
+      /**
+       * @description The name of the ISG equipment type.
+       * @example Combine
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the ISG equipment type.
+       * @example d8dce5b0-cc8d-4c34-afac-27d93793bd86
+       */
+      ERID?: string;
+    };
+    /**
+     * EquipmentMake
+     * @description Represents the make of the equipment, including its name, unique identifier, and metadata.
+     * @example {
+     *       "id": 1,
+     *       "name": "JOHN DEERE",
+     *       "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
+     *       "certified": true,
+     *       "deereOrSubsidiary": true,
+     *       "deprecated": false,
+     *       "recordMetaData": {
+     *         "createdBy": "user123",
+     *         "createdAt": "2023-10-01T12:00:00Z",
+     *         "updatedBy": "user456",
+     *         "updatedAt": "2023-10-02T12:00:00Z"
+     *       }
+     *     }
+     */
+    'equipment-make': components['schemas']['resource'] & {
+      /**
+       * @description The name of the equipment make.
+       * @example JOHN DEERE
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment make.
+       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+       */
+      ERID?: string;
+      /**
+       * @description Indicates if the equipment make is certified.
+       * @example true
+       */
+      certified?: boolean;
+      /**
+       * @description Indicates if the equipment make is deereOrSubsidiary.
+       * @example true
+       */
+      deereOrSubsidiary?: boolean;
+      /**
+       * @description Indicates if the equipment make is deprecated.
+       * @example false
+       */
+      deprecated?: boolean;
+    };
+    /**
+     * EquipmentMake
+     * @description Represents the make of the equipment, including its name, unique identifier, and metadata.
+     */
+    'equipment-make-embed': {
+      /**
+       * @description EquipmentMake
+       * @example EquipmentMake
+       */
+      '@type'?: string;
+      /**
+       * @description Unique identifier for the equipment make.
        * @example 1
        */
-      countryCallingCode?: string;
+      id?: string;
+      /**
+       * @description The name of the equipment make.
+       * @example JOHN DEERE
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment make.
+       * @example db18bdc4-025a-11eb-97e4-0e8d658c7ba3
+       */
+      ERID?: string;
+      /**
+       * @description Indicates if the equipment make is certified.
+       * @example true
+       */
+      certified?: boolean;
+      /**
+       * @description Indicates if the equipment make is deereOrSubsidiary.
+       * @example true
+       */
+      deereOrSubsidiary?: boolean;
+    };
+    /**
+     * EquipmentModel
+     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+     * @example {
+     *       "name": "8360R",
+     *       "ERID": "158df9ff-334a-4e0d-86cc-3adca17a9686",
+     *       "category": "Machine",
+     *       "deprecated": false,
+     *       "certified": false,
+     *       "make": {
+     *         "name": "JOHN DEERE",
+     *         "ERID": "db18bdc4-025a-11eb-97e4-0e8d658c7ba3",
+     *         "deprecated": false,
+     *         "recordMetaData": {
+     *           "createdBy": "user123",
+     *           "createdAt": "2023-10-01T12:00:00Z",
+     *           "updatedBy": "user456",
+     *           "updatedAt": "2023-10-02T12:00:00Z"
+     *         }
+     *       },
+     *       "type": {
+     *         "name": "Two-wheel Drive Tractors - 140 Hp And Above",
+     *         "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
+     *         "category": "Machine",
+     *         "certified": true,
+     *         "marketSegment": "Agriculture",
+     *         "icon": {
+     *           "url": "https://example.com/icon.png",
+     *           "description": "Icon representing the equipment type"
+     *         },
+     *         "deprecated": false,
+     *         "recordMetaData": {
+     *           "createdBy": "user123",
+     *           "createdAt": "2023-10-01T12:00:00Z",
+     *           "updatedBy": "user456",
+     *           "updatedAt": "2023-10-02T12:00:00Z"
+     *         }
+     *       },
+     *       "isgType": {
+     *         "name": "Tractor",
+     *         "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
+     *         "category": "Machine",
+     *         "deprecated": false,
+     *         "recordMetaData": {
+     *           "createdBy": "user123",
+     *           "createdAt": "2023-10-01T12:00:00Z",
+     *           "updatedBy": "user456",
+     *           "updatedAt": "2023-10-02T12:00:00Z"
+     *         }
+     *       },
+     *       "icon": {
+     *         "url": "https://example.com/icon.png",
+     *         "description": "Icon representing the equipment model"
+     *       },
+     *       "recordMetaData": {
+     *         "createdBy": "user123",
+     *         "createdAt": "2023-10-01T12:00:00Z",
+     *         "updatedBy": "user456",
+     *         "updatedAt": "2023-10-02T12:00:00Z"
+     *       }
+     *     }
+     */
+    'equipment-model': components['schemas']['resource'] & {
+      /**
+       * @description The name of the equipment model.
+       * @example 8360R
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment model.
+       * @example 158df9ff-334a-4e0d-86cc-3adca17a9686
+       */
+      ERID?: string;
+      /**
+       * @description The category of the equipment model.
+       * @example Machine
+       * @enum {string}
+       */
+      category?: 'Machine' | 'Implement' | 'Unknown';
+      /**
+       * @description Indicates if the equipment model is deprecated.
+       * @example false
+       */
+      deprecated?: boolean;
+      /**
+       * @description Indicates if the equipment model is certified.
+       * @example false
+       */
+      certified?: boolean;
+      make?: components['schemas']['equipment-make'];
+      type?: components['schemas']['equipment-type'];
+      isgType?: components['schemas']['equipment-isg-type'];
+    };
+    /** EquipmentModel */
+    'equipment-model-details': {
+      /** @example 8360R */
+      name?: string;
+      /** @example 158df9ff-334a-4e0d-86cc-3adca17a9686 */
+      ERID?: string;
+      /** @enum {string} */
+      category?: 'Machine' | 'Implement' | 'Unknown';
+      make?: components['schemas']['equipment-make-embed'];
+      type?: components['schemas']['equipment-type-embed'];
+      icon?: components['schemas']['equipment-icon'];
+    };
+    /**
+     * EquipmentModel
+     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+     */
+    'equipment-model-embed': {
+      /**
+       * @description EquipmentModel
+       * @example EquipmentModel
+       */
+      '@type'?: string;
+      /**
+       * @description Unique identifier for the equipment model.
+       * @example 65985
+       */
+      id?: string;
+      /**
+       * @description The name of the equipment model.
+       * @example S680
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment model.
+       * @example f2e7d596-35c6-11e7-af34-123e49453e98
+       */
+      ERID?: string;
+      /**
+       * @description Indicates if the equipment model is certified.
+       * @example true
+       */
+      certified?: boolean;
+    };
+    /**
+     * EquipmentModel
+     * @description Represents the model of the equipment, including its name, unique identifier, category, certification status, make, type, ISG type, icon, deprecation status, and metadata.
+     * @example {
+     *       "name": "8360R",
+     *       "ERID": "158df9ff-334a-4e0d-86cc-3adca17a9686",
+     *       "category": "Machine",
+     *       "certified": false
+     *     }
+     */
+    'equipment-model-no-embed': components['schemas']['resource'] & {
+      /**
+       * @description The name of the equipment model.
+       * @example 8360R
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment model.
+       * @example 158df9ff-334a-4e0d-86cc-3adca17a9686
+       */
+      ERID?: string;
+      /**
+       * @description The category of the equipment model.
+       * @example Machine
+       * @enum {string}
+       */
+      category?: 'Machine' | 'Implement' | 'Unknown';
+      /**
+       * @description Indicates if the equipment model is certified.
+       * @example false
+       */
+      certified?: boolean;
+    };
+    /** PatchDTO */
+    'equipment-patch': {
+      /** @enum {string} */
+      operation?: 'UPDATE';
+      /** @enum {string} */
+      path?: '/organization' | '/archived' | '/organizationRole/type' | '/name';
+      /** @description - For transfer request : value={organizationId} - For archive/unarchive request : value=true/false - For role update request : value={Controlling} - For name update request : value={name} */
+      value?: string;
+    };
+    /**
+     * EquipmentType
+     * @deprecated
+     * @description Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
+     * @example {
+     *       "id": 217,
+     *       "name": "Two-wheel Drive Tractors - 140 Hp And Above",
+     *       "ERID": "82115264-9385-460c-bfbe-177a59445fd9",
+     *       "category": "Machine",
+     *       "certified": true,
+     *       "marketSegment": "Agriculture",
+     *       "icon": {
+     *         "url": "https://example.com/icon.png",
+     *         "description": "Icon representing the equipment type"
+     *       },
+     *       "deprecated": false,
+     *       "allowsCustomModel": true,
+     *       "recordMetaData": {
+     *         "createdBy": "user123",
+     *         "createdAt": "2023-10-01T12:00:00Z",
+     *         "updatedBy": "user456",
+     *         "updatedAt": "2023-10-02T12:00:00Z"
+     *       }
+     *     }
+     */
+    'equipment-type': components['schemas']['resource'] & {
+      /**
+       * @description The name of the equipment type.
+       * @example Two-wheel Drive Tractors - 140 Hp And Above
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment type.
+       * @example 82115264-9385-460c-bfbe-177a59445fd9
+       */
+      ERID?: string;
+      /**
+       * @description The category of the equipment type.
+       * @example Machine
+       * @enum {string}
+       */
+      category?: 'Machine' | 'Implement' | 'Unknown';
+      /**
+       * @description Indicates if the equipment type is certified.
+       * @example true
+       */
+      certified?: boolean;
+      /**
+       * @description Indicates if the equipment type allows custom models.
+       * @example true
+       */
+      allowsCustomModel?: boolean;
+      /**
+       * @description The market segment of the equipment type.
+       * @example Agriculture
+       * @enum {string}
+       */
+      marketSegment?:
+        | 'Unknown'
+        | 'Agriculture'
+        | 'Commercial Worksite Products'
+        | 'Construction'
+        | 'Engines & Components'
+        | 'Forestry'
+        | 'Mining'
+        | 'Turf';
+      icon?: components['schemas']['equipment-icon'];
+      /**
+       * @description Indicates if the equipment type is deprecated.
+       * @example false
+       */
+      deprecated?: boolean;
+    };
+    /**
+     * EquipmentType
+     * @description Represents the type of equipment, including its name, unique identifier, category, certification status, market segment, icon, deprecation status, and metadata.
+     */
+    'equipment-type-embed': {
+      /**
+       * @description EquipmentType
+       * @example EquipmentType
+       */
+      '@type'?: string;
+      /**
+       * @description Unique identifier for the equipment type.
+       * @example 222
+       */
+      id?: string;
+      /**
+       * @description The name of the equipment type.
+       * @example Combine
+       */
+      name?: string;
+      /**
+       * @description Unique identifier for the equipment type.
+       * @example 80619ff7-11fa-11ee-bb58-0e5cd6a962d7
+       */
+      ERID?: string;
+    };
+    /**
+     * Equipment
+     * @description Represents the equipment, including its name, serial number, model year, make, type, ISG type, model, organization, telematics capability, and various other attributes.
+     */
+    equipmentForList: components['schemas']['resource'] & {
+      /**
+       * @description Equipment | Machine | Implement
+       * @example Equipment
+       * @enum {string}
+       */
+      '@type'?: 'Equipment' | 'Machine' | 'Implement';
+      /**
+       * @description Equipment Name.
+       * @example Cates 8360R 055358
+       */
+      name?: string;
+      /**
+       * @description Unique 64-bit ISO NAME used to identify the controller during address claim.
+       * @example b00082000422ed1d
+       */
+      isoName?: string;
+      /**
+       * @description Serial Number of the Equipment and passed on the query parameter
+       * @example 1RW8360RLCD055358
+       */
+      serialNumber?: string;
+      /**
+       * @description VIN or PIN, more than Serial Number, of the Engine.
+       * @example RG6090L839275
+       */
+      engineSerialNumber?: string;
+      /**
+       * @description True if this is an official equipment (we have PI information about it).
+       * @example true
+       */
+      isSerialNumberCertified?: boolean;
+      /**
+       * @description Year of model.
+       * @example 2019
+       */
+      modelYear?: string;
+      make?: components['schemas']['equipment-make-embed'];
+      type?: components['schemas']['equipment-type-embed'];
+      isgType?: components['schemas']['equipment-isg-type-embed'];
+      model?: components['schemas']['equipment-model-embed'];
+      organization?: components['schemas']['organization-embed'];
+      /**
+       * @description Indicates if the equipment is capable of telematics.
+       * @example true
+       */
+      telematicsCapable?: boolean;
+      /**
+       * @description Indicates if the equipment is archived.
+       * @example true
+       */
+      archived?: boolean;
+      /**
+       * @description Unique id for principal equipment
+       * @example 12345
+       */
+      principalId?: string;
+      organizationRole?: components['schemas']['organization-role'];
+      /**
+       * @description Unique identifier of the Equipment.
+       * @example fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      ERID?: string;
+      /** @description List of alternate identifiers of the Equipment like DE-13, DE-17, ERID... */
+      alternateIdentifiers?: components['schemas']['identifier'][];
+      icon?: components['schemas']['equipment-icon'];
+      /** @description List of devices paired with the equipment. */
+      devices?: components['schemas']['device'][];
+      pairingDetails?: components['schemas']['pairing-details'];
+      /**
+       * Format: date-time
+       * @description Timestamp when the equipment was archived.
+       * @example 2021-03-10T19:19:46.420Z
+       */
+      archivedTimestamp?: string;
+      /** @description List of equipment that was merged. */
+      mergedEquipment?: components['schemas']['machine'][];
+      /**
+       * @description Indicates if the equipment is CSC equipment or not.
+       * @example true
+       */
+      isCsc?: boolean;
+    };
+    /**
+     * IconStyle
+     * @description icon style
+     */
+    'icon-style': {
+      /** @description primary color of the icon style */
+      primaryColor?: string;
+      /** @description secondary color of the icon style */
+      secondaryColor?: string;
+    };
+    /**
+     * Identifier of Equipment
+     * @description Identifier of the Equipment like DE-13, DE-17, ERID...
+     */
+    identifier: {
+      /**
+       * @description Type of identifier.
+       * @enum {string}
+       */
+      type?: 'serialNumber' | 'ERID';
+      /**
+       * @description Value of identifier.
+       * @example RW8360R055358
+       */
+      value?: string;
+    };
+    /** Implement */
+    implement: components['schemas']['equipment'] & {
+      machine?: components['schemas']['machine'];
+    };
+    /** InabilityDetail */
+    'inability-detail': components['schemas']['resource'] & {
+      /** @example RC14.8.1 */
+      code?: string;
+      /** @example REGISTRATION */
+      type?: string;
+      /** @example SIM registration is required */
+      description?: string;
+    };
+    /** Link */
+    link: {
+      /** @example nextPage */
+      rel?: string;
+      /**
+       * @description This will be the relative URL. Users will prefix the base url as per their requirements.
+       * @example /equipment?pageOffset=10&itemSize=10
+       */
+      uri?: string;
+    };
+    /** Machine */
+    machine: components['schemas']['equipment'] & {
+      implements?: components['schemas']['implement'][];
+    };
+    /**
+     * MeasurementAsDouble
+     * @description measurement as double
+     */
+    measurementAsDouble: components['schemas']['abstractMeasurement'] & {
+      /** @description type of measurement */
+      type?: string;
+      /** @description unit of measurement */
+      unit?: string;
+      /**
+       * Format: double
+       * @description measurement value as double
+       */
+      valueAsDouble?: number;
+    };
+    /**
+     * MeasurementAsString
+     * @description measurement as string
+     */
+    measurementAsString: components['schemas']['abstractMeasurement'] & {
+      /** @description type of measurement */
+      type?: string;
+      /** @description unit of measurement */
+      unit?: string;
+      /** @description measurement value as string */
+      valueAsString?: string;
+    };
+    /**
+     * Offsets
+     * @description Represents the offsets of a device, including its variable and defined type representation values.
+     */
+    offsets: components['schemas']['resource-embed'] & {
+      /**
+       * @description Offsets
+       * @example Offsets
+       * @enum {string}
+       */
+      '@type'?: 'Offsets';
+      variableRepresentationValues?: components['schemas']['variableRepresentationValue'][];
+      definedTypeRepresentationValues?: components['schemas']['definedTypeRepresentationValue'][];
+    };
+    /** Resource */
+    'organization-embed': {
+      /**
+       * @description Unique id
+       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      id?: string;
+      /**
+       * @description Resource
+       * @example Resource
+       */
+      '@type'?: string;
+    };
+    /**
+     * OrganizationRole
+     * @description Represents the role of an organization, including its type, effective timestamp, and event.
+     * @example {
+     *       "type": "Controlling",
+     *       "effectiveTS": "2023-10-01T12:00:00Z",
+     *       "event": "CREATION"
+     *     }
+     */
+    'organization-role': {
+      /**
+       * @description The type of the organization role.
+       * @example Controlling
+       * @enum {string}
+       */
+      type?: 'Controlling' | 'NonControlling';
+      /**
+       * Format: date-time
+       * @description The timestamp when the role becomes effective.
+       * @example 2023-10-01T12:00:00Z
+       */
+      effectiveTS?: string;
+      /**
+       * @description The event associated with the organization role.
+       * @example CREATION
+       * @enum {string}
+       */
+      event?:
+        | 'CREATION'
+        | 'TRANSFER'
+        | 'SUBSCRIPTION'
+        | 'PAIRING'
+        | 'ORDER'
+        | 'COMMANDED'
+        | 'DECOMMISSION';
+      /** @example true */
+      inPossession?: boolean;
+    };
+    /**
+     * PairingDetails
+     * @description Represents the details of the pairing process, including timestamps and location.
+     * @example {
+     *       "paired": true,
+     *       "associationTimestamp": "2023-10-01T12:00:00Z",
+     *       "disassociationTimestamp": "2023-10-02T12:00:00Z",
+     *       "confirmationTimestamp": "2023-10-01T12:30:00Z",
+     *       "location": {
+     *         "latitude": 40.712776,
+     *         "longitude": -74.005974
+     *       }
+     *     }
+     */
+    'pairing-details': {
+      /**
+       * @description Indicates if the equipment is paired.
+       * @example true
+       */
+      paired?: boolean;
+      /**
+       * Format: date-time
+       * @description The timestamp when the equipment was paired.
+       * @example 2023-10-01T12:00:00Z
+       */
+      associationTimestamp?: string;
+      /**
+       * Format: date-time
+       * @description The timestamp when the equipment was un-paired.
+       * @example 2023-10-02T12:00:00Z
+       */
+      disassociationTimestamp?: string;
+      /**
+       * Format: date-time
+       * @description The timestamp when the pairing was confirmed.
+       * @example 2023-10-01T12:30:00Z
+       */
+      confirmationTimestamp?: string;
+      location?: components['schemas']['point'];
+    };
+    /** Point */
+    point: {
+      /** Format: double */
+      lat?: number;
+      /** Format: double */
+      lon?: number;
+      /** Format: double */
+      slope?: number;
+    };
+    /** PositionReceiver */
+    'position-receiver': components['schemas']['device'] & Record<string, never>;
+    /** Resource */
+    resource: {
+      links?: components['schemas']['link'][];
+      /**
+       * @description Unique id
+       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      id?: string;
+      /**
+       * @description Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       * @example Equipment | Machine | Implement | MachineCharacteristics | ImplementCharacteristics | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       */
+      '@type'?: string;
+    };
+    /** Resource */
+    'resource-embed': {
+      /**
+       * @description Unique id
+       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      id?: string;
+      /**
+       * @description Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       * @example Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       */
+      '@type'?: string;
+    };
+    /** Resource */
+    resourcewithoutLinks: {
+      /**
+       * @description Unique id
+       * @example 363997 | fcdc83cb-8840-4215-84b5-1769889db932
+       */
+      id?: string;
+      /**
+       * @description Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       * @example Equipment | Machine | Implement | EquipmentType | EquipmentMake | EquipmentModel | Organization | TheftRecord | DecommissionRecord | WarrantyInformation | DeviceParameter | Other
+       */
+      '@type'?: string;
     };
     /** TelematicsGateway */
     'telematics-gateway': components['schemas']['device'] & {
@@ -1765,54 +1787,41 @@ export interface components {
       messagesRestricted?: boolean;
       communicationModules?: components['schemas']['communication-module'][];
     };
-    /** Implement */
-    implement: components['schemas']['equipment'] & {
-      machine?: components['schemas']['machine'];
+    /** VariableRepresentationValue */
+    variableRepresentationValue: {
+      variable?: components['schemas']['measurementAsDouble'];
     };
-    /** Machine */
-    machine: components['schemas']['equipment'] & {
-      implements?: components['schemas']['implement'][];
-    };
-    /** PatchDTO */
-    'equipment-patch': {
-      /** @enum {string} */
-      operation?: 'UPDATE';
-      /** @enum {string} */
-      path?: '/organization' | '/archived' | '/organizationRole/type' | '/name';
-      /** @description - For transfer request : value={organizationId} - For archive/unarchive request : value=true/false - For role update request : value={Controlling} - For name update request : value={name} */
-      value?: string;
-    };
-    /** Equipment Creation */
-    createEquipment: {
+    /**
+     * Version
+     * @description Represents the version of a device or software, including its name.
+     * @example {
+     *       "name": "3.16.1171"
+     *     }
+     */
+    version: components['schemas']['resource-embed'] & {
       /**
-       * @description Equipment Name.
-       * @example Cates 8360R 055358
+       * @description Version
+       * @example Version
+       * @enum {string}
+       */
+      '@type'?: 'Version';
+      /**
+       * @description The name of the version.
+       * @example 3.16.1171
        */
       name?: string;
-      /**
-       * @description Serial Number of the Equipment and passed on the query parameter
-       * @example Must be unique string. Max character count is 30.
-       */
-      serialNumber?: string;
-      /**
-       * Model of the equipment.
-       * @description Model of the equipment.
-       */
-      model?: {
-        /**
-         * @description Unique id
-         * @example 3 | 158df9ff-334a-4e0d-86cc-3adca17a9686
-         */
-        id?: string;
-        /**
-         * @description EquipmentModel
-         * @example EquipmentModel
-         */
-        '@type'?: string;
-      };
     };
   };
   responses: {
+    /** @description Create */
+    CreateEquip: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
     /** @description A collection of Assets */
     GetEquipment: {
       headers: {
@@ -1820,7 +1829,7 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown[];
+          values?: components['schemas']['equipmentForList'][];
         };
       };
     };
@@ -1831,7 +1840,27 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown[];
+          values?: components['schemas']['equipment'][];
+        };
+      };
+    };
+    /** @description A collection of Assets */
+    GetEquipmentByMakeId: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+    /** @description A collection of Assets */
+    GetEquipmentMake: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/json': {
+          values?: unknown;
         };
       };
     };
@@ -1857,21 +1886,8 @@ export interface components {
         };
       };
     };
-    /** Equipment Creation */
-    UpdateEquipment: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    examples: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
     /** @description A collection of Assets */
-    GetEquipmentMake: {
+    GetEquipmentTypeByEquipmentMakeIdAndEquipmentTypeId: {
       headers: {
         [name: string]: unknown;
       };
@@ -1882,7 +1898,7 @@ export interface components {
       };
     };
     /** @description A collection of Assets */
-    GetEquipmentByMakeId: {
+    GetEquipmentTypes: {
       headers: {
         [name: string]: unknown;
       };
@@ -1899,34 +1915,12 @@ export interface components {
         'application/json': Record<string, never>;
       };
     };
-    /** @description A collection of Assets */
-    GetEquipmentTypes: {
+    /** Equipment Creation */
+    UpdateEquipment: {
       headers: {
         [name: string]: unknown;
       };
-      content: {
-        'application/json': Record<string, never>;
-      };
-    };
-    /** @description A collection of Assets */
-    GetEquipmentTypeByEquipmentMakeIdAndEquipmentTypeId: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/json': {
-          values?: unknown;
-        };
-      };
-    };
-    /** @description Create */
-    CreateEquip: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/json': Record<string, never>;
-      };
+      content?: never;
     };
     /** @description Update */
     UpdatedEquip: {
@@ -1937,57 +1931,24 @@ export interface components {
         'application/json': Record<string, never>;
       };
     };
+    examples: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
   };
   parameters: {
-    /** @description List of embed data for the Equipment ISG Type */
-    embed: 'equipmentModels' | 'recordMetadata';
-    /** @description Optional query parameter that controls which records are returned based on the record's deprecated flag: parameter set to false: Return only non-deprecated records query parameter not present: both deprecated and non-deprecated records returned. */
-    deprecatedForEquipmentModels: boolean;
-    /** @description Whether to filter isg types by the deprecated flag */
-    deprecated: false | true | 'all';
-    /** @description Originating system of the request */
-    originator: string;
-    /** @description List of OrganizationEquipment Ids (these ids are unique across all orgs) */
-    OrganizationEquipmentIds: number[];
-    /** @description List of serial numbers of the equipment */
-    EquipmentSerialNumbers: string[];
-    /** @description List of OrganizationIds */
-    OrganizationIds: number[];
-    /** @description List of PrincipalIds */
-    PrincipalIds: number[];
-    /**
-     * @description Refers to starting record value
-     * @example 200
-     */
-    PageOffset: number;
-    /**
-     * @description Refers to number of items per page(default 100 max 5000)
-     * @example 200
-     */
-    ItemLimit: number;
-    /** @example 1111 */
-    id: number;
-    /** @example 1234, */
-    organizationId: number;
-    /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
-    organizationIds: number[];
-    /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
-    EmbedForList: 'devices' | 'equipment' | 'icon' | 'pairingDetails';
-    /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
-    Embed: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
-    Categories: 'Machine' | 'Implement';
-    CapableOf: 'Connectivity' | '!Connectivity';
-    Role: 'Controlling' | 'NonControlling';
     /** @description true or false */
     Archived: boolean;
-    /** @example VIN1234 */
-    SerialNumber: string;
-    /** @description ID for Equipment Make */
-    EquipmentMakeId: number;
-    /** @description ID for Equipment ISG Type */
-    EquipmentISGTypeId: number;
+    CapableOf: 'Connectivity' | '!Connectivity';
+    Categories: 'Machine' | 'Implement';
     /** @description Deprecated value should be false */
     Deprecated: boolean;
+    /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
+    Embed: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
+    /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
+    EmbedForList: 'devices' | 'equipment' | 'icon' | 'pairingDetails';
     /**
      * @description Embed additional attributes if required.
      * @example [
@@ -1996,6 +1957,14 @@ export interface components {
      *     ]
      */
     EmbedV1: 'make' | 'type' | 'isgType';
+    /** @description ID for Equipment ISG Type */
+    EquipmentISGTypeId: number;
+    /** @description ID for Equipment Make */
+    EquipmentMakeId: number;
+    /** @description Name for Equipment Make */
+    EquipmentMakeName: string;
+    /** @description ID for Equipment Model */
+    EquipmentModelId: number;
     /**
      * @description It should be equipment model name
      * @example [
@@ -2004,16 +1973,47 @@ export interface components {
      *     ]
      */
     EquipmentModelName: 'string or partial string with * wildcard search';
+    /** @description List of serial numbers of the equipment */
+    EquipmentSerialNumbers: string[];
     /** @description ID for Equipment Type */
     EquipmentTypeId: number;
-    /** @description ID for Equipment Model */
-    EquipmentModelId: number;
-    /** @description List of type categories for the Equipment Model */
-    category: 'machine' | 'implement';
     /** @description Name for Equipment Type */
     EquipmentTypeName: string;
-    /** @description Name for Equipment Make */
-    EquipmentMakeName: string;
+    /**
+     * @description Refers to number of items per page(default 100 max 5000)
+     * @example 200
+     */
+    ItemLimit: number;
+    /** @description List of OrganizationEquipment Ids (these ids are unique across all orgs) */
+    OrganizationEquipmentIds: number[];
+    /** @description List of OrganizationIds */
+    OrganizationIds: number[];
+    /**
+     * @description Refers to starting record value
+     * @example 200
+     */
+    PageOffset: number;
+    /** @description List of PrincipalIds */
+    PrincipalIds: number[];
+    Role: 'Controlling' | 'NonControlling';
+    /** @example VIN1234 */
+    SerialNumber: string;
+    /** @description List of type categories for the Equipment Model */
+    category: 'machine' | 'implement';
+    /** @description Whether to filter isg types by the deprecated flag */
+    deprecated: false | true | 'all';
+    /** @description Optional query parameter that controls which records are returned based on the record's deprecated flag: parameter set to false: Return only non-deprecated records query parameter not present: both deprecated and non-deprecated records returned. */
+    deprecatedForEquipmentModels: boolean;
+    /** @description List of embed data for the Equipment ISG Type */
+    embed: 'equipmentModels' | 'recordMetadata';
+    /** @example 1111 */
+    id: number;
+    /** @example 1234, */
+    organizationId: number;
+    /** @description The organization ids to get Equipment Models for. If provided, then only non-certified models will be returned. If not provided, then only certified models will be returned. */
+    organizationIds: number[];
+    /** @description Originating system of the request */
+    originator: string;
   };
   requestBodies: never;
   headers: never;
@@ -2021,50 +2021,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  createEquipment: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @example 1234, */
-        organizationId: components['parameters']['organizationId'];
-      };
-      cookie?: never;
-    };
-    /** @description Asset to be created. */
-    requestBody?: {
-      content: {
-        'application/json': components['schemas']['createEquipment'];
-      };
-    };
-    responses: {
-      /** @description Created */
-      201: components['responses']['CreateEquip'];
-      /** @description Accepted */
-      202: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Errors'];
-        };
-      };
-      /** @description User is not authorized for this request. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
   putEquipment: {
     parameters: {
       query?: never;
@@ -2134,6 +2090,39 @@ export interface operations {
       };
     };
   };
+  getEquipmentISGTypes: {
+    parameters: {
+      query?: {
+        /** @description List of type categories for the Equipment Model */
+        category?: components['parameters']['category'];
+        /** @description Whether to filter isg types by the deprecated flag */
+        deprecated?: components['parameters']['deprecated'];
+        /** @description List of embed data for the Equipment ISG Type */
+        embed?: components['parameters']['embed'];
+      };
+      header?: {
+        /** @description Originating system of the request */
+        'X-Deere-Originator'?: components['parameters']['originator'];
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            links?: components['schemas']['link'][];
+            values?: components['schemas']['equipment-isg-type'][];
+          };
+        };
+      };
+    };
+  };
   getEquipmentMakes: {
     parameters: {
       query?: never;
@@ -2194,126 +2183,6 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
-      };
-    };
-  };
-  getEquipmentTypesByMakeId: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description ID for Equipment Make */
-        equipmentMakeId: components['parameters']['EquipmentMakeId'];
-        /** @description Deprecated value should be false */
-        deprecated: components['parameters']['Deprecated'];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            links?: components['schemas']['link'][];
-            values?: components['schemas']['equipment-type'][];
-          };
-        };
-      };
-    };
-  };
-  getEquipmentTypes: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Deprecated value should be false */
-        deprecated: components['parameters']['Deprecated'];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            links?: components['schemas']['link'][];
-            values?: components['schemas']['equipment-type'][];
-          };
-        };
-      };
-    };
-  };
-  getEquipmentModels: {
-    parameters: {
-      query?: {
-        /**
-         * @description Embed additional attributes if required.
-         * @example [
-         *       "make",
-         *       "type"
-         *     ]
-         */
-        embed?: components['parameters']['EmbedV1'];
-        /**
-         * @description It should be equipment model name
-         * @example [
-         *       "9RX420",
-         *       "9RX*"
-         *     ]
-         */
-        equipmentModelName?: components['parameters']['EquipmentModelName'];
-      };
-      header?: never;
-      path: {
-        /** @description Deprecated value should be false */
-        deprecated: components['parameters']['Deprecated'];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: components['responses']['GetEquipmentModelName'];
-    };
-  };
-  getEquipmentISGTypes: {
-    parameters: {
-      query?: {
-        /** @description List of type categories for the Equipment Model */
-        category?: components['parameters']['category'];
-        /** @description Whether to filter isg types by the deprecated flag */
-        deprecated?: components['parameters']['deprecated'];
-        /** @description List of embed data for the Equipment ISG Type */
-        embed?: components['parameters']['embed'];
-      };
-      header?: {
-        /** @description Originating system of the request */
-        'X-Deere-Originator'?: components['parameters']['originator'];
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            links?: components['schemas']['link'][];
-            values?: components['schemas']['equipment-isg-type'][];
-          };
-        };
       };
     };
   };
@@ -2458,6 +2327,137 @@ export interface operations {
         };
       };
       /** @description User is not two-legged authorized */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getEquipmentTypesByMakeId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID for Equipment Make */
+        equipmentMakeId: components['parameters']['EquipmentMakeId'];
+        /** @description Deprecated value should be false */
+        deprecated: components['parameters']['Deprecated'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            links?: components['schemas']['link'][];
+            values?: components['schemas']['equipment-type'][];
+          };
+        };
+      };
+    };
+  };
+  getEquipmentModels: {
+    parameters: {
+      query?: {
+        /**
+         * @description Embed additional attributes if required.
+         * @example [
+         *       "make",
+         *       "type"
+         *     ]
+         */
+        embed?: components['parameters']['EmbedV1'];
+        /**
+         * @description It should be equipment model name
+         * @example [
+         *       "9RX420",
+         *       "9RX*"
+         *     ]
+         */
+        equipmentModelName?: components['parameters']['EquipmentModelName'];
+      };
+      header?: never;
+      path: {
+        /** @description Deprecated value should be false */
+        deprecated: components['parameters']['Deprecated'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: components['responses']['GetEquipmentModelName'];
+    };
+  };
+  getEquipmentTypes: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Deprecated value should be false */
+        deprecated: components['parameters']['Deprecated'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            links?: components['schemas']['link'][];
+            values?: components['schemas']['equipment-type'][];
+          };
+        };
+      };
+    };
+  };
+  createEquipment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @example 1234, */
+        organizationId: components['parameters']['organizationId'];
+      };
+      cookie?: never;
+    };
+    /** @description Asset to be created. */
+    requestBody?: {
+      content: {
+        'application/json': components['schemas']['createEquipment'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      201: components['responses']['CreateEquip'];
+      /** @description Accepted */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Errors'];
+        };
+      };
+      /** @description User is not authorized for this request. */
       403: {
         headers: {
           [name: string]: unknown;

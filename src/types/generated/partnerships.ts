@@ -236,13 +236,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description A list of errors */
-    Errors: {
-      /** @example Errors */
-      '@type'?: string;
-      errors?: components['schemas']['Error'][];
-      otherAttributes?: Record<string, never>;
-    };
     /** @description An error object */
     Error: {
       /** @example Error */
@@ -261,16 +254,12 @@ export interface components {
       /** @example 1234123412341234 */
       invalidValue?: string;
     };
-    /** @description A list of partnerships */
-    Partnerships: {
-      links?: components['schemas']['PartnershipsLink'][];
-      /**
-       * Format: int64
-       * @description Number of partnerships found.
-       * @example 1
-       */
-      total?: number;
-      values?: components['schemas']['Partnership'][];
+    /** @description A list of errors */
+    Errors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: components['schemas']['Error'][];
+      otherAttributes?: Record<string, never>;
     };
     /** @description A partnership object */
     Partnership: {
@@ -284,6 +273,35 @@ export interface components {
        * @example REJECTED
        */
       status?: string;
+    };
+    PartnershipId: {
+      /**
+       * @description View the status of the partnership
+       * @example PENDING
+       */
+      status?: string;
+    };
+    /** @description A list of partnerships */
+    Partnerships: {
+      links?: components['schemas']['PartnershipsLink'][];
+      /**
+       * Format: int64
+       * @description Number of partnerships found.
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['Partnership'][];
+    };
+    /** @description A list of partnerships */
+    PartnershipsId: {
+      links?: components['schemas']['PartnershipsLink'][];
+      /**
+       * Format: int64
+       * @description Number of partnerships found.
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['PartnershipId'][];
     };
     PartnershipsLink: {
       /**
@@ -307,18 +325,24 @@ export interface components {
        */
       contactInvitation?: unknown;
     };
-    /** @description A list of partnerships */
-    PartnershipsId: {
-      links?: components['schemas']['PartnershipsLink'][];
+    PermissionPostValue: {
       /**
-       * Format: int64
-       * @description Number of partnerships found.
-       * @example 1
+       * @description The type of permission.
+       * @example viewDetailsAndMapLocation
        */
-      total?: number;
-      values?: components['schemas']['PartnershipId'][];
+      type?: string;
+      /**
+       * @description Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved.
+       * @example requested
+       */
+      status?: string;
     };
-    PartnershipId: {
+    PermissionValue: {
+      /**
+       * @description The type of permission.
+       * @example prescription Files
+       */
+      type?: string;
       /**
        * @description View the status of the partnership
        * @example PENDING
@@ -343,45 +367,12 @@ export interface components {
        */
       requestPermissions?: unknown;
     };
-    PermissionValue: {
-      /**
-       * @description The type of permission.
-       * @example prescription Files
-       */
-      type?: string;
-      /**
-       * @description View the status of the partnership
-       * @example PENDING
-       */
-      status?: string;
-    };
     /** @description A list of permissions */
     PermissionsPost: {
       values?: components['schemas']['PermissionPostValue'][];
     };
-    PermissionPostValue: {
-      /**
-       * @description The type of permission.
-       * @example viewDetailsAndMapLocation
-       */
-      type?: string;
-      /**
-       * @description Indicates whether this permission has been granted to the partner org. Possible values are: Not Given, Requested, and Approved.
-       * @example requested
-       */
-      status?: string;
-    };
   };
   responses: {
-    /** @description Not found */
-    TokenNotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
-      };
-    };
     /** @description Request body was invalid */
     BadCreateRequests: {
       headers: {
@@ -398,12 +389,21 @@ export interface components {
       };
       content?: never;
     };
+    /** @description Not found */
+    TokenNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
   };
   parameters: {
-    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-    'X-deere-signature': string;
     /** @description Token Id */
     PartnershipId: string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
   };
   requestBodies: never;
   headers: never;

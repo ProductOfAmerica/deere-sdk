@@ -28,6 +28,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description Engine Hours */
+    EngineHours: {
+      /**
+       * @description The number of hours the engine has been running.
+       * @example &lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;
+       */
+      reading?: Record<string, never>;
+      /**
+       * Format: date-time
+       * @description Timestamp at which the report was created.
+       * @example 2010-10-04T14:35:05.000Z
+       */
+      reportTime?: string;
+      /**
+       * @description Device which collected the data.
+       * @example CI
+       */
+      source?: string;
+    };
     /** @description Page of engineHours information for the machine. */
     EngineHours_Response: {
       /** @description Link list */
@@ -47,25 +66,6 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/machines/4321
        */
       machine?: unknown;
-    };
-    /** @description Engine Hours */
-    EngineHours: {
-      /**
-       * @description The number of hours the engine has been running.
-       * @example &lt;valueAsDouble&gt;523.5166666666667&lt;/valueAsDouble&gt;
-       */
-      reading?: Record<string, never>;
-      /**
-       * Format: date-time
-       * @description Timestamp at which the report was created.
-       * @example 2010-10-04T14:35:05.000Z
-       */
-      reportTime?: string;
-      /**
-       * @description Device which collected the data.
-       * @example CI
-       */
-      source?: string;
     };
   };
   responses: never;

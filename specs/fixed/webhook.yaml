@@ -16,6 +16,40 @@ servers:
           - "sandboxapi"
           - "partnerapi"
 paths:
+  /eventSubscriptionDelivery:
+    patch:
+      summary: "Update Event Subscription Delivery"
+      description: "This resource will update an event subscription delivery"
+      operationId: "updateDelivery"
+      requestBody:
+        x-required-boolean: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionUpdateResponse"
+            examples:
+              No Header:
+                value:
+                  authorizationHeaderValue: "Bearer 123abc"
+                  concurrentDeliveries: 5
+                  maxBatchSize: 5
+                  status: "Active"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdatedResponse_EventSubscriptionDelivery"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse_EventSubscriptionDelivery"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
+    get:
+      description: "This resource will return your event subscription delivery status"
+      summary: "Get Event Subscription Delivery"
+      operationId: "getDelivery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DeliveryResponse"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
   /eventSubscriptions:
     post:
       summary: "Create an Event Subscription"
@@ -131,15 +165,15 @@ paths:
           $ref: "#/components/responses/InputValueIsInvalidResponse"
 components:
   parameters:
-    Id:
-      in: "path"
-      name: "id"
-      description: "Event Subscription ID as a GUID."
-      x-required-boolean: true
+    DisplayName:
+      in: "request"
+      name: "displayName"
+      description: "Human-readable name to easily identify the event subscription."
+      x-required-boolean: false
       schema:
         type: "string"
         default: "N/A"
-        example: "83ks9gh3-29fj-9302-837j-92jlsk92jd095kd"
+        example: "My Data Subscription"
     EventTypeId:
       in: "request"
       name: "eventTypeId"
@@ -158,15 +192,22 @@ components:
         type: "array"
         default: "N/A"
         example: "See sample request below"
-    TargetEndpoint:
-      in: "request"
-      name: "targetEndpoint"
-      description: "The postback endpoint that receives the event(s)."
+    HTTPTargetEndpointAuthorizationHeader:
+      name: "Authorization"
+      in: "header"
+      description: "If set via the eventSubscriptionDelivery endpoint, we will include an Authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
+      x-required-boolean: false
+      schema:
+        $ref: "#/components/schemas/AuthorizationHeader"
+    Id:
+      in: "path"
+      name: "id"
+      description: "Event Subscription ID as a GUID."
       x-required-boolean: true
       schema:
-        type: "---"
+        type: "string"
         default: "N/A"
-        example: "See sample request below"
+        example: "83ks9gh3-29fj-9302-837j-92jlsk92jd095kd"
     Status:
       in: "request"
       name: "status"
@@ -176,15 +217,15 @@ components:
         type: "string"
         default: "Active"
         example: "Active"
-    DisplayName:
+    TargetEndpoint:
       in: "request"
-      name: "displayName"
-      description: "Human-readable name to easily identify the event subscription."
-      x-required-boolean: false
+      name: "targetEndpoint"
+      description: "The postback endpoint that receives the event(s)."
+      x-required-boolean: true
       schema:
-        type: "string"
+        type: "---"
         default: "N/A"
-        example: "My Data Subscription"
+        example: "See sample request below"
     Token:
       in: "request"
       name: "token"
@@ -194,22 +235,7 @@ components:
         type: "string"
         default: "N/A"
         example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$'"
-    HTTPTargetEndpointAuthorizationHeader:
-      name: "Authorization"
-      in: "header"
-      description: "If set via the eventSubscriptionDelivery endpoint, we will include an Authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
-      x-required-boolean: false
-      schema:
-        $ref: "#/components/schemas/AuthorizationHeader"
   requestBodies:
-    SubscriptionRequest:
-      x-required-boolean: true
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/SubscriptionRequestContent"
-    SubscriptionUpdateRequest:
-      $ref: "#/components/schemas/SubscriptionResponseContent"
     DeliveryUpdateRequest:
       x-required-boolean: true
       content:
@@ -222,88 +248,27 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/HTTPTargetEndpointEventsContent"
+    SubscriptionRequest:
+      x-required-boolean: true
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/SubscriptionRequestContent"
+    SubscriptionUpdateRequest:
+      $ref: "#/components/schemas/SubscriptionResponseContent"
   responses:
-    SubscriptionResponse:
-      description: "Subscription"
+    BadRequestResponse:
+      description: "Bad Request"
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
-            properties:
-              links:
-                items:
-                  $ref: "#/components/schemas/CreatedSubscriptionLinks"
-              values:
-                items:
-                  $ref: "#/components/schemas/CreatedSubscriptionValues"
-          examples:
-            No Header:
-              value:
-                id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
-                eventTypeId: "fieldOperation"
-                filters:
-                  - key: "orgId"
-                    values:
-                      - "123456"
-                  - key: "fieldOperationType"
-                    values:
-                      - "seeding"
-                targetEndpoint:
-                  targetType: "https"
-                  uri: "https://website.com/api/receiveEvents"
-                status: "Active"
-                displayName: "Org 123456 Seeding Field Ops Subscription"
-                clientKey: "REDACTED"
-                token: "REDACTED"
-                links:
-                  - rel: "user"
-                    uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
-                  - rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
-    SubscriptionCollectionResponse:
-      description: "Subscriptions"
+            $ref: "#/components/schemas/Errors"
+    BadRequestResponse_EventSubscriptionDelivery:
+      description: "Bad Request"
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
-            properties:
-              links:
-                items:
-                  $ref: "#/components/schemas/SubscriptionCollectionResponseContent"
-          examples:
-            No Header:
-              value:
-                links:
-                  - rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptions"
-                total: 1
-                values:
-                  - id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
-                    eventTypeId: "fieldOperation"
-                    filters:
-                      - key: "orgId"
-                        values:
-                          - "123456"
-                      - key: "fieldOperationType"
-                        values:
-                          - "seeding"
-                      - key: "cropSeason"
-                        values:
-                          - "2017"
-                          - "2018"
-                      - key: "fieldId"
-                        values:
-                          - "12345"
-                    targetEndpoint:
-                      targetType: "https"
-                      uri: "https://example.com/api/receiveEvents"
-                    status: "Active"
-                    displayName: "Org123456SeedingFieldOpsSubscription"
-                    clientKey: "REDACTED"
-                    token: "REDACTED"
-                    links:
-                      - rel: "user"
-                        uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
-                      - rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
+            $ref: "#/components/schemas/Errors_EventSubscriptionDelivery"
     CreatedSubscription:
       description: "Created"
       content:
@@ -353,6 +318,114 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             description: "A deleted response"
+    DeliveryResponse:
+      description: "Delivery"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              values:
+                items:
+                  $ref: "#/components/schemas/SubscriptionUpdateResponseGet"
+              links:
+                items:
+                  $ref: "#/components/schemas/SubscriptionDeliveryLink"
+          examples:
+            No Header:
+              value:
+                authorizationHeaderValue: "Bearer 123abc"
+                clientKey: "REDACTED"
+                status: "Active"
+                concurrentDeliveries: 5
+                maxBatchSize: 10
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptionDelivery"
+    DoesNotHaveAccessResponse:
+      description: "Does not have access"
+    InputValueIsInvalidResponse:
+      description: "Not found"
+    SubscriptionCollectionResponse:
+      description: "Subscriptions"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/SubscriptionCollectionResponseContent"
+          examples:
+            No Header:
+              value:
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptions"
+                total: 1
+                values:
+                  - id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
+                    eventTypeId: "fieldOperation"
+                    filters:
+                      - key: "orgId"
+                        values:
+                          - "123456"
+                      - key: "fieldOperationType"
+                        values:
+                          - "seeding"
+                      - key: "cropSeason"
+                        values:
+                          - "2017"
+                          - "2018"
+                      - key: "fieldId"
+                        values:
+                          - "12345"
+                    targetEndpoint:
+                      targetType: "https"
+                      uri: "https://example.com/api/receiveEvents"
+                    status: "Active"
+                    displayName: "Org123456SeedingFieldOpsSubscription"
+                    clientKey: "REDACTED"
+                    token: "REDACTED"
+                    links:
+                      - rel: "user"
+                        uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
+    SubscriptionResponse:
+      description: "Subscription"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/CreatedSubscriptionLinks"
+              values:
+                items:
+                  $ref: "#/components/schemas/CreatedSubscriptionValues"
+          examples:
+            No Header:
+              value:
+                id: "ae4b499c-1111-2222-3333-d7498cd7d9dd"
+                eventTypeId: "fieldOperation"
+                filters:
+                  - key: "orgId"
+                    values:
+                      - "123456"
+                  - key: "fieldOperationType"
+                    values:
+                      - "seeding"
+                targetEndpoint:
+                  targetType: "https"
+                  uri: "https://website.com/api/receiveEvents"
+                status: "Active"
+                displayName: "Org 123456 Seeding Field Ops Subscription"
+                clientKey: "REDACTED"
+                token: "REDACTED"
+                links:
+                  - rel: "user"
+                    uri: "https://sandboxapi.deere.com/platform/users/subscribedUser"
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
     UpdatedResponse:
       description: "Subscription"
       content:
@@ -367,86 +440,27 @@ components:
           examples:
             Headers:
               description: "204 No Content"
-    InputValueIsInvalidResponse:
-      description: "Not found"
-    DoesNotHaveAccessResponse:
-      description: "Does not have access"
-    BadRequestResponse:
-      description: "Bad Request"
+    UpdatedResponse_EventSubscriptionDelivery:
+      description: "Update Subscriptions delivery"
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
-            $ref: "#/components/schemas/Errors"
+            properties:
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+          examples:
+            Headers:
+              description: "204 No Content"
   schemas:
-    HTTPTargetEndpointEventsContent:
-      description: "A list of events"
-      type: "array"
-      items:
-        $ref: "#/components/schemas/HTTPTargetEndpointEventContent"
-    HTTPTargetEndpointEventContent:
-      description: "An event"
-      type: "object"
-      properties:
-        clientKey:
-          type: "string"
-          description: "The client key that made the subscription"
-          example: "johndeere-abcdef"
-        eventTypeId:
-          type: "string"
-          example: "fieldOperation"
-        targetResource:
-          type: "string"
-          format: "url"
-          example: "https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912"
-        token:
-          type: "string"
-          pattern: "^[A-Za-z0-9+/=]{0,256}$"
-          description: "a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set."
-          example: "abc123ABC+/="
-        metadata:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/HTTPTargetEndpointEventMetadata"
-        links:
-          $ref: "#/components/schemas/Links"
-      required:
-        - "clientKey"
-        - "eventTypeId"
-        - "targetResource"
-        - "metadata"
-        - "links"
-    HTTPTargetEndpointEventMetadata:
-      type: "object"
-      description: "Generic key value pair"
-      properties:
-        key:
-          type: "string"
-          example: "orgId"
-        value:
-          type: "string"
-          example: 12345
-    Links:
-      type: "array"
-      items:
-        $ref: "#/components/schemas/Link"
-      readOnly: true
-    Link:
-      description: "Link to another resource"
-      type: "object"
-      required:
-        - "rel"
-        - "uri"
-      properties:
-        rel:
-          type: "string"
-          example: "self"
-        uri:
-          type: "string"
-          example: "https://sandboxapi.deere.com/platform/users/USER"
-    Errors:
-      type: "array"
-      items:
-        $ref: "#/components/schemas/Error"
+    AuthorizationHeader:
+      type: "string"
+      maxLength: 4096
+      nullable: true
+      example: "Bearer"
+      description: "If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
     CreatedSubscriptionLinks:
       properties:
         user:
@@ -495,141 +509,6 @@ components:
           description: "Links to other resources."
           example: "See the sample response below"
           type: "array"
-    Error:
-      type: "object"
-      properties:
-        guid:
-          type: "string"
-          format: "guid"
-          example: "11111111-2222-3333-4444-555555555555"
-        message:
-          type: "string"
-          description: "An english description of the error"
-          example: "was invalid because"
-        code:
-          type: "string"
-          description: "A string constant representing the type of error"
-          example: 400
-        field:
-          type: "string"
-          description: "The name of the property or parameter deemed invalid"
-          example: "example-field"
-        invalidValue:
-          type: "string"
-          description: "The value that was supplied for this field in the request"
-          example: "Bad value"
-    SubscriptionRequestContent:
-      description: "A subscription request"
-      type: "object"
-      properties:
-        eventTypeId:
-          $ref: "#/components/schemas/EventTypeId"
-        filters:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Filter"
-        targetEndpoint:
-          $ref: "#/components/schemas/HttpsSubscription"
-        status:
-          type: "string"
-          enum:
-            - "Active"
-          default: "Active"
-        displayName:
-          type: "string"
-          example: "mySubscribedEndPoint"
-        token:
-          type: "string"
-          pattern: "^[A-Za-z0-9+/=]{0,256}$"
-          description: "a string that well be sent with each delivery to validate the sender. Accepts the base 64 character set."
-          example: "abc123ABC+/="
-      required:
-        - "eventTypeId"
-        - "targetEndpoint"
-    Filter:
-      type: "object"
-      description: "Consists of a key and list of values used to filter events based on metadata."
-      properties:
-        key:
-          type: "string"
-          example: "orgId"
-        values:
-          type: "array"
-          items:
-            type: "string"
-            example: "1234"
-      required:
-        - "key"
-        - "values"
-    SubscriptionCollectionResponseContent:
-      type: "object"
-      properties:
-        self:
-          description: "The link of the request."
-          example: "https://sandboxapi.deere.com/platform/eventSubscriptions"
-    SubscriptionResponseContentPut:
-      description: "A subscription response"
-      type: "object"
-      properties:
-        targetEndpoint:
-          example: "See the sample response below"
-          type: "---"
-          description: "The postback endpoint that receives the event(s)."
-        status:
-          type: "string"
-          example: "Active"
-          description: "The status of the event subscription."
-        displayName:
-          type: "string"
-          example: "My Data Subscription"
-          description: "Human-readable name to easily identify the event subscription."
-        clientKey:
-          type: "string"
-          example: "REDACTED"
-          description: "The client key used to create the subscription."
-        token:
-          type: "string"
-          pattern: "^[A-Za-z0-9+/=]{0,256}$"
-          description: "A string that was sent with each delivery to validate the sender."
-          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$'"
-    SubscriptionResponseContent:
-      description: "A subscription response"
-      type: "object"
-      properties:
-        targetEndpoint:
-          type: "---"
-          description: "The postback endpoint that receives the event(s)."
-          example: "See the sample request below Editable: Yes"
-        status:
-          description: "The status of the event subscription."
-          type: "string"
-          example: "active Editable: Yes"
-        displayName:
-          type: "string"
-          description: "Human-readable name to easily identify the event subscription."
-          example: "My Data Subscription Editable: Yes"
-        token:
-          type: "string"
-          description: "A string that was sent with each delivery to validate the sender."
-          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes"
-    HttpsSubscription:
-      description: "A HTTPS subscription"
-      type: "object"
-      required:
-        - "targetType"
-        - "uri"
-      properties:
-        targetType:
-          type: "string"
-          example: "https"
-        uri:
-          type: "string"
-          example: "https//example.com/callme"
-    EventTypeId:
-      type: "string"
-      description: "See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names"
-      readOnly: true
-      example: "exampleEvent"
     DeliveryContent:
       type: "object"
       description: "Delivery"
@@ -661,9 +540,275 @@ components:
       enum:
         - "Active"
         - "Paused"
-    AuthorizationHeader:
+    Error:
+      type: "object"
+      properties:
+        guid:
+          type: "string"
+          format: "guid"
+          example: "11111111-2222-3333-4444-555555555555"
+        message:
+          type: "string"
+          description: "An english description of the error"
+          example: "was invalid because"
+        code:
+          type: "string"
+          description: "A string constant representing the type of error"
+          example: 400
+        field:
+          type: "string"
+          description: "The name of the property or parameter deemed invalid"
+          example: "example-field"
+        invalidValue:
+          type: "string"
+          description: "The value that was supplied for this field in the request"
+          example: "Bad value"
+    Error_EventSubscriptionDelivery:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          description: "An english description of the error"
+          example: "was invalid because"
+        code:
+          type: "string"
+          description: "A string constant representing the type of error"
+          example: 400
+        field:
+          type: "string"
+          description: "The name of the property or parameter deemed invalid"
+          example: "Machine.serialNumber"
+        gud:
+          type: "string"
+          format: "uuid"
+          description: "A reference to this encounter of the error, for traceability and troubleshooting"
+          example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
+        invalidValue:
+          type: "string"
+          description: "The value that was supplied for this field in the request"
+          example: null
+      readOnly: true
+    Errors:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Error"
+    Errors_EventSubscriptionDelivery:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Error_EventSubscriptionDelivery"
+      readOnly: true
+    EventTypeId:
       type: "string"
-      maxLength: 4096
-      nullable: true
-      example: "Bearer"
-      description: "If provided, we will include an authorization header on every HTTP Post callback for this client with the complete content provided in this property. For more information, see RFC 7235, section 4.2 and RCF 7617. You may choose to rotate this value on a regular basis. The max size for this value is 4 kb."
+      description: "See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names"
+      readOnly: true
+      example: "exampleEvent"
+    Filter:
+      type: "object"
+      description: "Consists of a key and list of values used to filter events based on metadata."
+      properties:
+        key:
+          type: "string"
+          example: "orgId"
+        values:
+          type: "array"
+          items:
+            type: "string"
+            example: "1234"
+      required:
+        - "key"
+        - "values"
+    HTTPTargetEndpointEventContent:
+      description: "An event"
+      type: "object"
+      properties:
+        clientKey:
+          type: "string"
+          description: "The client key that made the subscription"
+          example: "johndeere-abcdef"
+        eventTypeId:
+          type: "string"
+          example: "fieldOperation"
+        targetResource:
+          type: "string"
+          format: "url"
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/795b80cf-eb03-4c43-a9e1-f46eb0fbf912"
+        token:
+          type: "string"
+          pattern: "^[A-Za-z0-9+/=]{0,256}$"
+          description: "a string that will be sent with each delivery to validate the sender. Accepts the base 64 character set."
+          example: "abc123ABC+/="
+        metadata:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/HTTPTargetEndpointEventMetadata"
+        links:
+          $ref: "#/components/schemas/Links"
+      required:
+        - "clientKey"
+        - "eventTypeId"
+        - "targetResource"
+        - "metadata"
+        - "links"
+    HTTPTargetEndpointEventMetadata:
+      type: "object"
+      description: "Generic key value pair"
+      properties:
+        key:
+          type: "string"
+          example: "orgId"
+        value:
+          type: "string"
+          example: 12345
+    HTTPTargetEndpointEventsContent:
+      description: "A list of events"
+      type: "array"
+      items:
+        $ref: "#/components/schemas/HTTPTargetEndpointEventContent"
+    HttpsSubscription:
+      description: "A HTTPS subscription"
+      type: "object"
+      required:
+        - "targetType"
+        - "uri"
+      properties:
+        targetType:
+          type: "string"
+          example: "https"
+        uri:
+          type: "string"
+          example: "https//example.com/callme"
+    Link:
+      description: "Link to another resource"
+      type: "object"
+      required:
+        - "rel"
+        - "uri"
+      properties:
+        rel:
+          type: "string"
+          example: "self"
+        uri:
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/users/USER"
+    Links:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Link"
+      readOnly: true
+    SubscriptionCollectionResponseContent:
+      type: "object"
+      properties:
+        self:
+          description: "The link of the request."
+          example: "https://sandboxapi.deere.com/platform/eventSubscriptions"
+    SubscriptionDeliveryLink:
+      properties:
+        self:
+          description: "The link to the event subscription's delivery status."
+          example: "https://sandboxapi.deere.com/platform/eventSubscriptionDelivery"
+    SubscriptionRequestContent:
+      description: "A subscription request"
+      type: "object"
+      properties:
+        eventTypeId:
+          $ref: "#/components/schemas/EventTypeId"
+        filters:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Filter"
+        targetEndpoint:
+          $ref: "#/components/schemas/HttpsSubscription"
+        status:
+          type: "string"
+          enum:
+            - "Active"
+          default: "Active"
+        displayName:
+          type: "string"
+          example: "mySubscribedEndPoint"
+        token:
+          type: "string"
+          pattern: "^[A-Za-z0-9+/=]{0,256}$"
+          description: "a string that well be sent with each delivery to validate the sender. Accepts the base 64 character set."
+          example: "abc123ABC+/="
+      required:
+        - "eventTypeId"
+        - "targetEndpoint"
+    SubscriptionResponseContent:
+      description: "A subscription response"
+      type: "object"
+      properties:
+        targetEndpoint:
+          type: "---"
+          description: "The postback endpoint that receives the event(s)."
+          example: "See the sample request below Editable: Yes"
+        status:
+          description: "The status of the event subscription."
+          type: "string"
+          example: "active Editable: Yes"
+        displayName:
+          type: "string"
+          description: "Human-readable name to easily identify the event subscription."
+          example: "My Data Subscription Editable: Yes"
+        token:
+          type: "string"
+          description: "A string that was sent with each delivery to validate the sender."
+          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$' Editable: Yes"
+    SubscriptionResponseContentPut:
+      description: "A subscription response"
+      type: "object"
+      properties:
+        targetEndpoint:
+          example: "See the sample response below"
+          type: "---"
+          description: "The postback endpoint that receives the event(s)."
+        status:
+          type: "string"
+          example: "Active"
+          description: "The status of the event subscription."
+        displayName:
+          type: "string"
+          example: "My Data Subscription"
+          description: "Human-readable name to easily identify the event subscription."
+        clientKey:
+          type: "string"
+          example: "REDACTED"
+          description: "The client key used to create the subscription."
+        token:
+          type: "string"
+          pattern: "^[A-Za-z0-9+/=]{0,256}$"
+          description: "A string that was sent with each delivery to validate the sender."
+          example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$'"
+    SubscriptionUpdateResponse:
+      properties:
+        concurrentDeliveries:
+          type: "number"
+          description: "Concurrency of the event subscription delivery (default: 1, min: 1, max: 10)."
+          example: "5 Editable: Yes"
+        clientKey:
+          type: "string"
+          description: "The client key used to create the subscription."
+          example: "johndeere-1234567898765432123456789876543212345678 Editable: No"
+        links:
+          type: "array"
+          example: "See the sample request below Editable: No"
+          description: "Links to other resources."
+    SubscriptionUpdateResponseGet:
+      properties:
+        concurrentDeliveries:
+          type: "number"
+          description: "Concurrency of the event subscription delivery (default: 1, min: 1, max: 10)."
+          example: 5
+        clientKey:
+          type: "string"
+          description: "The client key used to create the subscription."
+          example: "REDACTED"
+        links:
+          type: "array"
+          example: "See the sample request below"
+          description: "Links to other resources."
+x-source-documents:
+  - endPointName: "event-subscription"
+    id: 103
+  - endPointName: "event-subscription-delivery"
+    id: 104
