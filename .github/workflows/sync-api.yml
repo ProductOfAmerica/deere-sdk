@@ -50,14 +50,38 @@ jobs:
       - name: Fetch latest API specs
         run: pnpm fetch-specs
 
+      - name: Redact specs
+        run: pnpm redact-specs
+
       - name: Fix specs
         run: pnpm fix-specs
+
+      - name: Generate API servers
+        run: pnpm generate-api-servers
 
       - name: Generate types
         run: pnpm generate-types
 
       - name: Generate SDK
         run: pnpm generate-sdk
+
+      - name: Classify API changes
+        id: classify
+        run: |
+          CLASSIFICATION=$(jq -r .classification sync-report.json)
+          ADDED_COUNT=$(jq '.newOperations | length' sync-report.json)
+
+          echo "Classification: $CLASSIFICATION"
+          echo "Added operations: $ADDED_COUNT"
+
+          echo "classification=$CLASSIFICATION" >> $GITHUB_OUTPUT
+          echo "added_count=$ADDED_COUNT" >> $GITHUB_OUTPUT
+
+          {
+            echo "added_ops<<EOF"
+            jq -r '.newOperations[] | "- `" + .spec + "`: " + .method + " " + .path + " (as `" + .name + "`)"' sync-report.json
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Lint fix generated code
         run: pnpm lint:fix
@@ -75,10 +99,11 @@ jobs:
           SPEC_CHANGES=$(git diff --name-only -- 'specs/raw/*.yaml' 'specs/fixed/*.yaml' | wc -l)
           API_CHANGES=$(git diff --name-only -- 'src/api/*.ts' | wc -l)
           TYPE_CHANGES=$(git diff --name-only -- 'src/types/generated/*.ts' | grep -v 'index.ts' | wc -l)
+          MANIFEST_CHANGES=$(git diff --name-only -- 'scripts/api-surface.yaml' | wc -l)
 
-          TOTAL=$((SPEC_CHANGES + API_CHANGES + TYPE_CHANGES))
+          TOTAL=$((SPEC_CHANGES + API_CHANGES + TYPE_CHANGES + MANIFEST_CHANGES))
 
-          echo "Spec changes: $SPEC_CHANGES, API changes: $API_CHANGES, Type changes: $TYPE_CHANGES"
+          echo "Spec changes: $SPEC_CHANGES, API changes: $API_CHANGES, Type changes: $TYPE_CHANGES, Manifest changes: $MANIFEST_CHANGES"
           git status --porcelain
 
           if [[ $TOTAL -gt 0 ]]; then
@@ -100,9 +125,17 @@ jobs:
           # Parse version components
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # Bump patch version
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          # Additive changes bump minor and reset patch to 0; everything else
+          # (benign spec churn, forced release) keeps the patch-only bump.
+          # Guarded strictly on the classification value, never on whether
+          # scripts/api-surface.yaml itself shows a diff.
+          if [[ "${{ steps.classify.outputs.classification }}" == "additive" ]]; then
+            NEW_MINOR=$((MINOR + 1))
+            NEW_VERSION="${MAJOR}.${NEW_MINOR}.0"
+          else
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          fi
 
           echo "New version: $NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
@@ -115,14 +148,26 @@ jobs:
 
       - name: Update CHANGELOG.md
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        env:
+          ADDED_OPS: ${{ steps.classify.outputs.added_ops }}
         run: |
           DATE=$(date +%Y-%m-%d)
           VERSION="${{ steps.version.outputs.new_version }}"
+          CLASSIFICATION="${{ steps.classify.outputs.classification }}"
+
+          # Additive runs render the new operations under their own heading;
+          # everything else keeps today's plain entry. ADDED_OPS travels
+          # through env rather than direct expression interpolation below, so
+          # a backtick or paren in an operation name cannot break the script.
+          ADDED_BLOCK=""
+          if [[ "$CLASSIFICATION" == "additive" ]]; then
+            ADDED_BLOCK=$'### Added\n'"$ADDED_OPS"$'\n\n'
+          fi
 
           # Create new changelog entry
           ENTRY="## [$VERSION] - $DATE
 
-          ### Changed
+          ${ADDED_BLOCK}### Changed
           - Synced with latest John Deere API specifications
           "
 
@@ -205,11 +250,22 @@ jobs:
       # modes are eliminated by letting the tag trigger drive the release.
 
       - name: Summary
+        env:
+          ADDED_OPS: ${{ steps.classify.outputs.added_ops }}
         run: |
+          CLASSIFICATION="${{ steps.classify.outputs.classification }}"
+
           if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
             echo "### ✅ API Sync Complete" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Released version: **v${{ steps.version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Classification: **$CLASSIFICATION**" >> $GITHUB_STEP_SUMMARY
+            if [[ "$CLASSIFICATION" == "additive" ]]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "New operations:" >> $GITHUB_STEP_SUMMARY
+              echo "$ADDED_OPS" >> $GITHUB_STEP_SUMMARY
+            fi
             echo "" >> $GITHUB_STEP_SUMMARY
             cat << 'SUMMARY_EOF' >> $GITHUB_STEP_SUMMARY
           ${{ steps.summary.outputs.summary }}
@@ -222,4 +278,26 @@ jobs:
             echo "### ℹ️ No Changes Detected" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "The John Deere API specifications have not changed since the last sync." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Breaking-change guidance
+        if: failure()
+        run: |
+          CLASSIFICATION=""
+          if [[ -f sync-report.json ]]; then
+            CLASSIFICATION=$(jq -r .classification sync-report.json 2>/dev/null || echo "")
+          fi
+
+          if [[ "$CLASSIFICATION" == "breaking" ]]; then
+            MISSING_OPS=$(jq -r '.missingOperations[] | "- `" + .spec + "`: " + .method + " " + .path + " (as `" + .name + "`)"' sync-report.json 2>/dev/null || echo "")
+
+            echo "### Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
+            echo "" >> $GITHUB_STEP_SUMMARY || true
+            echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
+            echo "" >> $GITHUB_STEP_SUMMARY || true
+            echo "$MISSING_OPS" >> $GITHUB_STEP_SUMMARY || true
+            echo "" >> $GITHUB_STEP_SUMMARY || true
+            echo "Remediation: upstream renamed a path: edit that entry's op: in scripts/api-surface.yaml to keep the name; endpoint removed upstream: delete the entry, a major-version consideration; see the header of scripts/api-surface.yaml" >> $GITHUB_STEP_SUMMARY || true
+          else
+            echo "Sync failed. Check the failed step's log above for details." >> $GITHUB_STEP_SUMMARY || true
           fi
