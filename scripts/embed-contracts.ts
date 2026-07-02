@@ -16,6 +16,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
+import { isRecord } from './lib/spec-utils.js';
 
 /** Sentinel stamped on every schema this registry touches. Used for idempotence
  *  across `pnpm generate` re-runs and for drift detection (if JD ever documents
@@ -72,12 +73,8 @@ function fail(prefix: string, detail: string): never {
   throw new Error(`embed-contracts: ${prefix}: ${detail}`);
 }
 
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 function validatePatch(patch: unknown, entryPrefix: string): Patch {
-  if (!isObject(patch)) {
+  if (!isRecord(patch)) {
     fail(entryPrefix, `patch must be an object, got ${typeof patch}`);
   }
   const op = patch.op;
@@ -88,7 +85,7 @@ function validatePatch(patch: unknown, entryPrefix: string): Patch {
     if (typeof patch.property !== 'string' || !patch.property) {
       fail(entryPrefix, 'addProperty: `property` must be a non-empty string');
     }
-    if (!isObject(patch.schema)) {
+    if (!isRecord(patch.schema)) {
       fail(entryPrefix, 'addProperty: `schema` must be an object');
     }
     return {
@@ -102,7 +99,7 @@ function validatePatch(patch: unknown, entryPrefix: string): Patch {
     if (typeof patch.name !== 'string' || !patch.name) {
       fail(entryPrefix, 'addSchema: `name` must be a non-empty string');
     }
-    if (!isObject(patch.schema)) {
+    if (!isRecord(patch.schema)) {
       fail(entryPrefix, 'addSchema: `schema` must be an object');
     }
     return { op: 'addSchema', name: patch.name, schema: patch.schema };
@@ -114,7 +111,7 @@ function validatePatch(patch: unknown, entryPrefix: string): Patch {
 }
 
 function validateVariant(variant: unknown, entryPrefix: string): EmbedVariant {
-  if (!isObject(variant)) {
+  if (!isRecord(variant)) {
     fail(entryPrefix, `variant must be an object, got ${typeof variant}`);
   }
   if (!Array.isArray(variant.patches)) {
@@ -126,7 +123,7 @@ function validateVariant(variant: unknown, entryPrefix: string): EmbedVariant {
 
 function validateEntry(entry: unknown, index: number): EmbedContract {
   const entryPrefix = `entry[${index}]`;
-  if (!isObject(entry)) {
+  if (!isRecord(entry)) {
     fail(entryPrefix, `must be an object, got ${typeof entry}`);
   }
   const required = ['spec', 'path', 'method', 'embedParam', 'responseItemSchema'] as const;
@@ -135,7 +132,7 @@ function validateEntry(entry: unknown, index: number): EmbedContract {
       fail(entryPrefix, `missing or invalid required field "${key}"`);
     }
   }
-  if (!isObject(entry.variants)) {
+  if (!isRecord(entry.variants)) {
     fail(entryPrefix, '`variants` must be an object');
   }
   const variants: Record<string, EmbedVariant> = {};
