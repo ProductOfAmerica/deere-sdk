@@ -192,15 +192,101 @@ paths:
             schema:
               $ref: "#/components/schemas/PostFiles"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            files: "files"
-            ag3: "ag3"
   parameters:
+    Archived:
+      name: "archived"
+      in: "query"
+      description: "Allows client to filter files according to whether they have been archived. TRUE returns only archived files."
+      schema:
+        type: "boolean"
+        default: "false"
+        example: "true"
+    DelayProcessing:
+      name: "delayProcessing"
+      in: "body"
+      description: "Set to false to force the file to be processed if it would otherwise delay processing. Can only be used with a copyFrom link."
+      schema:
+        type: "boolean"
+        example: "false"
+    EndDate:
+      name: "endDate"
+      in: "query"
+      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard"
+      schema:
+        type: "dateTime"
+        default: "N/A"
+        example: "2015-02-03T10:42:24.282Z"
+    FileId:
+      name: "fileId"
+      in: "path"
+      description: "File Id."
+      x-required-boolean: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 577499742
+    FileType:
+      in: "query"
+      name: "fileType"
+      description: "Takes a number that identifies the file type."
+      x-required-boolean: false
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: "0"
+    FileTypeOptional:
+      in: "query"
+      name: "fileType"
+      description: "Takes the file type number."
+      required: "Optional"
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: "0"
+    Filter:
+      in: "query"
+      name: "filter"
+      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        default: "ALL"
+        format: "int64"
+        example: "MACHINE"
+    FilterOptional:
+      in: "query"
+      name: "filter"
+      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
+      required: "Optional"
+      schema:
+        type: "string"
+        default: "ALL"
+        format: "int64"
+        example: "MACHINE"
+    Links:
+      name: "links"
+      description: "Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization."
+      in: "body"
+      schema:
+        type: "Array of Links"
+        example: "[{\"rel\": \"copyFrom\", \"uri\": \"/files/12345\"}]"
+    Name:
+      name: "name"
+      in: "body"
+      description: "File name."
+      x-required-boolean: true
+      schema:
+        example: "back40Seeding.zip"
+        type: "string"
+    Offset:
+      name: "offset"
+      in: ""
+      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter offset point (in bytes) in this parameter."
+      x-required-boolean: true
+      schema:
+        type: "integer"
+        default: "N/A"
+        example: -1
     OrganizationID:
       in: "path"
       name: "orgId"
@@ -227,44 +313,41 @@ components:
         type: "string"
         default: "N/A"
         example: "5343535"
-    Filter:
-      in: "query"
-      name: "filter"
-      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        default: "ALL"
-        format: "int64"
-        example: "MACHINE"
-    FilterOptional:
-      in: "query"
-      name: "filter"
-      description: "Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host."
-      required: "Optional"
-      schema:
-        type: "string"
-        default: "ALL"
-        format: "int64"
-        example: "MACHINE"
-    FileType:
-      in: "query"
-      name: "fileType"
-      description: "Takes a number that identifies the file type."
-      x-required-boolean: false
+    Size:
+      name: "size"
+      in: ""
+      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter size (in bytes) in this parameter."
+      x-required-boolean: true
       schema:
         type: "integer"
         default: "N/A"
-        example: "0"
-    FileTypeOptional:
+        example: -1
+    StartDate:
+      name: "startDate"
       in: "query"
-      name: "fileType"
-      description: "Takes the file type number."
+      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard."
+      schema:
+        type: "string"
+        format: "date-time"
+        default: "N/A"
+        example: "2013-01-04T14:08:51.104Z"
+    Status:
+      name: "status"
+      in: "query"
+      description: "Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE."
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "TRANSFERABLE"
+    Transferable:
+      in: "query"
+      name: "transferable"
+      description: "Filters by whether a file is transferable"
       required: "Optional"
       schema:
-        type: "integer"
+        type: "boolean"
         default: "N/A"
-        example: "0"
+        example: "true"
     X-deere-signature:
       name: "x-deere-signature"
       in: "header"
@@ -281,98 +364,58 @@ components:
       schema:
         type: "string"
         example: "520122365ebb4870a344784570d202c7"
-    Transferable:
-      in: "query"
-      name: "transferable"
-      description: "Filters by whether a file is transferable"
-      required: "Optional"
-      schema:
-        type: "boolean"
-        default: "N/A"
-        example: "true"
-    Offset:
-      name: "offset"
-      in: ""
-      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter offset point (in bytes) in this parameter."
-      x-required-boolean: true
-      schema:
-        type: "integer"
-        default: "N/A"
-        example: -1
-    Size:
-      name: "size"
-      in: ""
-      description: "Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter size (in bytes) in this parameter."
-      x-required-boolean: true
-      schema:
-        type: "integer"
-        default: "N/A"
-        example: -1
-    FileId:
-      name: "fileId"
-      in: "path"
-      description: "File Id."
-      x-required-boolean: true
-      schema:
-        type: "string"
-        default: "N/A"
-        example: 577499742
-    StartDate:
-      name: "startDate"
-      in: "query"
-      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard."
-      schema:
-        type: "string"
-        format: "date-time"
-        default: "N/A"
-        example: "2013-01-04T14:08:51.104Z"
-    EndDate:
-      name: "endDate"
-      in: "query"
-      description: "Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard"
-      schema:
-        type: "dateTime"
-        default: "N/A"
-        example: "2015-02-03T10:42:24.282Z"
-    Status:
-      name: "status"
-      in: "query"
-      description: "Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE."
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "TRANSFERABLE"
-    Archived:
-      name: "archived"
-      in: "query"
-      description: "Allows client to filter files according to whether they have been archived. TRUE returns only archived files."
-      schema:
-        type: "boolean"
-        default: "false"
-        example: "true"
-    Name:
-      name: "name"
-      in: "body"
-      description: "File name."
-      x-required-boolean: true
-      schema:
-        example: "back40Seeding.zip"
-        type: "string"
-    DelayProcessing:
-      name: "delayProcessing"
-      in: "body"
-      description: "Set to false to force the file to be processed if it would otherwise delay processing. Can only be used with a copyFrom link."
-      schema:
-        type: "boolean"
-        example: "false"
-    Links:
-      name: "links"
-      description: "Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization."
-      in: "body"
-      schema:
-        type: "Array of Links"
-        example: "[{\"rel\": \"copyFrom\", \"uri\": \"/files/12345\"}]"
   responses:
+    FileIdGet:
+      description: "Successful operation"
+      content:
+        application/zip:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/octet-stream:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/x-zip:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/x-zip-compressed:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        multipart/mixed:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            description: "Based on value of embed request param one of the above response object is returned"
+            properties:
+              links:
+                items:
+                  $ref: "#/components/schemas/FilesLink"
+              values:
+                items:
+                  $ref: "#/components/schemas/ValueFileIdGet"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                id: "577499742"
+                name: "back40.zip"
+                type: "SETUP"
+                createdTime: "2015-02-03T10:42:24.282Z"
+                modifiedTime: "2015-02-03T10:42:24.282Z"
+                nativeSize: "72946"
+                source: "JohnDoe"
+                transferPending: "false"
+                visibleViaShare: "owned"
+                shared: "false"
+                status: "UPLOAD_PENDING"
+                archived: "false"
+                assigned: "false"
+                new: "false"
+                links:
+                  - rel: "owningOrganization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/2101"
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/files/466578633"
     FileListResponse:
       description: "Successful operation"
       content:
@@ -426,58 +469,21 @@ components:
                       archived: "false"
                       assigned: "false"
                       new: "false"
-    FileIdGet:
-      description: "Successful operation"
-      content:
-        application/zip:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-        application/octet-stream:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-        application/x-zip:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-        application/x-zip-compressed:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-        multipart/mixed:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            description: "Based on value of embed request param one of the above response object is returned"
-            properties:
-              links:
-                items:
-                  $ref: "#/components/schemas/FilesLink"
-              values:
-                items:
-                  $ref: "#/components/schemas/ValueFileIdGet"
-          examples:
-            No Header:
-              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
-              value:
-                id: "577499742"
-                name: "back40.zip"
-                type: "SETUP"
-                createdTime: "2015-02-03T10:42:24.282Z"
-                modifiedTime: "2015-02-03T10:42:24.282Z"
-                nativeSize: "72946"
-                source: "JohnDoe"
-                transferPending: "false"
-                visibleViaShare: "owned"
-                shared: "false"
-                status: "UPLOAD_PENDING"
-                archived: "false"
-                assigned: "false"
-                new: "false"
-                links:
-                  - rel: "owningOrganization"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/2101"
-                  - rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/files/466578633"
   schemas:
+    EditableFileDetails:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "RW8360R907628_12062012.zip"
+        archived:
+          type: "boolean"
+          description: "Indicates whether the file has been archived."
+          example: false
+        delayProcessing:
+          type: "boolean"
+          description: "If set to true, then processing of the file will be delayed until this is toggled to false."
+          example: false
     FileType:
       type: "string"
       enum:
@@ -496,62 +502,6 @@ components:
         - "BOUNDARY"
         - "EXCEL"
       example: "SETUP"
-    PostableFileDetails:
-      allOf:
-        - $ref: "#/components/schemas/EditableFileDetails"
-        - type: "object"
-          properties:
-            type:
-              $ref: "#/components/schemas/FileType"
-            source:
-              type: "string"
-              description: "The source of the file (e.g., the display type or user that uploaded it)"
-              example: "myUserName"
-            contextMetadata:
-              type: "object"
-              description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
-              example:
-                frequency: "DAILY"
-                reportType: "CONNECTIVITY"
-                machines:
-                  - "eb8a4a58-9d94-4c98-ae56-09331aa0ff50"
-                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
-                fields:
-                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
-                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
-            customMetadata:
-              type: "object"
-              description: "Additional custom metadata for the file"
-              example:
-                time_range_start: "2025-07-01T00:00:00Z"
-                time_range_end: "2025-07-28T00:00:00Z"
-                locale: "en-US"
-                time_zone: "UTC"
-                unit_of_measure: "XYZ"
-                user_type: "Admin"
-                schedule_id: "124jsg"
-    EditableFileDetails:
-      type: "object"
-      properties:
-        name:
-          type: "string"
-          example: "RW8360R907628_12062012.zip"
-        archived:
-          type: "boolean"
-          description: "Indicates whether the file has been archived."
-          example: false
-        delayProcessing:
-          type: "boolean"
-          description: "If set to true, then processing of the file will be delayed until this is toggled to false."
-          example: false
-    FilesLink:
-      properties:
-        owningOrganization:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234"
-          description: "Organization Link."
-        partnerships:
-          example: "https://sandboxapi.deere.com/platform/files/466578633/partnerships"
-          description: "Partnership Link."
     FilesGet:
       type: "object"
       properties:
@@ -624,6 +574,64 @@ components:
           type: "string"
           example: "AgLeader"
           description: "Indicates the manufacturer."
+    FilesLink:
+      properties:
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organization Link."
+        partnerships:
+          example: "https://sandboxapi.deere.com/platform/files/466578633/partnerships"
+          description: "Partnership Link."
+    PostFiles:
+      properties:
+        "201":
+          description: "The file was successfully created."
+          example: "Created"
+        "400":
+          description: "File names must be between 5 and 69 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
+          example: "Must be between 5 and 69 characters Should not contain invalid characters."
+    PostableFileDetails:
+      allOf:
+        - $ref: "#/components/schemas/EditableFileDetails"
+        - type: "object"
+          properties:
+            type:
+              $ref: "#/components/schemas/FileType"
+            source:
+              type: "string"
+              description: "The source of the file (e.g., the display type or user that uploaded it)"
+              example: "myUserName"
+            contextMetadata:
+              type: "object"
+              description: "Contextual metadata for the file, such as frequency, report type, machines, and fields"
+              example:
+                frequency: "DAILY"
+                reportType: "CONNECTIVITY"
+                machines:
+                  - "eb8a4a58-9d94-4c98-ae56-09331aa0ff50"
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+                fields:
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+                  - "3341fe33-4825-464b-8442-3f17fa876cd1"
+            customMetadata:
+              type: "object"
+              description: "Additional custom metadata for the file"
+              example:
+                time_range_start: "2025-07-01T00:00:00Z"
+                time_range_end: "2025-07-28T00:00:00Z"
+                locale: "en-US"
+                time_zone: "UTC"
+                unit_of_measure: "XYZ"
+                user_type: "Admin"
+                schedule_id: "124jsg"
+    PutFiles:
+      properties:
+        "204":
+          description: "The file was updated."
+          example: "No Content"
+        "400":
+          description: "File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
+          example: "Must be between 1 and 45 characters Should not contain invalid characters."
     ValueFileIdGet:
       type: "object"
       properties:
@@ -684,19 +692,11 @@ components:
           type: "boolean"
           example: "false"
           description: "Indicates whether the file is new."
-    PostFiles:
-      properties:
-        "201":
-          description: "The file was successfully created."
-          example: "Created"
-        "400":
-          description: "File names must be between 5 and 69 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
-          example: "Must be between 5 and 69 characters Should not contain invalid characters."
-    PutFiles:
-      properties:
-        "204":
-          description: "The file was updated."
-          example: "No Content"
-        "400":
-          description: "File names must be between 1 and 45 characters and may only contain international alphanumeric characters, spaces, and any of the following: \".,-_\". Specifically, it must match the following Unicode regular expression: ^[\\p{N}\\p{L}.,_ \\-]+$"
-          example: "Must be between 1 and 45 characters Should not contain invalid characters."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+            ag3: "ag3"

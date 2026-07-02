@@ -45,33 +45,7 @@ paths:
         "429":
           $ref: "#/components/responses/TooManyRequests"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            eq1: "eq1"
   parameters:
-    principalId:
-      name: "principalId"
-      in: "path"
-      description: "Principal ID of the machine/equipment."
-      x-required-boolean: true
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "5432"
-    StartDate:
-      name: "startDate"
-      in: "query"
-      description: "Returns alerts from a specified date onward. Requests are time-based with a maximum length of seven days."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        format: "date-time"
-        default: "24 hours before the timestamp of the request"
-        example: "2013-04-29T00:00:00Z"
     EndDate:
       name: "endDate"
       in: "query"
@@ -89,6 +63,25 @@ components:
         type: "boolean"
         default: "false"
         example: "true"
+    StartDate:
+      name: "startDate"
+      in: "query"
+      description: "Returns alerts from a specified date onward. Requests are time-based with a maximum length of seven days."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        format: "date-time"
+        default: "24 hours before the timestamp of the request"
+        example: "2013-04-29T00:00:00Z"
+    principalId:
+      name: "principalId"
+      in: "path"
+      description: "Principal ID of the machine/equipment."
+      x-required-boolean: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "5432"
   responses:
     AlertID:
       description: "The list of machines for a organization."
@@ -166,170 +159,37 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/BadRequestResponseBody"
-    Unauthorized:
-      description: "The request could not be authorized with the given credentials."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/UnauthorizedResponseBody"
     Forbidden:
       description: "The provided authorization is not allowed to access this resource."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/ForbiddenResponseBody"
-    NotFound:
-      description: "The requested resource could not be found."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/NotFoundResponseBody"
     NotAcceptable:
       description: "The given Accept headers did not allow for the content type this resource produces."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/NotAcceptableResponseBody"
+    NotFound:
+      description: "The requested resource could not be found."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/NotFoundResponseBody"
     TooManyRequests:
       description: "The server has received too many requests and cannot fulfill them. Try again at a later time."
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/TooManyRequestsResponseBody"
+    Unauthorized:
+      description: "The request could not be authorized with the given credentials."
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/UnauthorizedResponseBody"
   schemas:
-    BadRequestResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "400"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The provided payload was invalid or malformed."
-              type: "string"
-      type: "object"
-    UnauthorizedResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "401"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The request could not be authorized with the given credentials."
-              type: "string"
-      type: "object"
-    ForbiddenResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "403"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The provided authorization is not allowed to access this resource."
-              type: "string"
-      type: "object"
-    NotAcceptableResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "406"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The requested resource could not be produced in any acceptable format."
-              type: "string"
-      type: "object"
-    NotFoundResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "404"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The requested resource could not be found."
-              type: "string"
-      type: "object"
-    UID:
-      description: "A unique string identifier."
-      example: "e7c52f93-4bb6-48bb-b808-11b7b4f23059"
-      format: "uuid"
-      readOnly: true
-      type: "string"
-    ErrorResponseBody:
-      properties:
-        "@type":
-          description: "This is the type definition for this reference object."
-          enum:
-            - "Errors"
-          readOnly: true
-          type: "string"
-        errors:
-          items:
-            properties:
-              "@type":
-                description: "This is the type definition for this reference object."
-                enum:
-                  - "Error"
-                readOnly: true
-                type: "string"
-              code:
-                example: "400"
-                format: "numeric"
-                type: "string"
-              field:
-                description: "The field in the request body that is invalid."
-                example: "id"
-                type: "string"
-              guid:
-                $ref: "#/components/schemas/UID"
-              invalidValue:
-                description: "The invalid value present in the field."
-                example: "b48da18c-c0e6-4bcc-a00e-581035beab3d"
-                type: "string"
-              message:
-                example: "There was a problem with the request."
-                type: "string"
-            required:
-              - "guid"
-              - "message"
-            type: "object"
-          type: "array"
-        otherAttributes:
-          properties:
-            name:
-              example: "example_name"
-              type: "string"
-            value:
-              example: "example_value"
-              type: "string"
-          type: "object"
-      type: "object"
-    TooManyRequestsResponseBody:
-      allOf:
-        - $ref: "#/components/schemas/ErrorResponseBody"
-        - properties:
-            code:
-              enum:
-                - "429"
-              format: "numeric"
-              type: "string"
-            message:
-              example: "The server has received too many requests. Try again at a later time."
-              type: "string"
-      type: "object"
     AlertLink:
       properties:
         machine:
@@ -451,3 +311,143 @@ components:
               type: "string"
               example: "Other AIC 524019.31 Reverser lever left in incorrect position. - Return to park to attempt recovery."
               description: "Diagnostic Trouble Code (DTC) description."
+    BadRequestResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "400"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The provided payload was invalid or malformed."
+              type: "string"
+      type: "object"
+    ErrorResponseBody:
+      properties:
+        "@type":
+          description: "This is the type definition for this reference object."
+          enum:
+            - "Errors"
+          readOnly: true
+          type: "string"
+        errors:
+          items:
+            properties:
+              "@type":
+                description: "This is the type definition for this reference object."
+                enum:
+                  - "Error"
+                readOnly: true
+                type: "string"
+              code:
+                example: "400"
+                format: "numeric"
+                type: "string"
+              field:
+                description: "The field in the request body that is invalid."
+                example: "id"
+                type: "string"
+              guid:
+                $ref: "#/components/schemas/UID"
+              invalidValue:
+                description: "The invalid value present in the field."
+                example: "b48da18c-c0e6-4bcc-a00e-581035beab3d"
+                type: "string"
+              message:
+                example: "There was a problem with the request."
+                type: "string"
+            required:
+              - "guid"
+              - "message"
+            type: "object"
+          type: "array"
+        otherAttributes:
+          properties:
+            name:
+              example: "example_name"
+              type: "string"
+            value:
+              example: "example_value"
+              type: "string"
+          type: "object"
+      type: "object"
+    ForbiddenResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "403"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The provided authorization is not allowed to access this resource."
+              type: "string"
+      type: "object"
+    NotAcceptableResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "406"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The requested resource could not be produced in any acceptable format."
+              type: "string"
+      type: "object"
+    NotFoundResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "404"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The requested resource could not be found."
+              type: "string"
+      type: "object"
+    TooManyRequestsResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "429"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The server has received too many requests. Try again at a later time."
+              type: "string"
+      type: "object"
+    UID:
+      description: "A unique string identifier."
+      example: "e7c52f93-4bb6-48bb-b808-11b7b4f23059"
+      format: "uuid"
+      readOnly: true
+      type: "string"
+    UnauthorizedResponseBody:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponseBody"
+        - properties:
+            code:
+              enum:
+                - "401"
+              format: "numeric"
+              type: "string"
+            message:
+              example: "The request could not be authorized with the given credentials."
+              type: "string"
+      type: "object"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"

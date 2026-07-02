@@ -77,13 +77,140 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    PTOStatusValue: {
+    Accept: unknown;
+    ContentType: unknown;
+    EngineStateValue: {
       /**
-       * @description Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable.
+       * @description State of the engine. engineState only possible values are: On or Off.
        * @example On
        * @enum {string}
        */
-      value?: 'On' | 'Off' | 'Fault' | 'Unavailable';
+      value?: 'On' | 'Off';
+    };
+    /** Equipment */
+    Equipment: {
+      /**
+       * Format: int64
+       * @description Equipment Id of a configured equipment
+       * @example 7269
+       */
+      id?: number;
+      /**
+       * @description Make of a configured equipment, maxLength = 20
+       * @example JOHN DEERE
+       */
+      make?: string;
+      /**
+       * @description Name of a configured equipment (sometimes called model). maxLength
+       * @example 6120
+       */
+      name?: string;
+    };
+    EquipmentMeasurements: {
+      /**
+       * Format: date-time
+       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
+       */
+      timestamp?: string;
+      /** Format: date-time */
+      measurements?: components['schemas']['Measurement'][];
+    };
+    EquipmentMeasurementsNew: {
+      /**
+       * Format: date-time
+       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
+       */
+      timestamp?: string;
+      /** Format: date-time */
+      measurements?: components['schemas']['MeasurementNew'][];
+    };
+    /** Measurement */
+    Measurement: {
+      Speed?: components['schemas']['MeasurementValue'] & string;
+      Heading?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
+         * @enum {string}
+         */
+        name?: 'heading';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      FuelLevel?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
+         * @enum {string}
+         */
+        name?: 'fuelLevelPercentage';
+        /**
+         * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
+         * @enum {string}
+         */
+        unit?: 'percent';
+      };
+      /** Latitude */
+      Latitude?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
+         * @enum {string}
+         */
+        name?: 'latitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** Longitude */
+      Longitude?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
+         * @enum {string}
+         */
+        name?: 'longitude';
+        /**
+         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
+         * @enum {string}
+         */
+        unit?: 'degrees';
+      };
+      /** EngineState */
+      EngineState?: components['schemas']['EngineStateValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
+         * @enum {string}
+         */
+        name?: 'engineState';
+      };
+      /** Odometer */
+      Odometer?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
+         * @enum {string}
+         */
+        name?: 'odometer';
+        /**
+         * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
+         * @enum {string}
+         */
+        unit?: 'km';
+      };
+      /** EngineHours */
+      EngineHours?: components['schemas']['MeasurementValue'] & {
+        /**
+         * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
+         * @enum {string}
+         */
+        name?: 'engineHours';
+        /**
+         * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
+         * @enum {string}
+         */
+        unit?: 'hours';
+      };
     };
     /** Measurement */
     MeasurementNew: {
@@ -192,142 +319,15 @@ export interface components {
         name?: 'ptoStatus';
       };
     };
-    EquipmentMeasurements: {
-      /**
-       * Format: date-time
-       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
-       */
-      timestamp?: string;
-      /** Format: date-time */
-      measurements?: components['schemas']['Measurement'][];
-    };
-    EquipmentMeasurementsNew: {
-      /**
-       * Format: date-time
-       * @description Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order.
-       */
-      timestamp?: string;
-      /** Format: date-time */
-      measurements?: components['schemas']['MeasurementNew'][];
-    };
-    ContentType: unknown;
-    Accept: unknown;
-    /** Equipment */
-    Equipment: {
-      /**
-       * Format: int64
-       * @description Equipment Id of a configured equipment
-       * @example 7269
-       */
-      id?: number;
-      /**
-       * @description Make of a configured equipment, maxLength = 20
-       * @example JOHN DEERE
-       */
-      make?: string;
-      /**
-       * @description Name of a configured equipment (sometimes called model). maxLength
-       * @example 6120
-       */
-      name?: string;
-    };
-    /** Measurement */
-    Measurement: {
-      Speed?: components['schemas']['MeasurementValue'] & string;
-      Heading?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. heading only possible value for providing heading.
-         * @enum {string}
-         */
-        name?: 'heading';
-        /**
-         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading.
-         * @enum {string}
-         */
-        unit?: 'degrees';
-      };
-      FuelLevel?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel.
-         * @enum {string}
-         */
-        name?: 'fuelLevelPercentage';
-        /**
-         * @description The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level.
-         * @enum {string}
-         */
-        unit?: 'percent';
-      };
-      /** Latitude */
-      Latitude?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude.
-         * @enum {string}
-         */
-        name?: 'latitude';
-        /**
-         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude
-         * @enum {string}
-         */
-        unit?: 'degrees';
-      };
-      /** Longitude */
-      Longitude?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude.
-         * @enum {string}
-         */
-        name?: 'longitude';
-        /**
-         * @description The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude
-         * @enum {string}
-         */
-        unit?: 'degrees';
-      };
-      /** EngineState */
-      EngineState?: components['schemas']['EngineStateValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState.
-         * @enum {string}
-         */
-        name?: 'engineState';
-      };
-      /** Odometer */
-      Odometer?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading.
-         * @enum {string}
-         */
-        name?: 'odometer';
-        /**
-         * @description The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading
-         * @enum {string}
-         */
-        unit?: 'km';
-      };
-      /** EngineHours */
-      EngineHours?: components['schemas']['MeasurementValue'] & {
-        /**
-         * @description Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours.
-         * @enum {string}
-         */
-        name?: 'engineHours';
-        /**
-         * @description The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours
-         * @enum {string}
-         */
-        unit?: 'hours';
-      };
-    };
     MeasurementValue: string;
     MeasurementValueNew: string;
-    EngineStateValue: {
+    PTOStatusValue: {
       /**
-       * @description State of the engine. engineState only possible values are: On or Off.
+       * @description Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable.
        * @example On
        * @enum {string}
        */
-      value?: 'On' | 'Off';
+      value?: 'On' | 'Off' | 'Fault' | 'Unavailable';
     };
   };
   responses: {
@@ -343,6 +343,11 @@ export interface components {
   };
   parameters: {
     /**
+     * @description The master record identifier of the equipment
+     * @example 1234
+     */
+    EquipmentId: number;
+    /**
      * @description The identifier of the machine
      * @example 1234
      */
@@ -352,11 +357,6 @@ export interface components {
      * @example 1234
      */
     OrganizationId: number;
-    /**
-     * @description The master record identifier of the equipment
-     * @example 1234
-     */
-    EquipmentId: number;
   };
   requestBodies: never;
   headers: never;

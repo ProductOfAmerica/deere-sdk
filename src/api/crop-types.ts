@@ -55,16 +55,6 @@ export class CropTypesApi {
   /**
    * View a specific cropType
    * @description This endpoint will return details of specific cropType.
-   * @generated from GET /cropTypes/{name}
-   */
-  async get(name: string, options?: RequestOptions): Promise<components['schemas']['CropType2']> {
-    const path = `/cropTypes/${name}`;
-    return this.client.get<components['schemas']['CropType2']>(this.spec, path, options);
-  }
-
-  /**
-   * View a specific cropType
-   * @description This endpoint will return details of specific cropType.
    * @generated from GET /cropTypes/{id}
    */
   async getCroptypes(
@@ -73,6 +63,16 @@ export class CropTypesApi {
   ): Promise<components['schemas']['CropType3']> {
     const path = `/cropTypes/${id}`;
     return this.client.get<components['schemas']['CropType3']>(this.spec, path, options);
+  }
+
+  /**
+   * View a specific cropType
+   * @description This endpoint will return details of specific cropType.
+   * @generated from GET /cropTypes/{name}
+   */
+  async get(name: string, options?: RequestOptions): Promise<components['schemas']['CropType2']> {
+    const path = `/cropTypes/${name}`;
+    return this.client.get<components['schemas']['CropType2']>(this.spec, path, options);
   }
 
   /**

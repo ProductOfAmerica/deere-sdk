@@ -18,6 +18,27 @@ export class FieldsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * View Clients that Own a Field
+   * @description View details about the client that owns the field. The
+   * response will link to the following resources: fields: View the field the
+   * client belongs to. farms: View the farms belonging to the client.
+   * owningOrganization: View the org that owns the field.
+   * @generated from GET /organizations/{orgID}/fields/{id}/clients
+   */
+  async listClients(
+    orgID: string,
+    id: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
+    const path = `/organizations/${orgID}/fields/${id}/clients`;
+    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
    * Retrieve all of the Fields for an Organization
    * @generated from GET /organizations/{orgId}/fields
    */
@@ -156,27 +177,6 @@ export class FieldsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetFarm']>>(
-      this.spec,
-      path,
-      options
-    );
-  }
-
-  /**
-   * View Clients that Own a Field
-   * @description View details about the client that owns the field. The
-   * response will link to the following resources: fields: View the field the
-   * client belongs to. farms: View the farms belonging to the client.
-   * owningOrganization: View the org that owns the field.
-   * @generated from GET /organizations/{orgID}/fields/{id}/clients
-   */
-  async listClients(
-    orgID: string,
-    id: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
-    const path = `/organizations/${orgID}/fields/${id}/clients`;
-    return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
       options

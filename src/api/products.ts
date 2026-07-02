@@ -122,25 +122,6 @@ export class ProductsApi {
   }
 
   /**
-   * Adds a single reference variety to organization
-   * @description This endpoint will associate a reference variety to your
-   * organization from the global reference list. The reference varieties are
-   * immutable, however, they can still be archived or made available. The
-   * response headers from the GET endpoints will include the attributes that
-   * can be overridden.
-   * @generated from POST /varieties/{erid}/associateToOrg/{organizationId}
-   */
-  async createAssociatetoorg(
-    erid: string,
-    organizationId: string,
-    data: components['schemas']['ReferenceProductPointerRequest'],
-    options?: RequestOptions
-  ): Promise<void> {
-    const path = `/varieties/${erid}/associateToOrg/${organizationId}`;
-    await this.client.post(this.spec, path, data, options);
-  }
-
-  /**
    * Search reference catalog varieties
    * @description This endpoint searches the reference catalog for varieties
    * that match the given search criteria. This data can be used in a subsequent
@@ -187,6 +168,25 @@ export class ProductsApi {
   ): Promise<components['schemas']['ReferenceVariety']> {
     const path = `/varieties/${erid}`;
     return this.client.get<components['schemas']['ReferenceVariety']>(this.spec, path, options);
+  }
+
+  /**
+   * Adds a single reference variety to organization
+   * @description This endpoint will associate a reference variety to your
+   * organization from the global reference list. The reference varieties are
+   * immutable, however, they can still be archived or made available. The
+   * response headers from the GET endpoints will include the attributes that
+   * can be overridden.
+   * @generated from POST /varieties/{erid}/associateToOrg/{organizationId}
+   */
+  async createAssociatetoorg(
+    erid: string,
+    organizationId: string,
+    data: components['schemas']['ReferenceProductPointerRequest'],
+    options?: RequestOptions
+  ): Promise<void> {
+    const path = `/varieties/${erid}/associateToOrg/${organizationId}`;
+    await this.client.post(this.spec, path, data, options);
   }
 
   /**

@@ -28,26 +28,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description Page of hoursOfOperation information for the machine. */
-    HoursOfOperation_Response: {
-      /** @description Link list */
-      links?: components['schemas']['MyJD_links'][];
-      /**
-       * Format: int64
-       * @description Number of results in the list
-       * @example 1
-       */
-      total?: number;
-      values?: components['schemas']['HoursOfOperation'][];
-    };
-    /** @description The link object provides links to ressources which are related to the response */
-    MyJD_links: {
-      /**
-       * @description Machines Link.
-       * @example https://sandboxapi.deere.com/platform/machines/5432
-       */
-      machine?: unknown;
-    };
     /** @description Hours Of Operation */
     HoursOfOperation: {
       /**
@@ -73,6 +53,26 @@ export interface components {
        * @example PTO Status On
        */
       detailedState?: string;
+    };
+    /** @description Page of hoursOfOperation information for the machine. */
+    HoursOfOperation_Response: {
+      /** @description Link list */
+      links?: components['schemas']['MyJD_links'][];
+      /**
+       * Format: int64
+       * @description Number of results in the list
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['HoursOfOperation'][];
+    };
+    /** @description The link object provides links to ressources which are related to the response */
+    MyJD_links: {
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/5432
+       */
+      machine?: unknown;
     };
   };
   responses: never;

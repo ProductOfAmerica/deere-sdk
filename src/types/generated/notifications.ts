@@ -4,66 +4,6 @@
  */
 
 export interface paths {
-  '/notifications/{sourceEvent}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Fetch single notification.
-     * @description Retrieve a single notification by source event.
-     */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          /** @description Source event of the notification */
-          sourceEvent: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Created */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/vnd.deere.axiom.v3+json': {
-              values?: unknown;
-              links?: unknown;
-            };
-          };
-        };
-        400: components['schemas']['Error'];
-        /** @description Not authorized */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Not Found */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/notificationEvents': {
     parameters: {
       query?: never;
@@ -157,6 +97,66 @@ export interface paths {
         };
       };
     };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/{sourceEvent}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Fetch single notification.
+     * @description Retrieve a single notification by source event.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Source event of the notification */
+          sourceEvent: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+              links?: unknown;
+            };
+          };
+        };
+        400: components['schemas']['Error'];
+        /** @description Not authorized */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -256,27 +256,66 @@ export interface components {
        */
       invalidValue?: string;
     };
-    ResponseDetails: {
+    GetAvailableLinks: {
       /**
-       * @description Event ID
-       * @example b22956b7-0b43-40ea-a396-1fdc816ebb58
+       * @description Contribution Definitions Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
        */
-      eventId?: string;
+      contribution?: unknown;
       /**
-       * @description Event status code.
-       * @example SUCCESS
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/317783
        */
-      eventStatusCode?: string;
+      targetResource?: unknown;
+    };
+    GetResponse: {
       /**
-       * @description Number of notifications expected to generate from this event.
-       * @example 2
+       * @description Event title.
+       * @example Some Title
        */
-      expectedNotificationCount?: number;
+      title?: string;
       /**
-       * @description Actual number of notifications generated from this event.
-       * @example 2
+       * @description GeoJSON representation of the location.
+       * @example See sample response below.
        */
-      actualNotificationCount?: number;
+      geometries?: Record<string, never>;
+      /**
+       * @description Event description.
+       * @example Detailed event text.
+       */
+      text?: string;
+      /**
+       * @description Event severity.
+       * @example HIGH
+       */
+      severity?: string;
+      /**
+       * @description Event type.
+       * @example AGRONOMY
+       */
+      eventType?: string;
+      /**
+       * @description Notification Event GUID
+       * @example 2acf8953-8eaf-4487-9cd0-391059fcbfcf
+       */
+      sourceEvent?: Record<string, never>;
+      /**
+       * @description Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource.
+       * @example See sample response below.
+       */
+      minimizedNotifications?: Record<string, never>;
+    };
+    Links: {
+      /**
+       * @description Contribution Definitions Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
+       */
+      contributionDefinition?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
+       */
+      targetResource?: unknown;
     };
     PostNotifications: {
       /**
@@ -328,90 +367,51 @@ export interface components {
         links?: string;
       };
     };
-    GetResponse: {
+    ResponseDetails: {
       /**
-       * @description Event title.
-       * @example Some Title
+       * @description Event ID
+       * @example b22956b7-0b43-40ea-a396-1fdc816ebb58
        */
-      title?: string;
+      eventId?: string;
       /**
-       * @description GeoJSON representation of the location.
-       * @example See sample response below.
+       * @description Event status code.
+       * @example SUCCESS
        */
-      geometries?: Record<string, never>;
+      eventStatusCode?: string;
       /**
-       * @description Event description.
-       * @example Detailed event text.
+       * @description Number of notifications expected to generate from this event.
+       * @example 2
        */
-      text?: string;
+      expectedNotificationCount?: number;
       /**
-       * @description Event severity.
-       * @example HIGH
+       * @description Actual number of notifications generated from this event.
+       * @example 2
        */
-      severity?: string;
-      /**
-       * @description Event type.
-       * @example AGRONOMY
-       */
-      eventType?: string;
-      /**
-       * @description Notification Event GUID
-       * @example 2acf8953-8eaf-4487-9cd0-391059fcbfcf
-       */
-      sourceEvent?: Record<string, never>;
-      /**
-       * @description Minimized version of notification having additionalDetails, notificationState, targetResourceOrgId, dateCreated and link to targetResource.
-       * @example See sample response below.
-       */
-      minimizedNotifications?: Record<string, never>;
-    };
-    GetAvailableLinks: {
-      /**
-       * @description Contribution Definitions Link.
-       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/3c5be4a7-a839-41c2-8b88-7fc4587a83f6
-       */
-      contribution?: unknown;
-      /**
-       * @description Machines Link.
-       * @example https://sandboxapi.deere.com/platform/machines/317783
-       */
-      targetResource?: unknown;
-    };
-    Links: {
-      /**
-       * @description Contribution Definitions Link.
-       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/YOUR_DEFINITION_ID
-       */
-      contributionDefinition?: unknown;
-      /**
-       * @description Fields Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/ORGANIZATION_ID/fields/FIELD_ID
-       */
-      targetResource?: unknown;
+      actualNotificationCount?: number;
     };
   };
   responses: never;
   parameters: {
-    /** @description Source Event */
-    sourceEvent: string;
-    /** @description Organization */
-    orgId: string;
-    /** @description Criteria to search Notifications before event GUID */
-    before: Record<string, never>;
     /** @description Criteria to search Notifications after event GUID. */
     after: Record<string, never>;
+    /** @description Criteria to search Notifications before event GUID */
+    before: Record<string, never>;
     /** @description Number of records, maximum up to 100 supported. */
     count: number;
+    /** @description Criteria to search for end date in time range. */
+    endDate: string;
     /** @description Criteria to search for multiple (comma separated) event types. */
     eventTypes: Record<string, never>;
+    /** @description Organization */
+    orgId: string;
     /** @description Criteria to search for multiple severities. */
     severities: Record<string, never>;
+    /** @description Source Event */
+    sourceEvent: string;
     /** @description Criteria to search for multiple event GUID. */
     sourceEvents: Record<string, never>;
     /** @description Criteria to search for start date in time range. */
     startDate: string;
-    /** @description Criteria to search for end date in time range. */
-    endDate: string;
   };
   requestBodies: never;
   headers: never;

@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/organizations/{orgId}/assets': {
+  '/assetCatalog': {
     parameters: {
       query?: never;
       header?: never;
@@ -12,16 +12,12 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get all assets
-     * @description This endpoint will retrieve all assets for an organization.
+     * Get Asset Catalog List
+     * @description This endpoint will retrieve the Asset Catalog List.
      */
-    get: operations['getOrgAssets'];
+    get: operations['getAssetCatalog'];
     put?: never;
-    /**
-     * Create a new asset
-     * @description This endpoint will create a new asset.
-     */
-    post: operations['postAsset'];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -132,7 +128,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/assetCatalog': {
+  '/organizations/{orgId}/assets': {
     parameters: {
       query?: never;
       header?: never;
@@ -140,12 +136,16 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get Asset Catalog List
-     * @description This endpoint will retrieve the Asset Catalog List.
+     * Get all assets
+     * @description This endpoint will retrieve all assets for an organization.
      */
-    get: operations['getAssetCatalog'];
+    get: operations['getOrgAssets'];
     put?: never;
-    post?: never;
+    /**
+     * Create a new asset
+     * @description This endpoint will create a new asset.
+     */
+    post: operations['postAsset'];
     delete?: never;
     options?: never;
     head?: never;
@@ -156,49 +156,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    AssetCatalogItem: {
-      /** @example ContributedCatalogItem */
-      '@type'?: string;
-      assetCategory: components['schemas']['AssetCategory'];
-      assetType: components['schemas']['AssetType'];
-      assetSubType: components['schemas']['AssetSubType'];
-      links?: {
-        /**
-         * @description Links relavent to exploring the collection.
-         * @example self
-         */
-        rel?: string;
-        /**
-         * Format: uri
-         * @description The URI to the related resource.
-         * @example https://sandboxapi.deere.com/platform/resources/61265
-         */
-        uri?: string;
-      }[];
-    };
-    MeasurementData: {
-      /**
-       * @description representation for which to capture data sandardized via the [ADAPT Representation System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/RepresentationSystem.xml)
-       * @example vrSoilTemperature
-       */
-      name: string;
-      /**
-       * @description measurement reading
-       * @example 46.2
-       */
-      value: string;
-      /**
-       * @description unit of measure - the basis for any conversion sandardized via the [ADAPT Unit System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/UnitSystem.xml)
-       * @example F
-       */
-      unit: string;
-    };
-    /** @example DEVICE */
-    AssetCategory: string;
-    /** @example SENSOR */
-    AssetType: string;
-    /** @example ENVIRONMENTAL */
-    AssetSubType: string;
     '400Errors': {
       /** @example Errors */
       '@type'?: string;
@@ -219,23 +176,40 @@ export interface components {
       }[];
       otherAttributes?: Record<string, never>;
     };
-    GenericErrors: {
-      /** @example Errors */
-      '@type'?: string;
-      errors?: {
-        /** @example Error */
-        '@type'?: string;
-        /**
-         * Format: uuid
-         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
-         */
-        guid?: string;
-        /** @example some error message */
-        message?: string;
-      }[];
-      otherAttributes?: Record<string, never>;
+    Asset: components['schemas']['UpdateAsset'] & {
+      /**
+       * Format: date-time
+       * @description A timestamp of the date and time the last operation was performed on this item.
+       */
+      readonly lastModifiedDate?: string;
+      lastKnownLocation?: components['schemas']['LastKnownLocation'];
     };
-    CollectionBase: {
+    AssetCatalogCollection: components['schemas']['CollectionBase'] & {
+      values?: components['schemas']['AssetCatalogItem'][];
+    };
+    AssetCatalogGet: {
+      /**
+       * @description Asset Category
+       * @example DEVICE
+       */
+      assetCategory?: string;
+      /**
+       * @description Asset Type
+       * @example SENSOR
+       */
+      assetType?: string;
+      /**
+       * @description Asset Sub Type
+       * @example OTHER
+       */
+      assetSubType?: string;
+    };
+    AssetCatalogItem: {
+      /** @example ContributedCatalogItem */
+      '@type'?: string;
+      assetCategory: components['schemas']['AssetCategory'];
+      assetType: components['schemas']['AssetType'];
+      assetSubType: components['schemas']['AssetSubType'];
       links?: {
         /**
          * @description Links relavent to exploring the collection.
@@ -249,63 +223,11 @@ export interface components {
          */
         uri?: string;
       }[];
-      /** @example 1 */
-      total?: number;
     };
+    /** @example DEVICE */
+    AssetCategory: string;
     AssetCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['Asset'][];
-    };
-    AssetLocationCollection: components['schemas']['CollectionBase'] & {
-      values?: components['schemas']['AssetLocation'][];
-    };
-    AssetLocationBase: {
-      /** @example ContributedAssetLocation */
-      '@type'?: string;
-      /**
-       * Format: date-time
-       * @description ISO 8601 Date and time in UTC the `measurementData` and/or `geometry` were recorded by the Asset
-       * @example 2019-07-12T21:29:50.000Z
-       */
-      timestamp: string;
-      /**
-       * @description stringified [GeoJSON Point (RFC 7946)](https://tools.ietf.org/html/rfc7946#section-3.1.2) identifying the Asset geolocation
-       * @example { "type": "Feature", "geometry": { "geometries": [ { "coordinates": [ -94.5609911, 42.3428859 ], "type": "Point" } ], "type": "GeometryCollection" } }
-       */
-      geometry?: string;
-      measurementData?: components['schemas']['MeasurementData'][];
-    };
-    /** @description A point in time geolocation or measurments broadcast by an Asset, a series of Asset Locations track an Asset's movement and/or measurement changes. Either `geometry` or `measurementData` is required and both are allowed. */
-    AssetLocation: components['schemas']['AssetLocationBase'];
-    /** @description The Asset Location with the most recent `timestamp` */
-    LastKnownLocation: components['schemas']['AssetLocationBase'];
-    UpdateAsset: {
-      /**
-       * Format: uuid
-       * @description The ID of the Asset. Optional, but if included it must match the URL parameter for Asset Id.
-       * @example b9d96332-93c7-44ae-ac86-eed8727f13c7
-       */
-      id?: string;
-    } & components['schemas']['CreateAsset'];
-    /** @description A networked physical device, an IOT device, with the ability to broadcast geolocations and measurements */
-    CreateAsset: {
-      /** @example ContributedAsset */
-      '@type'?: string;
-      /**
-       * @description The name of the Asset.
-       * @example McGill 7000
-       */
-      title: string;
-      assetCategory: components['schemas']['AssetCategory'];
-      assetType: components['schemas']['AssetType'];
-      assetSubType: components['schemas']['AssetSubType'];
-    };
-    Asset: components['schemas']['UpdateAsset'] & {
-      /**
-       * Format: date-time
-       * @description A timestamp of the date and time the last operation was performed on this item.
-       */
-      readonly lastModifiedDate?: string;
-      lastKnownLocation?: components['schemas']['LastKnownLocation'];
     };
     AssetCollectionGetLink: {
       /**
@@ -392,35 +314,6 @@ export interface components {
         lastKnownLocation?: Record<string, never>;
       };
     };
-    CreatePostLink: {
-      /**
-       * @description Contribution Definition Link.
-       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
-       */
-      contributionDefinition?: unknown;
-    };
-    CreatePostValues: {
-      /**
-       * @description The name of the asset.
-       * @example Water Sensor
-       */
-      title?: string;
-      /**
-       * @description Asset Category
-       * @example DEVICE
-       */
-      assetCategory?: string;
-      /**
-       * @description Asset Type
-       * @example SENSOR
-       */
-      assetType?: string;
-      /**
-       * @description Asset Sub Type
-       * @example OTHER
-       */
-      assetSubType?: string;
-    };
     AssetGetValues: {
       /**
        * Format: uuid
@@ -496,6 +389,48 @@ export interface components {
        */
       measurementData?: unknown[];
     };
+    /** @description A point in time geolocation or measurments broadcast by an Asset, a series of Asset Locations track an Asset's movement and/or measurement changes. Either `geometry` or `measurementData` is required and both are allowed. */
+    AssetLocation: components['schemas']['AssetLocationBase'];
+    AssetLocationBase: {
+      /** @example ContributedAssetLocation */
+      '@type'?: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC the `measurementData` and/or `geometry` were recorded by the Asset
+       * @example 2019-07-12T21:29:50.000Z
+       */
+      timestamp: string;
+      /**
+       * @description stringified [GeoJSON Point (RFC 7946)](https://tools.ietf.org/html/rfc7946#section-3.1.2) identifying the Asset geolocation
+       * @example { "type": "Feature", "geometry": { "geometries": [ { "coordinates": [ -94.5609911, 42.3428859 ], "type": "Point" } ], "type": "GeometryCollection" } }
+       */
+      geometry?: string;
+      measurementData?: components['schemas']['MeasurementData'][];
+    };
+    AssetLocationCollection: components['schemas']['CollectionBase'] & {
+      values?: components['schemas']['AssetLocation'][];
+    };
+    /** @example ENVIRONMENTAL */
+    AssetSubType: string;
+    /** @example SENSOR */
+    AssetType: string;
+    CollectionBase: {
+      links?: {
+        /**
+         * @description Links relavent to exploring the collection.
+         * @example self
+         */
+        rel?: string;
+        /**
+         * Format: uri
+         * @description The URI to the related resource.
+         * @example https://sandboxapi.deere.com/platform/resources/61265
+         */
+        uri?: string;
+      }[];
+      /** @example 1 */
+      total?: number;
+    };
     ContributionDefinitionLink: {
       /** @example Link */
       '@type'?: string;
@@ -511,7 +446,32 @@ export interface components {
        */
       uri?: string;
     };
-    AssetCatalogGet: {
+    /** @description A networked physical device, an IOT device, with the ability to broadcast geolocations and measurements */
+    CreateAsset: {
+      /** @example ContributedAsset */
+      '@type'?: string;
+      /**
+       * @description The name of the Asset.
+       * @example McGill 7000
+       */
+      title: string;
+      assetCategory: components['schemas']['AssetCategory'];
+      assetType: components['schemas']['AssetType'];
+      assetSubType: components['schemas']['AssetSubType'];
+    };
+    CreatePostLink: {
+      /**
+       * @description Contribution Definition Link.
+       * @example https://sandboxapi.deere.com/platform/contributionDefinitions/DEFINITION_ID
+       */
+      contributionDefinition?: unknown;
+    };
+    CreatePostValues: {
+      /**
+       * @description The name of the asset.
+       * @example Water Sensor
+       */
+      title?: string;
       /**
        * @description Asset Category
        * @example DEVICE
@@ -528,9 +488,49 @@ export interface components {
        */
       assetSubType?: string;
     };
-    AssetCatalogCollection: components['schemas']['CollectionBase'] & {
-      values?: components['schemas']['AssetCatalogItem'][];
+    GenericErrors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example ed292512-1f3c-4285-83c3-1fb084423f9b
+         */
+        guid?: string;
+        /** @example some error message */
+        message?: string;
+      }[];
+      otherAttributes?: Record<string, never>;
     };
+    /** @description The Asset Location with the most recent `timestamp` */
+    LastKnownLocation: components['schemas']['AssetLocationBase'];
+    MeasurementData: {
+      /**
+       * @description representation for which to capture data sandardized via the [ADAPT Representation System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/RepresentationSystem.xml)
+       * @example vrSoilTemperature
+       */
+      name: string;
+      /**
+       * @description measurement reading
+       * @example 46.2
+       */
+      value: string;
+      /**
+       * @description unit of measure - the basis for any conversion sandardized via the [ADAPT Unit System](https://github.com/ADAPT/ADAPT/blob/develop/source/Representation/Resources/UnitSystem.xml)
+       * @example F
+       */
+      unit: string;
+    };
+    UpdateAsset: {
+      /**
+       * Format: uuid
+       * @description The ID of the Asset. Optional, but if included it must match the URL parameter for Asset Id.
+       * @example b9d96332-93c7-44ae-ac86-eed8727f13c7
+       */
+      id?: string;
+    } & components['schemas']['CreateAsset'];
   };
   responses: {
     /** @description Request */
@@ -611,27 +611,6 @@ export interface components {
       };
       content?: never;
     };
-    /** @description A collection of Assets */
-    GetOrgId: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': {
-          links?: unknown;
-          values?: unknown;
-        };
-      };
-    };
-    /** @description Create */
-    CreatePost: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': Record<string, never>;
-      };
-    };
     /** @description The Asset. */
     AssetGet: {
       headers: {
@@ -642,15 +621,6 @@ export interface components {
           links?: unknown;
           values?: unknown;
         };
-      };
-    };
-    /** @description Success */
-    AssetPut: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': Record<string, never>;
       };
     };
     /** @description The Asset Locations */
@@ -673,12 +643,23 @@ export interface components {
         '*/*': components['schemas']['AssetLocation'][];
       };
     };
-    /** @description Success. */
-    Success: {
+    /** @description Success */
+    AssetPut: {
       headers: {
         [name: string]: unknown;
       };
-      content?: never;
+      content: {
+        'application/vnd.deere.axiom.v3+json': Record<string, never>;
+      };
+    };
+    /** @description Create */
+    CreatePost: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': Record<string, never>;
+      };
     };
     /** @description Created. */
     Created: {
@@ -689,30 +670,49 @@ export interface components {
       };
       content?: never;
     };
+    /** @description A collection of Assets */
+    GetOrgId: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          values?: unknown;
+        };
+      };
+    };
+    /** @description Success. */
+    Success: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
   };
   parameters: {
-    /** @description The ID of the organization */
-    OrgId: string;
+    /** @description The ID of the asset */
+    AssetId: string;
+    /** @description The ID associated with the asset. */
+    AssetId2: string;
+    /** @description The number of results to include in the response. Must be a positive value greater than or equal to 1. Max 500. Default 500. */
+    Count: string;
     /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
     Embed: string;
+    /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
+    EndDate: string;
+    /** @description The ID of the organization */
+    OrgId: string;
+    /** @description A query param returned by the server in the nextPage link if there are more results for your query than were returned in the response. */
+    PageKey: string;
+    /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
+    StartDate: string;
     /** @description See for more information. */
     'X-deere-sign': string;
     /** @description See for more information. */
     'x-deere-sign': string;
     /** @description See for more information. */
     'x-deere-sign2': string;
-    /** @description The ID of the asset */
-    AssetId: string;
-    /** @description The ID associated with the asset. */
-    AssetId2: string;
-    /** @description Retrieves results that occurred after (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
-    StartDate: string;
-    /** @description Retrieves results that occurred before (inclusive) a specified date. The format is in the ISO 8601 Standard. Note: When including startDate without endDate or vice versa the missing parameter will default. startDate will default to the beginning of time and endDate will default to the current time. */
-    EndDate: string;
-    /** @description A query param returned by the server in the nextPage link if there are more results for your query than were returned in the response. */
-    PageKey: string;
-    /** @description The number of results to include in the response. Must be a positive value greater than or equal to 1. Max 500. Default 500. */
-    Count: string;
   };
   requestBodies: never;
   headers: {
@@ -726,56 +726,29 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  getOrgAssets: {
+  getAssetCatalog: {
     parameters: {
-      query?: {
-        /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
-        embed?: components['parameters']['Embed'];
-      };
+      query?: never;
       header?: {
         /** @description See for more information. */
-        'x-deere-signature'?: components['parameters']['X-deere-sign'];
+        'x-deere-signature'?: components['parameters']['x-deere-sign'];
       };
-      path: {
-        /** @description The ID of the organization */
-        orgId: components['parameters']['OrgId'];
-      };
+      path?: never;
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      200: components['responses']['GetOrgId'];
-      401: components['responses']['401'];
-      403: components['responses']['403'];
-      406: components['responses']['406'];
-      429: components['responses']['429'];
-    };
-  };
-  postAsset: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description The ID of the organization */
-        orgId: components['parameters']['OrgId'];
+      /** @description The Asset Catalog containaing all valid entries. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            values?: unknown;
+          };
+        };
       };
-      cookie?: never;
-    };
-    /** @description Asset to be created. */
-    requestBody?: {
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['CreatePostValues'];
-      };
-    };
-    responses: {
-      201: components['responses']['CreatePost'];
-      400: components['responses']['400'];
-      401: components['responses']['401'];
-      403: components['responses']['403'];
-      404: components['responses']['404'];
-      406: components['responses']['406'];
-      415: components['responses']['415'];
-      429: components['responses']['429'];
     };
   };
   getAsset: {
@@ -860,29 +833,56 @@ export interface operations {
       429: components['responses']['429'];
     };
   };
-  getAssetCatalog: {
+  getOrgAssets: {
     parameters: {
-      query?: never;
+      query?: {
+        /** @description Additional data to embed in the response. For example embed=lastKnownLocation will return assets with their lastKnownLocation included. */
+        embed?: components['parameters']['Embed'];
+      };
       header?: {
         /** @description See for more information. */
-        'x-deere-signature'?: components['parameters']['x-deere-sign'];
+        'x-deere-signature'?: components['parameters']['X-deere-sign'];
       };
-      path?: never;
+      path: {
+        /** @description The ID of the organization */
+        orgId: components['parameters']['OrgId'];
+      };
       cookie?: never;
     };
     requestBody?: never;
     responses: {
-      /** @description The Asset Catalog containaing all valid entries. */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/vnd.deere.axiom.v3+json': {
-            values?: unknown;
-          };
-        };
+      200: components['responses']['GetOrgId'];
+      401: components['responses']['401'];
+      403: components['responses']['403'];
+      406: components['responses']['406'];
+      429: components['responses']['429'];
+    };
+  };
+  postAsset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The ID of the organization */
+        orgId: components['parameters']['OrgId'];
       };
+      cookie?: never;
+    };
+    /** @description Asset to be created. */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['CreatePostValues'];
+      };
+    };
+    responses: {
+      201: components['responses']['CreatePost'];
+      400: components['responses']['400'];
+      401: components['responses']['401'];
+      403: components['responses']['403'];
+      404: components['responses']['404'];
+      406: components['responses']['406'];
+      415: components['responses']['415'];
+      429: components['responses']['429'];
     };
   };
 }

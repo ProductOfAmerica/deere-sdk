@@ -19,6 +19,110 @@ servers:
           - "partnerapiqa"
           - "sandboxapiqa"
 paths:
+  /organizations/{orgId}/fields/{fieldId}/flags:
+    get:
+      operationId: "getOrgFieldFlags"
+      summary: "List flags for the field"
+      tags:
+        - "Flags APIs"
+      description: "This resource will return a list of flag objects associated with the field."
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+        - $ref: "#/components/parameters/FieldId"
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/StartTime"
+        - $ref: "#/components/parameters/EndTime"
+        - $ref: "#/components/parameters/CategoryIds"
+        - $ref: "#/components/parameters/CategoryNames"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/ShapeTypes"
+        - $ref: "#/components/parameters/Simple"
+        - $ref: "#/components/parameters/MetadataOnly"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetOrgId"
+        "403":
+          description: "Forbidden. The user has no access to the given flag"
+        "404":
+          description: "Entity Not found. No organization and/or field with these ids."
+  /organizations/{orgId}/flags:
+    post:
+      operationId: "createFlag"
+      tags:
+        - "Flags APIs"
+      description: "This resource will create a flag in the given organization."
+      summary: "Create a flag"
+      security:
+        - OAuth2:
+            - "ag3"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+      requestBody:
+        description: "The flag data to add. The new uuid will be assigned as ID of the newly created flag."
+        x-required-boolean: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/ValuesFlagIdPut"
+            examples:
+              No Headers:
+                value:
+                  "@type": "Flag"
+                  geometry:
+                    type: "Point"
+                    coordinates:
+                      - -93.14959274063109
+                      - 41.66881548411553
+                  notes: "SomeUnique123"
+                  archived: false
+                  proximityAlertEnabled: false
+                  links:
+                    - "@type": "Link"
+                      rel: "flagCategory"
+                      uri: "https://sandboxapi.deere.com/platform/flagCategories/CATEGORY_ID"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/FIELDS_ID"
+      responses:
+        "200":
+          $ref: "#/components/responses/PostFlags"
+        "400":
+          description: "- Not all data specified"
+        "403":
+          description: "Access forbidden. The user has no access to the org or is not allowed to create flags in the org."
+        "404":
+          description: "Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found)"
+    get:
+      summary: "View flags list"
+      parameters:
+        - $ref: "#/components/parameters/OrgId3"
+        - $ref: "#/components/parameters/Accept-Language"
+        - $ref: "#/components/parameters/Embed"
+        - $ref: "#/components/parameters/StartTime"
+        - $ref: "#/components/parameters/EndTime"
+        - $ref: "#/components/parameters/CategoryIds"
+        - $ref: "#/components/parameters/CategoryNames"
+        - $ref: "#/components/parameters/RecordFilter"
+        - $ref: "#/components/parameters/FlagScopes"
+        - $ref: "#/components/parameters/ShapeTypes"
+        - $ref: "#/components/parameters/Simple"
+        - $ref: "#/components/parameters/MetadataOnly"
+      operationId: "getFlagsForOrganization"
+      security:
+        - OAuth2:
+            - "ag1"
+      tags:
+        - "Flags APIs"
+      description: "This resource will return a Flags list for Organization."
+      responses:
+        "200":
+          $ref: "#/components/responses/FlagsGet"
+        "403":
+          description: "Access forbidden. The user does not have permission to access the given organization, or the organization does not exist."
   /organizations/{orgId}/flags/{flagId}:
     get:
       summary: "List a flag by org id and Flag id"
@@ -134,120 +238,48 @@ paths:
           description: "Forbidden. - The user has no permission to delete the flag."
         "404":
           description: "Entity Not found. Given flag id does not exist or given orgId does not present."
-  /organizations/{orgId}/flags:
-    post:
-      operationId: "createFlag"
-      tags:
-        - "Flags APIs"
-      description: "This resource will create a flag in the given organization."
-      summary: "Create a flag"
-      security:
-        - OAuth2:
-            - "ag3"
-      parameters:
-        - $ref: "#/components/parameters/OrgId3"
-      requestBody:
-        description: "The flag data to add. The new uuid will be assigned as ID of the newly created flag."
-        x-required-boolean: true
-        content:
-          application/vnd.deere.axiom.v3+json:
-            schema:
-              $ref: "#/components/schemas/ValuesFlagIdPut"
-            examples:
-              No Headers:
-                value:
-                  "@type": "Flag"
-                  geometry:
-                    type: "Point"
-                    coordinates:
-                      - -93.14959274063109
-                      - 41.66881548411553
-                  notes: "SomeUnique123"
-                  archived: false
-                  proximityAlertEnabled: false
-                  links:
-                    - "@type": "Link"
-                      rel: "flagCategory"
-                      uri: "https://sandboxapi.deere.com/platform/flagCategories/CATEGORY_ID"
-                    - "@type": "Link"
-                      rel: "field"
-                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/FIELDS_ID"
-      responses:
-        "200":
-          $ref: "#/components/responses/PostFlags"
-        "400":
-          description: "- Not all data specified"
-        "403":
-          description: "Access forbidden. The user has no access to the org or is not allowed to create flags in the org."
-        "404":
-          description: "Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found)"
-    get:
-      summary: "View flags list"
-      parameters:
-        - $ref: "#/components/parameters/OrgId3"
-        - $ref: "#/components/parameters/Accept-Language"
-        - $ref: "#/components/parameters/Embed"
-        - $ref: "#/components/parameters/StartTime"
-        - $ref: "#/components/parameters/EndTime"
-        - $ref: "#/components/parameters/CategoryIds"
-        - $ref: "#/components/parameters/CategoryNames"
-        - $ref: "#/components/parameters/RecordFilter"
-        - $ref: "#/components/parameters/FlagScopes"
-        - $ref: "#/components/parameters/ShapeTypes"
-        - $ref: "#/components/parameters/Simple"
-        - $ref: "#/components/parameters/MetadataOnly"
-      operationId: "getFlagsForOrganization"
-      security:
-        - OAuth2:
-            - "ag1"
-      tags:
-        - "Flags APIs"
-      description: "This resource will return a Flags list for Organization."
-      responses:
-        "200":
-          $ref: "#/components/responses/FlagsGet"
-        "403":
-          description: "Access forbidden. The user does not have permission to access the given organization, or the organization does not exist."
-  /organizations/{orgId}/fields/{fieldId}/flags:
-    get:
-      operationId: "getOrgFieldFlags"
-      summary: "List flags for the field"
-      tags:
-        - "Flags APIs"
-      description: "This resource will return a list of flag objects associated with the field."
-      security:
-        - OAuth2:
-            - "ag1"
-      parameters:
-        - $ref: "#/components/parameters/OrgId3"
-        - $ref: "#/components/parameters/FieldId"
-        - $ref: "#/components/parameters/Accept-Language"
-        - $ref: "#/components/parameters/Embed"
-        - $ref: "#/components/parameters/StartTime"
-        - $ref: "#/components/parameters/EndTime"
-        - $ref: "#/components/parameters/CategoryIds"
-        - $ref: "#/components/parameters/CategoryNames"
-        - $ref: "#/components/parameters/RecordFilter"
-        - $ref: "#/components/parameters/ShapeTypes"
-        - $ref: "#/components/parameters/Simple"
-        - $ref: "#/components/parameters/MetadataOnly"
-      responses:
-        "200":
-          $ref: "#/components/responses/GetOrgId"
-        "403":
-          description: "Forbidden. The user has no access to the given flag"
-        "404":
-          description: "Entity Not found. No organization and/or field with these ids."
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            ag1: "ag1"
-            ag3: "ag3"
   parameters:
+    Accept-Language:
+      name: "Accept-Language"
+      in: "header"
+      description: "If embedding flag category, language that category name shall be returned within a flag, e.g., \"de-DE\""
+      schema:
+        type: "string"
+        default: "en"
+        example: "de-DE"
+    CategoryIds:
+      name: "categoryIDs"
+      in: "query"
+      description: "Specify a comma-separated list of category GUIDs to retrieve"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "688c20bb-9609-4590-95c9-649ba65c06df,0aed8e88-c27c-424b-8b66-babfe7fcf5ee"
+    CategoryNames:
+      name: "categoryNames"
+      in: "query"
+      description: "Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "ROCKS,WEEDS"
+    Embed:
+      name: "embed"
+      in: "query"
+      description: "Embed additional attributes if required to reduce the number of requests"
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "flagCategory, flagCategoryWithPreferences, field, showRecordMetadata"
+    EndTime:
+      name: "endTime"
+      in: "query"
+      description: "Flags created before end time (in UTC) will be returned"
+      schema:
+        type: "string"
+        default: "now"
+        example: "2018-08-01T00:00:00Z"
     FieldId:
       name: "fieldId"
       in: "path"
@@ -258,6 +290,31 @@ components:
         format: "uuid"
         default: "N/A"
         example: "c634597d-3d1a-4975-93e9-acc6696658d2"
+    FlagId:
+      name: "flagId"
+      in: "path"
+      description: "flagId to query for flag"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "688c20bb-9609-4590-95c9-649ba65c06df"
+    FlagScopes:
+      name: "flagScopes"
+      in: "query"
+      description: "Specify whether to request global flags, field-related flags or both"
+      schema:
+        type: "string"
+        default: "all"
+        example: "global, field, all"
+    MetadataOnly:
+      name: "metadataOnly"
+      in: "query"
+      description: "Does not populate geometry, overrides simple if both are true"
+      schema:
+        type: "boolean"
+        default: "false"
+        example: "false"
     OrgId:
       name: "orgId"
       in: "path"
@@ -285,63 +342,6 @@ components:
         type: "string"
         default: "N/A"
         example: 123456
-    FlagId:
-      name: "flagId"
-      in: "path"
-      description: "flagId to query for flag"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "688c20bb-9609-4590-95c9-649ba65c06df"
-    Accept-Language:
-      name: "Accept-Language"
-      in: "header"
-      description: "If embedding flag category, language that category name shall be returned within a flag, e.g., \"de-DE\""
-      schema:
-        type: "string"
-        default: "en"
-        example: "de-DE"
-    Embed:
-      name: "embed"
-      in: "query"
-      description: "Embed additional attributes if required to reduce the number of requests"
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "flagCategory, flagCategoryWithPreferences, field, showRecordMetadata"
-    StartTime:
-      name: "startTime"
-      in: "query"
-      description: "Flags created after start time (in UTC) will be returned"
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "2018-08-01T00:00:00Z"
-    EndTime:
-      name: "endTime"
-      in: "query"
-      description: "Flags created before end time (in UTC) will be returned"
-      schema:
-        type: "string"
-        default: "now"
-        example: "2018-08-01T00:00:00Z"
-    CategoryIds:
-      name: "categoryIDs"
-      in: "query"
-      description: "Specify a comma-separated list of category GUIDs to retrieve"
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "688c20bb-9609-4590-95c9-649ba65c06df,0aed8e88-c27c-424b-8b66-babfe7fcf5ee"
-    CategoryNames:
-      name: "categoryNames"
-      in: "query"
-      description: "Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used"
-      schema:
-        type: "string"
-        default: "N/A"
-        example: "ROCKS,WEEDS"
     RecordFilter:
       name: "recordFilter"
       in: "query"
@@ -350,14 +350,6 @@ components:
         type: "string"
         default: "active"
         example: "active, archived, all"
-    FlagScopes:
-      name: "flagScopes"
-      in: "query"
-      description: "Specify whether to request global flags, field-related flags or both"
-      schema:
-        type: "string"
-        default: "all"
-        example: "global, field, all"
     ShapeTypes:
       name: "shapeTypes"
       in: "query"
@@ -374,14 +366,14 @@ components:
         type: "boolean"
         default: "false"
         example: "false"
-    MetadataOnly:
-      name: "metadataOnly"
+    StartTime:
+      name: "startTime"
       in: "query"
-      description: "Does not populate geometry, overrides simple if both are true"
+      description: "Flags created after start time (in UTC) will be returned"
       schema:
-        type: "boolean"
-        default: "false"
-        example: "false"
+        type: "string"
+        default: "N/A"
+        example: "2018-08-01T00:00:00Z"
   responses:
     FlagIdGet:
       description: "Get response by Flag Id"
@@ -511,6 +503,8 @@ components:
             Headers:
               description: "201 Created Location: https://sandboxapi.deere.com/platform/flags/3e4f37a4-5667-49ae-9f6b-5a13e446dee6"
   schemas:
+    ContentType:
+      properties: {}
     LinkFlagId:
       properties:
         flagCategoryWithPrefrences:
@@ -546,8 +540,6 @@ components:
         field:
           example: "https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELDS_ID"
           description: "Field Link."
-    ContentType:
-      properties: {}
     ValuesFlagId:
       properties:
         geometry:
@@ -601,3 +593,11 @@ components:
         links:
           items:
             $ref: "#/components/schemas/LinkFlagIdPut"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: "ag1"
+            ag3: "ag3"

@@ -28,14 +28,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    /** @description The link object provides links to ressources which are related to the response */
-    MyJD_links: {
-      /**
-       * @description Device State Report Link.
-       * @example https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports
-       */
-      self?: unknown;
-    };
     /** @description Device State Report */
     DeviceStateReport: {
       /**
@@ -255,17 +247,25 @@ export interface components {
        */
       vehiclePowerState?: Record<string, never>;
     };
+    /** @description The link object provides links to ressources which are related to the response */
+    MyJD_links: {
+      /**
+       * @description Device State Report Link.
+       * @example https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports
+       */
+      self?: unknown;
+    };
   };
   responses: never;
   parameters: {
-    /** @description Principal ID of the machine/equipment. */
-    principalId: string;
-    /** @description Return DSR from the specified startDate. */
-    startDate: string;
     /** @description Return DSR till the specified endDate. */
     endDate: string;
     /** @description If true, startDate and endDate won't be used. Send true to fetch lastKnown call History. */
     lastKnown: boolean;
+    /** @description Principal ID of the machine/equipment. */
+    principalId: string;
+    /** @description Return DSR from the specified startDate. */
+    startDate: string;
   };
   requestBodies: never;
   headers: never;

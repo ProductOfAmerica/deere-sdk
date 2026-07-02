@@ -18,57 +18,19 @@ export class AssetsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
-   * Get all assets
-   * @description This endpoint will retrieve all assets for an organization.
-   * @generated from GET /organizations/{orgId}/assets
+   * Get Asset Catalog List
+   * @description This endpoint will retrieve the Asset Catalog List.
+   * @generated from GET /assetCatalog
    */
-  async list(
-    orgId: string,
-    params?: { embed?: string },
+  async getAssetcatalog(
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>> {
-    const query = new URLSearchParams();
-    if (params?.embed !== undefined) query.set('embed', String(params.embed));
-    const queryString = query.toString();
-    const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>>(
+  ): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
+    const path = `/assetCatalog`;
+    return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(
       this.spec,
       path,
       options
     );
-  }
-  /**
-   * Get all items (follows pagination automatically)
-   * @generated from GET /organizations/{orgId}/assets
-   */
-  async listAll(
-    orgId: string,
-    params?: { embed?: string },
-    options?: RequestOptions
-  ): Promise<components['schemas']['AssetCollectionGetValue'][]> {
-    const query = new URLSearchParams();
-    if (params?.embed !== undefined) query.set('embed', String(params.embed));
-    const queryString = query.toString();
-    const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
-    return this.client.getAll<components['schemas']['AssetCollectionGetValue']>(
-      this.spec,
-      path,
-      options
-    );
-  }
-
-  /**
-   * Create a new asset
-   * @description This endpoint will create a new asset.
-   * @generated from POST /organizations/{orgId}/assets
-   */
-  async create(
-    orgId: string,
-    data: components['schemas']['CreatePostValues'],
-    options?: RequestOptions
-  ): Promise<void> {
-    const path = `/organizations/${orgId}/assets`;
-    await this.client.post(this.spec, path, data, options);
   }
 
   /**
@@ -157,19 +119,57 @@ export class AssetsApi {
   }
 
   /**
-   * Get Asset Catalog List
-   * @description This endpoint will retrieve the Asset Catalog List.
-   * @generated from GET /assetCatalog
+   * Get all assets
+   * @description This endpoint will retrieve all assets for an organization.
+   * @generated from GET /organizations/{orgId}/assets
    */
-  async getAssetcatalog(
+  async list(
+    orgId: string,
+    params?: { embed?: string },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['AssetCatalogGet']>> {
-    const path = `/assetCatalog`;
-    return this.client.get<PaginatedResponse<components['schemas']['AssetCatalogGet']>>(
+  ): Promise<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>> {
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<PaginatedResponse<components['schemas']['AssetCollectionGetValue']>>(
       this.spec,
       path,
       options
     );
+  }
+  /**
+   * Get all items (follows pagination automatically)
+   * @generated from GET /organizations/{orgId}/assets
+   */
+  async listAll(
+    orgId: string,
+    params?: { embed?: string },
+    options?: RequestOptions
+  ): Promise<components['schemas']['AssetCollectionGetValue'][]> {
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/organizations/${orgId}/assets${queryString ? `?${queryString}` : ''}`;
+    return this.client.getAll<components['schemas']['AssetCollectionGetValue']>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
+   * Create a new asset
+   * @description This endpoint will create a new asset.
+   * @generated from POST /organizations/{orgId}/assets
+   */
+  async create(
+    orgId: string,
+    data: components['schemas']['CreatePostValues'],
+    options?: RequestOptions
+  ): Promise<void> {
+    const path = `/organizations/${orgId}/assets`;
+    await this.client.post(this.spec, path, data, options);
   }
 }
 

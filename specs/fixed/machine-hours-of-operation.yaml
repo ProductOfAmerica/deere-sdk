@@ -112,37 +112,7 @@ paths:
         "404":
           description: "Machine does not exists with given machine id"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            eq1: "eq1"
   schemas:
-    HoursOfOperation_Response:
-      description: "Page of hoursOfOperation information for the machine."
-      properties:
-        links:
-          description: "Link list"
-          type: "array"
-          items:
-            $ref: "#/components/schemas/MyJD_links"
-        total:
-          description: "Number of results in the list"
-          type: "integer"
-          format: "int64"
-          example: 1
-        values:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/HoursOfOperation"
-    MyJD_links:
-      description: "The link object provides links to ressources which are related to the response"
-      properties:
-        machine:
-          example: "https://sandboxapi.deere.com/platform/machines/5432"
-          description: "Machines Link."
     HoursOfOperation:
       description: "Hours Of Operation"
       type: "object"
@@ -173,3 +143,33 @@ components:
           description: "The returned value indicates the user queried definedType value."
           type: "string"
           example: "PTO Status On"
+    HoursOfOperation_Response:
+      description: "Page of hoursOfOperation information for the machine."
+      properties:
+        links:
+          description: "Link list"
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MyJD_links"
+        total:
+          description: "Number of results in the list"
+          type: "integer"
+          format: "int64"
+          example: 1
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/HoursOfOperation"
+    MyJD_links:
+      description: "The link object provides links to ressources which are related to the response"
+      properties:
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/5432"
+          description: "Machines Link."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"

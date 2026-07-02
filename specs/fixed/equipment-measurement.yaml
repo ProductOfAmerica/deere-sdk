@@ -97,6 +97,15 @@ paths:
               $ref: "#/components/schemas/Accept"
 components:
   parameters:
+    EquipmentId:
+      in: "path"
+      name: "principalId"
+      description: "The master record identifier of the equipment"
+      x-required-boolean: true
+      schema:
+        type: "integer"
+        format: "int64"
+      example: 1234
     MachineId:
       in: "path"
       name: "machineId"
@@ -115,17 +124,22 @@ components:
         type: "integer"
         format: "int64"
       example: 1234
-    EquipmentId:
-      in: "path"
-      name: "principalId"
-      description: "The master record identifier of the equipment"
-      x-required-boolean: true
-      schema:
-        type: "integer"
-        format: "int64"
-      example: 1234
+  responses:
+    CreateEquip:
+      description: "No Content"
+      content:
+        application/json:
+          schema:
+            type: "object"
+          examples:
+            Headers:
+              description: "204 No Content"
   schemas:
-    PTOStatusValue:
+    Accept:
+      properties: {}
+    ContentType:
+      properties: {}
+    EngineStateValue:
       type: "object"
       properties:
         value:
@@ -133,11 +147,185 @@ components:
           enum:
             - "On"
             - "Off"
-            - "Fault"
-            - "Unavailable"
-          description: "Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable."
+          description: "State of the engine. engineState only possible values are: On or Off."
           example: "On"
           x-required-boolean: true
+    Equipment:
+      title: "Equipment"
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          description: "Equipment Id of a configured equipment"
+          example: 7269
+          format: "int64"
+        make:
+          type: "string"
+          description: "Make of a configured equipment, maxLength = 20"
+          example: "JOHN DEERE"
+        name:
+          type: "string"
+          description: "Name of a configured equipment (sometimes called model). maxLength"
+          example: 6120
+    EquipmentMeasurements:
+      properties:
+        timestamp:
+          type: "string"
+          format: "date-time"
+          description: "Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order."
+        measurements:
+          type: "array"
+          format: "date-time"
+          items:
+            $ref: "#/components/schemas/Measurement"
+    EquipmentMeasurementsNew:
+      properties:
+        timestamp:
+          type: "string"
+          format: "date-time"
+          description: "Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order."
+        measurements:
+          type: "array"
+          format: "date-time"
+          items:
+            $ref: "#/components/schemas/MeasurementNew"
+    Measurement:
+      title: "Measurement"
+      type: "object"
+      properties:
+        Speed:
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "string"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "vehicleSpeed"
+                  description: "Name identifying which measurement this value corresponds to. vehicleSpeed only possible value for providing speed."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "kph"
+                  description: "The unit of measure we should interpret the value as. kph is currently the only supported unit for speed."
+        Heading:
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "heading"
+                  description: "Name identifying which measurement this value corresponds to. heading only possible value for providing heading."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "degrees"
+                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading."
+        FuelLevel:
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "fuelLevelPercentage"
+                  description: "Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "percent"
+                  description: "The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level."
+        Latitude:
+          title: "Latitude"
+          type: "object"
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "latitude"
+                  description: "Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "degrees"
+                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude"
+        Longitude:
+          title: "Longitude"
+          type: "object"
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "longitude"
+                  description: "Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "degrees"
+                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude"
+        EngineState:
+          title: "EngineState"
+          type: "object"
+          allOf:
+            - $ref: "#/components/schemas/EngineStateValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "engineState"
+                  description: "Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState."
+                  x-required-boolean: true
+        Odometer:
+          title: "Odometer"
+          type: "object"
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "odometer"
+                  description: "Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "km"
+                  description: "The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading"
+        EngineHours:
+          title: "EngineHours"
+          type: "object"
+          allOf:
+            - $ref: "#/components/schemas/MeasurementValue"
+            - type: "object"
+              properties:
+                name:
+                  type: "string"
+                  enum:
+                    - "engineHours"
+                  description: "Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours."
+                  x-required-boolean: true
+                unit:
+                  type: "string"
+                  enum:
+                    - "hours"
+                  description: "The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours"
     MeasurementNew:
       title: "Measurement"
       type: "object"
@@ -302,186 +490,6 @@ components:
                     - "ptoStatus"
                   description: "Name identifying which measurement this value corresponds to. ptoStatus only possible value for providing ptoStatus."
                   x-required-boolean: true
-    EquipmentMeasurements:
-      properties:
-        timestamp:
-          type: "string"
-          format: "date-time"
-          description: "Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order."
-        measurements:
-          type: "array"
-          format: "date-time"
-          items:
-            $ref: "#/components/schemas/Measurement"
-    EquipmentMeasurementsNew:
-      properties:
-        timestamp:
-          type: "string"
-          format: "date-time"
-          description: "Timestamp that the provided set of measurements were recorded. This will be valuable in determining the correct order of measurements in case they are provided out of order."
-        measurements:
-          type: "array"
-          format: "date-time"
-          items:
-            $ref: "#/components/schemas/MeasurementNew"
-    ContentType:
-      properties: {}
-    Accept:
-      properties: {}
-    Equipment:
-      title: "Equipment"
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          description: "Equipment Id of a configured equipment"
-          example: 7269
-          format: "int64"
-        make:
-          type: "string"
-          description: "Make of a configured equipment, maxLength = 20"
-          example: "JOHN DEERE"
-        name:
-          type: "string"
-          description: "Name of a configured equipment (sometimes called model). maxLength"
-          example: 6120
-    Measurement:
-      title: "Measurement"
-      type: "object"
-      properties:
-        Speed:
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "string"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "vehicleSpeed"
-                  description: "Name identifying which measurement this value corresponds to. vehicleSpeed only possible value for providing speed."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "kph"
-                  description: "The unit of measure we should interpret the value as. kph is currently the only supported unit for speed."
-        Heading:
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "heading"
-                  description: "Name identifying which measurement this value corresponds to. heading only possible value for providing heading."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "degrees"
-                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for heading."
-        FuelLevel:
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "fuelLevelPercentage"
-                  description: "Name identifying which measurement this value corresponds to. fuelLevelPercentage only possible value for providing fuel."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "percent"
-                  description: "The unit of measure we should interpret the value as. percent is currently the only supported unit for fuel level."
-        Latitude:
-          title: "Latitude"
-          type: "object"
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "latitude"
-                  description: "Name identifying which measurement this value corresponds to. latitude only possible value for providing latitude."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "degrees"
-                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for latitude"
-        Longitude:
-          title: "Longitude"
-          type: "object"
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "longitude"
-                  description: "Name identifying which measurement this value corresponds to. longitude only possible value for providing longitude."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "degrees"
-                  description: "The unit of measure we should interpret the value as. degrees is currently the only supported unit for longitude"
-        EngineState:
-          title: "EngineState"
-          type: "object"
-          allOf:
-            - $ref: "#/components/schemas/EngineStateValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "engineState"
-                  description: "Name identifying which measurement this value corresponds to. engineState only possible value for providing engineState."
-                  x-required-boolean: true
-        Odometer:
-          title: "Odometer"
-          type: "object"
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "odometer"
-                  description: "Name identifying which measurement this value corresponds to. odometer only possible value for providing odometerReading."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "km"
-                  description: "The unit of measure we should interpret the value as. km is currently the only supported unit for odometerReading"
-        EngineHours:
-          title: "EngineHours"
-          type: "object"
-          allOf:
-            - $ref: "#/components/schemas/MeasurementValue"
-            - type: "object"
-              properties:
-                name:
-                  type: "string"
-                  enum:
-                    - "engineHours"
-                  description: "Name identifying which measurement this value corresponds to. engineHours only possible value for providing engineHours."
-                  x-required-boolean: true
-                unit:
-                  type: "string"
-                  enum:
-                    - "hours"
-                  description: "The unit of measure we should interpret the value as. hours is currently the only supported unit for engineHours"
     MeasurementValue:
       type: "string"
       properties:
@@ -500,7 +508,7 @@ components:
           description: "Value of the actual measurement. The value will be used as is so it must be converted to the correct units."
           example: "19.5"
           x-required-boolean: true
-    EngineStateValue:
+    PTOStatusValue:
       type: "object"
       properties:
         value:
@@ -508,16 +516,8 @@ components:
           enum:
             - "On"
             - "Off"
-          description: "State of the engine. engineState only possible values are: On or Off."
+            - "Fault"
+            - "Unavailable"
+          description: "Status of PTO (Power Take-Off). ptoStatus possible values are: On, Off, Fault, or Unavailable."
           example: "On"
           x-required-boolean: true
-  responses:
-    CreateEquip:
-      description: "No Content"
-      content:
-        application/json:
-          schema:
-            type: "object"
-          examples:
-            Headers:
-              description: "204 No Content"

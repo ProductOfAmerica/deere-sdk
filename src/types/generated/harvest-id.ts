@@ -93,60 +93,37 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    LinkHarvestIdentificationModules: {
-      /**
-       * @description Self Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules
-       */
-      self?: unknown;
-    };
-    LinkSerialNumber: {
-      /**
-       * @description Self Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493
-       */
-      self?: unknown;
-      /**
-       * @description Field Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das
-       */
-      field?: unknown;
-      /**
-       * @description Organizations Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/123456
-       */
-      organization?: unknown;
-    };
-    /** @description A link provides a URI to access resources that are related to the response. */
-    Link: {
-      '@type'?: string;
-      /**
-       * @description The relation of the object to the linked resource.
-       * @example self
-       */
-      rel: string;
-      /**
-       * Format: uri
-       * @description The URI to the related resource.
-       * @example https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564
-       */
-      uri: string;
-    };
-    Point: {
-      /** @example Point */
-      '@type'?: string;
-      /**
-       * Format: double
-       * @description The latitude of the point
-       * @example 43.6187
-       */
-      lat?: number;
-      /**
-       * Format: double
-       * @description The longitude of the point
-       * @example 116.2146
-       */
-      lon?: number;
+    /** Format: Errors/DataValidationException */
+    Errors: {
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+         */
+        guid?: string;
+        /**
+         * @description An english description of the error
+         * @example End date should not be specified without start date
+         */
+        message?: string;
+        /**
+         * @description A string constant representing the type of error
+         * @example validation_constraint_operation_end_date_without_start_date
+         */
+        code?: string;
+        /**
+         * @description The name of the property or parameter deemed invalid
+         * @example startDate
+         */
+        field?: string;
+        /**
+         * @description The value that was supplied for this field in the request
+         * @example null
+         */
+        invalidValue?: string;
+      }[];
     };
     /** @description A general representation of quantity and unit. */
     EventMeasurement: {
@@ -246,40 +223,86 @@ export interface components {
        */
       orgId?: string;
     };
-    /** Format: Errors/DataValidationException */
-    Errors: {
-      errors?: {
-        /** @example Error */
-        '@type'?: string;
-        /**
-         * Format: uuid
-         * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
-         */
-        guid?: string;
-        /**
-         * @description An english description of the error
-         * @example End date should not be specified without start date
-         */
-        message?: string;
-        /**
-         * @description A string constant representing the type of error
-         * @example validation_constraint_operation_end_date_without_start_date
-         */
-        code?: string;
-        /**
-         * @description The name of the property or parameter deemed invalid
-         * @example startDate
-         */
-        field?: string;
-        /**
-         * @description The value that was supplied for this field in the request
-         * @example null
-         */
-        invalidValue?: string;
-      }[];
+    /** @description A link provides a URI to access resources that are related to the response. */
+    Link: {
+      '@type'?: string;
+      /**
+       * @description The relation of the object to the linked resource.
+       * @example self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The URI to the related resource.
+       * @example https://api.deere.com/platform/organizations/12345/harvestIdentificationModules/MHJL1232564
+       */
+      uri: string;
+    };
+    LinkHarvestIdentificationModules: {
+      /**
+       * @description Self Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules
+       */
+      self?: unknown;
+    };
+    LinkSerialNumber: {
+      /**
+       * @description Self Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/harvestIdentificationModules/14404565493
+       */
+      self?: unknown;
+      /**
+       * @description Field Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/field/6547879-adfasdfa-dasf546-551das
+       */
+      field?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+    };
+    Point: {
+      /** @example Point */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @description The latitude of the point
+       * @example 43.6187
+       */
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example 116.2146
+       */
+      lon?: number;
     };
   };
   responses: {
+    /** @description Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first. */
+    BadDateRange: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description The user has not been provided access to the field operation specified by id. */
+    DoesNotHaveAccessToFieldOperation: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The user has not been provided access to data in this organization */
+    DoesNotHaveAccessToOrg: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
     /** @description An array of HID Cotton modules */
     HIDCottonModules: {
       headers: {
@@ -297,6 +320,27 @@ export interface components {
           values?: components['schemas']['HIDCottonModule'][];
         };
       };
+    };
+    /** @description The specified organization or HID Cotton module does not exist */
+    HidModuleIdIsInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified field operation does not exist. */
+    InputFieldOpGuidInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The specified Organization ID does not exist */
+    InputOrgIdInvalid: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
     };
     /** @description A single HID Cotton Module */
     SingleHIDCottonModule: {
@@ -325,69 +369,25 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': number[];
       };
     };
-    /** @description Bad Request - Start Date and End Date must both be present (or neither present), and Start Date should be chronologically first. */
-    BadDateRange: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
-      };
-    };
-    /** @description The specified organization or HID Cotton module does not exist */
-    HidModuleIdIsInvalid: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The specified Organization ID does not exist */
-    InputOrgIdInvalid: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The user has not been provided access to data in this organization */
-    DoesNotHaveAccessToOrg: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The user has not been provided access to the field operation specified by id. */
-    DoesNotHaveAccessToFieldOperation: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The specified field operation does not exist. */
-    InputFieldOpGuidInvalid: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
   };
   parameters: {
-    AcceptJSON: 'application/vnd.deere.axiom.v3+json';
-    /** @description Module Serial Number */
-    ModuleSerialNumber: string;
-    /** @description Organization ID */
-    OrgId: string;
-    /** @description Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.) */
-    Embed: string;
     /** @description Desired unit system. Takes ENGLISH or METRIC. */
     'Accept-UOM-System': 'ENGLISH' | 'METRIC' | 'MIXED';
     /** @description Desired yield representation (unit) type. Takes VOLUME or MASS. */
     'Accept-Yield-Preference': string;
+    AcceptJSON: 'application/vnd.deere.axiom.v3+json';
     /** @description Refer to https://developer.deere.com/#!help&doc=.%2Fgetstarted%2FHELPdeereTags.htm */
     DeereTags: string;
-    /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
-    WrapStartDate: string;
+    /** @description Related entities to embed. Possible values include clients, farms and field. (Note: embedding of clients and farms requires field to be embedded as well.) */
+    Embed: string;
+    /** @description Module Serial Number */
+    ModuleSerialNumber: string;
+    /** @description Organization ID */
+    OrgId: string;
     /** @description End of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the startDate parameter. */
     WrapEndDate: string;
+    /** @description Start of the date-time range for wrap-timestamp filtering, in RFC 3339 format. Must be accompanied by the endDate parameter. */
+    WrapStartDate: string;
   };
   requestBodies: never;
   headers: never;

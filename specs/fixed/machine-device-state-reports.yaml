@@ -116,33 +116,7 @@ paths:
         "410":
           description: "The requested resource is no longer available"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            eq1: "eq1"
   parameters:
-    principalId:
-      name: "principalId"
-      in: "path"
-      description: "Principal ID of the machine/equipment."
-      x-required-boolean: true
-      schema:
-        type: "string"
-        default: "N/A"
-        example: 5432
-    startDate:
-      name: "startDate"
-      in: "query"
-      description: "Return DSR from the specified startDate."
-      x-required-boolean: false
-      schema:
-        type: "string"
-        format: "date-time"
-        default: "2 months old from CurrentTime"
-        example: "2010-10-04T14:35:05.000Z"
     endDate:
       name: "endDate"
       in: "query"
@@ -163,13 +137,26 @@ components:
         format: "boolean"
         default: "false"
         example: "true"
+    principalId:
+      name: "principalId"
+      in: "path"
+      description: "Principal ID of the machine/equipment."
+      x-required-boolean: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 5432
+    startDate:
+      name: "startDate"
+      in: "query"
+      description: "Return DSR from the specified startDate."
+      x-required-boolean: false
+      schema:
+        type: "string"
+        format: "date-time"
+        default: "2 months old from CurrentTime"
+        example: "2010-10-04T14:35:05.000Z"
   schemas:
-    MyJD_links:
-      description: "The link object provides links to ressources which are related to the response"
-      properties:
-        self:
-          example: "https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports"
-          description: "Device State Report Link."
     DeviceStateReport:
       description: "Device State Report"
       type: "object"
@@ -353,3 +340,16 @@ components:
           type: "byte"
           format: "int32"
           example: 2
+    MyJD_links:
+      description: "The link object provides links to ressources which are related to the response"
+      properties:
+        self:
+          example: "https://sandboxapi.deere.com/platform/machines/5432/deviceStateReports"
+          description: "Device State Report Link."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"

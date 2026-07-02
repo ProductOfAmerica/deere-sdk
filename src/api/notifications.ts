@@ -18,19 +18,6 @@ export class NotificationsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
-   * Fetch single notification.
-   * @description Retrieve a single notification by source event.
-   * @generated from GET /notifications/{sourceEvent}
-   */
-  async get(
-    sourceEvent: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['GetResponse']> {
-    const path = `/notifications/${sourceEvent}`;
-    return this.client.get<components['schemas']['GetResponse']>(this.spec, path, options);
-  }
-
-  /**
    * Create Notification Event
    * @description This resource creates an event that Operations Center will use
    * to generate notifications. These notifications will be received by anyone
@@ -55,6 +42,19 @@ export class NotificationsApi {
   async delete(sourceEvent: string, options?: RequestOptions): Promise<void> {
     const path = `/notificationEvents/${sourceEvent}`;
     await this.client.delete(this.spec, path, options);
+  }
+
+  /**
+   * Fetch single notification.
+   * @description Retrieve a single notification by source event.
+   * @generated from GET /notifications/{sourceEvent}
+   */
+  async get(
+    sourceEvent: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['GetResponse']> {
+    const path = `/notifications/${sourceEvent}`;
+    return this.client.get<components['schemas']['GetResponse']>(this.spec, path, options);
   }
 
   /**

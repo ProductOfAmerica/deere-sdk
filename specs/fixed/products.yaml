@@ -302,67 +302,6 @@ paths:
           description: "The user does not have sufficient privileges to update varieties in this org"
         "404":
           description: "There is no variety matching the specified Erid"
-  /varieties/{erid}/associateToOrg/{organizationId}:
-    post:
-      tags:
-        - "Reference Varieties"
-      summary: "Adds a single reference variety to organization"
-      security:
-        - OAuth2:
-            - "eq2"
-      description: "This endpoint will associate a reference variety to your organization from the global reference list. The reference varieties are immutable, however, they can still be archived or made available. The response headers from the GET endpoints will include the attributes that can be overridden."
-      parameters:
-        - $ref: "#/components/parameters/ERID"
-        - $ref: "#/components/parameters/OrganizationID"
-      requestBody:
-        description: "The product to add."
-        content:
-          application/vnd.deere.axiom.v3+json:
-            schema:
-              $ref: "#/components/schemas/ReferenceProductPointerRequest"
-            examples:
-              No Header:
-                value:
-                  countryCode: "USA"
-                  overrides:
-                    - key: "archived"
-                      value: true
-      responses:
-        "200":
-          description: "Successful association of reference variety to org."
-          content:
-            application/vnd.deere.axiom.v3+json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/ReferenceProductOverrideStatus"
-              examples:
-                Headers:
-                  description: "201 Created Created successfully."
-                  value:
-                    - key: "archived"
-                      success: true
-                      errors: []
-        "400":
-          description: "Unresolvable name conflict or other error occurred."
-          content:
-            application/json:
-              schema:
-                properties:
-                  total:
-                    type: "integer"
-                    format: "int64"
-                    example: 1
-                  errors:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/Errors"
-        "403":
-          description: "Invalid access to products for organization"
-        "404":
-          description: "Organization does not exist."
-        "409":
-          description: "A product already exists in this org with the specified erid."
   /varieties:
     get:
       tags:
@@ -498,6 +437,67 @@ paths:
           description: "The user does not have access to manage products."
         "404":
           description: "No variety found matching this erid."
+  /varieties/{erid}/associateToOrg/{organizationId}:
+    post:
+      tags:
+        - "Reference Varieties"
+      summary: "Adds a single reference variety to organization"
+      security:
+        - OAuth2:
+            - "eq2"
+      description: "This endpoint will associate a reference variety to your organization from the global reference list. The reference varieties are immutable, however, they can still be archived or made available. The response headers from the GET endpoints will include the attributes that can be overridden."
+      parameters:
+        - $ref: "#/components/parameters/ERID"
+        - $ref: "#/components/parameters/OrganizationID"
+      requestBody:
+        description: "The product to add."
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/ReferenceProductPointerRequest"
+            examples:
+              No Header:
+                value:
+                  countryCode: "USA"
+                  overrides:
+                    - key: "archived"
+                      value: true
+      responses:
+        "200":
+          description: "Successful association of reference variety to org."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ReferenceProductOverrideStatus"
+              examples:
+                Headers:
+                  description: "201 Created Created successfully."
+                  value:
+                    - key: "archived"
+                      success: true
+                      errors: []
+        "400":
+          description: "Unresolvable name conflict or other error occurred."
+          content:
+            application/json:
+              schema:
+                properties:
+                  total:
+                    type: "integer"
+                    format: "int64"
+                    example: 1
+                  errors:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Errors"
+        "403":
+          description: "Invalid access to products for organization"
+        "404":
+          description: "Organization does not exist."
+        "409":
+          description: "A product already exists in this org with the specified erid."
   /varieties/{erid}/documents:
     get:
       tags:
@@ -598,17 +598,6 @@ paths:
           description: "Organization does not exist"
 components:
   parameters:
-    VarietyEmbed:
-      in: "query"
-      name: "embed"
-      description: "An embeddable list of properties which are optional by default."
-      schema:
-        type: "array"
-        items:
-          type: "string"
-        enum:
-          - "documents"
-          - "showMergedProducts"
     ArchiveStatus:
       in: "query"
       name: "status"
@@ -621,30 +610,15 @@ components:
           - "ARCHIVED"
           - "ALL"
         example: "AVAILABLE"
-    OrganizationID:
+    ERID:
       in: "path"
-      name: "organizationId"
-      description: "The identifier of the Organization."
+      name: "erid"
+      description: "A unique identifier for an entity formatted as a uuid."
       x-required-boolean: true
-      schema:
-        type: "integer"
-        example: 6781
-        format: "int64"
-    OrgId:
-      name: "orgId"
-      in: "path"
-      description: "The organization owning the varieties."
-      x-required-boolean: true
-      schema:
-        type: "number"
-        example: 654321
-    RecordFilter:
-      name: "recordFilter"
-      in: "query"
-      description: "Filter results based on status"
+      example: "cf09acfc-9196-4dbb-9b38-1be02673c5ff"
       schema:
         type: "string"
-        example: "active, archived, all"
+        format: "uuid"
     Embed:
       name: "embed"
       in: "query"
@@ -659,13 +633,41 @@ components:
       schema:
         type: "string"
         example: "documents"
-    X-deere-signature:
-      name: "x-deere-signature"
-      in: "header"
-      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "The organization owning the varieties."
+      x-required-boolean: true
+      schema:
+        type: "number"
+        example: 654321
+    OrganizationID:
+      in: "path"
+      name: "organizationId"
+      description: "The identifier of the Organization."
+      x-required-boolean: true
+      schema:
+        type: "integer"
+        example: 6781
+        format: "int64"
+    RecordFilter:
+      name: "recordFilter"
+      in: "query"
+      description: "Filter results based on status"
       schema:
         type: "string"
-        example: "9r8392615e4b4e1c92018026f47109bb"
+        example: "active, archived, all"
+    VarietyEmbed:
+      in: "query"
+      name: "embed"
+      description: "An embeddable list of properties which are optional by default."
+      schema:
+        type: "array"
+        items:
+          type: "string"
+        enum:
+          - "documents"
+          - "showMergedProducts"
     VarietyId:
       name: "varietyId"
       in: "path"
@@ -682,87 +684,17 @@ components:
       schema:
         type: "string"
         example: "8e1e0920-1265-4066-8067-8ce2ce5012b2"
-    ERID:
-      in: "path"
-      name: "erid"
-      description: "A unique identifier for an entity formatted as a uuid."
-      x-required-boolean: true
-      example: "cf09acfc-9196-4dbb-9b38-1be02673c5ff"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
       schema:
         type: "string"
-        format: "uuid"
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            ag2: "ag2"
-            ag3: "ag3"
+        example: "9r8392615e4b4e1c92018026f47109bb"
+  responses:
+    Created:
+      description: "Created"
   schemas:
-    BaseResourceWithoutLink:
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "BaseResource"
-        id:
-          description: "Primary identifier for resource."
-          type: "string"
-          format: "uuid"
-          example: "1f8c12b4-126f-11ec-82a8-0242ac130003"
-    Document:
-      type: "object"
-      allOf:
-        - properties:
-            "@type":
-              example: "Document"
-              x-required-boolean: true
-            erid:
-              type: "string"
-              description: "Unique id of the document"
-              example: "08e930ee-4c31-41b6-b57e-8c0a8e1284a4"
-            docType:
-              type: "string"
-              example: "24(c) Registration"
-              description: "Type of document for this product."
-              x-required-boolean: true
-            productErid:
-              type: "string"
-              example: "388ab719-277d-4032-a2c3-40a297d8f482"
-              description: "The Unique id of the product."
-              x-required-boolean: true
-            description:
-              type: "string"
-              example: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
-              description: "Information about the document."
-              x-required-boolean: true
-            fileName:
-              type: "string"
-              example: "ld7OD026.pdf"
-              description: "The filename of the document."
-              x-required-boolean: true
-            expirationDate:
-              type: "string"
-              format: "date"
-              example: "2017-03-22"
-              readOnly: true
-              nullable: true
-      required:
-        - "@type"
-        - "productErid"
-        - "docType"
-        - "description"
-        - "fileName"
-    DocumentCollection:
-      type: "object"
-      allOf:
-        - $ref: "#/components/schemas/CollectionBase"
-        - properties:
-            values:
-              type: "array"
-              items:
-                $ref: "#/components/schemas/Document"
     BaseResource:
       type: "object"
       properties:
@@ -779,234 +711,17 @@ components:
           description: "Provides a reference to an associated object or list."
           items:
             $ref: "#/components/schemas/Link"
-    ReferenceVariety:
-      type: "object"
-      allOf:
-        - $ref: "#/components/schemas/BaseResource"
-        - properties:
-            "@type":
-              example: "ReferenceVariety"
-            id:
-              description: "Primary identifier for reference variety."
-              type: "string"
-              format: "uuid"
-              example: "1f8c12b4-126f-11ec-82a8-0242ac130003"
-              nullable: false
-            referenceId:
-              type: "string"
-              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
-              format: "uuid"
-              description: "product id of the reference variety"
-            category:
-              type: "string"
-              enum:
-                - "VARIETY"
-              example: "VARIETY"
-            name:
-              type: "string"
-              example: "S73-Z5 - 50lb bag"
-              description: "The common name of the reference variety."
-              nullable: false
-            referenceGuid:
-              type: "string"
-              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
-              format: "uuid"
-              description: "Optional. Denotes whether this product is from the global reference list."
-            companyName:
-              type: "string"
-              description: "The name of the input manufacturer."
-              example: "NK"
-              nullable: false
-            cropName:
-              type: "string"
-              example: "SOYBEANS"
-              description: "The identifier of the crop type that this reference variety is associated with (see the Crop Types API)."
-              nullable: false
-            countryCode:
-              type: "string"
-              example: "USA"
-              description: "Specifies the region the reference variety data belongs to. Some data may not be available in certain regions and data will not be included in the response."
-            sourceSystem:
-              type: "string"
-              format: "integer"
-              description: "The source system for the reference variety."
-              example: 3
-              nullable: false
-            sourceSystemProductId:
-              type: "string"
-              description: "The source system identifier for the reference variety."
-              example: "905P24925"
-              nullable: false
-            createdTime:
-              type: "string"
-              format: "date-time"
-              example: "2019-03-27T14:59:57.000Z"
-              description: "product created time"
-            modifiedTime:
-              type: "string"
-              format: "date-time"
-              example: "2019-03-27T14:59:57.000Z"
-              description: "product modified time"
-    Link:
+    BaseResourceWithoutLink:
       type: "object"
       properties:
         "@type":
           type: "string"
-          example: "Link"
-          description: "The type of the link."
-        rel:
+          example: "BaseResource"
+        id:
+          description: "Primary identifier for resource."
           type: "string"
-          example: "self"
-          description: "The identifier for the associated resource. If the resource is embeddable, this is also the \"embed\" value."
-        uri:
-          type: "string"
-          format: "uri"
-          example: "api_route"
-          description: "The location of the resource"
-    CollectionBase:
-      type: "object"
-      properties:
-        links:
-          type: "array"
-          description: "Provides a reference to an associated object or list."
-          items:
-            $ref: "#/components/schemas/Link"
-        total:
-          type: "integer"
-          format: "int32"
-          example: 100
-    ReferenceVarietyCollection:
-      type: "object"
-      allOf:
-        - $ref: "#/components/schemas/CollectionBase"
-        - properties:
-            values:
-              type: "array"
-              items:
-                $ref: "#/components/schemas/ReferenceVariety"
-    OverrideKeyValuePair:
-      type: "object"
-      properties:
-        key:
-          nullable: false
-          type: "string"
-          description: "Key for override parameter when setting overrides for a reference product"
-          example: "archived"
-          enum:
-            - "archived"
-        value:
-          nullable: false
-          type: "object"
-          description: "Value for override parameter, can be string, number or boolean"
-          example: true
-      required:
-        - "key"
-        - "value"
-    CommonProductPointerRequest:
-      type: "object"
-      properties:
-        overrides:
-          nullable: true
-          type: "array"
-          items:
-            $ref: "#/components/schemas/OverrideKeyValuePair"
-    ReferenceProductPointerRequest:
-      allOf:
-        - properties:
-            countryCode:
-              type: "string"
-              example: "USA"
-              description: "Country of the product to which it belongs."
-              x-required-boolean: true
-        - $ref: "#/components/schemas/CommonProductPointerRequest"
-    VarietyCollection:
-      type: "object"
-      allOf:
-        - $ref: "#/components/schemas/CollectionBase"
-        - properties:
-            values:
-              type: "array"
-              items:
-                $ref: "#/components/schemas/Variety"
-    ReferenceProductOverrideStatus:
-      type: "object"
-      properties:
-        key:
-          nullable: false
-          type: "string"
-          description: "Key for override parameter when setting overrides for a reference product"
-          example: "archived"
-          enum:
-            - "archived"
-        success:
-          nullable: false
-          type: "boolean"
-          description: "Whether or not the override was successfully applied"
-          example: true
-        errors:
-          $ref: "#/components/schemas/Errors"
-    PutVariety:
-      type: "object"
-      allOf:
-        - properties:
-            "@type":
-              example: "Variety"
-            name:
-              type: "string"
-              example: "S73-Z5 - 50lb bag"
-              description: "The common name of the variety."
-              x-required-boolean: true
-            cropName:
-              type: "string"
-              example: "SOYBEANS"
-              x-required-boolean: true
-              description: "The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported."
-            companyName:
-              type: "string"
-              description: "The brand of the variety."
-              example: "NK"
-              x-required-boolean: true
-            category:
-              type: "string"
-              enum:
-                - "VARIETY"
-              example: "VARIETY"
-            archived:
-              type: "boolean"
-              description: "Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization."
-              example: false
-            createdTime:
-              type: "string"
-              format: "date-time"
-              example: "2019-03-27T14:59:57.000Z"
-              description: "product created time"
-            modifiedTime:
-              type: "string"
-              format: "date-time"
-              example: "2019-03-27T14:59:57.000Z"
-              description: "product modified time"
-      required:
-        - "name"
-        - "cropName"
-        - "companyName"
-    VarietyIdUpdate:
-      properties:
-        name:
-          type: "string"
-          example: "RL8288HB"
-          description: "The common name of the variety."
-        companyName:
-          type: "string"
-          example: "AgVenture"
-          description: "The name of the input manufacturer."
-        cropName:
-          type: "string"
-          example: "CORN_WET"
-          description: "The identifier of the crop type that this variety is associated with."
-        archived:
-          type: "boolean"
-          example: false
-          description: "Whether or not this product is actively used. Defaults to false."
+          format: "uuid"
+          example: "1f8c12b4-126f-11ec-82a8-0242ac130003"
     ChildVariety:
       type: "object"
       allOf:
@@ -1077,6 +792,342 @@ components:
               items:
                 $ref: "#/components/schemas/Document"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label."
+    CollectionBase:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          description: "Provides a reference to an associated object or list."
+          items:
+            $ref: "#/components/schemas/Link"
+        total:
+          type: "integer"
+          format: "int32"
+          example: 100
+    CommonProductPointerRequest:
+      type: "object"
+      properties:
+        overrides:
+          nullable: true
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OverrideKeyValuePair"
+    Document:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              example: "Document"
+              x-required-boolean: true
+            erid:
+              type: "string"
+              description: "Unique id of the document"
+              example: "08e930ee-4c31-41b6-b57e-8c0a8e1284a4"
+            docType:
+              type: "string"
+              example: "24(c) Registration"
+              description: "Type of document for this product."
+              x-required-boolean: true
+            productErid:
+              type: "string"
+              example: "388ab719-277d-4032-a2c3-40a297d8f482"
+              description: "The Unique id of the product."
+              x-required-boolean: true
+            description:
+              type: "string"
+              example: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
+              description: "Information about the document."
+              x-required-boolean: true
+            fileName:
+              type: "string"
+              example: "ld7OD026.pdf"
+              description: "The filename of the document."
+              x-required-boolean: true
+            expirationDate:
+              type: "string"
+              format: "date"
+              example: "2017-03-22"
+              readOnly: true
+              nullable: true
+      required:
+        - "@type"
+        - "productErid"
+        - "docType"
+        - "description"
+        - "fileName"
+    DocumentCollection:
+      type: "object"
+      allOf:
+        - $ref: "#/components/schemas/CollectionBase"
+        - properties:
+            values:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Document"
+    Errors:
+      type: "object"
+      format: "Errors/DataValidationException"
+      properties:
+        "@type":
+          type: "string"
+          example: "Errors"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            properties:
+              "@type":
+                type: "string"
+                example: "Error"
+              guid:
+                type: "string"
+                format: "uuid"
+                example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
+              message:
+                type: "string"
+                description: "An english description of the error."
+                example: "The given crop type does not exist"
+              code:
+                type: "string"
+                example: "validation_constraint_crop_type_does_not_exist"
+                description: "A string constant representing the type of error."
+              field:
+                type: "string"
+                example: "targetCrops"
+                description: "The name of the property or parameter deemed invalid."
+              invalidValue:
+                type: "string"
+                example: "CORN_WET"
+                description: "The value that was supplied for this field in the request."
+        otherAttributes:
+          example: {}
+          type: "object"
+    Link:
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Link"
+          description: "The type of the link."
+        rel:
+          type: "string"
+          example: "self"
+          description: "The identifier for the associated resource. If the resource is embeddable, this is also the \"embed\" value."
+        uri:
+          type: "string"
+          format: "uri"
+          example: "api_route"
+          description: "The location of the resource"
+    OverrideKeyValuePair:
+      type: "object"
+      properties:
+        key:
+          nullable: false
+          type: "string"
+          description: "Key for override parameter when setting overrides for a reference product"
+          example: "archived"
+          enum:
+            - "archived"
+        value:
+          nullable: false
+          type: "object"
+          description: "Value for override parameter, can be string, number or boolean"
+          example: true
+      required:
+        - "key"
+        - "value"
+    PostVariety:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              example: "Variety"
+            name:
+              type: "string"
+              example: "S73-Z5 - 50lb bag"
+              description: "The common name of the variety."
+              x-required-boolean: true
+            cropName:
+              type: "string"
+              example: "SOYBEANS"
+              description: "The identifier of the crop type that this variety is associated with (see the Crop Types API)."
+              x-required-boolean: true
+            companyName:
+              type: "string"
+              description: "The brand of the variety."
+              example: "NK"
+              x-required-boolean: true
+            category:
+              type: "string"
+              enum:
+                - "VARIETY"
+              example: "VARIETY"
+            archived:
+              type: "boolean"
+              description: "Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization."
+              example: false
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2017-03-21T21:12:53.865Z"
+              description: "product created time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2018-04-06T15:12:52.910Z"
+              description: "product modified time"
+          required:
+            - "name"
+            - "cropName"
+            - "companyName"
+    PutVariety:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              example: "Variety"
+            name:
+              type: "string"
+              example: "S73-Z5 - 50lb bag"
+              description: "The common name of the variety."
+              x-required-boolean: true
+            cropName:
+              type: "string"
+              example: "SOYBEANS"
+              x-required-boolean: true
+              description: "The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported."
+            companyName:
+              type: "string"
+              description: "The brand of the variety."
+              example: "NK"
+              x-required-boolean: true
+            category:
+              type: "string"
+              enum:
+                - "VARIETY"
+              example: "VARIETY"
+            archived:
+              type: "boolean"
+              description: "Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization."
+              example: false
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product created time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product modified time"
+      required:
+        - "name"
+        - "cropName"
+        - "companyName"
+    ReferenceProductOverrideStatus:
+      type: "object"
+      properties:
+        key:
+          nullable: false
+          type: "string"
+          description: "Key for override parameter when setting overrides for a reference product"
+          example: "archived"
+          enum:
+            - "archived"
+        success:
+          nullable: false
+          type: "boolean"
+          description: "Whether or not the override was successfully applied"
+          example: true
+        errors:
+          $ref: "#/components/schemas/Errors"
+    ReferenceProductPointerRequest:
+      allOf:
+        - properties:
+            countryCode:
+              type: "string"
+              example: "USA"
+              description: "Country of the product to which it belongs."
+              x-required-boolean: true
+        - $ref: "#/components/schemas/CommonProductPointerRequest"
+    ReferenceVariety:
+      type: "object"
+      allOf:
+        - $ref: "#/components/schemas/BaseResource"
+        - properties:
+            "@type":
+              example: "ReferenceVariety"
+            id:
+              description: "Primary identifier for reference variety."
+              type: "string"
+              format: "uuid"
+              example: "1f8c12b4-126f-11ec-82a8-0242ac130003"
+              nullable: false
+            referenceId:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "product id of the reference variety"
+            category:
+              type: "string"
+              enum:
+                - "VARIETY"
+              example: "VARIETY"
+            name:
+              type: "string"
+              example: "S73-Z5 - 50lb bag"
+              description: "The common name of the reference variety."
+              nullable: false
+            referenceGuid:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "Optional. Denotes whether this product is from the global reference list."
+            companyName:
+              type: "string"
+              description: "The name of the input manufacturer."
+              example: "NK"
+              nullable: false
+            cropName:
+              type: "string"
+              example: "SOYBEANS"
+              description: "The identifier of the crop type that this reference variety is associated with (see the Crop Types API)."
+              nullable: false
+            countryCode:
+              type: "string"
+              example: "USA"
+              description: "Specifies the region the reference variety data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+            sourceSystem:
+              type: "string"
+              format: "integer"
+              description: "The source system for the reference variety."
+              example: 3
+              nullable: false
+            sourceSystemProductId:
+              type: "string"
+              description: "The source system identifier for the reference variety."
+              example: "905P24925"
+              nullable: false
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product created time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product modified time"
+    ReferenceVarietyCollection:
+      type: "object"
+      allOf:
+        - $ref: "#/components/schemas/CollectionBase"
+        - properties:
+            values:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/ReferenceVariety"
     Variety:
       type: "object"
       allOf:
@@ -1162,89 +1213,15 @@ components:
               items:
                 $ref: "#/components/schemas/ChildVariety"
               description: "List of child products."
-    Errors:
-      type: "object"
-      format: "Errors/DataValidationException"
-      properties:
-        "@type":
-          type: "string"
-          example: "Errors"
-        errors:
-          type: "array"
-          items:
-            type: "object"
-            format: "Error/ConstraintViolation"
-            properties:
-              "@type":
-                type: "string"
-                example: "Error"
-              guid:
-                type: "string"
-                format: "uuid"
-                example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
-              message:
-                type: "string"
-                description: "An english description of the error."
-                example: "The given crop type does not exist"
-              code:
-                type: "string"
-                example: "validation_constraint_crop_type_does_not_exist"
-                description: "A string constant representing the type of error."
-              field:
-                type: "string"
-                example: "targetCrops"
-                description: "The name of the property or parameter deemed invalid."
-              invalidValue:
-                type: "string"
-                example: "CORN_WET"
-                description: "The value that was supplied for this field in the request."
-        otherAttributes:
-          example: {}
-          type: "object"
-    PostVariety:
+    VarietyCollection:
       type: "object"
       allOf:
+        - $ref: "#/components/schemas/CollectionBase"
         - properties:
-            "@type":
-              example: "Variety"
-            name:
-              type: "string"
-              example: "S73-Z5 - 50lb bag"
-              description: "The common name of the variety."
-              x-required-boolean: true
-            cropName:
-              type: "string"
-              example: "SOYBEANS"
-              description: "The identifier of the crop type that this variety is associated with (see the Crop Types API)."
-              x-required-boolean: true
-            companyName:
-              type: "string"
-              description: "The brand of the variety."
-              example: "NK"
-              x-required-boolean: true
-            category:
-              type: "string"
-              enum:
-                - "VARIETY"
-              example: "VARIETY"
-            archived:
-              type: "boolean"
-              description: "Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization."
-              example: false
-            createdTime:
-              type: "string"
-              format: "date-time"
-              example: "2017-03-21T21:12:53.865Z"
-              description: "product created time"
-            modifiedTime:
-              type: "string"
-              format: "date-time"
-              example: "2018-04-06T15:12:52.910Z"
-              description: "product modified time"
-          required:
-            - "name"
-            - "cropName"
-            - "companyName"
+            values:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Variety"
     VarietyCreate:
       properties:
         name:
@@ -1267,6 +1244,29 @@ components:
           type: "string"
           description: "The identifier of the associated reference variety, if applicable. This is optional, but helps to capture product lineage and improve consistency across organizations."
           example: "1a63a1fe-b00f-403f-81f7-c157e0234cc4"
-  responses:
-    Created:
-      description: "Created"
+    VarietyIdUpdate:
+      properties:
+        name:
+          type: "string"
+          example: "RL8288HB"
+          description: "The common name of the variety."
+        companyName:
+          type: "string"
+          example: "AgVenture"
+          description: "The name of the input manufacturer."
+        cropName:
+          type: "string"
+          example: "CORN_WET"
+          description: "The identifier of the crop type that this variety is associated with."
+        archived:
+          type: "boolean"
+          example: false
+          description: "Whether or not this product is actively used. Defaults to false."
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag2: "ag2"
+            ag3: "ag3"

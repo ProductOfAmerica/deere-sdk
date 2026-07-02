@@ -18,6 +18,66 @@ export class FieldOperationsApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * View a Field Operation
+   * @description View a single field operation. The response will include links
+   * to: organization: The organization which owns this data. field: The field
+   * in which this operation was performed. self: The field operation.
+   * @generated from GET /fieldOperations/{operationId}
+   */
+  async get(
+    operationId: string,
+    params?: { embed?: 'measurementTypes' },
+    options?: RequestOptions
+  ): Promise<components['schemas']['FieldOperationId']> {
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/fieldOperations/${operationId}${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<components['schemas']['FieldOperationId']>(this.spec, path, options);
+  }
+
+  /**
+   * Asynchronous Shapefile Download
+   * @description An ESRI Shapefile is available for each Field Operation.
+   * Please see the for details on the shapefile format and how to consume it.
+   * The expected response codes are: 202 Accepted – The request was received
+   * and is being processed. Call back later to check for completion. This API
+   * does not currently support webhooks. To check for completion, repeat the
+   * same API call until you get an HTTP 307. Processing may take up to 30
+   * minutes, depending on the size of data. Applications should poll the API
+   * using a backoff loop. Polling intervals should start at 5 seconds and
+   * double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)
+   * 307 Temporary Redirect – The shapefile is ready to download. This response
+   * contains a location header. The location is a pre-signed URL that is valid
+   * for no less than one hour. To download the file, perform a GET request to
+   * the URL in the location header. Do not apply OAuth signing or other
+   * authorization to this request - it will cause the call to fail. 406 Not
+   * Acceptable - A shapefile cannot be generated. Note the initial call for a
+   * shapefile may receive either a 202 or a 307 response, depending upon
+   * whether an up-to-date file already exists for the specified field
+   * operation. For a sample integration, see our .
+   * @generated from GET /fieldOps/{operationId}
+   */
+  async getFieldops(
+    operationId: string,
+    params?: {
+      splitShapeFile?: boolean;
+      shapeType?: 'Point' | 'Polygon';
+      resolution?: 'EachSection' | 'EachSensor' | 'OneHertz';
+    },
+    options?: RequestOptions
+  ): Promise<unknown> {
+    const query = new URLSearchParams();
+    if (params?.splitShapeFile !== undefined)
+      query.set('splitShapeFile', String(params.splitShapeFile));
+    if (params?.shapeType !== undefined) query.set('shapeType', String(params.shapeType));
+    if (params?.resolution !== undefined) query.set('resolution', String(params.resolution));
+    const queryString = query.toString();
+    const path = `/fieldOps/${operationId}${queryString ? `?${queryString}` : ''}`;
+    return this.client.get<unknown>(this.spec, path, options);
+  }
+
+  /**
    * List Field Operations
    * @description This resource returns logical data structures representing the
    * agronomic operations performed in a field. Supported field operation types
@@ -86,66 +146,6 @@ export class FieldOperationsApi {
     const queryString = query.toString();
     const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['FieldOperation']>(this.spec, path, options);
-  }
-
-  /**
-   * View a Field Operation
-   * @description View a single field operation. The response will include links
-   * to: organization: The organization which owns this data. field: The field
-   * in which this operation was performed. self: The field operation.
-   * @generated from GET /fieldOperations/{operationId}
-   */
-  async get(
-    operationId: string,
-    params?: { embed?: 'measurementTypes' },
-    options?: RequestOptions
-  ): Promise<components['schemas']['FieldOperationId']> {
-    const query = new URLSearchParams();
-    if (params?.embed !== undefined) query.set('embed', String(params.embed));
-    const queryString = query.toString();
-    const path = `/fieldOperations/${operationId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<components['schemas']['FieldOperationId']>(this.spec, path, options);
-  }
-
-  /**
-   * Asynchronous Shapefile Download
-   * @description An ESRI Shapefile is available for each Field Operation.
-   * Please see the for details on the shapefile format and how to consume it.
-   * The expected response codes are: 202 Accepted – The request was received
-   * and is being processed. Call back later to check for completion. This API
-   * does not currently support webhooks. To check for completion, repeat the
-   * same API call until you get an HTTP 307. Processing may take up to 30
-   * minutes, depending on the size of data. Applications should poll the API
-   * using a backoff loop. Polling intervals should start at 5 seconds and
-   * double with each attempt: secondsToWait = 5 * 2 ^ (numberOfAttempts - 1)
-   * 307 Temporary Redirect – The shapefile is ready to download. This response
-   * contains a location header. The location is a pre-signed URL that is valid
-   * for no less than one hour. To download the file, perform a GET request to
-   * the URL in the location header. Do not apply OAuth signing or other
-   * authorization to this request - it will cause the call to fail. 406 Not
-   * Acceptable - A shapefile cannot be generated. Note the initial call for a
-   * shapefile may receive either a 202 or a 307 response, depending upon
-   * whether an up-to-date file already exists for the specified field
-   * operation. For a sample integration, see our .
-   * @generated from GET /fieldOps/{operationId}
-   */
-  async getFieldops(
-    operationId: string,
-    params?: {
-      splitShapeFile?: boolean;
-      shapeType?: 'Point' | 'Polygon';
-      resolution?: 'EachSection' | 'EachSensor' | 'OneHertz';
-    },
-    options?: RequestOptions
-  ): Promise<unknown> {
-    const query = new URLSearchParams();
-    if (params?.splitShapeFile !== undefined)
-      query.set('splitShapeFile', String(params.splitShapeFile));
-    if (params?.shapeType !== undefined) query.set('shapeType', String(params.shapeType));
-    if (params?.resolution !== undefined) query.set('resolution', String(params.resolution));
-    const queryString = query.toString();
-    const path = `/fieldOps/${operationId}${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<unknown>(this.spec, path, options);
   }
 }
 

@@ -4,6 +4,61 @@
  */
 
 export interface paths {
+  '/organizations/{orgID}/farms/{id}/fields': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a Farm's Field
+     * @description View details on the field to which a specified farm belongs. The response will link to the following resources: boundaries: View the boundaries of this field. clients: View the clients associated with this field. farms: View the farms belonging to this field. owningOrganization: View the organization that owns the field. activeBoundary: View the active boundary of this field.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
+        };
+        path: {
+          /** @description The id of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description Farm ID */
+          id: components['parameters']['Id3'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Get Field by client Id */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: components['schemas']['GroupLink'][];
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+              values?: components['schemas']['FieldResponse2'][];
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{orgId}/farms': {
     parameters: {
       query?: never;
@@ -76,61 +131,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/organizations/{orgID}/farms/{id}/fields': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * View a Farm's Field
-     * @description View details on the field to which a specified farm belongs. The response will link to the following resources: boundaries: View the boundaries of this field. clients: View the clients associated with this field. farms: View the farms belonging to this field. owningOrganization: View the organization that owns the field. activeBoundary: View the active boundary of this field.
-     */
-    get: {
-      parameters: {
-        query?: never;
-        header?: {
-          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-          'x-deere-signature'?: components['parameters']['X-deere-signature'];
-        };
-        path: {
-          /** @description The id of the organization */
-          orgId: components['parameters']['OrgId'];
-          /** @description Farm ID */
-          id: components['parameters']['Id3'];
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Get Field by client Id */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/vnd.deere.axiom.v3+json': {
-              links?: components['schemas']['GroupLink'][];
-              /**
-               * Format: int32
-               * @example 1
-               */
-              total?: number;
-              values?: components['schemas']['FieldResponse2'][];
-            };
-          };
-        };
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -163,20 +163,6 @@ export interface components {
        * @example 2020-09-21T15:41:15.205Z
        */
       lastModifiedTime?: string;
-    };
-    GetFarms: {
-      /**
-       * Format: int32
-       * @example 1
-       */
-      total?: number;
-      links?: {
-        /** @example self */
-        rel?: string;
-        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/ */
-        uri?: string;
-      }[];
-      values?: components['schemas']['GetFarm'][];
     };
     GetFarm: {
       /** @example Farm */
@@ -211,19 +197,22 @@ export interface components {
         uri?: string;
       }[];
     };
+    GetFarms: {
+      /**
+       * Format: int32
+       * @example 1
+       */
+      total?: number;
+      links?: {
+        /** @example self */
+        rel?: string;
+        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/ */
+        uri?: string;
+      }[];
+      values?: components['schemas']['GetFarm'][];
+    };
     /** @description Link to another resource */
     GroupLink: Record<string, never>;
-    PostFarm: {
-      /** @example John Doe */
-      name?: string;
-      /** @example false */
-      archived?: boolean;
-      /**
-       * @description Link to client resource
-       * @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
-       */
-      clientUri?: string;
-    };
     MalformedRequestError: {
       /** @example Link */
       '@type'?: string;
@@ -245,6 +234,17 @@ export interface components {
       /** @example {} */
       otherAttributes?: Record<string, never>;
     };
+    PostFarm: {
+      /** @example John Doe */
+      name?: string;
+      /** @example false */
+      archived?: boolean;
+      /**
+       * @description Link to client resource
+       * @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      clientUri?: string;
+    };
   };
   responses: {
     /** @description Array of clients containing links related to assets */
@@ -255,32 +255,6 @@ export interface components {
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['Clients'];
       };
-    };
-    /** @description Array of farms containing links related to assets */
-    FarmsReturned: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarms'];
-      };
-    };
-    /** @description Success */
-    FarmReturned: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarm'];
-      };
-    };
-    /** @description created */
-    FarmCreatedResponse: {
-      headers: {
-        Location?: string;
-        [name: string]: unknown;
-      };
-      content?: never;
     };
     /** @description Deleted */
     DeletedResponse: {
@@ -297,13 +271,6 @@ export interface components {
         };
       };
     };
-    /** @description Updated */
-    UpdatedResponse: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
     /** @description Does not have access */
     DoesNotHaveAccessResponse: {
       headers: {
@@ -318,12 +285,47 @@ export interface components {
       };
       content?: never;
     };
+    /** @description created */
+    FarmCreatedResponse: {
+      headers: {
+        Location?: string;
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Success */
+    FarmReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarm'];
+      };
+    };
+    /** @description Array of farms containing links related to assets */
+    FarmsReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarms'];
+      };
+    };
     /** @description Content has not changed since last call */
     HasNotChanged: {
       headers: {
         [name: string]: unknown;
       };
       content?: never;
+    };
+    /** @description Request Validation failure. */
+    MalformedRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['MalformedRequestError'];
+      };
     };
     /** @description Organization not found */
     OrgNotFound: {
@@ -339,32 +341,30 @@ export interface components {
       };
       content?: never;
     };
-    /** @description Request Validation failure. */
-    MalformedRequest: {
+    /** @description Updated */
+    UpdatedResponse: {
       headers: {
         [name: string]: unknown;
       };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['MalformedRequestError'];
-      };
+      content?: never;
     };
   };
   parameters: {
-    /** @description The id of the organization */
-    OrgId: number;
-    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-    'X-deere-signature': string;
-    /** @description Farm ID */
-    Id3: string;
     /** @description Farm id */
     FarmId: string;
-    /** @description Embed additional traceability record metadata to response */
-    RecordMetadataEmbed: string;
+    /** @description Farm ID */
+    Id3: string;
+    /** @description The id of the organization */
+    OrgId: number;
     /**
      * @description Allows filtering based on archived status
      * @example archived
      */
     RecordFilter: 'available' | 'archived' | 'all';
+    /** @description Embed additional traceability record metadata to response */
+    RecordMetadataEmbed: string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
   };
   requestBodies: {
     FarmRequest: {

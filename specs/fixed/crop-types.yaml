@@ -33,23 +33,6 @@ paths:
           $ref: "#/components/responses/CropTypeCollectionResponse"
         "405":
           $ref: "#/components/responses/CropTypeMethodNotAllowed"
-  /cropTypes/{name}:
-    get:
-      summary: "View a specific cropType"
-      description: "This endpoint will return details of specific cropType."
-      security:
-        - OAuth2:
-            - "ag1"
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/X-deere-signature2"
-      responses:
-        "200":
-          $ref: "#/components/responses/CropTypeNameResponse"
-        "404":
-          $ref: "#/components/responses/CropTypeNotFound"
-        "405":
-          $ref: "#/components/responses/CropTypeMethodNotAllowed"
   /cropTypes/{id}:
     get:
       summary: "View a specific cropType"
@@ -63,6 +46,23 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/CropTypeIdResponse"
+        "404":
+          $ref: "#/components/responses/CropTypeNotFound"
+        "405":
+          $ref: "#/components/responses/CropTypeMethodNotAllowed"
+  /cropTypes/{name}:
+    get:
+      summary: "View a specific cropType"
+      description: "This endpoint will return details of specific cropType."
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/X-deere-signature2"
+      responses:
+        "200":
+          $ref: "#/components/responses/CropTypeNameResponse"
         "404":
           $ref: "#/components/responses/CropTypeNotFound"
         "405":
@@ -86,14 +86,23 @@ paths:
         "405":
           $ref: "#/components/responses/CropTypeMethodNotAllowed"
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            ag1: "ag1"
   parameters:
+    Id:
+      in: "path"
+      name: "id"
+      description: "This is the crop type Id"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: 173
+    Name:
+      in: "path"
+      name: "name"
+      description: "This is the crop type name"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        example: "ENERGY_CANE"
     RecordFilter:
       name: "recordFilter"
       in: "query"
@@ -119,22 +128,6 @@ components:
         type: "string"
         format: "uuid"
         example: "9r8392615e4b4e1c12458026f47109bb"
-    Name:
-      in: "path"
-      name: "name"
-      description: "This is the crop type name"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: "ENERGY_CANE"
-    Id:
-      in: "path"
-      name: "id"
-      description: "This is the crop type Id"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        example: 173
     organizationId:
       in: "path"
       name: "organizationId"
@@ -198,53 +191,6 @@ components:
                       - "@type": "Link"
                         rel: "self"
                         uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
-    CropTypeNameResponse:
-      description: "A collection of crop types"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            type: "object"
-            properties:
-              total:
-                type: "integer"
-                format: "int64"
-                example: 1
-              values:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CropType2"
-          examples:
-            No Header:
-              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
-              value:
-                "@type": "CropType"
-                name: "CORN_WET"
-                translatedName: "Corn"
-                color: "#FFE119"
-                densityFactor:
-                  "@type": "Density"
-                  value: 25.4
-                  unit: "kg1bu-1"
-                standardPayableMoisture:
-                  "@type": "Moisture"
-                  value: 15
-                  unit: "%"
-                supportedEquipmentTypes:
-                  - "@type": "SupportedEquipmentType"
-                    erid: "d9d1c11f-35e0-43af-84ae-696d9ea3c18b"
-                    equipmentTypeProtoEnum: "ET_CORN_HEAD"
-                  - "@type": "SupportedEquipmentType"
-                    erid: "d8dce5b0-cc8d-4c34-afac-27d93793bd86"
-                    equipmentTypeProtoEnum: "ET_COMBINE"
-                  - "@type": "SupportedEquipmentType"
-                    erid: "57c1e304-bf44-4c50-bf3e-0e910d528b92"
-                    equipmentTypeProtoEnum: "ET_BALER"
-                lastModifiedTime: "2021-10-14T11:55:00Z"
-                id: "173"
-                links:
-                  - "@type": "Link"
-                    rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
     CropTypeIdResponse:
       description: "A collection of crop types"
       content:
@@ -292,6 +238,57 @@ components:
                   - "@type": "Link"
                     rel: "self"
                     uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
+    CropTypeMethodNotAllowed:
+      description: "The requested method is not allowed"
+    CropTypeNameResponse:
+      description: "A collection of crop types"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            type: "object"
+            properties:
+              total:
+                type: "integer"
+                format: "int64"
+                example: 1
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/CropType2"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 9b5392615e4b4e1c92013026f47109bb"
+              value:
+                "@type": "CropType"
+                name: "CORN_WET"
+                translatedName: "Corn"
+                color: "#FFE119"
+                densityFactor:
+                  "@type": "Density"
+                  value: 25.4
+                  unit: "kg1bu-1"
+                standardPayableMoisture:
+                  "@type": "Moisture"
+                  value: 15
+                  unit: "%"
+                supportedEquipmentTypes:
+                  - "@type": "SupportedEquipmentType"
+                    erid: "d9d1c11f-35e0-43af-84ae-696d9ea3c18b"
+                    equipmentTypeProtoEnum: "ET_CORN_HEAD"
+                  - "@type": "SupportedEquipmentType"
+                    erid: "d8dce5b0-cc8d-4c34-afac-27d93793bd86"
+                    equipmentTypeProtoEnum: "ET_COMBINE"
+                  - "@type": "SupportedEquipmentType"
+                    erid: "57c1e304-bf44-4c50-bf3e-0e910d528b92"
+                    equipmentTypeProtoEnum: "ET_BALER"
+                lastModifiedTime: "2021-10-14T11:55:00Z"
+                id: "173"
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
+    CropTypeNotFound:
+      description: "Not found"
     CropTypeorganizationResponse:
       description: "A collection of crop types"
       content:
@@ -346,10 +343,6 @@ components:
                       - "@type": "Link"
                         rel: "self"
                         uri: "https://sandboxapi.deere.com/platform/cropTypes/CORN_WET"
-    CropTypeMethodNotAllowed:
-      description: "The requested method is not allowed"
-    CropTypeNotFound:
-      description: "Not found"
   schemas:
     CropType:
       type: "object"
@@ -579,3 +572,10 @@ components:
               type: "string"
               example: "ET_COMBINE"
               description: "This is the equipment type enumeration value"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            ag1: "ag1"

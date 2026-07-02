@@ -42,45 +42,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/cropTypes/{name}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * View a specific cropType
-     * @description This endpoint will return details of specific cropType.
-     */
-    get: {
-      parameters: {
-        query?: never;
-        header?: {
-          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
-          'x-deere-signature'?: components['parameters']['X-deere-signature2'];
-        };
-        path: {
-          /** @description This is the crop type name */
-          name: components['parameters']['Name'];
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        200: components['responses']['CropTypeNameResponse'];
-        404: components['responses']['CropTypeNotFound'];
-        405: components['responses']['CropTypeMethodNotAllowed'];
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/cropTypes/{id}': {
     parameters: {
       query?: never;
@@ -108,6 +69,45 @@ export interface paths {
       requestBody?: never;
       responses: {
         200: components['responses']['CropTypeIdResponse'];
+        404: components['responses']['CropTypeNotFound'];
+        405: components['responses']['CropTypeMethodNotAllowed'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/cropTypes/{name}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a specific cropType
+     * @description This endpoint will return details of specific cropType.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature2'];
+        };
+        path: {
+          /** @description This is the crop type name */
+          name: components['parameters']['Name'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['CropTypeNameResponse'];
         404: components['responses']['CropTypeNotFound'];
         405: components['responses']['CropTypeMethodNotAllowed'];
       };
@@ -457,6 +457,29 @@ export interface components {
       };
     };
     /** @description A collection of crop types */
+    CropTypeIdResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @example 1
+           */
+          total?: number;
+          values?: components['schemas']['CropType3'][];
+        };
+      };
+    };
+    /** @description The requested method is not allowed */
+    CropTypeMethodNotAllowed: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description A collection of crop types */
     CropTypeNameResponse: {
       headers: {
         [name: string]: unknown;
@@ -472,21 +495,12 @@ export interface components {
         };
       };
     };
-    /** @description A collection of crop types */
-    CropTypeIdResponse: {
+    /** @description Not found */
+    CropTypeNotFound: {
       headers: {
         [name: string]: unknown;
       };
-      content: {
-        'application/vnd.deere.axiom.v3+json': {
-          /**
-           * Format: int64
-           * @example 1
-           */
-          total?: number;
-          values?: components['schemas']['CropType3'][];
-        };
-      };
+      content?: never;
     };
     /** @description A collection of crop types */
     CropTypeorganizationResponse: {
@@ -504,32 +518,18 @@ export interface components {
         };
       };
     };
-    /** @description The requested method is not allowed */
-    CropTypeMethodNotAllowed: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Not found */
-    CropTypeNotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
   };
   parameters: {
+    /** @description This is the crop type Id */
+    Id: string;
+    /** @description This is the crop type name */
+    Name: string;
     /** @description Filter results based on status */
     RecordFilter: string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
     'X-deere-signature': string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
     'X-deere-signature2': string;
-    /** @description This is the crop type name */
-    Name: string;
-    /** @description This is the crop type Id */
-    Id: string;
     /** @description This is the organization Id */
     organizationId: string;
   };

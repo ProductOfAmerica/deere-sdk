@@ -250,6 +250,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    ContentType: unknown;
+    GetAvailableLinks: {
+      /**
+       * @description Self Link
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/operators
+       */
+      self?: unknown;
+    };
+    GetOperatorAvailableLinks: {
+      /**
+       * @description Self Link
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
+       */
+      self?: unknown;
+    };
     GetResponseDetails: {
       /**
        * @description Operator ID
@@ -303,7 +318,6 @@ export interface components {
        */
       name?: string;
     };
-    ContentType: unknown;
     PutOperator: {
       /**
        * @description Operator Name
@@ -316,33 +330,19 @@ export interface components {
        */
       archived?: string;
     };
-    GetAvailableLinks: {
-      /**
-       * @description Self Link
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/operators
-       */
-      self?: unknown;
-    };
-    GetOperatorAvailableLinks: {
-      /**
-       * @description Self Link
-       * @example https://sandboxapi.deere.com/platform/organizations/123456/operators/0235d40e-02d0-44cb-a126-fff21173fc1f
-       */
-      self?: unknown;
-    };
   };
   responses: never;
   parameters: {
-    /** @description Organization ID */
-    orgId: string;
-    /** @description Operator ID */
-    id: string;
     /** @description Include operator metadata in the response. */
     embed: string;
-    /** @description Filter operators by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
-    recordFilter: string;
+    /** @description Operator ID */
+    id: string;
     /** @description Start of the range for timestamp filtering */
     lastModifiedTime: Record<string, never>;
+    /** @description Organization ID */
+    orgId: string;
+    /** @description Filter operators by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE */
+    recordFilter: string;
   };
   requestBodies: never;
   headers: never;

@@ -18,6 +18,34 @@ export class MapLayersApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * View a Map Layer Summary
+   * @description Returns a specific Map Layer Summary resource.
+   * @generated from GET /mapLayerSummaries/{id}
+   */
+  async get(
+    id: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['PostContributedMapLayerSummary']> {
+    const path = `/mapLayerSummaries/${id}`;
+    return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
+   * Delete a Map Layer Summary
+   * @description Deletes a Map Layer Summary and its underlying Map Layer and
+   * File Resource resources.
+   * @generated from DELETE /mapLayerSummaries/{id}
+   */
+  async delete(id: string, options?: RequestOptions): Promise<void> {
+    const path = `/mapLayerSummaries/${id}`;
+    await this.client.delete(this.spec, path, options);
+  }
+
+  /**
    * List Map Layer Summaries
    * @description This resource will list all Map Layer Summaries for a
    * specified field.
@@ -69,34 +97,6 @@ export class MapLayersApi {
   ): Promise<void> {
     const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries`;
     await this.client.post(this.spec, path, data, options);
-  }
-
-  /**
-   * View a Map Layer Summary
-   * @description Returns a specific Map Layer Summary resource.
-   * @generated from GET /mapLayerSummaries/{id}
-   */
-  async get(
-    id: string,
-    options?: RequestOptions
-  ): Promise<components['schemas']['PostContributedMapLayerSummary']> {
-    const path = `/mapLayerSummaries/${id}`;
-    return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(
-      this.spec,
-      path,
-      options
-    );
-  }
-
-  /**
-   * Delete a Map Layer Summary
-   * @description Deletes a Map Layer Summary and its underlying Map Layer and
-   * File Resource resources.
-   * @generated from DELETE /mapLayerSummaries/{id}
-   */
-  async delete(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/mapLayerSummaries/${id}`;
-    await this.client.delete(this.spec, path, options);
   }
 }
 

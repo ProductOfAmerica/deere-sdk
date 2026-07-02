@@ -14,6 +14,61 @@ servers:
           - "sandboxapi"
           - "partnerapi"
 paths:
+  /organizations/{orgID}/clients/{id}/fields:
+    get:
+      description: "View the field to which a specific client belongs. For the client, the response links to the following resources: boundaries: View the boundaries that belong to this field. clients: View the client that belongs to this field. farms: View the farms within this field. owningOrganization: View the organization that owns the field."
+      summary: "View a Client's Field"
+      security:
+        - OAuth2:
+            - "ag1"
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/X-deere-signature"
+      responses:
+        "200":
+          description: "Get Field by client Id"
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                properties:
+                  links:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/GroupLinkID"
+                  total:
+                    type: "integer"
+                    example: 1
+                    format: "int32"
+                  values:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/FieldResponse"
+              examples:
+                No Header:
+                  description: "20O OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                    total: 1
+                    values:
+                      - name: "Narnia"
+                        archived: false
+                        id: "a7cb723f-6707-46fb-a9ff-4e734e3daf58"
+                        links:
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58"
+                          - rel: "boundaries"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/boundaries"
+                          - rel: "clients"
+                            uri: "https://sandboxapi.deere.comm/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
+                          - rel: "farms"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/farms"
+                          - rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                          - rel: "contributionDefinition"
+                            uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
   /organizations/{orgId}/clients:
     get:
       description: "Retrieve all of the clients for an organization"
@@ -128,72 +183,8 @@ paths:
           $ref: "#/components/responses/DoesNotHaveAccessResponse"
         "404":
           $ref: "#/components/responses/OrgNotFound"
-  /organizations/{orgID}/clients/{id}/fields:
-    get:
-      description: "View the field to which a specific client belongs. For the client, the response links to the following resources: boundaries: View the boundaries that belong to this field. clients: View the client that belongs to this field. farms: View the farms within this field. owningOrganization: View the organization that owns the field."
-      summary: "View a Client's Field"
-      security:
-        - OAuth2:
-            - "ag1"
-      parameters:
-        - $ref: "#/components/parameters/OrgId"
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/X-deere-signature"
-      responses:
-        "200":
-          description: "Get Field by client Id"
-          content:
-            application/vnd.deere.axiom.v3+json:
-              schema:
-                properties:
-                  links:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/GroupLinkID"
-                  total:
-                    type: "integer"
-                    example: 1
-                    format: "int32"
-                  values:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/FieldResponse"
-              examples:
-                No Header:
-                  description: "20O OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 3b5392615e4b4e1c92013026f47109bb"
-                  value:
-                    links:
-                      - rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
-                    total: 1
-                    values:
-                      - name: "Narnia"
-                        archived: false
-                        id: "a7cb723f-6707-46fb-a9ff-4e734e3daf58"
-                        links:
-                          - rel: "self"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58"
-                          - rel: "boundaries"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/boundaries"
-                          - rel: "clients"
-                            uri: "https://sandboxapi.deere.comm/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
-                          - rel: "farms"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/farms"
-                          - rel: "owningOrganization"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
-                          - rel: "contributionDefinition"
-                            uri: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
 components:
   parameters:
-    OrgId:
-      in: "path"
-      name: "orgId"
-      description: "The id of the organization"
-      x-required-boolean: true
-      schema:
-        type: "integer"
-        format: "int64"
-        example: 12345
     ClientId:
       in: "path"
       name: "clientId"
@@ -209,20 +200,6 @@ components:
       x-required-boolean: false
       schema:
         type: "string"
-    FarmName:
-      in: "query"
-      name: "name"
-      description: "farm name"
-      x-required-boolean: false
-      schema:
-        type: "string"
-    RecordFilter:
-      in: "query"
-      name: "recordFilter"
-      description: "Filter clients by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE"
-      schema:
-        type: "string"
-        example: "ACTIVE"
     Embed:
       name: "embed"
       in: "query"
@@ -231,22 +208,13 @@ components:
       schema:
         type: "string"
         example: "showRecordMetadata"
-    X-deere-signature:
-      name: "x-deere-signature"
-      in: "header"
-      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+    FarmName:
+      in: "query"
+      name: "name"
+      description: "farm name"
+      x-required-boolean: false
       schema:
         type: "string"
-        example: "9r8392615e4b4e1c92018026f47109bb"
-    OrgId2:
-      in: "path"
-      name: "orgID"
-      description: "The ID of the organization"
-      x-required-boolean: true
-      schema:
-        type: "string"
-        format: "int64"
-        example: 123456
     Id:
       name: "clientId"
       in: "path"
@@ -256,12 +224,86 @@ components:
         type: "string"
         format: "uuid"
         example: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+    OrgId:
+      in: "path"
+      name: "orgId"
+      description: "The id of the organization"
+      x-required-boolean: true
+      schema:
+        type: "integer"
+        format: "int64"
+        example: 12345
+    OrgId2:
+      in: "path"
+      name: "orgID"
+      description: "The ID of the organization"
+      x-required-boolean: true
+      schema:
+        type: "string"
+        format: "int64"
+        example: 123456
+    RecordFilter:
+      in: "query"
+      name: "recordFilter"
+      description: "Filter clients by status. Possible values ACTIVE or ALL or ARCHIVED Default - ACTIVE"
+      schema:
+        type: "string"
+        example: "ACTIVE"
+    X-deere-signature:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "9r8392615e4b4e1c92018026f47109bb"
   requestBodies:
     ClientRequest:
       $ref: "#/components/schemas/ClientPost"
     ClientRequest2:
       $ref: "#/components/schemas/ClientPost"
   responses:
+    ClientCreatedResponse:
+      description: "created"
+      headers:
+        Location:
+          schema:
+            description: "The uri of the newly created resource"
+            type: "string"
+            format: "url"
+            example: "https://sandboxapi.deere.com/platform/organizations/1234/clients/795b80cf-eb03-4c43-a9e1-f46eb0fbf912"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                type: "integer"
+                example: 1
+                format: "int32"
+          examples:
+            Headers:
+              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/12345/clients/4r539261-5e4b-4e1c-9201-8026f47109bb"
+    ClientReturned:
+      description: "Success"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Client"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
+              value:
+                name: "Aslan"
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                  - rel: "fields"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
+                  - rel: "farms"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
+                  - rel: "owningOrganization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/6789"
+                id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+                archived: false
     ClientsReturned:
       description: "Array of clients containing links related to assets"
       content:
@@ -301,48 +343,15 @@ components:
                         uri: "https://sandboxapi.deere.com/platform/organizations/6789"
                     id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
                     archived: false
-    ClientReturned:
-      description: "Success"
+    DeletedResponse:
+      description: "Deleted"
       content:
         application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/Client"
-          examples:
-            No Header:
-              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json x-deere-signature: 5a5392615e4b4e1c92013026f47109bb"
-              value:
-                name: "Aslan"
-                links:
-                  - rel: "self"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e"
-                  - rel: "fields"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/fields"
-                  - rel: "farms"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/6789/clients/f1161eba-7c82-4a80-9eeb-383451b4c46e/farms"
-                  - rel: "owningOrganization"
-                    uri: "https://sandboxapi.deere.com/platform/organizations/6789"
-                id: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
-                archived: false
-    ClientCreatedResponse:
-      description: "created"
-      headers:
-        Location:
-          schema:
-            description: "The uri of the newly created resource"
-            type: "string"
-            format: "url"
-            example: "https://sandboxapi.deere.com/platform/organizations/1234/clients/795b80cf-eb03-4c43-a9e1-f46eb0fbf912"
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            properties:
-              total:
-                type: "integer"
-                example: 1
-                format: "int32"
           examples:
             Headers:
-              description: "201 Created Location: https://sandboxapi.deere.com/platform/organizations/12345/clients/4r539261-5e4b-4e1c-9201-8026f47109bb"
+              description: "204 No Content"
+    DoesNotHaveAccessResponse:
+      description: "Does not have access"
     FarmsResponse:
       description: "Get Farm by client Id"
       content:
@@ -383,13 +392,18 @@ components:
                         uri: "https://sandboxapi.deere.com/platform/organizations/6789/farms/f1161eba-7c82-4a80-9eeb-383451b4c46e/clients"
                       - rel: "owningOrganization"
                         uri: "https://sandboxapi.deere.com/platform/organizations/6789"
-    DeletedResponse:
-      description: "Deleted"
+    HasNotChanged:
+      description: "Content has not changed since last call"
+    MalformedRequest:
+      description: "Request Validation failure."
       content:
         application/vnd.deere.axiom.v3+json:
-          examples:
-            Headers:
-              description: "204 No Content"
+          schema:
+            $ref: "#/components/schemas/MalformedRequestError"
+    OrgNotFound:
+      description: "Organization not found"
+    OrgOrClientNotFound:
+      description: "Organization or client not found"
     UpdatedResponse:
       description: "Updated"
       content:
@@ -403,36 +417,7 @@ components:
           examples:
             Headers:
               description: "204 No Content"
-    DoesNotHaveAccessResponse:
-      description: "Does not have access"
-    OrgNotFound:
-      description: "Organization not found"
-    HasNotChanged:
-      description: "Content has not changed since last call"
-    OrgOrClientNotFound:
-      description: "Organization or client not found"
-    MalformedRequest:
-      description: "Request Validation failure."
-      content:
-        application/vnd.deere.axiom.v3+json:
-          schema:
-            $ref: "#/components/schemas/MalformedRequestError"
   schemas:
-    Clients:
-      type: "object"
-      properties:
-        links:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/GroupLink"
-        total:
-          type: "integer"
-          example: 1
-          format: "int32"
-        values:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/Client"
     Client:
       type: "object"
       properties:
@@ -460,70 +445,6 @@ components:
           type: "boolean"
           example: true
           description: "Archived status"
-    GroupLink:
-      description: "Link to another resource"
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "Link"
-        rel:
-          x-required-boolean: true
-          type: "string"
-          example: "self"
-        uri:
-          x-required-boolean: true
-          type: "string"
-          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients"
-    FieldResponse:
-      properties:
-        x-deere-signature:
-          type: "string"
-          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
-          example: "3b5392615e4b4e1c92013026f47109bb"
-        id:
-          type: "string"
-          format: "uuid"
-          example: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
-          description: "Client ID"
-        name:
-          type: "string"
-          description: "Client Name"
-          example: "Aslan"
-    ContentType:
-      properties: {}
-    Link:
-      description: "Link to another resource"
-      type: "object"
-      properties:
-        "@type":
-          type: "string"
-          example: "Link"
-        rel:
-          x-required-boolean: true
-          type: "string"
-          example: "self"
-        uri:
-          x-required-boolean: true
-          type: "string"
-          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
-    GroupLinkID:
-      properties:
-        boundaries:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/boundaries"
-          description: "Boundaries Link."
-        clients:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
-          description: "Clients Link."
-        farms:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/farms"
-          description: "Farms Link."
-        owningOrganization:
-          example: "https://sandboxapi.deere.com/platform/organizations/1234"
-          description: "Organizations Link."
-        contributionDefinition:
-          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
-          description: "Contribution Definition Link"
     ClientPost:
       properties:
         name:
@@ -534,6 +455,59 @@ components:
           example: "false"
           type: "string"
           description: "Archived status (false = active)"
+    Clients:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GroupLink"
+        total:
+          type: "integer"
+          example: 1
+          format: "int32"
+        values:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Client"
+    ContentType:
+      properties: {}
+    Errors:
+      type: "object"
+      format: "Errors/DataValidationException"
+      properties:
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            format: "Error/ConstraintViolation"
+            example:
+              guid: "438d14c1-db6f-402a-a349-942ccab36c59"
+              message: "invalid client name"
+              code: 400
+              field: "client name"
+              invalidValue: "?????"
+          properties:
+            guid:
+              type: "string"
+              format: "uuid"
+              example: "438d14c1-db6f-402a-a349-942ccab36c59"
+            message:
+              type: "string"
+              description: "A description of the error translated into the language specified in the 'Accept-Language' header if available, otherwise English"
+              example: "invalid client name"
+            code:
+              type: "string"
+              description: "A string constant representing the type of error"
+              example: 400
+            field:
+              type: "string"
+              description: "The name of the property or parameter deemed invalid"
+              example: "client name"
+            invalidValue:
+              type: "string"
+              description: "The value that was supplied for this field in the request"
+              example: "?????"
     FarmResponse:
       properties:
         farmId:
@@ -577,42 +551,68 @@ components:
         modifiedBy:
           type: "string"
           description: "The Id of the entity which last modified the farm"
-    Errors:
-      type: "object"
-      format: "Errors/DataValidationException"
+    FieldResponse:
       properties:
-        errors:
-          type: "array"
-          items:
-            type: "object"
-            format: "Error/ConstraintViolation"
-            example:
-              guid: "438d14c1-db6f-402a-a349-942ccab36c59"
-              message: "invalid client name"
-              code: 400
-              field: "client name"
-              invalidValue: "?????"
-          properties:
-            guid:
-              type: "string"
-              format: "uuid"
-              example: "438d14c1-db6f-402a-a349-942ccab36c59"
-            message:
-              type: "string"
-              description: "A description of the error translated into the language specified in the 'Accept-Language' header if available, otherwise English"
-              example: "invalid client name"
-            code:
-              type: "string"
-              description: "A string constant representing the type of error"
-              example: 400
-            field:
-              type: "string"
-              description: "The name of the property or parameter deemed invalid"
-              example: "client name"
-            invalidValue:
-              type: "string"
-              description: "The value that was supplied for this field in the request"
-              example: "?????"
+        x-deere-signature:
+          type: "string"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+          example: "3b5392615e4b4e1c92013026f47109bb"
+        id:
+          type: "string"
+          format: "uuid"
+          example: "f1161eba-7c82-4a80-9eeb-383451b4c46e"
+          description: "Client ID"
+        name:
+          type: "string"
+          description: "Client Name"
+          example: "Aslan"
+    GroupLink:
+      description: "Link to another resource"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Link"
+        rel:
+          x-required-boolean: true
+          type: "string"
+          example: "self"
+        uri:
+          x-required-boolean: true
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients"
+    GroupLinkID:
+      properties:
+        boundaries:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/boundaries"
+          description: "Boundaries Link."
+        clients:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/clients"
+          description: "Clients Link."
+        farms:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234/fields/a7cb723f-6707-46fb-a9ff-4e734e3daf58/farms"
+          description: "Farms Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organizations Link."
+        contributionDefinition:
+          example: "https://sandboxapi.deere.com/platform/contributionDefinitions/32a256ea-0000-4756-b000-b6dabda856ef"
+          description: "Contribution Definition Link"
+    Link:
+      description: "Link to another resource"
+      type: "object"
+      properties:
+        "@type":
+          type: "string"
+          example: "Link"
+        rel:
+          x-required-boolean: true
+          type: "string"
+          example: "self"
+        uri:
+          x-required-boolean: true
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/organizations/5555/clients/9369f3f6-2428-4bba-bf64-0a19cdaf007d"
     MalformedRequestError:
       type: "object"
       properties:

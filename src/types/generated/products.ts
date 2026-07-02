@@ -248,95 +248,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/varieties/{erid}/associateToOrg/{organizationId}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Adds a single reference variety to organization
-     * @description This endpoint will associate a reference variety to your organization from the global reference list. The reference varieties are immutable, however, they can still be archived or made available. The response headers from the GET endpoints will include the attributes that can be overridden.
-     */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          /**
-           * @description A unique identifier for an entity formatted as a uuid.
-           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
-           */
-          erid: components['parameters']['ERID'];
-          /** @description The identifier of the Organization. */
-          organizationId: components['parameters']['OrganizationID'];
-        };
-        cookie?: never;
-      };
-      /** @description The product to add. */
-      requestBody?: {
-        content: {
-          'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductPointerRequest'];
-        };
-      };
-      responses: {
-        /** @description Successful association of reference variety to org. */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductOverrideStatus'][];
-          };
-        };
-        /** @description Unresolvable name conflict or other error occurred. */
-        400: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              /**
-               * Format: int64
-               * @example 1
-               */
-              total?: number;
-              errors?: components['schemas']['Errors'][];
-            };
-          };
-        };
-        /** @description Invalid access to products for organization */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Organization does not exist. */
-        404: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description A product already exists in this org with the specified erid. */
-        409: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-      };
-    };
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   '/varieties': {
     parameters: {
       query?: never;
@@ -456,6 +367,95 @@ export interface paths {
     };
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/varieties/{erid}/associateToOrg/{organizationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Adds a single reference variety to organization
+     * @description This endpoint will associate a reference variety to your organization from the global reference list. The reference varieties are immutable, however, they can still be archived or made available. The response headers from the GET endpoints will include the attributes that can be overridden.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductPointerRequest'];
+        };
+      };
+      responses: {
+        /** @description Successful association of reference variety to org. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductOverrideStatus'][];
+          };
+        };
+        /** @description Unresolvable name conflict or other error occurred. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * Format: int64
+               * @example 1
+               */
+              total?: number;
+              errors?: components['schemas']['Errors'][];
+            };
+          };
+        };
+        /** @description Invalid access to products for organization */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Organization does not exist. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description A product already exists in this org with the specified erid. */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
     delete?: never;
     options?: never;
     head?: never;
@@ -600,6 +600,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    BaseResource: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description Primary identifier for resource.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link'][];
+    };
     BaseResourceWithoutLink: {
       /** @example BaseResource */
       '@type'?: string;
@@ -609,6 +621,87 @@ export interface components {
        * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
        */
       id?: string;
+    };
+    ChildVariety: components['schemas']['BaseResource'] & {
+      /** @example Variety */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier for the variety that is unique to your organization.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      id?: string;
+      /**
+       * @description The common name of the variety.
+       * @example S73-Z5 - 50lb bag
+       */
+      name?: string;
+      /**
+       * @example VARIETY
+       * @enum {string}
+       */
+      category?: 'VARIETY';
+      /**
+       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API).
+       * @example SOYBEANS
+       */
+      cropName?: string;
+      /**
+       * @description The brand of the variety.
+       * @example NK
+       */
+      companyName?: string;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * Format: date-time
+       * @description product created time
+       * @example 2017-03-21T21:12:53.865Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modified time
+       * @example 2018-04-06T15:12:52.910Z
+       */
+      readonly modifiedTime?: string;
+      /**
+       * @description Country of the product to which it belongs
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Parent id of the child in which the product is merged
+       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
+       */
+      parentErid?: string;
+      /**
+       * @description Showing the status of cleanup.
+       * @example MERGED
+       */
+      cleanupStatus?: string;
+      /**
+       * @description Clean up action time
+       * @example 2025-09-22T11:24:43.855Z
+       */
+      cleanupActionDate?: string;
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. */
+      documentsList?: components['schemas']['Document'][];
+    };
+    CollectionBase: {
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link'][];
+      /**
+       * Format: int32
+       * @example 100
+       */
+      total?: number;
+    };
+    CommonProductPointerRequest: {
+      overrides?: components['schemas']['OverrideKeyValuePair'][] | null;
     };
     Document: {
       /** @example Document */
@@ -647,18 +740,176 @@ export interface components {
     DocumentCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['Document'][];
     };
-    BaseResource: {
-      /** @example BaseResource */
+    /** Format: Errors/DataValidationException */
+    Errors: {
+      /** @example Errors */
+      '@type'?: string;
+      errors?: {
+        /** @example Error */
+        '@type'?: string;
+        /**
+         * Format: uuid
+         * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+         */
+        guid?: string;
+        /**
+         * @description An english description of the error.
+         * @example The given crop type does not exist
+         */
+        message?: string;
+        /**
+         * @description A string constant representing the type of error.
+         * @example validation_constraint_crop_type_does_not_exist
+         */
+        code?: string;
+        /**
+         * @description The name of the property or parameter deemed invalid.
+         * @example targetCrops
+         */
+        field?: string;
+        /**
+         * @description The value that was supplied for this field in the request.
+         * @example CORN_WET
+         */
+        invalidValue?: string;
+      }[];
+      /** @example {} */
+      otherAttributes?: Record<string, never>;
+    };
+    Link: {
+      /**
+       * @description The type of the link.
+       * @example Link
+       */
       '@type'?: string;
       /**
-       * Format: uuid
-       * @description Primary identifier for resource.
-       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
+       * @example self
        */
-      id?: string;
-      /** @description Provides a reference to an associated object or list. */
-      links?: components['schemas']['Link'][];
+      rel?: string;
+      /**
+       * Format: uri
+       * @description The location of the resource
+       * @example api_route
+       */
+      uri?: string;
     };
+    OverrideKeyValuePair: {
+      /**
+       * @description Key for override parameter when setting overrides for a reference product
+       * @example archived
+       * @enum {string}
+       */
+      key: 'archived';
+      /**
+       * @description Value for override parameter, can be string, number or boolean
+       * @example true
+       */
+      value: Record<string, never>;
+    };
+    PostVariety: {
+      /** @example Variety */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the variety.
+       * @example S73-Z5 - 50lb bag
+       */
+      name: string;
+      /**
+       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API).
+       * @example SOYBEANS
+       */
+      cropName: string;
+      /**
+       * @description The brand of the variety.
+       * @example NK
+       */
+      companyName: string;
+      /**
+       * @example VARIETY
+       * @enum {string}
+       */
+      category?: 'VARIETY';
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * Format: date-time
+       * @description product created time
+       * @example 2017-03-21T21:12:53.865Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modified time
+       * @example 2018-04-06T15:12:52.910Z
+       */
+      modifiedTime?: string;
+    };
+    PutVariety: {
+      /** @example Variety */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the variety.
+       * @example S73-Z5 - 50lb bag
+       */
+      name: string;
+      /**
+       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported.
+       * @example SOYBEANS
+       */
+      cropName: string;
+      /**
+       * @description The brand of the variety.
+       * @example NK
+       */
+      companyName: string;
+      /**
+       * @example VARIETY
+       * @enum {string}
+       */
+      category?: 'VARIETY';
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * Format: date-time
+       * @description product created time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modified time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+    };
+    ReferenceProductOverrideStatus: {
+      /**
+       * @description Key for override parameter when setting overrides for a reference product
+       * @example archived
+       * @enum {string}
+       */
+      key?: 'archived';
+      /**
+       * @description Whether or not the override was successfully applied
+       * @example true
+       */
+      success?: boolean;
+      errors?: components['schemas']['Errors'];
+    };
+    ReferenceProductPointerRequest: {
+      /**
+       * @description Country of the product to which it belongs.
+       * @example USA
+       */
+      countryCode?: string;
+    } & components['schemas']['CommonProductPointerRequest'];
     ReferenceVariety: components['schemas']['BaseResource'] & {
       /** @example ReferenceVariety */
       '@type'?: unknown;
@@ -729,207 +980,8 @@ export interface components {
        */
       modifiedTime?: string;
     };
-    Link: {
-      /**
-       * @description The type of the link.
-       * @example Link
-       */
-      '@type'?: string;
-      /**
-       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
-       * @example self
-       */
-      rel?: string;
-      /**
-       * Format: uri
-       * @description The location of the resource
-       * @example api_route
-       */
-      uri?: string;
-    };
-    CollectionBase: {
-      /** @description Provides a reference to an associated object or list. */
-      links?: components['schemas']['Link'][];
-      /**
-       * Format: int32
-       * @example 100
-       */
-      total?: number;
-    };
     ReferenceVarietyCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['ReferenceVariety'][];
-    };
-    OverrideKeyValuePair: {
-      /**
-       * @description Key for override parameter when setting overrides for a reference product
-       * @example archived
-       * @enum {string}
-       */
-      key: 'archived';
-      /**
-       * @description Value for override parameter, can be string, number or boolean
-       * @example true
-       */
-      value: Record<string, never>;
-    };
-    CommonProductPointerRequest: {
-      overrides?: components['schemas']['OverrideKeyValuePair'][] | null;
-    };
-    ReferenceProductPointerRequest: {
-      /**
-       * @description Country of the product to which it belongs.
-       * @example USA
-       */
-      countryCode?: string;
-    } & components['schemas']['CommonProductPointerRequest'];
-    VarietyCollection: components['schemas']['CollectionBase'] & {
-      values?: components['schemas']['Variety'][];
-    };
-    ReferenceProductOverrideStatus: {
-      /**
-       * @description Key for override parameter when setting overrides for a reference product
-       * @example archived
-       * @enum {string}
-       */
-      key?: 'archived';
-      /**
-       * @description Whether or not the override was successfully applied
-       * @example true
-       */
-      success?: boolean;
-      errors?: components['schemas']['Errors'];
-    };
-    PutVariety: {
-      /** @example Variety */
-      '@type'?: unknown;
-      /**
-       * @description The common name of the variety.
-       * @example S73-Z5 - 50lb bag
-       */
-      name: string;
-      /**
-       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported.
-       * @example SOYBEANS
-       */
-      cropName: string;
-      /**
-       * @description The brand of the variety.
-       * @example NK
-       */
-      companyName: string;
-      /**
-       * @example VARIETY
-       * @enum {string}
-       */
-      category?: 'VARIETY';
-      /**
-       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
-       * @example false
-       */
-      archived?: boolean;
-      /**
-       * Format: date-time
-       * @description product created time
-       * @example 2019-03-27T14:59:57.000Z
-       */
-      createdTime?: string;
-      /**
-       * Format: date-time
-       * @description product modified time
-       * @example 2019-03-27T14:59:57.000Z
-       */
-      modifiedTime?: string;
-    };
-    VarietyIdUpdate: {
-      /**
-       * @description The common name of the variety.
-       * @example RL8288HB
-       */
-      name?: string;
-      /**
-       * @description The name of the input manufacturer.
-       * @example AgVenture
-       */
-      companyName?: string;
-      /**
-       * @description The identifier of the crop type that this variety is associated with.
-       * @example CORN_WET
-       */
-      cropName?: string;
-      /**
-       * @description Whether or not this product is actively used. Defaults to false.
-       * @example false
-       */
-      archived?: boolean;
-    };
-    ChildVariety: components['schemas']['BaseResource'] & {
-      /** @example Variety */
-      '@type'?: unknown;
-      /**
-       * Format: uuid
-       * @description The primary identifier for the variety that is unique to your organization.
-       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
-       */
-      id?: string;
-      /**
-       * @description The common name of the variety.
-       * @example S73-Z5 - 50lb bag
-       */
-      name?: string;
-      /**
-       * @example VARIETY
-       * @enum {string}
-       */
-      category?: 'VARIETY';
-      /**
-       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API).
-       * @example SOYBEANS
-       */
-      cropName?: string;
-      /**
-       * @description The brand of the variety.
-       * @example NK
-       */
-      companyName?: string;
-      /**
-       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
-       * @example false
-       */
-      archived?: boolean;
-      /**
-       * Format: date-time
-       * @description product created time
-       * @example 2017-03-21T21:12:53.865Z
-       */
-      createdTime?: string;
-      /**
-       * Format: date-time
-       * @description product modified time
-       * @example 2018-04-06T15:12:52.910Z
-       */
-      readonly modifiedTime?: string;
-      /**
-       * @description Country of the product to which it belongs
-       * @example USA
-       */
-      countryCode?: string;
-      /**
-       * @description Parent id of the child in which the product is merged
-       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
-       */
-      parentErid?: string;
-      /**
-       * @description Showing the status of cleanup.
-       * @example MERGED
-       */
-      cleanupStatus?: string;
-      /**
-       * @description Clean up action time
-       * @example 2025-09-22T11:24:43.855Z
-       */
-      cleanupActionDate?: string;
-      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. */
-      documentsList?: components['schemas']['Document'][];
     };
     Variety: components['schemas']['BaseResource'] & {
       /** @example Variety */
@@ -1014,82 +1066,8 @@ export interface components {
       /** @description List of child products. */
       childProducts?: components['schemas']['ChildVariety'][];
     };
-    /** Format: Errors/DataValidationException */
-    Errors: {
-      /** @example Errors */
-      '@type'?: string;
-      errors?: {
-        /** @example Error */
-        '@type'?: string;
-        /**
-         * Format: uuid
-         * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
-         */
-        guid?: string;
-        /**
-         * @description An english description of the error.
-         * @example The given crop type does not exist
-         */
-        message?: string;
-        /**
-         * @description A string constant representing the type of error.
-         * @example validation_constraint_crop_type_does_not_exist
-         */
-        code?: string;
-        /**
-         * @description The name of the property or parameter deemed invalid.
-         * @example targetCrops
-         */
-        field?: string;
-        /**
-         * @description The value that was supplied for this field in the request.
-         * @example CORN_WET
-         */
-        invalidValue?: string;
-      }[];
-      /** @example {} */
-      otherAttributes?: Record<string, never>;
-    };
-    PostVariety: {
-      /** @example Variety */
-      '@type'?: unknown;
-      /**
-       * @description The common name of the variety.
-       * @example S73-Z5 - 50lb bag
-       */
-      name: string;
-      /**
-       * @description The identifier of the crop type that this variety is associated with (see the Crop Types API).
-       * @example SOYBEANS
-       */
-      cropName: string;
-      /**
-       * @description The brand of the variety.
-       * @example NK
-       */
-      companyName: string;
-      /**
-       * @example VARIETY
-       * @enum {string}
-       */
-      category?: 'VARIETY';
-      /**
-       * @description Whether or not this product is actively used in your organization. A value of true will hide the variety from display in your organization.
-       * @example false
-       */
-      archived?: boolean;
-      /**
-       * Format: date-time
-       * @description product created time
-       * @example 2017-03-21T21:12:53.865Z
-       */
-      createdTime?: string;
-      /**
-       * Format: date-time
-       * @description product modified time
-       * @example 2018-04-06T15:12:52.910Z
-       */
-      modifiedTime?: string;
+    VarietyCollection: components['schemas']['CollectionBase'] & {
+      values?: components['schemas']['Variety'][];
     };
     VarietyCreate: {
       /**
@@ -1118,6 +1096,28 @@ export interface components {
        */
       referenceId?: string;
     };
+    VarietyIdUpdate: {
+      /**
+       * @description The common name of the variety.
+       * @example RL8288HB
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example AgVenture
+       */
+      companyName?: string;
+      /**
+       * @description The identifier of the crop type that this variety is associated with.
+       * @example CORN_WET
+       */
+      cropName?: string;
+      /**
+       * @description Whether or not this product is actively used. Defaults to false.
+       * @example false
+       */
+      archived?: boolean;
+    };
   };
   responses: {
     /** @description Created */
@@ -1129,31 +1129,31 @@ export interface components {
     };
   };
   parameters: {
-    /** @description An embeddable list of properties which are optional by default. */
-    VarietyEmbed: 'documents' | 'showMergedProducts';
     /** @description Filters the list based on archive status. Accepted values are ARCHIVED, AVAILABLE, and ALL. The default behavior is to return only available (non-archived) varieties. */
     ArchiveStatus: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
-    /** @description The identifier of the Organization. */
-    OrganizationID: number;
-    /** @description The organization owning the varieties. */
-    OrgId: number;
-    /** @description Filter results based on status */
-    RecordFilter: string;
-    /** @description Embeds extra information in the org varieties response */
-    Embed: string;
-    /** @description Embeds extra information in the variety response */
-    Embed2: string;
-    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-    'X-deere-signature': string;
-    /** @description The variety Id to find. */
-    VarietyId: string;
-    /** @description The variety Id */
-    VarietyId2: string;
     /**
      * @description A unique identifier for an entity formatted as a uuid.
      * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
      */
     ERID: string;
+    /** @description Embeds extra information in the org varieties response */
+    Embed: string;
+    /** @description Embeds extra information in the variety response */
+    Embed2: string;
+    /** @description The organization owning the varieties. */
+    OrgId: number;
+    /** @description The identifier of the Organization. */
+    OrganizationID: number;
+    /** @description Filter results based on status */
+    RecordFilter: string;
+    /** @description An embeddable list of properties which are optional by default. */
+    VarietyEmbed: 'documents' | 'showMergedProducts';
+    /** @description The variety Id to find. */
+    VarietyId: string;
+    /** @description The variety Id */
+    VarietyId2: string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
   };
   requestBodies: never;
   headers: never;

@@ -125,13 +125,6 @@ paths:
           description: "Machine not found"
           content: {}
 components:
-  securitySchemes:
-    OAuth2:
-      type: "oauth2"
-      flows:
-        clientCredentials:
-          scopes:
-            eq1: "eq1"
   schemas:
     MyJD_links:
       properties:
@@ -169,3 +162,10 @@ components:
           format: "date"
           description: "The last time the machine noted its GPS location."
           example: "2010-10-04T15:06:24.000Z"
+  securitySchemes:
+    OAuth2:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            eq1: "eq1"

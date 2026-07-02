@@ -52,6 +52,7 @@
     "prepublishOnly": "pnpm clean && pnpm build",
     "fetch-specs": "tsx scripts/fetch-specs.ts",
     "redact-specs": "tsx scripts/redact-specs.ts",
+    "canonicalize-specs": "tsx scripts/canonicalize-specs.ts",
     "fix-specs": "tsx scripts/fix-specs.ts",
     "generate-api-servers": "tsx scripts/generate-api-servers.ts",
     "generate-types": "tsx scripts/generate-types.ts",

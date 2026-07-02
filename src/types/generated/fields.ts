@@ -4,6 +4,45 @@
  */
 
 export interface paths {
+  '/organizations/{orgID}/fields/{id}/clients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View Clients that Own a Field
+     * @description View details about the client that owns the field. The response will link to the following resources: fields: View the field the client belongs to. farms: View the farms belonging to the client. owningOrganization: View the org that owns the field.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature'];
+        };
+        path: {
+          /** @description The ID of the organization */
+          orgId: components['parameters']['OrgId'];
+          /** @description field guid */
+          fieldId: components['parameters']['FieldId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['getFieldResponse'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{orgId}/fields': {
     parameters: {
       query?: never;
@@ -213,53 +252,160 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/organizations/{orgID}/fields/{id}/clients': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * View Clients that Own a Field
-     * @description View details about the client that owns the field. The response will link to the following resources: fields: View the field the client belongs to. farms: View the farms belonging to the client. owningOrganization: View the org that owns the field.
-     */
-    get: {
-      parameters: {
-        query?: never;
-        header?: {
-          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-          'x-deere-signature'?: components['parameters']['X-deere-signature'];
-        };
-        path: {
-          /** @description The ID of the organization */
-          orgId: components['parameters']['OrgId'];
-          /** @description field guid */
-          fieldId: components['parameters']['FieldId'];
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        200: components['responses']['getFieldResponse'];
-      };
-    };
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
-    FieldsResponse: {
+    ABLine: {
+      /** @example AbLine */
+      '@Type'?: string;
+      /** @example 356.5847091769351 */
+      heading?: number;
+      aPoint?: components['schemas']['Point'];
+    };
+    AccessPoint: {
+      /** Format: uri */
+      id?: string;
+      description?: string;
+      direction?: string;
+      isEntry?: boolean;
+      isExit?: boolean;
+      location?: components['schemas']['Point'];
+      name?: string;
       links?: components['schemas']['Link'][];
-      totals?: number;
-      values?: components['schemas']['FieldResponse'][];
+    };
+    Author: {
+      /** @example User */
+      '@Type'?: string;
+      /** @example scoutcarla1 */
+      accountName?: string;
+      /** @example scoutcarla1 */
+      givenName?: string;
+      /** @example scoutcarla1 */
+      familyName?: string;
+    };
+    Boundary: {
+      /** @example Boundary */
+      '@Type'?: string;
+      /** @example Auto-Generated 2014 Harvest */
+      name?: string;
+      /** @example Auto */
+      sourceType?: string;
+      /**
+       * Format: date-time
+       * @example 2016-11-17T11:53:00.000Z
+       */
+      modifiedTime?: string;
+      area?: components['schemas']['MeasurementAsDouble'];
+      workableArea?: components['schemas']['MeasurementAsDouble'];
+      multipolygons?: components['schemas']['Polygon'][];
+      extent?: components['schemas']['Extent'];
+      /**
+       * Format: uuid
+       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+      /** @description Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries. */
+      active?: boolean;
+      /** @description Indicates whether the contained area is irrigated */
+      irrigated?: boolean;
+    };
+    Client: {
+      /** @example Client */
+      '@Type'?: string;
+      /** @example --- */
+      name?: string;
+      /**
+       * Format: uri
+       * @example 68b887c7-1ac2-40a4-b70b-117a8ec34abf
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    Clients: {
+      /** @example Clients */
+      '@Type'?: string;
+      clients?: components['schemas']['Client'][];
+    };
+    CreateUpdateClient: {
+      /** @example Client */
+      '@Type'?: string;
+      /** @example SouthEast End_Client */
+      name?: string;
+    };
+    CreateUpdateFarm: {
+      /** @example Farm */
+      '@Type'?: string;
+      /** @example SouthEast End */
+      name?: string;
+    };
+    /** @description Place holder for Matt to create the field object to be created or updated. */
+    CreateUpdateField: {
+      /** @example Field */
+      '@Type'?: string;
+      /** @example Land_Demo_1 */
+      name?: string;
+      /** @example true */
+      archived?: boolean;
+      Farms?: {
+        /** @example Farms */
+        '@Type'?: string;
+        farms?: components['schemas']['CreateUpdateFarm'][];
+      };
+      Clients?: {
+        /** @example Clients */
+        '@Type'?: string;
+        clients?: components['schemas']['CreateUpdateClient'][];
+      };
+    };
+    Extent: {
+      /** @example Extent */
+      '@Type'?: string;
+      topLeft?: components['schemas']['Point'];
+      bottomRight?: components['schemas']['Point'];
+    };
+    Farm: {
+      /** @example Farm */
+      '@Type'?: string;
+      /** @example --- */
+      name?: string;
+      /**
+       * Format: uri
+       * @example 1efb4de1-fe41-42bc-bbb3-d128a432cafd
+       */
+      id?: string;
+      links?: components['schemas']['Link'][];
+    };
+    Farms: {
+      /** @example Farms */
+      '@Type'?: string;
+      farms?: components['schemas']['Farm'][];
+    };
+    FieldGuidSearches: {
+      /** @example FieldGuidSearches */
+      '@Type'?: string;
+      fieldIds?: string[];
+      /** @example client */
+      clientName?: string;
+      /** @example farm */
+      farmName?: string;
+      /** @example field */
+      fieldName?: string;
+      embeds?: (
+        | 'farms'
+        | 'clients'
+        | 'boundaries'
+        | 'activeBoundary'
+        | 'simplifiedBoundaries'
+        | 'metadataOnlyBoundaries'
+        | 'guidanceLines'
+        | 'shapes'
+        | 'accessPoints'
+        | 'notes'
+      )[];
+      /** @enum {string} */
+      status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
     };
     FieldResponse: {
       /** @example Field */
@@ -281,45 +427,116 @@ export interface components {
       id?: string;
       links?: components['schemas']['Link'][];
     };
-    Farms: {
-      /** @example Farms */
-      '@Type'?: string;
-      farms?: components['schemas']['Farm'][];
-    };
-    Farm: {
-      /** @example Farm */
-      '@Type'?: string;
-      /** @example --- */
+    FieldsPost: {
+      /**
+       * @description New Field Name
+       * @example UniqueFieldName
+       */
       name?: string;
       /**
+       * @description Archived status (false = active)
+       * @example false
+       */
+      archived?: string;
+      /**
+       * @description Existing or Unique (new) farm name
+       * @example FarmName
+       */
+      'farms.name'?: string;
+      /**
+       * Format: uuid
+       * @description Farm ID
+       * @example e61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      'farms.id'?: string;
+      /**
+       * @description Existing or Unique (new) client name
+       * @example ClientName
+       */
+      'clients.name'?: string;
+      /**
+       * Format: uuid
+       * @description Client ID
+       * @example e61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      'clients.id'?: string;
+    };
+    FieldsResponse: {
+      links?: components['schemas']['Link'][];
+      totals?: number;
+      values?: components['schemas']['FieldResponse'][];
+    };
+    Flag: {
+      /** @example GenericNote */
+      '@Type'?: string;
+      /**
+       * Format: date-time
+       * @example 2016-08-19T18:48:48.886Z
+       */
+      createdDate?: string;
+      /**
+       * Format: date-time
+       * @example 2016-08-19T18:48:48.886Z
+       */
+      lastModifiedDate?: string;
+      /** @example some text */
+      text?: string;
+      metadata?: components['schemas']['MetaData'][];
+      author?: components['schemas']['Author'][];
+      geometry?: components['schemas']['Geometry'];
+      /** @example SCOUT */
+      noteType?: string;
+      /**
        * Format: uri
-       * @example 1efb4de1-fe41-42bc-bbb3-d128a432cafd
+       * @example 4e7a1fa7-9db9-45ea-94d3-e45b2fa43c2a
        */
       id?: string;
       links?: components['schemas']['Link'][];
     };
-    CreateUpdateFarm: {
+    Geometry: {
+      coordinates?: string[];
+      /** @example Point */
+      type?: string;
+    };
+    GetFarm: {
       /** @example Farm */
-      '@Type'?: string;
-      /** @example SouthEast End */
-      name?: string;
-    };
-    Clients: {
-      /** @example Clients */
-      '@Type'?: string;
-      clients?: components['schemas']['Client'][];
-    };
-    Client: {
-      /** @example Client */
-      '@Type'?: string;
-      /** @example --- */
+      '@type'?: string;
+      /** @example John Doe */
       name?: string;
       /**
-       * Format: uri
-       * @example 68b887c7-1ac2-40a4-b70b-117a8ec34abf
+       * Format: uuid
+       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
        */
-      id?: string;
-      links?: components['schemas']['Link'][];
+      readonly id?: string;
+      /** @example false */
+      archived?: boolean;
+      /** @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c */
+      clientUri?: string;
+      readonly links?: {
+        /** @example Link */
+        '@type'?: string;
+        /** @example self */
+        rel?: string;
+        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
+        uri?: string;
+      }[];
+    };
+    GetFarms: {
+      /**
+       * Format: int32
+       * @example 1
+       */
+      total?: number;
+      links?: {
+        /** @example self */
+        rel?: string;
+        /**
+         * @description Platform uri to fetch farm details
+         * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/222/farms
+         */
+        uri?: string;
+      }[];
+      values?: components['schemas']['GetFarm'][];
     };
     /** @description Link to another resource */
     GroupLink: {
@@ -369,101 +586,6 @@ export interface components {
        */
       contributionDefinition?: unknown;
     };
-    FieldsPost: {
-      /**
-       * @description New Field Name
-       * @example UniqueFieldName
-       */
-      name?: string;
-      /**
-       * @description Archived status (false = active)
-       * @example false
-       */
-      archived?: string;
-      /**
-       * @description Existing or Unique (new) farm name
-       * @example FarmName
-       */
-      'farms.name'?: string;
-      /**
-       * Format: uuid
-       * @description Farm ID
-       * @example e61b83f4-3a12-431e-8010-596f2466dc27
-       */
-      'farms.id'?: string;
-      /**
-       * @description Existing or Unique (new) client name
-       * @example ClientName
-       */
-      'clients.name'?: string;
-      /**
-       * Format: uuid
-       * @description Client ID
-       * @example e61b83f4-3a12-431e-8010-596f2466dc27
-       */
-      'clients.id'?: string;
-    };
-    GetFarms: {
-      /**
-       * Format: int32
-       * @example 1
-       */
-      total?: number;
-      links?: {
-        /** @example self */
-        rel?: string;
-        /**
-         * @description Platform uri to fetch farm details
-         * @example https://sandboxapi.deere.com/platform/organizations/5555/fields/222/farms
-         */
-        uri?: string;
-      }[];
-      values?: components['schemas']['GetFarm'][];
-    };
-    CreateUpdateClient: {
-      /** @example Client */
-      '@Type'?: string;
-      /** @example SouthEast End_Client */
-      name?: string;
-    };
-    Boundary: {
-      /** @example Boundary */
-      '@Type'?: string;
-      /** @example Auto-Generated 2014 Harvest */
-      name?: string;
-      /** @example Auto */
-      sourceType?: string;
-      /**
-       * Format: date-time
-       * @example 2016-11-17T11:53:00.000Z
-       */
-      modifiedTime?: string;
-      area?: components['schemas']['MeasurementAsDouble'];
-      workableArea?: components['schemas']['MeasurementAsDouble'];
-      multipolygons?: components['schemas']['Polygon'][];
-      extent?: components['schemas']['Extent'];
-      /**
-       * Format: uuid
-       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
-       */
-      id?: string;
-      links?: components['schemas']['Link'][];
-      /** @description Whether or not this boundary is currently in use. A field with associated boundaries will have exactly one active boundary; however, a field may also exist with no boundaries. */
-      active?: boolean;
-      /** @description Indicates whether the contained area is irrigated */
-      irrigated?: boolean;
-    };
-    AccessPoint: {
-      /** Format: uri */
-      id?: string;
-      description?: string;
-      direction?: string;
-      isEntry?: boolean;
-      isExit?: boolean;
-      location?: components['schemas']['Point'];
-      name?: string;
-      links?: components['schemas']['Link'][];
-    };
     GuidanceLines: components['schemas']['ABLine'] & {
       bPoint?: components['schemas']['Point'];
       eastShift?: components['schemas']['MeasurementAsDouble'];
@@ -496,97 +618,12 @@ export interface components {
       locked?: boolean;
       links?: components['schemas']['Link'][];
     };
-    Flag: {
-      /** @example GenericNote */
-      '@Type'?: string;
-      /**
-       * Format: date-time
-       * @example 2016-08-19T18:48:48.886Z
-       */
-      createdDate?: string;
-      /**
-       * Format: date-time
-       * @example 2016-08-19T18:48:48.886Z
-       */
-      lastModifiedDate?: string;
-      /** @example some text */
-      text?: string;
-      metadata?: components['schemas']['MetaData'][];
-      author?: components['schemas']['Author'][];
-      geometry?: components['schemas']['Geometry'];
-      /** @example SCOUT */
-      noteType?: string;
-      /**
-       * Format: uri
-       * @example 4e7a1fa7-9db9-45ea-94d3-e45b2fa43c2a
-       */
-      id?: string;
-      links?: components['schemas']['Link'][];
-    };
-    MetaData: {
-      /** @example Metadata */
-      '@Type'?: string;
-      /** @example EARLY_GROWTH_EMERGENCE */
-      name?: string;
-      /** @example 9 */
-      value?: number;
-    };
-    Author: {
-      /** @example User */
-      '@Type'?: string;
-      /** @example scoutcarla1 */
-      accountName?: string;
-      /** @example scoutcarla1 */
-      givenName?: string;
-      /** @example scoutcarla1 */
-      familyName?: string;
-    };
-    Geometry: {
-      coordinates?: string[];
-      /** @example Point */
-      type?: string;
-    };
-    ABLine: {
-      /** @example AbLine */
-      '@Type'?: string;
-      /** @example 356.5847091769351 */
-      heading?: number;
-      aPoint?: components['schemas']['Point'];
-    };
-    Polygon: {
-      /** @example Polygon */
-      '@Type'?: string;
-      rings?: components['schemas']['Ring'][];
-    };
-    Ring: {
-      /** @example Ring */
-      '@Type'?: string;
-      points?: components['schemas']['Point'][];
-      /** @example exterior */
-      type?: string;
-      passable?: boolean;
-    };
-    Point: {
-      /** @example Point */
-      '@Type'?: string;
-      /**
-       * Format: double
-       * @description The latitude of the point
-       * @example 43.6187
-       */
-      lat?: number;
-      /**
-       * Format: double
-       * @description The longitude of the point
-       * @example 116.2146
-       */
-      lon?: number;
-    };
-    Extent: {
-      /** @example Extent */
-      '@Type'?: string;
-      topLeft?: components['schemas']['Point'];
-      bottomRight?: components['schemas']['Point'];
+    /** @description Link to another resource */
+    Link: {
+      /** @example self */
+      rel?: string;
+      /** @example https://sandboxapi.deere.com/platform/users/USER */
+      uri?: string;
     };
     MeasurementAsDouble: {
       /** @example MeasurementAsDouble */
@@ -604,82 +641,70 @@ export interface components {
        */
       unit?: string;
     };
-    /** @description Link to another resource */
-    Link: {
-      /** @example self */
-      rel?: string;
-      /** @example https://sandboxapi.deere.com/platform/users/USER */
-      uri?: string;
-    };
-    FieldGuidSearches: {
-      /** @example FieldGuidSearches */
+    MetaData: {
+      /** @example Metadata */
       '@Type'?: string;
-      fieldIds?: string[];
-      /** @example client */
-      clientName?: string;
-      /** @example farm */
-      farmName?: string;
-      /** @example field */
-      fieldName?: string;
-      embeds?: (
-        | 'farms'
-        | 'clients'
-        | 'boundaries'
-        | 'activeBoundary'
-        | 'simplifiedBoundaries'
-        | 'metadataOnlyBoundaries'
-        | 'guidanceLines'
-        | 'shapes'
-        | 'accessPoints'
-        | 'notes'
-      )[];
-      /** @enum {string} */
-      status?: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
-    };
-    GetFarm: {
-      /** @example Farm */
-      '@type'?: string;
-      /** @example John Doe */
+      /** @example EARLY_GROWTH_EMERGENCE */
       name?: string;
+      /** @example 9 */
+      value?: number;
+    };
+    Point: {
+      /** @example Point */
+      '@Type'?: string;
       /**
-       * Format: uuid
-       * @example 9369f3f6-2428-4bba-bf64-0a19cdaf007d
+       * Format: double
+       * @description The latitude of the point
+       * @example 43.6187
        */
-      readonly id?: string;
-      /** @example false */
-      archived?: boolean;
-      /** @example https://apiqa.tal.deere.com/platform/organizations/5555/clients/22b84b4c-b651-d554-a02b-89829cd5239c */
-      clientUri?: string;
-      readonly links?: {
-        /** @example Link */
-        '@type'?: string;
-        /** @example self */
-        rel?: string;
-        /** @example https://apiqa.tal.deere.com/platform/organizations/5555/farms/9369f3f6-2428-4bba-bf64-0a19cdaf007d */
-        uri?: string;
-      }[];
+      lat?: number;
+      /**
+       * Format: double
+       * @description The longitude of the point
+       * @example 116.2146
+       */
+      lon?: number;
     };
-    /** @description Place holder for Matt to create the field object to be created or updated. */
-    CreateUpdateField: {
-      /** @example Field */
+    Polygon: {
+      /** @example Polygon */
       '@Type'?: string;
-      /** @example Land_Demo_1 */
-      name?: string;
-      /** @example true */
-      archived?: boolean;
-      Farms?: {
-        /** @example Farms */
-        '@Type'?: string;
-        farms?: components['schemas']['CreateUpdateFarm'][];
-      };
-      Clients?: {
-        /** @example Clients */
-        '@Type'?: string;
-        clients?: components['schemas']['CreateUpdateClient'][];
-      };
+      rings?: components['schemas']['Ring'][];
+    };
+    Ring: {
+      /** @example Ring */
+      '@Type'?: string;
+      points?: components['schemas']['Point'][];
+      /** @example exterior */
+      type?: string;
+      passable?: boolean;
     };
   };
   responses: {
+    /** @description Field successfully created */
+    Created: {
+      headers: {
+        /** @description The uri of the newly created resource */
+        Location?: string;
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Field deleted. If the client and farm has only this field the client and farm will be deleted */
+    Deleted: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd:deere:axiom:v3+json': unknown;
+      };
+    };
+    /** @description Invalid access to organization */
+    DoesNotHaveAccessToOrg: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
     /** @description Array of farms */
     FarmsReturned: {
       headers: {
@@ -687,6 +712,15 @@ export interface components {
       };
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['GetFarms'];
+      };
+    };
+    /** @description Success */
+    FieldReturned: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldResponse'];
       };
     };
     /** @description Array of fields containing links related to fields */
@@ -697,6 +731,54 @@ export interface components {
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsResponse'];
       };
+    };
+    /** @description Array of fields with header for partial success. */
+    FieldsReturnedWithPartialSuccessHeader: {
+      headers: {
+        /** @description A string list of fieldIds requested which were not returned */
+        'FIELDS-NOT-FOUND'?: string;
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsResponse'];
+      };
+    };
+    /** @description Organization not found */
+    OrgNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Organization or Field not found */
+    OrgOrFieldNotFound: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description Field successfully updated */
+    Updated: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsPost'];
+      };
+    };
+    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
+    ValidationErrorForCreate: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
+    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
+    ValidationErrorForUpdate: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
     };
     /** @description Get Field by client Id */
     getFieldResponse: {
@@ -715,102 +797,20 @@ export interface components {
         };
       };
     };
-    /** @description Array of fields with header for partial success. */
-    FieldsReturnedWithPartialSuccessHeader: {
-      headers: {
-        /** @description A string list of fieldIds requested which were not returned */
-        'FIELDS-NOT-FOUND'?: string;
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsResponse'];
-      };
-    };
-    /** @description Success */
-    FieldReturned: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldResponse'];
-      };
-    };
-    /** @description Invalid access to organization */
-    DoesNotHaveAccessToOrg: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Organization not found */
-    OrgNotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Organization or Field not found */
-    OrgOrFieldNotFound: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Field successfully created */
-    Created: {
-      headers: {
-        /** @description The uri of the newly created resource */
-        Location?: string;
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description Field successfully updated */
-    Updated: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['FieldsPost'];
-      };
-    };
-    /** @description Field deleted. If the client and farm has only this field the client and farm will be deleted */
-    Deleted: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd:deere:axiom:v3+json': unknown;
-      };
-    };
-    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
-    ValidationErrorForUpdate: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
-    /** @description The possible errors are: * CFF_CLIENT_ID_ALREADY_EXISTS * CFF_BAD_CLIENT_ID * CFF_CLIENT_ID_NAME_CONFLICT * CFF_CLIENT_ID_NOT_FOUND * CFF_CLIENT_NAME_ALREADY_EXISTS * CFF_EMPTY_CLIENT_NAME * CFF_CLIENT_NAME_EXCEEDS_255_CHARS * CFF_DUPLICATE_GUID_WITHIN_DOCUMENT * CFF_FARM_EXISTS_UNDER_DIFFERENT_CLIENT * CFF_FARM_ID_ALREADY_EXISTS * CFF_BAD_FARM_ID * CFF_FARM_ID_NAME_CONFLICT * CFF_FARM_ID_NOT_FOUND * CFF_FARM_NAME_ALREADY_EXISTS * CFF_EMPTY_FARM_NAME * CFF_FARM_NAME_EXCEEDS_255_CHARS * CFF_ALREADY_EXISTS_ACTIVE * CFF_ALREADY_EXISTS_ARCHIVED * CFF_ALREADY_EXISTS_MERGED * CFF_FIELD_ID_ALREADY_EXISTS * CFF_BAD_FIELD_ID * CFF_FIELD_NAME_ALREADY_EXISTS * CFF_EMPTY_FIELD_NAME * CFF_FIELD_NAME_EXCEEDS_255_CHARS * CFF_MISSING_REQUEST_BODY * CFF_OUTDATED_REQUEST * CFF_USER_LAST_MODIFIED_CLIPPED */
-    ValidationErrorForCreate: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
   };
   parameters: {
-    /** @description The ID of the organization */
-    OrgId: number;
-    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
-    'X-deere-signature': string;
     /** @description client name */
     ClientName: string;
+    /** @description Context Organization ID */
+    ContextOrganizationId: string;
     /** @description farm name */
     FarmName: string;
+    /** @description list of objects to include */
+    FieldEmbed: ('farms' | 'clients' | 'guidanceLines' | 'accessPoints')[];
+    /** @description field guid */
+    FieldId: string;
     /** @description field name */
     FieldName: string;
-    /** @description Filters by resource state (whether or not the resource is archived) */
-    recordFilter: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
     /** @description list of objects to include */
     FieldsEmbed: (
       | 'farms'
@@ -822,14 +822,14 @@ export interface components {
       | 'accessPoints'
       | 'notes'
     )[];
-    /** @description list of objects to include */
-    FieldEmbed: ('farms' | 'clients' | 'guidanceLines' | 'accessPoints')[];
-    /** @description Context Organization ID */
-    ContextOrganizationId: string;
-    /** @description field guid */
-    FieldId: string;
+    /** @description The ID of the organization */
+    OrgId: number;
     /** @description Indicates a preference for returned measurements to be in English vs Metric */
     UnitOfMeasureHeader: 'METRIC' | 'ENGLISH';
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature': string;
+    /** @description Filters by resource state (whether or not the resource is archived) */
+    recordFilter: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
   };
   requestBodies: {
     ASingleField: {

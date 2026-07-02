@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/organizations/{orgId}/flags/{flagId}': {
+  '/organizations/{orgId}/fields/{fieldId}/flags': {
     parameters: {
       query?: never;
       header?: never;
@@ -12,21 +12,13 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * List a flag by org id and Flag id
-     * @description This endpoint will return a flag for a given org and Flag id.
+     * List flags for the field
+     * @description This resource will return a list of flag objects associated with the field.
      */
-    get: operations['getFlagForOrganizationByFlagId'];
-    /**
-     * Update flag by id
-     * @description This resource will update flag by Organization and Flag Id.
-     */
-    put: operations['updateFlagByIdOrgId'];
+    get: operations['getOrgFieldFlags'];
+    put?: never;
     post?: never;
-    /**
-     * Delete a flag for a given org
-     * @description This resource will delete a single flag based on its Id and org id
-     */
-    delete: operations['deleteFlagByIdOrgId'];
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -56,7 +48,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/organizations/{orgId}/fields/{fieldId}/flags': {
+  '/organizations/{orgId}/flags/{flagId}': {
     parameters: {
       query?: never;
       header?: never;
@@ -64,13 +56,21 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * List flags for the field
-     * @description This resource will return a list of flag objects associated with the field.
+     * List a flag by org id and Flag id
+     * @description This endpoint will return a flag for a given org and Flag id.
      */
-    get: operations['getOrgFieldFlags'];
-    put?: never;
+    get: operations['getFlagForOrganizationByFlagId'];
+    /**
+     * Update flag by id
+     * @description This resource will update flag by Organization and Flag Id.
+     */
+    put: operations['updateFlagByIdOrgId'];
     post?: never;
-    delete?: never;
+    /**
+     * Delete a flag for a given org
+     * @description This resource will delete a single flag based on its Id and org id
+     */
+    delete: operations['deleteFlagByIdOrgId'];
     options?: never;
     head?: never;
     patch?: never;
@@ -80,6 +80,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    ContentType: unknown;
     LinkFlagId: {
       /**
        * @description Flag Category Preferences Link.
@@ -131,7 +132,6 @@ export interface components {
        */
       field?: unknown;
     };
-    ContentType: unknown;
     ValuesFlagId: {
       /**
        * @description Currently only three geometries types (Point, LineString and Polygon) are supported.
@@ -245,38 +245,38 @@ export interface components {
     };
   };
   parameters: {
+    /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
+    'Accept-Language': string;
+    /** @description Specify a comma-separated list of category GUIDs to retrieve */
+    CategoryIds: string;
+    /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
+    CategoryNames: string;
+    /** @description Embed additional attributes if required to reduce the number of requests */
+    Embed: string;
+    /** @description Flags created before end time (in UTC) will be returned */
+    EndTime: string;
     /** @description Fields guid of the field. */
     FieldId: string;
+    /** @description flagId to query for flag */
+    FlagId: string;
+    /** @description Specify whether to request global flags, field-related flags or both */
+    FlagScopes: string;
+    /** @description Does not populate geometry, overrides simple if both are true */
+    MetadataOnly: boolean;
     /** @description Org Id to query for Flag */
     OrgId: string;
     /** @description Organization Id */
     OrgId2: string;
     /** @description Organization Id where the Flag belongs to */
     OrgId3: string;
-    /** @description flagId to query for flag */
-    FlagId: string;
-    /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
-    'Accept-Language': string;
-    /** @description Embed additional attributes if required to reduce the number of requests */
-    Embed: string;
-    /** @description Flags created after start time (in UTC) will be returned */
-    StartTime: string;
-    /** @description Flags created before end time (in UTC) will be returned */
-    EndTime: string;
-    /** @description Specify a comma-separated list of category GUIDs to retrieve */
-    CategoryIds: string;
-    /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
-    CategoryNames: string;
     /** @description Request flags by archived status */
     RecordFilter: string;
-    /** @description Specify whether to request global flags, field-related flags or both */
-    FlagScopes: string;
     /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
     ShapeTypes: string;
     /** @description Populates simplified geometry */
     Simple: boolean;
-    /** @description Does not populate geometry, overrides simple if both are true */
-    MetadataOnly: boolean;
+    /** @description Flags created after start time (in UTC) will be returned */
+    StartTime: string;
   };
   requestBodies: never;
   headers: never;
@@ -284,6 +284,146 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getOrgFieldFlags: {
+    parameters: {
+      query?: {
+        /** @description Embed additional attributes if required to reduce the number of requests */
+        embed?: components['parameters']['Embed'];
+        /** @description Flags created after start time (in UTC) will be returned */
+        startTime?: components['parameters']['StartTime'];
+        /** @description Flags created before end time (in UTC) will be returned */
+        endTime?: components['parameters']['EndTime'];
+        /** @description Specify a comma-separated list of category GUIDs to retrieve */
+        categoryIDs?: components['parameters']['CategoryIds'];
+        /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
+        categoryNames?: components['parameters']['CategoryNames'];
+        /** @description Request flags by archived status */
+        recordFilter?: components['parameters']['RecordFilter'];
+        /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
+        shapeTypes?: components['parameters']['ShapeTypes'];
+        /** @description Populates simplified geometry */
+        simple?: components['parameters']['Simple'];
+        /** @description Does not populate geometry, overrides simple if both are true */
+        metadataOnly?: components['parameters']['MetadataOnly'];
+      };
+      header?: {
+        /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
+        'Accept-Language'?: components['parameters']['Accept-Language'];
+      };
+      path: {
+        /** @description Organization Id where the Flag belongs to */
+        orgId: components['parameters']['OrgId3'];
+        /** @description Fields guid of the field. */
+        fieldId: components['parameters']['FieldId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components['responses']['GetOrgId'];
+      /** @description Forbidden. The user has no access to the given flag */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No organization and/or field with these ids. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getFlagsForOrganization: {
+    parameters: {
+      query?: {
+        /** @description Embed additional attributes if required to reduce the number of requests */
+        embed?: components['parameters']['Embed'];
+        /** @description Flags created after start time (in UTC) will be returned */
+        startTime?: components['parameters']['StartTime'];
+        /** @description Flags created before end time (in UTC) will be returned */
+        endTime?: components['parameters']['EndTime'];
+        /** @description Specify a comma-separated list of category GUIDs to retrieve */
+        categoryIDs?: components['parameters']['CategoryIds'];
+        /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
+        categoryNames?: components['parameters']['CategoryNames'];
+        /** @description Request flags by archived status */
+        recordFilter?: components['parameters']['RecordFilter'];
+        /** @description Specify whether to request global flags, field-related flags or both */
+        flagScopes?: components['parameters']['FlagScopes'];
+        /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
+        shapeTypes?: components['parameters']['ShapeTypes'];
+        /** @description Populates simplified geometry */
+        simple?: components['parameters']['Simple'];
+        /** @description Does not populate geometry, overrides simple if both are true */
+        metadataOnly?: components['parameters']['MetadataOnly'];
+      };
+      header?: {
+        /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
+        'Accept-Language'?: components['parameters']['Accept-Language'];
+      };
+      path: {
+        /** @description Organization Id where the Flag belongs to */
+        orgId: components['parameters']['OrgId3'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components['responses']['FlagsGet'];
+      /** @description Access forbidden. The user does not have permission to access the given organization, or the organization does not exist. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  createFlag: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization Id where the Flag belongs to */
+        orgId: components['parameters']['OrgId3'];
+      };
+      cookie?: never;
+    };
+    /** @description The flag data to add. The new uuid will be assigned as ID of the newly created flag. */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['ValuesFlagIdPut'];
+      };
+    };
+    responses: {
+      200: components['responses']['PostFlags'];
+      /** @description - Not all data specified */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Access forbidden. The user has no access to the org or is not allowed to create flags in the org. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   getFlagForOrganizationByFlagId: {
     parameters: {
       query?: {
@@ -426,146 +566,6 @@ export interface operations {
         content?: never;
       };
       /** @description Entity Not found. Given flag id does not exist or given orgId does not present. */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  getFlagsForOrganization: {
-    parameters: {
-      query?: {
-        /** @description Embed additional attributes if required to reduce the number of requests */
-        embed?: components['parameters']['Embed'];
-        /** @description Flags created after start time (in UTC) will be returned */
-        startTime?: components['parameters']['StartTime'];
-        /** @description Flags created before end time (in UTC) will be returned */
-        endTime?: components['parameters']['EndTime'];
-        /** @description Specify a comma-separated list of category GUIDs to retrieve */
-        categoryIDs?: components['parameters']['CategoryIds'];
-        /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
-        categoryNames?: components['parameters']['CategoryNames'];
-        /** @description Request flags by archived status */
-        recordFilter?: components['parameters']['RecordFilter'];
-        /** @description Specify whether to request global flags, field-related flags or both */
-        flagScopes?: components['parameters']['FlagScopes'];
-        /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
-        shapeTypes?: components['parameters']['ShapeTypes'];
-        /** @description Populates simplified geometry */
-        simple?: components['parameters']['Simple'];
-        /** @description Does not populate geometry, overrides simple if both are true */
-        metadataOnly?: components['parameters']['MetadataOnly'];
-      };
-      header?: {
-        /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
-        'Accept-Language'?: components['parameters']['Accept-Language'];
-      };
-      path: {
-        /** @description Organization Id where the Flag belongs to */
-        orgId: components['parameters']['OrgId3'];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: components['responses']['FlagsGet'];
-      /** @description Access forbidden. The user does not have permission to access the given organization, or the organization does not exist. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  createFlag: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Organization Id where the Flag belongs to */
-        orgId: components['parameters']['OrgId3'];
-      };
-      cookie?: never;
-    };
-    /** @description The flag data to add. The new uuid will be assigned as ID of the newly created flag. */
-    requestBody?: {
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['ValuesFlagIdPut'];
-      };
-    };
-    responses: {
-      200: components['responses']['PostFlags'];
-      /** @description - Not all data specified */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Access forbidden. The user has no access to the org or is not allowed to create flags in the org. */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Entity Not found. - No contributon definition ID is found - Field link cannot be resolved (field not found) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  getOrgFieldFlags: {
-    parameters: {
-      query?: {
-        /** @description Embed additional attributes if required to reduce the number of requests */
-        embed?: components['parameters']['Embed'];
-        /** @description Flags created after start time (in UTC) will be returned */
-        startTime?: components['parameters']['StartTime'];
-        /** @description Flags created before end time (in UTC) will be returned */
-        endTime?: components['parameters']['EndTime'];
-        /** @description Specify a comma-separated list of category GUIDs to retrieve */
-        categoryIDs?: components['parameters']['CategoryIds'];
-        /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
-        categoryNames?: components['parameters']['CategoryNames'];
-        /** @description Request flags by archived status */
-        recordFilter?: components['parameters']['RecordFilter'];
-        /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
-        shapeTypes?: components['parameters']['ShapeTypes'];
-        /** @description Populates simplified geometry */
-        simple?: components['parameters']['Simple'];
-        /** @description Does not populate geometry, overrides simple if both are true */
-        metadataOnly?: components['parameters']['MetadataOnly'];
-      };
-      header?: {
-        /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
-        'Accept-Language'?: components['parameters']['Accept-Language'];
-      };
-      path: {
-        /** @description Organization Id where the Flag belongs to */
-        orgId: components['parameters']['OrgId3'];
-        /** @description Fields guid of the field. */
-        fieldId: components['parameters']['FieldId'];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: components['responses']['GetOrgId'];
-      /** @description Forbidden. The user has no access to the given flag */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Entity Not found. No organization and/or field with these ids. */
       404: {
         headers: {
           [name: string]: unknown;

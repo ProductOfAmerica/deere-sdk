@@ -182,20 +182,6 @@ export interface components {
       invalidValue?: string;
     };
     Errors: components['schemas']['Error'][];
-    LinksArrayGet: {
-      /**
-       * @description Fields Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c
-       */
-      field?: unknown;
-    };
-    LinkArrayPost: {
-      /**
-       * @description Fields Link.
-       * @example https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId
-       */
-      field?: unknown;
-    };
     GuidanceLine: {
       /**
        * @description Identifies the subclass of guidance line.
@@ -315,8 +301,54 @@ export interface components {
        */
       spatialProjection?: Record<string, never>;
     };
+    LinkArrayPost: {
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/orgId/fields/fieldId
+       */
+      field?: unknown;
+    };
+    LinksArrayGet: {
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/127856/fields/309b4c20-f33a-4c96-9a2c-913def198i0c
+       */
+      field?: unknown;
+    };
   };
   responses: {
+    /** @description Request Validation failure */
+    BadRequest: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description Created, with a Location header containing the URI of the newly created resource */
+    Created: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          links?: unknown;
+          /**
+           * Format: int32
+           * @example 1
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description The user does not have sufficient privileges to access this resource. */
+    Forbidden: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content?: never;
+    };
     /** @description A collection of guidance lines */
     GuidanceLinesResponse: {
       headers: {
@@ -349,22 +381,6 @@ export interface components {
         };
       };
     };
-    /** @description Created, with a Location header containing the URI of the newly created resource */
-    Created: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': {
-          links?: unknown;
-          /**
-           * Format: int32
-           * @example 1
-           */
-          total?: number;
-        };
-      };
-    };
     /** @description No Content. Request Completed Succesfully. */
     NoContent: {
       headers: {
@@ -380,22 +396,6 @@ export interface components {
         };
       };
     };
-    /** @description Request Validation failure */
-    BadRequest: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
-      };
-    };
-    /** @description The user does not have sufficient privileges to access this resource. */
-    Forbidden: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content?: never;
-    };
     /** @description The specified resource does not exist */
     NotFound: {
       headers: {
@@ -405,18 +405,18 @@ export interface components {
     };
   };
   parameters: {
-    /** @description The organization owning the guidance lines. */
-    OrgId: string;
+    /** @description Whether to return the track geometry for AB and Adaptive Curves. See */
+    Embed: string;
     /** @description The field that the guidance lines are associated with. */
     FieldId: string;
     /** @description The identifier of this guidance line. */
     GuidanceLineId: string;
-    /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
-    Status: string;
+    /** @description The organization owning the guidance lines. */
+    OrgId: string;
     /** @description Filter results based on status; Will default to active */
     RecordFilter: string;
-    /** @description Whether to return the track geometry for AB and Adaptive Curves. See */
-    Embed: string;
+    /** @description Whether to include archived guidance lines. Valid values are "archived", "available", or "all". Default is "available". */
+    Status: string;
   };
   requestBodies: {
     PostRequest: {
