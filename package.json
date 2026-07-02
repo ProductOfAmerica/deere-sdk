@@ -80,6 +80,7 @@
   "pnpm": {
     "overrides": {
       "brace-expansion": "5.0.6",
+      "js-yaml": "^4.2.0",
       "minimatch": "^10.2.3"
     }
   },
