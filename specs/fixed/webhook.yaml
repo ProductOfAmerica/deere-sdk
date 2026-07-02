@@ -16,6 +16,40 @@ servers:
           - "sandboxapi"
           - "partnerapi"
 paths:
+  /eventSubscriptionDelivery:
+    patch:
+      summary: "Update Event Subscription Delivery"
+      description: "This resource will update an event subscription delivery"
+      operationId: "updateDelivery"
+      requestBody:
+        x-required-boolean: true
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionUpdateResponse"
+            examples:
+              No Header:
+                value:
+                  authorizationHeaderValue: "Bearer 123abc"
+                  concurrentDeliveries: 5
+                  maxBatchSize: 5
+                  status: "Active"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdatedResponse_EventSubscriptionDelivery"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse_EventSubscriptionDelivery"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
+    get:
+      description: "This resource will return your event subscription delivery status"
+      summary: "Get Event Subscription Delivery"
+      operationId: "getDelivery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DeliveryResponse"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessResponse"
   /eventSubscriptions:
     post:
       summary: "Create an Event Subscription"
@@ -229,6 +263,12 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             $ref: "#/components/schemas/Errors"
+    BadRequestResponse_EventSubscriptionDelivery:
+      description: "Bad Request"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            $ref: "#/components/schemas/Errors_EventSubscriptionDelivery"
     CreatedSubscription:
       description: "Created"
       content:
@@ -278,6 +318,29 @@ components:
         application/vnd.deere.axiom.v3+json:
           schema:
             description: "A deleted response"
+    DeliveryResponse:
+      description: "Delivery"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              values:
+                items:
+                  $ref: "#/components/schemas/SubscriptionUpdateResponseGet"
+              links:
+                items:
+                  $ref: "#/components/schemas/SubscriptionDeliveryLink"
+          examples:
+            No Header:
+              value:
+                authorizationHeaderValue: "Bearer 123abc"
+                clientKey: "REDACTED"
+                status: "Active"
+                concurrentDeliveries: 5
+                maxBatchSize: 10
+                links:
+                  - rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/eventSubscriptionDelivery"
     DoesNotHaveAccessResponse:
       description: "Does not have access"
     InputValueIsInvalidResponse:
@@ -365,6 +428,20 @@ components:
                     uri: "https://sandboxapi.deere.com/platform/eventSubscriptions/ae4b499c-1111-2222-3333-d7498cd7d9dd"
     UpdatedResponse:
       description: "Subscription"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+          examples:
+            Headers:
+              description: "204 No Content"
+    UpdatedResponse_EventSubscriptionDelivery:
+      description: "Update Subscriptions delivery"
       content:
         application/vnd.deere.axiom.v3+json:
           schema:
@@ -486,10 +563,40 @@ components:
           type: "string"
           description: "The value that was supplied for this field in the request"
           example: "Bad value"
+    Error_EventSubscriptionDelivery:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          description: "An english description of the error"
+          example: "was invalid because"
+        code:
+          type: "string"
+          description: "A string constant representing the type of error"
+          example: 400
+        field:
+          type: "string"
+          description: "The name of the property or parameter deemed invalid"
+          example: "Machine.serialNumber"
+        gud:
+          type: "string"
+          format: "uuid"
+          description: "A reference to this encounter of the error, for traceability and troubleshooting"
+          example: "9b331708-10e8-4e15-8097-a9aed7455d6d"
+        invalidValue:
+          type: "string"
+          description: "The value that was supplied for this field in the request"
+          example: null
+      readOnly: true
     Errors:
       type: "array"
       items:
         $ref: "#/components/schemas/Error"
+    Errors_EventSubscriptionDelivery:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/Error_EventSubscriptionDelivery"
+      readOnly: true
     EventTypeId:
       type: "string"
       description: "See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names"
@@ -594,6 +701,11 @@ components:
         self:
           description: "The link of the request."
           example: "https://sandboxapi.deere.com/platform/eventSubscriptions"
+    SubscriptionDeliveryLink:
+      properties:
+        self:
+          description: "The link to the event subscription's delivery status."
+          example: "https://sandboxapi.deere.com/platform/eventSubscriptionDelivery"
     SubscriptionRequestContent:
       description: "A subscription request"
       type: "object"
@@ -667,3 +779,36 @@ components:
           pattern: "^[A-Za-z0-9+/=]{0,256}$"
           description: "A string that was sent with each delivery to validate the sender."
           example: "Follows pattern '^[A-Za-z0-9+/=]{0,256}$'"
+    SubscriptionUpdateResponse:
+      properties:
+        concurrentDeliveries:
+          type: "number"
+          description: "Concurrency of the event subscription delivery (default: 1, min: 1, max: 10)."
+          example: "5 Editable: Yes"
+        clientKey:
+          type: "string"
+          description: "The client key used to create the subscription."
+          example: "johndeere-1234567898765432123456789876543212345678 Editable: No"
+        links:
+          type: "array"
+          example: "See the sample request below Editable: No"
+          description: "Links to other resources."
+    SubscriptionUpdateResponseGet:
+      properties:
+        concurrentDeliveries:
+          type: "number"
+          description: "Concurrency of the event subscription delivery (default: 1, min: 1, max: 10)."
+          example: 5
+        clientKey:
+          type: "string"
+          description: "The client key used to create the subscription."
+          example: "REDACTED"
+        links:
+          type: "array"
+          example: "See the sample request below"
+          description: "Links to other resources."
+x-source-documents:
+  - endPointName: "event-subscription"
+    id: 103
+  - endPointName: "event-subscription-delivery"
+    id: 104

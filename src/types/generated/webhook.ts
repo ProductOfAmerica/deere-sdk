@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+  '/eventSubscriptionDelivery': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get Event Subscription Delivery
+     * @description This resource will return your event subscription delivery status
+     */
+    get: operations['getDelivery'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update Event Subscription Delivery
+     * @description This resource will update an event subscription delivery
+     */
+    patch: operations['updateDelivery'];
+    trace?: never;
+  };
   '/eventSubscriptions': {
     parameters: {
       query?: never;
@@ -168,7 +192,36 @@ export interface components {
        */
       invalidValue?: string;
     };
+    Error_EventSubscriptionDelivery: {
+      /**
+       * @description An english description of the error
+       * @example was invalid because
+       */
+      message?: string;
+      /**
+       * @description A string constant representing the type of error
+       * @example 400
+       */
+      code?: string;
+      /**
+       * @description The name of the property or parameter deemed invalid
+       * @example Machine.serialNumber
+       */
+      field?: string;
+      /**
+       * Format: uuid
+       * @description A reference to this encounter of the error, for traceability and troubleshooting
+       * @example 9b331708-10e8-4e15-8097-a9aed7455d6d
+       */
+      gud?: string;
+      /**
+       * @description The value that was supplied for this field in the request
+       * @example null
+       */
+      invalidValue?: string;
+    };
     Errors: components['schemas']['Error'][];
+    Errors_EventSubscriptionDelivery: components['schemas']['Error_EventSubscriptionDelivery'][];
     /**
      * @description See [Event Types](https://developer-portal.deere.com/#/myjohndeere/data-subscription-service/event-types) for valid event names
      * @example exampleEvent
@@ -230,6 +283,13 @@ export interface components {
       /**
        * @description The link of the request.
        * @example https://sandboxapi.deere.com/platform/eventSubscriptions
+       */
+      self?: unknown;
+    };
+    SubscriptionDeliveryLink: {
+      /**
+       * @description The link to the event subscription's delivery status.
+       * @example https://sandboxapi.deere.com/platform/eventSubscriptionDelivery
        */
       self?: unknown;
     };
@@ -302,6 +362,40 @@ export interface components {
        */
       token?: string;
     };
+    SubscriptionUpdateResponse: {
+      /**
+       * @description Concurrency of the event subscription delivery (default: 1, min: 1, max: 10).
+       * @example 5 Editable: Yes
+       */
+      concurrentDeliveries?: number;
+      /**
+       * @description The client key used to create the subscription.
+       * @example johndeere-1234567898765432123456789876543212345678 Editable: No
+       */
+      clientKey?: string;
+      /**
+       * @description Links to other resources.
+       * @example See the sample request below Editable: No
+       */
+      links?: unknown[];
+    };
+    SubscriptionUpdateResponseGet: {
+      /**
+       * @description Concurrency of the event subscription delivery (default: 1, min: 1, max: 10).
+       * @example 5
+       */
+      concurrentDeliveries?: number;
+      /**
+       * @description The client key used to create the subscription.
+       * @example REDACTED
+       */
+      clientKey?: string;
+      /**
+       * @description Links to other resources.
+       * @example See the sample request below
+       */
+      links?: unknown[];
+    };
   };
   responses: {
     /** @description Bad Request */
@@ -311,6 +405,15 @@ export interface components {
       };
       content: {
         'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+      };
+    };
+    /** @description Bad Request */
+    BadRequestResponse_EventSubscriptionDelivery: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['Errors_EventSubscriptionDelivery'];
       };
     };
     /** @description Created */
@@ -332,6 +435,18 @@ export interface components {
       };
       content: {
         'application/vnd.deere.axiom.v3+json': unknown;
+      };
+    };
+    /** @description Delivery */
+    DeliveryResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          values?: unknown;
+          links?: unknown;
+        };
       };
     };
     /** @description Does not have access */
@@ -373,6 +488,22 @@ export interface components {
     };
     /** @description Subscription */
     UpdatedResponse: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description Update Subscriptions delivery */
+    UpdatedResponse_EventSubscriptionDelivery: {
       headers: {
         [name: string]: unknown;
       };
@@ -433,6 +564,37 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  getDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components['responses']['DeliveryResponse'];
+      403: components['responses']['DoesNotHaveAccessResponse'];
+    };
+  };
+  updateDelivery: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['SubscriptionUpdateResponse'];
+      };
+    };
+    responses: {
+      200: components['responses']['UpdatedResponse_EventSubscriptionDelivery'];
+      400: components['responses']['BadRequestResponse_EventSubscriptionDelivery'];
+      403: components['responses']['DoesNotHaveAccessResponse'];
+    };
+  };
   getSubscriptions: {
     parameters: {
       query?: never;

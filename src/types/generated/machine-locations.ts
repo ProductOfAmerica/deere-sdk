@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  '/machines/{principalId}/breadcrumbs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Machine Breadcrumbs
+     * @description This resource allows the client to get the following details of a Machine: SpeedFuel LevelDirection of Machine (heading)Machine StateMachine State Defined Type IdCorrelation IdLocation AltitudeOriginCreated TimeStamp
+     */
+    get: operations['getBreadcrumbsByMachineId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/machines/{principalId}/locationHistory': {
     parameters: {
       query?: never;
@@ -77,12 +97,188 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** @description Breadcrumb object containing location information and location-relevant machine data. */
+    Breadcrumb: {
+      machineState?: components['schemas']['BreadcrumbMachineState'];
+      /**
+       * @description The origin of the breadcrumb
+       * @default BREADCRUMB
+       * @example BREADCRUMB
+       * @enum {string}
+       */
+      origin: 'JDLINK' | 'BREADCRUMB';
+      links?: components['schemas']['Breadcrumb_links'][];
+    } & components['schemas']['Breadcrumb_POST'];
+    /** @description Human readable title for the machine state */
+    BreadcrumbMachineState: {
+      /**
+       * @default Breadcrumb$MachineState
+       * @example Breadcrumb$MachineState
+       */
+      '@type': string;
+      /**
+       * @example Idle
+       * @enum {string}
+       */
+      value?: 'Idle' | 'Working' | 'Transporting';
+    };
+    /** @description Breadcrumb object containing location information and location-relevant machine data. */
+    Breadcrumb_POST: {
+      /**
+       * @description Object type
+       * @default Breadcrumb
+       * @example Breadcrumb
+       */
+      '@type': string;
+      /**
+       * Format: date-time
+       * @description The timestamp of the breadcrumb creation
+       * @example 2018-08-07T10:12:50.911Z
+       */
+      createTimestamp: string;
+      /**
+       * Format: date-time
+       * @description The timestamp of the event when the position was changed
+       * @example 2018-08-07T10:12:50.911Z
+       */
+      eventTimestamp: string;
+      point: components['schemas']['Point'];
+      speed?: components['schemas']['MeasurementAsDouble'];
+      heading?: components['schemas']['MeasurementAsInteger'];
+      fuelLevel?: components['schemas']['MeasurementAsDouble'];
+      /**
+       * @description Principal/Equipment id of which the location corresponds to.
+       * @example 123456
+       */
+      principalId?: number;
+      /**
+       * Format: guid
+       * @description Correlation ID has to be submitted with location or breadcrumb information when uploading to the server. Corellation ID information can be used by clients for diagnostics of the parallel assignment of the same machine to 2 or more devices. Workflow for detection: - My app subscribed to the machine locations changes of my org - If selecting a machine on my mobile device my app checks whether some device sent locations recently which was not mine (not one of my previous or current correlationIDs) - Prevention! - If I detected that another device sent location - the app warns me and I'm able to decide to select the machine or not - I started MLT and my app sends the breadcrumb/location with my correlationID to the server - My app is still subscribed to machine locations changes of the org and receives a location of machine selected in my app with a correlation ID which is not one of mines - My app warns me that another user reports locations to My machine as well - BTW - empty Correlation ID is not allowed when contributing a location or breadcrumb using the API or IoT - Recommendation - the app shall create a new correlationID (guid) when the user selects a new machine Correlation ID can be used for cleaning up recorded locations data on the server side in case the client erroneously submitted location data for a wrong machine.
+       * @example c1429d12-17db-4fd5-a27f-50ba62e81c8c
+       */
+      correlationId?: string;
+      links: components['schemas']['Breadcrumb_links'][];
+    };
+    /**
+     * @description Links related to the breadcrumb
+     * @example [
+     *       {
+     *         "@type": "Link",
+     *         "rel": "contributionDefinition",
+     *         "uri": "https://partnerapi.deere.com/platform/contributionDefinitions/70df8ced-b6df-458e-b6f2-2d705cb9a2bf"
+     *       },
+     *       {
+     *         "@type": "Link",
+     *         "rel": "machine",
+     *         "uri": "https://partnerapi.deere.com/platform/machines/482754"
+     *       }
+     *     ]
+     */
+    Breadcrumb_links: {
+      /**
+       * @description This is the @type definition for this reference object.
+       * @default Link
+       * @example Link
+       */
+      '@type': string;
+      /** @description Defines the relation from the object to the link. The minimum response is the self link. Please refere to the individual example and object definition (the allOf keyword which is only visibile in the YAMl code) to see all required links for the instance of the object. */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The URL to the ressource which is related
+       */
+      uri: string;
+    };
+    /** @description Page of bredacrumb information for the machine */
+    Breadcrumbs_Response: {
+      /** @description Link list */
+      links?: components['schemas']['MyJD_links_Breadcrumbs'][];
+      /**
+       * @description Number of results in the list
+       * @example 1
+       */
+      total?: number;
+      values?: components['schemas']['Breadcrumb'][];
+    };
+    /** @description Measurement as double value */
+    MeasurementAsDouble: {
+      /** Format: float */
+      valueAsDouble: number;
+      unit?: string;
+      vrDomainId?: string;
+    };
+    /** @description Measurement as integer value */
+    MeasurementAsInteger: {
+      valueAsInteger: number;
+      unit?: string;
+      vrDomainId?: string;
+    };
     MyJD_links: {
       /**
        * @description Machines Link.
        * @example https://sandboxapi.deere.com/platform/machines/4321
        */
       machine?: unknown;
+    };
+    /**
+     * @description The link object provides links to ressources which are related to the response
+     * @example [
+     *       {
+     *         "@type": "Link",
+     *         "rel": "self",
+     *         "uri": "https://partnerapi.deere.com/platform/machines/482754/breadcrumbs"
+     *       },
+     *       {
+     *         "@type": "Link",
+     *         "rel": "nextPage",
+     *         "uri": "https://partnerapi.deere.com/platform/machines/482754/breadcrumbs;start=30;count=10"
+     *       },
+     *       {
+     *         "@type": "Link",
+     *         "rel": "nextPage",
+     *         "uri": "https://partnerapi.deere.com/platform/machines/482754/breadcrumbs;start=10;count=10"
+     *       }
+     *     ]
+     */
+    MyJD_links_Breadcrumbs: {
+      /**
+       * @description This is the @type definition for this reference object.
+       * @default Link
+       * @example Link
+       */
+      '@type': string;
+      /**
+       * @description Defines the relation from the object to the link. The minimum response is the self link. Please refere to the individual example and object definition (the allOf keyword which is only visibile in the YAMl code) to see all required links for the instance of the object.
+       * @default self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The URL to the ressource which is related
+       */
+      uri?: string;
+    };
+    /** @description Point. */
+    Point: {
+      /**
+       * @description Object type
+       * @default Point
+       * @example Point
+       */
+      '@type': string;
+      /**
+       * Format: float
+       * @description Latitude in range of -90 to +90
+       * @example 7.801324
+       */
+      lat: number;
+      /**
+       * Format: float
+       * @description longitude in range of -180 to +180
+       * @example 49.456166
+       */
+      lon: number;
+      altitude?: components['schemas']['MeasurementAsDouble'];
     };
     ReportedLocation: {
       /**
@@ -129,4 +325,54 @@ export interface components {
   pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+  getBreadcrumbsByMachineId: {
+    parameters: {
+      query?: {
+        /** @description OrganizationId */
+        orgId?: string;
+        /** @description UTC format Start Date.If null, 'current time - 24 hours' will be treated as startDate. */
+        startDate?: string;
+        /** @description UTC format End Date. If null, current time will be treated as endDate. */
+        endDate?: string;
+        /** @description Default value: false. Valid values: true or false. If true, then date parameters are not used and the last known location of the machine will be sent in the response. */
+        lastKnown?: boolean;
+      };
+      header?: {
+        /** @description Accept Language. If not provided, the default Locale is US. Else, Locale will be searched on the basis of language. */
+        'Accept-Language'?: string;
+      };
+      path: {
+        /** @description principalId of Machine/Equipment. */
+        principalId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Breadcrumb list for the machine */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['Breadcrumbs_Response'];
+        };
+      };
+      /** @description The user does not have access to the machine or is not allowed to see machine locations */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Machine not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+}

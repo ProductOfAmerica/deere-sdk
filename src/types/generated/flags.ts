@@ -24,6 +24,102 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/organizations/{orgId}/flagCategories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Flags Category Collection
+     * @description This resource will return a Flags Category Collection for Organization.
+     */
+    get: operations['getFlagCategoriesForOrganization'];
+    put?: never;
+    /**
+     * Create a custom category
+     * @description This resource will create a custom category in the given organization.
+     */
+    post: operations['createFlagCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/flagCategories/{categoryId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get flag category by id
+     * @description This resource will return a flag category with the name translated into the specified language. The category can be a reference flagCategory, a master flagCategory created from a referenced flagCategory or a user-defined category.
+     */
+    get: operations['getFlagCategoryByIdOrgId'];
+    /**
+     * Update flag category by organization and flag category Id
+     * @description This resource will update flag category by Id.
+     */
+    put: operations['updateFlagCategoryByIdOrgId'];
+    post?: never;
+    /**
+     * Delete a flag category
+     * @description This resource will delete a single empty category based on the categoryId and orgId.
+     */
+    delete: operations['deleteFlagCategoryByIdOrgId'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/flagCategories/{categoryId}/flagCategoryPreferences': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List collection of FlagCategoryPreference
+     * @description This endpoint will return a collection of FlagCategoryPreference objects associated with the given flag category. The object with the key "default" is created automatically on the 1st access to the flagCategory object by a client. The default preference object shall be initialized with default values: prefKey: "default" hexColor: "#FFFFFF"
+     */
+    get: operations['getFlagCategoryPreferencesByIdOrgId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/flagCategoryPreferences/{flagCategoryPreferencesId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View preferences object for a category
+     * @description This resource will return the preferences object for the given flag category and org
+     */
+    get: operations['getFlagCategoryPreferenceByIdOrgId'];
+    /**
+     * Update flag category preferences
+     * @description This resource will update flag category preferences by Id and Org
+     */
+    put: operations['updateFlagCategoryPreferenceByIdOrgId'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{orgId}/flags': {
     parameters: {
       query?: never;
@@ -81,6 +177,139 @@ export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     ContentType: unknown;
+    FlagCategory: {
+      /**
+       * @description Name of the category.
+       * @example Rocks
+       */
+      categoryTitle?: string;
+      /**
+       * @description Whether or not the category is archived
+       * @default false
+       * @example false
+       */
+      archived: boolean;
+      /**
+       * @description Shows/sets whether the category is a preferred one in the current org. This can be applied to both user-defined and reference flag categories in this org.
+       * @example true
+       */
+      preferred?: boolean;
+      /**
+       * Format: uuid
+       * @description GUID of a flag category.
+       * @example 7c602ae8-4351-4640-9de8-88792bda83d7
+       */
+      readonly id?: string;
+      /**
+       * Format: date-time
+       * @example 2018-12-28T09:17:10.694Z
+       */
+      createdDate?: string;
+      /**
+       * Format: date-time
+       * @example 2018-12-28T09:17:10.694Z
+       */
+      lastModifiedDate?: string;
+    };
+    FlagCategory2: {
+      /**
+       * @description Name of the category.
+       * @example Rocks
+       */
+      categoryTitle?: string;
+      /**
+       * @description Whether or not the category is archived
+       * @default false
+       * @example false
+       */
+      archived: boolean;
+      /**
+       * @description Shows/sets whether the category is a preferred one in the current org. This can be applied to both user-defined and reference flag categories in this org.
+       * @example true
+       */
+      preferred?: boolean;
+      /**
+       * Format: uuid
+       * @description GUID of a flag category.
+       * @example 688c20bb-9609-4590-95c9-649ba65c06df
+       */
+      readonly id?: string;
+      /** @example 2018-12-18T13:29:14.167Z */
+      createdDate?: string;
+      /** @example 2018-12-18T13:29:30.924Z */
+      lastModifiedDate?: string;
+    };
+    /** @description The object for keeping visual and non-visual preferences for the given FlagCategory. */
+    FlagCategoryPreference: {
+      /**
+       * Format: GUID
+       * @description Id of the FlagCategoryPreferences resource.
+       * @example ac6a5bb5fae84b1da29459a8101295b0
+       */
+      id?: string;
+      /**
+       * @description Key name for the preference object to be identified by clients to support client-specific preferences
+       * @default default
+       * @example default
+       */
+      prefKey: string;
+      /**
+       * @description Color code for the flag category in hexadecimal format.
+       * @example #0BA74A
+       */
+      hexColor?: string;
+      /**
+       * Format: date-time
+       * @example 2018-07-01T21:00:11Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @example 2018-07-01T21:10:10Z
+       */
+      modifiedTime?: string;
+    };
+    GetPreferences: {
+      /**
+       * @description Users Link.
+       * @example https://sandboxapi.deere.com/platform/users/rostaninoleg
+       */
+      modifiedBy?: unknown;
+    };
+    LinkCategoryId: {
+      /**
+       * @description Organization Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+      /**
+       * @description Update Category Link.
+       * @example https://sandboxapi.deere.com/platform/flagCategories/7c602ae8-4351-4640-9de8-88792bda83d7
+       */
+      updateCategory?: unknown;
+      /**
+       * @description Delete Category Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/{orgId}/flagCategories/7c602ae8-4351-4640-9de8-88792bda83d7
+       */
+      deleteCategory?: unknown;
+    };
+    LinkCategoryId2: {
+      /**
+       * @description Organization Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+      /**
+       * @description Update Category Link.
+       * @example https://sandboxapi.deere.com/platform/flagCategories/835b863c-1997-451d-8850-1123ff4ec0e3
+       */
+      updateCategory?: unknown;
+      /**
+       * @description Delete Category Link.
+       * @example https://sandboxapi.deere.com/platform/flagCategories/835b863c-1997-451d-8850-1123ff4ec0e3
+       */
+      deleteCategory?: unknown;
+    };
     LinkFlagId: {
       /**
        * @description Flag Category Preferences Link.
@@ -131,6 +360,31 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID/fields/FIELDS_ID
        */
       field?: unknown;
+    };
+    PutPreferences: {
+      /**
+       * @description Users Link.
+       * @example https://sandboxapi.deere.com/platform/users/USERNAME
+       */
+      modifiedBy?: unknown;
+    };
+    PutResponse: {
+      /**
+       * @description Name of the category.
+       * @example Rocks
+       */
+      categoryTitle?: string;
+      /**
+       * @description Whether or not the category is archived
+       * @default false
+       * @example false
+       */
+      archived: boolean;
+      /**
+       * @description Shows/sets whether the category is a preferred one in the current org. This can be applied to both user-defined and reference flag categories in this org.
+       * @example true
+       */
+      preferred?: boolean;
     };
     ValuesFlagId: {
       /**
@@ -247,16 +501,30 @@ export interface components {
   parameters: {
     /** @description If embedding flag category, language that category name shall be returned within a flag, e.g., "de-DE" */
     'Accept-Language': string;
+    /** @description Language category names are being returned by the endpoint. */
+    'Accept-Language_FlagCategories': string;
+    /** @description CategoryId to query for Category. */
+    CategoryId: string;
+    /** @description CategoryId to query for Category. */
+    CategoryId2: string;
+    /** @description CategoryId to query for preferences. */
+    CategoryId_FlagCategoriesPreferences: string;
     /** @description Specify a comma-separated list of category GUIDs to retrieve */
     CategoryIds: string;
     /** @description Specify a comma-separated list of category names to retrieve. Instead/together with names, aliases for well known categories can be used */
     CategoryNames: string;
     /** @description Embed additional attributes if required to reduce the number of requests */
     Embed: string;
+    /** @description Embed additional attributes if required. */
+    Embed_FlagCategories: string;
     /** @description Flags created before end time (in UTC) will be returned */
     EndTime: string;
     /** @description Fields guid of the field. */
     FieldId: string;
+    /** @description flagCategoryPreferencesId to query for preferences. */
+    FlagCategoryPreferencesId: string;
+    /** @description flagCategoryPreferencesId to query for preferences. */
+    FlagCategoryPreferencesId2: string;
     /** @description flagId to query for flag */
     FlagId: string;
     /** @description Specify whether to request global flags, field-related flags or both */
@@ -267,8 +535,22 @@ export interface components {
     OrgId: string;
     /** @description Organization Id */
     OrgId2: string;
+    /** @description Organization Id. */
+    OrgId2_FlagCategories: string;
     /** @description Organization Id where the Flag belongs to */
     OrgId3: string;
+    /** @description OrgId to query for Category */
+    OrgId3_FlagCategories: string;
+    /** @description Organization Id where the Flag category belongs to */
+    OrgId4: string;
+    /** @description OrgId to query for Org. */
+    OrgId_FlagCategories: string;
+    /** @description orgId to query for preferences. */
+    OrgId_FlagCategoriesPreferences: string;
+    /** @description orgId to query for preferences. */
+    OrganizationId: string;
+    /** @description CategoryId to query for preferences */
+    PrefKey: string;
     /** @description Request flags by archived status */
     RecordFilter: string;
     /** @description Clients which cannot handle specific geometry types can select only supported ones. Request flags with geometry only of type */
@@ -329,6 +611,426 @@ export interface operations {
         content?: never;
       };
       /** @description Entity Not found. No organization and/or field with these ids. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getFlagCategoriesForOrganization: {
+    parameters: {
+      query?: {
+        /** @description Embed additional attributes if required. */
+        embed?: components['parameters']['Embed_FlagCategories'];
+      };
+      header?: {
+        /** @description Language category names are being returned by the endpoint. */
+        'Accept-Language'?: components['parameters']['Accept-Language_FlagCategories'];
+      };
+      path: {
+        /** @description Organization Id where the Flag category belongs to */
+        orgId: components['parameters']['OrgId4'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Returns collection of flag categories which includes reference and user-defined categories. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: components['schemas']['LinkCategoryId2'][];
+            /**
+             * Format: int64
+             * @description Number of results in the list
+             * @example 70
+             */
+            total?: number;
+            values?: components['schemas']['FlagCategory2'][];
+          };
+        };
+      };
+      /** @description Forbidden - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No organization present for given orgId. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  createFlagCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization Id where the Flag category belongs to */
+        orgId: components['parameters']['OrgId4'];
+      };
+      cookie?: never;
+    };
+    /** @description This resource will create a custom category in the given organization. */
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['PutResponse'];
+      };
+    };
+    responses: {
+      /** @description Created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            /**
+             * Format: int32
+             * @example 1
+             */
+            total?: number;
+          };
+        };
+      };
+      /** @description Invalid body - Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden - Given Invalid orgId or the user doesn't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No organization present for given orgId or no contribution definition ID is found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Conflict. User creates flag category with such title which is already being used in one of the existing category. */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getFlagCategoryByIdOrgId: {
+    parameters: {
+      query?: {
+        /** @description Embed additional attributes if required. */
+        embed?: components['parameters']['Embed_FlagCategories'];
+      };
+      header?: {
+        /** @description Language category names are being returned by the endpoint. */
+        'Accept-Language'?: components['parameters']['Accept-Language_FlagCategories'];
+      };
+      path: {
+        /** @description OrgId to query for Org. */
+        orgId: components['parameters']['OrgId_FlagCategories'];
+        /** @description CategoryId to query for Category. */
+        categoryId: components['parameters']['CategoryId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Returns flag category. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: unknown;
+            values?: unknown;
+          };
+        };
+      };
+      /** @description Forbidden - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No organization present for given orgId or given flag category does not exist */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateFlagCategoryByIdOrgId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization Id. */
+        orgId: components['parameters']['OrgId2_FlagCategories'];
+        /** @description CategoryId to query for Category. */
+        categoryId: components['parameters']['CategoryId2'];
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['PutResponse'];
+      };
+    };
+    responses: {
+      /** @description No Content. Successfully updated. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            /**
+             * Format: int32
+             * @example 1
+             */
+            total?: number;
+          };
+        };
+      };
+      /** @description Invalid body - Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden Access */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. Missing or incorrect categoryId in the org Or incorrect org */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  deleteFlagCategoryByIdOrgId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description OrgId to query for Category */
+        orgId: components['parameters']['OrgId3_FlagCategories'];
+        /** @description CategoryId to query for Category. */
+        categoryId: components['parameters']['CategoryId2'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No Content. Flag Category deleted successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            /**
+             * Format: int32
+             * @example 1
+             */
+            total?: number;
+          };
+        };
+      };
+      /** @description Forbidden. - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. - The user has no permission to delete the flag category. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. Given category id does not exist or given orgId does not exist. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getFlagCategoryPreferencesByIdOrgId: {
+    parameters: {
+      query?: {
+        /** @description CategoryId to query for preferences */
+        prefKey?: components['parameters']['PrefKey'];
+      };
+      header?: never;
+      path: {
+        /** @description orgId to query for preferences. */
+        organizationId: components['parameters']['OrganizationId'];
+        /** @description CategoryId to query for preferences. */
+        categoryId: components['parameters']['CategoryId_FlagCategoriesPreferences'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Returns the preferences object for the given flag category. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: components['schemas']['GetPreferences'][];
+            /**
+             * Format: int64
+             * @description Number of results in the list
+             * @example 70
+             */
+            total?: number;
+            values?: unknown;
+          };
+        };
+      };
+      /** @description Forbidden - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No category with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  getFlagCategoryPreferenceByIdOrgId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description orgId to query for preferences. */
+        orgId: components['parameters']['OrgId_FlagCategoriesPreferences'];
+        /** @description flagCategoryPreferencesId to query for preferences. */
+        flagCategoryPreferencesId: components['parameters']['FlagCategoryPreferencesId'];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Returns the preferences object identified by its global ID. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: components['schemas']['GetPreferences'][];
+            /**
+             * Format: int64
+             * @description Number of results in the list
+             * @example 70
+             */
+            total?: number;
+            values?: unknown;
+          };
+        };
+      };
+      /** @description Forbidden - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. No reference category with this id. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  updateFlagCategoryPreferenceByIdOrgId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description orgId to query for preferences. */
+        organizationId: components['parameters']['OrganizationId'];
+        /** @description flagCategoryPreferencesId to query for preferences. */
+        flagCategoryPreferencesId: components['parameters']['FlagCategoryPreferencesId2'];
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/vnd.deere.axiom.v3+json': components['schemas']['FlagCategoryPreference'];
+      };
+    };
+    responses: {
+      /** @description No Content. Successfully updated. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/vnd.deere.axiom.v3+json': {
+            links?: components['schemas']['PutPreferences'][];
+            /**
+             * Format: int64
+             * @description Number of results in the list
+             * @example 70
+             */
+            total?: number;
+          };
+        };
+      };
+      /** @description Invalid body - Bad Request */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden - Given Invalid orgId or the user dosen't have access for the given flagCategory or orgId. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Entity Not found. Incorrect flagCategoryPreferencesId. */
       404: {
         headers: {
           [name: string]: unknown;

@@ -4,6 +4,102 @@
  */
 
 export interface paths {
+  '/fileTransfers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List File Transfer Requests
+     * @description This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: file: View the file for which the transfer was requested. machine: View the machine to which the transfer was requested.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The source of the file transfer. Takes the values ORGANIZATION or MACHINE. */
+          source?: components['parameters']['Source2'];
+        };
+        header?: {
+          /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+          'x-deere-signature'?: components['parameters']['X-deere-signature_FileTransfers'];
+        };
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description File Transfer. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fileTransfers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a File Transfer Request
+     * @description This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: file: View the file for which the transfer was requested. machine: View the machine to which the transfer was requested.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The source of the file transfer. Takes the values ORGANIZATION or MACHINE. */
+          source?: components['parameters']['Source'];
+        };
+        header?: never;
+        path: {
+          /** @description File Transfer ID */
+          id: components['parameters']['Id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description File Transfer by ID. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/files': {
     parameters: {
       query?: never;
@@ -173,6 +269,84 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/organizations/{orgId}/fileTransfers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get File Transfer List by Organization
+     * @description This resource will retrieve list of all File Transfer by an Organization. The response will contain links to the following resources: file: View the file for which the transfer was requested. machine: View the machine to which the transfer was requested.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The source of the file transfer. Takes the values ORGANIZATION or MACHINE. */
+          source?: components['parameters']['Source'];
+        };
+        header?: never;
+        path: {
+          /** @description Organization */
+          orgId: components['parameters']['OrgId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description File Transfer. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              links?: unknown;
+              values?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Submit a File Transfer Request
+     * @description This resource allows you to select a file and machine, and use the client software to submit a file transfer request. After that, MyJohnDeere API v3's infrastructure transfers the selected file to the selected machine, where it becomes available for the machine operator to use. The response links to the following resources: file: The file for which the transfer is being requested. machine: The machine to which the transfer is being requested.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Organization */
+          orgId: components['parameters']['OrgId2'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['FileTransfersPost'];
+        };
+      };
+      responses: {
+        /** @description File Transfer. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['PostFileTransfersResponse'];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{orgId}/files': {
     parameters: {
       query?: never;
@@ -320,6 +494,95 @@ export interface components {
        */
       delayProcessing?: boolean;
     };
+    FileLinkGet: {
+      /**
+       * @description Files Link.
+       * @example https://sandboxapi.deere.com/platform/files/612
+       */
+      file?: unknown;
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/1523
+       */
+      machine?: unknown;
+    };
+    FileTransfersLink: {
+      /**
+       * @description Files Link.
+       * @example https://sandboxapi.deere.com/platform/files/fileID
+       */
+      file?: unknown;
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/machineID
+       */
+      machine?: unknown;
+    };
+    FileTransfersLinkAPIInteractions: {
+      /** @description Status. */
+      Status?: unknown;
+      /** @description The url of the created resources */
+      location?: unknown;
+    };
+    FileTransfersLinkGet: {
+      /**
+       * @description Files Link.
+       * @example https://sandboxapi.deere.com/platform/files/15234
+       */
+      file?: unknown;
+      /**
+       * @description Machines Link.
+       * @example https://sandboxapi.deere.com/platform/machines/8237
+       */
+      machine?: unknown;
+      /**
+       * @description Organization Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/1234
+       */
+      owningOrganization?: unknown;
+    };
+    FileTransfersPost: {
+      links?: {
+        /** @enum {string} */
+        rel?: 'file' | 'equipment';
+        /** Format: uri */
+        uri?: string;
+      }[];
+    };
+    FileTransfersValue: {
+      /**
+       * @description Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived.
+       * @example See sample response below.
+       */
+      file?: Record<string, never>;
+      /**
+       * @description File Transfer ID
+       * @example 1628996
+       */
+      id?: string;
+      /**
+       * @description File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST.
+       * @example HOST
+       */
+      source?: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of when the file transfer was initiated.All timestamps are formatted according to the standard.
+       * @example 2015-06-09T09:43:01.381Z
+       */
+      transferInitiationTime?: string;
+      /**
+       * Format: date-time
+       * @description Timestamp of when the file transfer was last updated.All timestamps are formatted according to the standard.
+       * @example 2015-06-09T09:43:01.384Z
+       */
+      lastUpdatedTime?: string;
+      /**
+       * @description Status of the file transfer.
+       * @example WDT_AVAILABLE_TO_DISPLAY
+       */
+      status?: string;
+    };
     /**
      * @example SETUP
      * @enum {string}
@@ -339,6 +602,45 @@ export interface components {
       | 'ISO_SETUP'
       | 'BOUNDARY'
       | 'EXCEL';
+    FileValue: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived.
+       * @example See sample response below.
+       */
+      file?: Record<string, never>;
+      /**
+       * @description File Transfer ID
+       * @default N/A
+       * @example 51234
+       */
+      id: string;
+      /**
+       * @description File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST.
+       * @default N/A
+       * @example HOST
+       */
+      source: string;
+      /**
+       * @description Timestamp of when the file transfer was initiated.All timestamps are formatted according to the standard.
+       * @example 2018-03-20T18:52:22.155Z
+       */
+      transferInitiationTime?: string;
+      /**
+       * @description Timestamp of when the file transfer was last updated.All timestamps are formatted according to the standard.
+       * @example 2018-03-20T21:11:35.519Z
+       */
+      lastUpdatedTime?: string;
+      /**
+       * @description Status of the file transfer.
+       * @example WDT_IN_PROCESS
+       */
+      status?: string;
+    };
     FilesGet: {
       /**
        * @description A new x-deere-signature response header will be included if the response has changed since last api call.
@@ -435,6 +737,14 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/files/466578633/partnerships
        */
       partnerships?: unknown;
+    };
+    /** @description File Transfers Post Api Response. */
+    PostFileTransfersResponse: {
+      /**
+       * @description The URL of the created resource.
+       * @example https://sandboxapi.deere.com/platform/fileTransfers/7482
+       */
+      Location?: string;
     };
     PostFiles: {
       /**
@@ -622,12 +932,18 @@ export interface components {
     Filter: string;
     /** @description Takes ALL or MACHINE. ALL shows all the files in the org. MACHINE shows only the files sent from a machine to the host. */
     FilterOptional: string;
+    /** @description File Transfer ID */
+    Id: string;
     /** @description Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization. */
     Links: Record<string, never>;
     /** @description File name. */
     Name: string;
     /** @description Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter offset point (in bytes) in this parameter. */
     Offset: number;
+    /** @description Organization */
+    OrgId: string;
+    /** @description Organization */
+    OrgId2: string;
     /** @description Organization */
     OrganizationID: string;
     /** @description Organization */
@@ -636,6 +952,10 @@ export interface components {
     OrganizationID3: string;
     /** @description Allows client to download file in chunks. -1 will download entire file. For smaller pieces, enter size (in bytes) in this parameter. */
     Size: number;
+    /** @description The source of the file transfer. Takes the values ORGANIZATION or MACHINE. */
+    Source: string;
+    /** @description The source of the file transfer. Takes the values ORGANIZATION or MACHINE. */
+    Source2: string;
     /** @description Takes a timestamp (in UTC) that indicates when the file was created. Timestamp format is the standard. */
     StartDate: string;
     /** @description Allows client to filter files according to whether they are transferable to machines. Takes TRANSFERABLE and NON_TRANSFERABLE. */
@@ -646,6 +966,8 @@ export interface components {
     'X-deere-signature': string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
     'X-deere-signatureOptional': string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature_FileTransfers': string;
   };
   requestBodies: never;
   headers: never;

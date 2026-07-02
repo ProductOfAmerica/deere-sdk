@@ -43,6 +43,80 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/fieldOperations/{operationId}/measurementTypes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Field Operation Measurements
+     * @description Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). Please refer . "carting" operations as well as construction operations "constructionmilling", "constructionpaving", "constructioncompacting", "constructioncrushing", "constructionstabilizingrecycling" are not supported at this time.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Operation ID */
+          operationId: components['parameters']['OperationId'];
+          /** @description Measurement Type */
+          measurementType: components['parameters']['MeasurementType_MeasurementType'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldOperationMeasurement'];
+        403: components['responses']['DoesNotHaveAccessToFieldOperationMeasurements'];
+        404: components['responses']['InputOrganizationOrFieldOperationIsInvalid'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fieldOperations/{operationId}/measurementTypes/{measurementType}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Field Operation Measurement
+     * @description Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). To view the different responses for each field operation type, view the documentation above. Please refer Note: This API has two possible accept headers. One will give a response with totals, and the other will give a response with a Base64 encoded image. For the image layer, A map image is available for each measurement offering a visual depiction of the data. Argonomic data points are grouped either by label (such as variety name) or numerical range, and this information provided in the JSON response as a map legend.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Operation ID */
+          operationId: components['parameters']['OperationId'];
+          /** @description Measurement Type */
+          measurementType: components['parameters']['MeasurementType_MeasurementType'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['responses']['FieldOperationMeasurementOrImage_MeasurementType'];
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/fieldOps/{operationId}': {
     parameters: {
       query?: never;
@@ -109,7 +183,7 @@ export interface paths {
         query?: {
           /** @description Retrieve operations for a specific crop season (year). */
           cropSeason?: components['parameters']['CropSeason'];
-          /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
+          /** @description Filter results by field operation type. Takes the values "APPLICATION", "CARTING", "HARVEST", "SEEDING", and "TILLAGE". */
           fieldOperationType?: components['parameters']['FieldOperationType'];
           /** @description Specify the starting date of the seven-day period in ISO-8601 format. Query Filter is inclusive. */
           startDate?: components['parameters']['StartDate'];
@@ -776,6 +850,38 @@ export interface components {
       | 'TemperatureDifference'
       | 'RelativeHumidity'
       | 'SoilTemperature';
+    FieldOperationMeasurementType: {
+      /**
+       * @description Measurement Name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3+json
+       * @example TillageDepthTarget
+       */
+      measurementName?: string;
+      /**
+       * @description Measurement Category.
+       * @example Target
+       */
+      measurementCategory?: string;
+      /**
+       * @description The area covered for this measurement. Includes value, and unitId.
+       * @example See sample response below
+       */
+      area?: unknown;
+      /**
+       * @description The average depth observed across the area covered. Includes value, and unitId.
+       * @example See sample response below
+       */
+      averageDepth?: unknown;
+      /**
+       * @description Numeric measurement value.
+       * @example 15.24
+       */
+      value?: number;
+      /**
+       * @description Unit of measurement.
+       * @example cm
+       */
+      unitId?: string;
+    };
     FieldOperationMeasurementTypesEnum: string &
       components['schemas']['FieldOperationMeasurementTypesInFullRelease'] &
       components['schemas']['FieldOperationMeasurementTypesInAgreportsApi'];
@@ -839,6 +945,63 @@ export interface components {
       | 'TillageSpeedResult'
       | 'TillageDepthTarget'
       | 'TillagePressureTarget';
+    FieldOperationMeasurement_MeasurementType: {
+      /**
+       * @description Field Operation name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3.image+json
+       * @example fieldOperationMapImage
+       */
+      name?: string;
+      /** @example See sample response below. */
+      declaredType?: unknown;
+      /** @example See sample response below. */
+      scope?: unknown;
+      /**
+       * @description The PNG image file.
+       * @example See sample response below.
+       */
+      image?: Record<string, never>;
+      /**
+       * @description The legend used to render the map image. Includes unitId and ranges.
+       * @example See sample response below.
+       */
+      legends?: unknown;
+      /**
+       * @description Two coordinates that represent the corners of the image when overlaid onto a Web Mercator projection1. Includes minimumLatitude, minimumLongitude, maximumLatitude, and maximumLongitude.
+       * @example See sample response below.
+       */
+      extent?: unknown;
+      /**
+       * @description Numeric values in the legend's ranges are measurements in this unit. The unit depends on the Accept-UOM-System header for the MapImage request.
+       * @example cm
+       */
+      unitId?: string;
+      /**
+       * @description The ranges contained in the legend. Includes either a label (for non-numeric ranges), or minimum, maximum, hexColor, and percent.
+       * @example See sample response below.
+       */
+      ranges?: unknown;
+      /**
+       * @description A label associated with the legend item. May be omitted for ranges with numeric values.
+       * @example 15
+       */
+      label?: string;
+      /**
+       * @description The HEX color value of the legend item.
+       * @example #4B0082
+       */
+      hexColor?: string;
+      /**
+       * @description The percentage of agronomic data points that are represented by this legend item. For example, 0.05 means that 5% of the operation's measurements fall into this legend range.
+       * @example 1
+       */
+      percent?: number;
+      /** @example false */
+      nil?: boolean;
+      /** @example true */
+      globalScope?: boolean;
+      /** @example false */
+      typeSubstituted?: boolean;
+    };
     FieldOperationPNGImage: {
       /**
        * @description Base64 encoded PNG image
@@ -1003,6 +1166,28 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0
        */
       farm?: unknown;
+    };
+    LinksGet: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456
+       */
+      organization?: unknown;
+      /**
+       * @description Fields Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27
+       */
+      field?: unknown;
+      /**
+       * @description Field Operations Link.
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA
+       */
+      fieldOperation?: unknown;
+      /**
+       * @description Field Operation Measurements Link.
+       * @example https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget
+       */
+      measurementType?: unknown;
     };
     /** @description The GPS extents of a map image */
     MapExtent: {
@@ -1566,6 +1751,22 @@ export interface components {
       };
     };
     /** @description An object of Field Operation Measurements or image */
+    FieldOperationMeasurement: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3+json': {
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+        };
+      };
+    };
+    /** @description An object of Field Operation Measurements or image */
     FieldOperationMeasurementOrImage: {
       headers: {
         [name: string]: unknown;
@@ -1574,6 +1775,38 @@ export interface components {
         'application/vnd.deere.axiom.v3+json': components['schemas']['FieldOperationMeasurement'];
         'application/vnd.deere.axiom.v3.image+json': components['schemas']['FieldOperationPNGImage'];
         'application/vnd.deere.axiom.v3.location+tif+json': components['schemas']['FieldOperationGeoTIFFLocation'];
+      };
+    };
+    /** @description An object of Field Operation Measurements or image */
+    FieldOperationMeasurementOrImage_MeasurementType: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        /**
+         * Field Operation Measurement
+         * @description Field Operations
+         */
+        'application/vnd.deere.axiom.v3+json': {
+          links?: components['schemas']['LinksGet'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationMeasurementType'][];
+        };
+        'application/vnd.deere.axiom.v3.image+json': {
+          links?: components['schemas']['LinksGet'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationMeasurement_MeasurementType'][];
+        };
       };
     };
     /** @description A collection of Field Operation Measurements */
@@ -1591,6 +1824,24 @@ export interface components {
            */
           total?: number;
           values?: components['schemas']['FieldOperationMeasurement'][];
+        };
+      };
+    };
+    /** @description A collection of Field Operation Measurements */
+    FieldOperationMeasurements_MeasurementType: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        'application/vnd.deere.axiom.v3.image+json': {
+          links?: components['schemas']['LinksGet'][];
+          /**
+           * Format: int64
+           * @description Number of results in the list
+           * @example 70
+           */
+          total?: number;
+          values?: components['schemas']['FieldOperationMeasurement_MeasurementType'][];
         };
       };
     };
@@ -1731,8 +1982,12 @@ export interface components {
   parameters: {
     /** @description Unit of measure system to use for numeric values in the shapefiles. Accepted values are "METRIC", "ENGLISH", and "MIXED".If this header is not specified, the unit system will be determined by the organization preference of the owning organization.For all unit systems, the units are consistent with . */
     'Accept-UOM-System': string;
+    /** @description Desired unit system. Takes ENGLISH or METRIC. */
+    'Accept-UOM-System_MeasurementType': string;
     /** @description Desired yield representation (unit) type. Accepted values are VOLUME or MASS. */
     'Accept-Yield-Preference': string;
+    /** @description Desired yield representation (unit) type. Takes VOLUME or MASS. */
+    'Accept-Yield-Preference_MeasurementType': string;
     /** @description The type of comparison to apply to the current Field Operation Layer. Rules: * `dataAnalysis` - Build the statistics for the `baseLayer` broken down by the land area for each of the legend values for the `compareLayer`. */
     CompareType: 'dataAnalysis';
     /** @description A percentage value representing how much smoothing/contouring will be applied to the image. Higher numbers mean more contouring. */
@@ -1751,7 +2006,7 @@ export interface components {
     FieldOperationLayerLegendEmbed: 'image'[];
     /** @description Include additional subelements in response. */
     FieldOperationMachineEmbed: 'machine'[];
-    /** @description Filter results by field operation type. Takes the values "APPLICATION", "HARVEST", "SEEDING", and "TILLAGE". */
+    /** @description Filter results by field operation type. Takes the values "APPLICATION", "CARTING", "HARVEST", "SEEDING", and "TILLAGE". */
     FieldOperationType: components['schemas']['FieldOperationTypesEnum'];
     /** @description The type of operations. If the request param is not supplied, no filtering by fieldOperationType will happen */
     FieldOperationTypes: components['schemas']['FieldOperationTypesEnum'][];
@@ -1770,6 +2025,8 @@ export interface components {
     )[];
     /** @description The measurementType within field operation by machine */
     MeasurementType: components['schemas']['FieldOperationMeasurementTypesEnum'];
+    /** @description Measurement Type */
+    MeasurementType_MeasurementType: string;
     /** @description Operation ID */
     OperationId: string;
     /** @description The identifier(s) for Field Operation(s). Used when there is the potential for more than one Field Operation to be passed. The identifier(s) will have a different format for HDP vs. IMET Field Operations but, clients should treat this as a generic string and not parse it in any way. */

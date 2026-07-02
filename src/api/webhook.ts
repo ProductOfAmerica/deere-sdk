@@ -18,6 +18,34 @@ export class WebhookApi {
   constructor(private readonly client: DeereClient) {}
 
   /**
+   * Get Event Subscription Delivery
+   * @description This resource will return your event subscription delivery
+   * status
+   * @generated from GET /eventSubscriptionDelivery
+   */
+  async listEventSubscriptionDelivery(
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<components['schemas']['SubscriptionUpdateResponseGet']>> {
+    const path = `/eventSubscriptionDelivery`;
+    return this.client.get<
+      PaginatedResponse<components['schemas']['SubscriptionUpdateResponseGet']>
+    >(this.spec, path, options);
+  }
+
+  /**
+   * Update Event Subscription Delivery
+   * @description This resource will update an event subscription delivery
+   * @generated from PATCH /eventSubscriptionDelivery
+   */
+  async patchEventSubscriptionDelivery(
+    data: components['schemas']['SubscriptionUpdateResponse'],
+    options?: RequestOptions
+  ): Promise<void> {
+    const path = `/eventSubscriptionDelivery`;
+    await this.client.patch(this.spec, path, data, options);
+  }
+
+  /**
    * Get Event Subscriptions
    * @description This resource will return a paged list of event subscriptions
    * for the user. The endpoint will return all Active, Expired, and Terminated

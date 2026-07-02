@@ -1829,7 +1829,7 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown;
+          values?: unknown[];
         };
       };
     };
@@ -1840,7 +1840,7 @@ export interface components {
       };
       content: {
         'application/json': {
-          values?: unknown;
+          values?: unknown[];
         };
       };
     };

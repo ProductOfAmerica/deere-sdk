@@ -35,6 +35,36 @@ paths:
           $ref: "#/components/responses/DoesNotHaveAccessToFieldOperations"
         "404":
           $ref: "#/components/responses/InputFieldOperationValueIsInvalid"
+  /fieldOperations/{operationId}/measurementTypes:
+    get:
+      summary: "Field Operation Measurements"
+      description: "Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). Please refer . \"carting\" operations as well as construction operations \"constructionmilling\", \"constructionpaving\", \"constructioncompacting\", \"constructioncrushing\", \"constructionstabilizingrecycling\" are not supported at this time."
+      parameters:
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/MeasurementType_MeasurementType"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldOperationMeasurement"
+        "403":
+          $ref: "#/components/responses/DoesNotHaveAccessToFieldOperationMeasurements"
+        "404":
+          $ref: "#/components/responses/InputOrganizationOrFieldOperationIsInvalid"
+  /fieldOperations/{operationId}/measurementTypes/{measurementType}:
+    get:
+      summary: "Field Operation Measurement"
+      description: "Field Operations include a variety of measurements collected when the operation is performed in the field. This endpoint returns an array of measurement types available for a given field operation. Two categories of measurements are available today: Target: Target measurements refer to what the machine or implement attempted to perform in the field. Result: Result measurements refer to what the machine or implement actually accomplished in the field. For example, the SeedingRateTarget measurement describes the rate at which the equipment attempted to plant seeds, while the SeedingRateResult measurement describes the rate at which seeds were actually planted by the equipment. Target measurements may be consistent throughout the entire operation (the operator may have applied a single rate across an entire field) but result measurements will vary during the operation as they account for machine error, operator error, and environmental factors. The difference in rate and location are easily visible in the associated map image. Note: The values included in the responses will depend on their availability as well as the field operation type (Seeding, Application Tank Mix, Application Single Product, Harvest Yield Contour, or Harvest Yield Result). To view the different responses for each field operation type, view the documentation above. Please refer Note: This API has two possible accept headers. One will give a response with totals, and the other will give a response with a Base64 encoded image. For the image layer, A map image is available for each measurement offering a visual depiction of the data. Argonomic data points are grouped either by label (such as variety name) or numerical range, and this information provided in the JSON response as a map legend."
+      parameters:
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/MeasurementType_MeasurementType"
+      security:
+        - OAuth2:
+            - "ag2"
+      responses:
+        "200":
+          $ref: "#/components/responses/FieldOperationMeasurementOrImage_MeasurementType"
   /fieldOps/{operationId}:
     get:
       summary: "Asynchronous Shapefile Download"
@@ -93,6 +123,13 @@ components:
       schema:
         type: "string"
         example: "METRIC"
+    Accept-UOM-System_MeasurementType:
+      name: "Accept-UOM-System"
+      in: "header"
+      description: "Desired unit system. Takes ENGLISH or METRIC."
+      schema:
+        type: "string"
+        example: "ENGLISH"
     Accept-Yield-Preference:
       name: "Accept-Yield-Preference"
       in: "header"
@@ -101,6 +138,13 @@ components:
       schema:
         type: "string"
         example: "VOLUME"
+    Accept-Yield-Preference_MeasurementType:
+      name: "Accept-Yield-Preference"
+      in: "header"
+      description: "Desired yield representation (unit) type. Takes VOLUME or MASS."
+      schema:
+        type: "string"
+        example: "MASS"
     CompareType:
       in: "path"
       x-required-boolean: true
@@ -181,7 +225,7 @@ components:
     FieldOperationType:
       in: "query"
       name: "fieldOperationType"
-      description: "Filter results by field operation type. Takes the values \"APPLICATION\", \"HARVEST\", \"SEEDING\", and \"TILLAGE\"."
+      description: "Filter results by field operation type. Takes the values \"APPLICATION\", \"CARTING\", \"HARVEST\", \"SEEDING\", and \"TILLAGE\"."
       schema:
         $ref: "#/components/schemas/FieldOperationTypesEnum"
     FieldOperationTypes:
@@ -219,6 +263,14 @@ components:
       x-required-boolean: true
       schema:
         $ref: "#/components/schemas/FieldOperationMeasurementTypesEnum"
+    MeasurementType_MeasurementType:
+      name: "measurementType"
+      in: "path"
+      description: "Measurement Type"
+      x-required-boolean: false
+      schema:
+        example: "HarvestYield"
+        type: "string"
     OperationId:
       name: "operationId"
       in: "path"
@@ -857,6 +909,17 @@ components:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/FieldOperationMachine"
+    FieldOperationMeasurement:
+      description: "An object of Field Operation Measurements or image"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          schema:
+            properties:
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
     FieldOperationMeasurementOrImage:
       description: "An object of Field Operation Measurements or image"
       content:
@@ -869,6 +932,119 @@ components:
         application/vnd.deere.axiom.v3.location+tif+json:
           schema:
             $ref: "#/components/schemas/FieldOperationGeoTIFFLocation"
+    FieldOperationMeasurementOrImage_MeasurementType:
+      description: "An object of Field Operation Measurements or image"
+      content:
+        application/vnd.deere.axiom.v3+json:
+          note: 123
+          summary: "Field Operation Measurement"
+          description: "Field Operations"
+          schema:
+            summary: "Field Operation Measurement"
+            description: "Field Operations"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurementType"
+        application/vnd.deere.axiom.v3.image+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurement_MeasurementType"
+          examples:
+            application/vnd.deere.axiom.v3+json:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                "@type": "FieldOperationMeasurement"
+                measurementName: "TillageDepthTarget"
+                measurementCategory: "Target"
+                area:
+                  "@type": "EventMeasurement"
+                  value: 0.72
+                  unitId: "ha"
+                averageDepth:
+                  "@type": "EventMeasurement"
+                  value: 15.24
+                  unitId: "cm"
+                links:
+                  - "@type": "Link"
+                    rel: "self"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                  - "@type": "Link"
+                    rel: "mapImage"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                  - "@type": "Link"
+                    rel: "organization"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                  - "@type": "Link"
+                    rel: "field"
+                    uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                  - "@type": "Link"
+                    rel: "fieldOperation"
+                    uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+            application/vnd.deere.axiom.v3.image+json:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3.image+json"
+              value:
+                name: "fieldOperationMapImage"
+                declaredType: "com.deere.api.axiom.generated.v3.FieldOperationMapImage"
+                scope: "javax.xml.bind.JAXBElement$GlobalScope"
+                value:
+                  image: "data:image/png;base64..."
+                  legend:
+                    "@type": "MapLegend"
+                    unitId: "cm"
+                    ranges:
+                      - "@type": "MapLegendItem"
+                        label: "15"
+                        hexColor: "#4B0082"
+                        percent: 1
+                  extent:
+                    "@type": "MapExtent"
+                    minimumLatitude: 41.66625903184001
+                    maximumLatitude: 41.669542228078
+                    minimumLongitude: -93.15431597923825
+                    maximumLongitude: -93.15009035584056
+                  links:
+                    - "@type": "Link"
+                      rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                    - "@type": "Link"
+                      rel: "organization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                    - "@type": "Link"
+                      rel: "fieldOperation"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+                    - "@type": "Link"
+                      rel: "measurementType"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                nil: false
+                globalScope: true
+                typeSubstituted: false
     FieldOperationMeasurements:
       description: "A collection of Field Operation Measurements"
       content:
@@ -889,6 +1065,68 @@ components:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/FieldOperationMeasurement"
+    FieldOperationMeasurements_MeasurementType:
+      description: "A collection of Field Operation Measurements"
+      content:
+        application/vnd.deere.axiom.v3.image+json:
+          schema:
+            type: "object"
+            properties:
+              links:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/LinksGet"
+              total:
+                description: "Number of results in the list"
+                type: "integer"
+                format: "int64"
+                example: 70
+              values:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/FieldOperationMeasurement_MeasurementType"
+          examples:
+            No Header:
+              description: "200 OK Content-Type: application/vnd.deere.axiom.v3+json"
+              value:
+                name: "fieldOperationMapImage"
+                declaredType: "com.deere.api.axiom.generated.v3.FieldOperationMapImage"
+                scope: "javax.xml.bind.JAXBElement$GlobalScope"
+                value:
+                  image: "data:image/png;base64..."
+                  legend:
+                    "@type": "MapLegend"
+                    unitId: "cm"
+                    ranges:
+                      - "@type": "MapLegendItem"
+                        label: "15"
+                        hexColor: "#4B0082"
+                        percent: 1
+                  extent:
+                    "@type": "MapExtent"
+                    minimumLatitude: 41.66625903184001
+                    maximumLatitude: 41.669542228078
+                    minimumLongitude: -93.15431597923825
+                    maximumLongitude: -93.15009035584056
+                  links:
+                    - "@type": "Link"
+                      rel: "self"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                    - "@type": "Link"
+                      rel: "organization"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456"
+                    - "@type": "Link"
+                      rel: "field"
+                      uri: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+                    - "@type": "Link"
+                      rel: "fieldOperation"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+                    - "@type": "Link"
+                      rel: "measurementType"
+                      uri: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+                nil: false
+                globalScope: true
+                typeSubstituted: false
     FieldOperationWorkNote:
       description: "A field operation work note object"
       content:
@@ -1838,6 +2076,30 @@ components:
         - "TemperatureDifference"
         - "RelativeHumidity"
         - "SoilTemperature"
+    FieldOperationMeasurementType:
+      properties:
+        measurementName:
+          type: "string"
+          example: "TillageDepthTarget"
+          description: "Measurement Name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3+json"
+        measurementCategory:
+          type: "string"
+          example: "Target"
+          description: "Measurement Category."
+        area:
+          example: "See sample response below"
+          description: "The area covered for this measurement. Includes value, and unitId."
+        averageDepth:
+          example: "See sample response below"
+          description: "The average depth observed across the area covered. Includes value, and unitId."
+        value:
+          type: "integer"
+          example: 15.24
+          description: "Numeric measurement value."
+        unitId:
+          type: "string"
+          example: "cm"
+          description: "Unit of measurement."
     FieldOperationMeasurementTypesEnum:
       allOf:
         - type: "string"
@@ -1902,6 +2164,56 @@ components:
         - "TillageSpeedResult"
         - "TillageDepthTarget"
         - "TillagePressureTarget"
+    FieldOperationMeasurement_MeasurementType:
+      properties:
+        name:
+          example: "fieldOperationMapImage"
+          type: "string"
+          description: "Field Operation name. Note: This response details section correspond to header-application/vnd.deere.axiom.v3.image+json"
+        declaredType:
+          example: "See sample response below."
+          description: ""
+        scope:
+          example: "See sample response below."
+          description: ""
+        image:
+          example: "See sample response below."
+          type: "Base64 encoded PNG image"
+          description: "The PNG image file."
+        legends:
+          example: "See sample response below."
+          description: "The legend used to render the map image. Includes unitId and ranges."
+        extent:
+          example: "See sample response below."
+          description: "Two coordinates that represent the corners of the image when overlaid onto a Web Mercator projection1. Includes minimumLatitude, minimumLongitude, maximumLatitude, and maximumLongitude."
+        unitId:
+          type: "string"
+          description: "Numeric values in the legend's ranges are measurements in this unit. The unit depends on the Accept-UOM-System header for the MapImage request."
+          example: "cm"
+        ranges:
+          example: "See sample response below."
+          description: "The ranges contained in the legend. Includes either a label (for non-numeric ranges), or minimum, maximum, hexColor, and percent."
+        label:
+          type: "string"
+          example: 15
+          description: "A label associated with the legend item. May be omitted for ranges with numeric values."
+        hexColor:
+          type: "string"
+          example: "#4B0082"
+          description: "The HEX color value of the legend item."
+        percent:
+          type: "number"
+          example: 1
+          description: "The percentage of agronomic data points that are represented by this legend item. For example, 0.05 means that 5% of the operation's measurements fall into this legend range."
+        nil:
+          type: "boolean"
+          example: "false"
+        globalScope:
+          type: "boolean"
+          example: "true"
+        typeSubstituted:
+          type: "boolean"
+          example: "false"
     FieldOperationPNGImage:
       type: "object"
       properties:
@@ -2089,6 +2401,20 @@ components:
         farm:
           example: "https://sandboxapi.deere.com/platform/organizations/123456/farms/4641d448-0000-1000-4033-e1e1e11124e0"
           description: "Farms Link."
+    LinksGet:
+      properties:
+        organization:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456"
+          description: "Organizations Link."
+        field:
+          example: "https://sandboxapi.deere.com/platform/organizations/123456/fields/d61b83f4-3a12-431e-8010-596f2466dc27"
+          description: "Fields Link."
+        fieldOperation:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA"
+          description: "Field Operations Link."
+        measurementType:
+          example: "https://sandboxapi.deere.com/platform/fieldOperations/MjIzMDMxXzU4NDFkMDM2YTA2ZDkwMDk3MGYyNDJkNA/measurementTypes/TillageDepthTarget"
+          description: "Field Operation Measurements Link."
     MapExtent:
       type: "object"
       description: "The GPS extents of a map image"
@@ -2539,3 +2865,8 @@ components:
         clientCredentials:
           scopes:
             ag2: "ag2"
+x-source-documents:
+  - endPointName: "field-operation"
+    id: 27
+  - endPointName: "measurement-type"
+    id: 28

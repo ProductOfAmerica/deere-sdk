@@ -1,141 +1,363 @@
 {
-  "fetchedAt": "2026-05-23T07:02:46.948Z",
+  "fetchedAt": "2026-07-02T10:19:49.876Z",
   "baseUrl": "https://developer.deere.com/devDoc/apiDetails",
   "specs": [
     {
       "id": 27,
       "name": "field-operations-api",
-      "file": "field-operations-api.yaml"
+      "file": "field-operations-api.yaml",
+      "docs": [
+        {
+          "endPointName": "field-operation",
+          "id": 27
+        },
+        {
+          "endPointName": "measurement-type",
+          "id": 28
+        }
+      ]
     },
     {
       "id": 5,
       "name": "fields",
-      "file": "fields.yaml"
+      "file": "fields.yaml",
+      "docs": [
+        {
+          "id": 5,
+          "endPointName": "fields"
+        }
+      ]
     },
     {
       "id": 22,
       "name": "farms",
-      "file": "farms.yaml"
+      "file": "farms.yaml",
+      "docs": [
+        {
+          "id": 22,
+          "endPointName": "farms"
+        }
+      ]
     },
     {
       "id": 84,
       "name": "clients",
-      "file": "clients.yaml"
+      "file": "clients.yaml",
+      "docs": [
+        {
+          "id": 84,
+          "endPointName": "clients"
+        }
+      ]
     },
     {
       "id": 106,
       "name": "organizations",
-      "file": "organizations.yaml"
+      "file": "organizations.yaml",
+      "docs": [
+        {
+          "id": 106,
+          "endPointName": "organizations"
+        }
+      ]
     },
     {
       "id": 74,
       "name": "boundaries",
-      "file": "boundaries.yaml"
+      "file": "boundaries.yaml",
+      "docs": [
+        {
+          "id": 74,
+          "endPointName": "boundaries"
+        }
+      ]
     },
     {
       "id": 8,
       "name": "equipment",
-      "file": "equipment.yaml"
+      "file": "equipment.yaml",
+      "docs": [
+        {
+          "id": 8,
+          "endPointName": "equipment"
+        }
+      ]
     },
     {
       "id": 68,
       "name": "crop-types",
-      "file": "crop-types.yaml"
+      "file": "crop-types.yaml",
+      "docs": [
+        {
+          "id": 68,
+          "endPointName": "crop-types"
+        }
+      ]
     },
     {
       "id": 4,
       "name": "assets",
-      "file": "assets.yaml"
+      "file": "assets.yaml",
+      "docs": [
+        {
+          "id": 4,
+          "endPointName": "assets"
+        }
+      ]
     },
     {
       "id": 100,
       "name": "users",
-      "file": "users.yaml"
+      "file": "users.yaml",
+      "docs": [
+        {
+          "id": 100,
+          "endPointName": "users"
+        }
+      ]
     },
     {
       "id": 101,
       "name": "operators",
-      "file": "operators.yaml"
+      "file": "operators.yaml",
+      "docs": [
+        {
+          "id": 101,
+          "endPointName": "operators"
+        }
+      ]
     },
     {
       "id": 18,
       "name": "files",
-      "file": "files.yaml"
+      "file": "files.yaml",
+      "docs": [
+        {
+          "endPointName": "files-api",
+          "id": 18
+        },
+        {
+          "endPointName": "file-transfers",
+          "id": 19
+        }
+      ]
     },
     {
       "id": 81,
       "name": "flags",
-      "file": "flags.yaml"
+      "file": "flags.yaml",
+      "docs": [
+        {
+          "endPointName": "flags",
+          "id": 81
+        },
+        {
+          "endPointName": "flag-categories",
+          "id": 82
+        },
+        {
+          "endPointName": "flag-categories-preferences",
+          "id": 83
+        }
+      ]
     },
     {
       "id": 78,
       "name": "guidance-lines",
-      "file": "guidance-lines.yaml"
+      "file": "guidance-lines.yaml",
+      "docs": [
+        {
+          "id": 78,
+          "endPointName": "guidance-lines"
+        }
+      ]
     },
     {
       "id": 96,
       "name": "map-layers",
-      "file": "map-layers.yaml"
+      "file": "map-layers.yaml",
+      "docs": [
+        {
+          "endPointName": "map-layer-summaries",
+          "id": 96
+        },
+        {
+          "endPointName": "file-resources",
+          "id": 98
+        },
+        {
+          "endPointName": "map-layers",
+          "id": 97
+        }
+      ]
     },
     {
       "id": 9,
       "name": "products",
-      "file": "products.yaml"
+      "file": "products.yaml",
+      "docs": [
+        {
+          "endPointName": "varieties",
+          "id": 9
+        },
+        {
+          "endPointName": "active-ingredients",
+          "id": 15
+        },
+        {
+          "endPointName": "chemicals",
+          "id": 10
+        },
+        {
+          "endPointName": "companies",
+          "id": 14
+        },
+        {
+          "endPointName": "documents",
+          "id": 16
+        },
+        {
+          "endPointName": "dry-blends",
+          "id": 13
+        },
+        {
+          "endPointName": "fertilizers",
+          "id": 11
+        },
+        {
+          "endPointName": "tank-mix",
+          "id": 12
+        }
+      ]
     },
     {
       "id": 103,
       "name": "webhook",
-      "file": "webhook.yaml"
+      "file": "webhook.yaml",
+      "docs": [
+        {
+          "endPointName": "event-subscription",
+          "id": 103
+        },
+        {
+          "endPointName": "event-subscription-delivery",
+          "id": 104
+        }
+      ]
     },
     {
       "id": 75,
       "name": "connection-management",
-      "file": "connection-management.yaml"
+      "file": "connection-management.yaml",
+      "docs": [
+        {
+          "id": 75,
+          "endPointName": "connection-management"
+        }
+      ]
     },
     {
       "id": 23,
       "name": "machine-locations",
-      "file": "machine-locations.yaml"
+      "file": "machine-locations.yaml",
+      "docs": [
+        {
+          "endPointName": "location-history",
+          "id": 23
+        },
+        {
+          "endPointName": "breadcrumbs",
+          "id": 24
+        }
+      ]
     },
     {
       "id": 29,
       "name": "machine-alerts",
-      "file": "machine-alerts.yaml"
+      "file": "machine-alerts.yaml",
+      "docs": [
+        {
+          "id": 29,
+          "endPointName": "machine-alerts"
+        }
+      ]
     },
     {
       "id": 30,
       "name": "machine-device-state-reports",
-      "file": "machine-device-state-reports.yaml"
+      "file": "machine-device-state-reports.yaml",
+      "docs": [
+        {
+          "id": 30,
+          "endPointName": "machine-device-state-reports"
+        }
+      ]
     },
     {
       "id": 31,
       "name": "machine-engine-hours",
-      "file": "machine-engine-hours.yaml"
+      "file": "machine-engine-hours.yaml",
+      "docs": [
+        {
+          "id": 31,
+          "endPointName": "machine-engine-hours"
+        }
+      ]
     },
     {
       "id": 32,
       "name": "machine-hours-of-operation",
-      "file": "machine-hours-of-operation.yaml"
+      "file": "machine-hours-of-operation.yaml",
+      "docs": [
+        {
+          "id": 32,
+          "endPointName": "machine-hours-of-operation"
+        }
+      ]
     },
     {
       "id": 66,
       "name": "harvest-id",
-      "file": "harvest-id.yaml"
+      "file": "harvest-id.yaml",
+      "docs": [
+        {
+          "id": 66,
+          "endPointName": "harvest-id"
+        }
+      ]
     },
     {
       "id": 72,
       "name": "aemp",
-      "file": "aemp.yaml"
+      "file": "aemp.yaml",
+      "docs": [
+        {
+          "id": 72,
+          "endPointName": "aemp"
+        }
+      ]
     },
     {
       "id": 73,
       "name": "equipment-measurement",
-      "file": "equipment-measurement.yaml"
+      "file": "equipment-measurement.yaml",
+      "docs": [
+        {
+          "id": 73,
+          "endPointName": "equipment-measurement"
+        }
+      ]
     },
     {
       "id": 85,
       "name": "partnerships",
-      "file": "partnerships.yaml"
+      "file": "partnerships.yaml",
+      "docs": [
+        {
+          "id": 85,
+          "endPointName": "partnerships"
+        }
+      ]
     }
   ],
   "notFound": [

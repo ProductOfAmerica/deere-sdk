@@ -37,6 +37,81 @@ export class FieldOperationsApi {
   }
 
   /**
+   * Field Operation Measurements
+   * @description Field Operations include a variety of measurements collected
+   * when the operation is performed in the field. This endpoint returns an
+   * array of measurement types available for a given field operation. Two
+   * categories of measurements are available today: Target: Target measurements
+   * refer to what the machine or implement attempted to perform in the field.
+   * Result: Result measurements refer to what the machine or implement actually
+   * accomplished in the field. For example, the SeedingRateTarget measurement
+   * describes the rate at which the equipment attempted to plant seeds, while
+   * the SeedingRateResult measurement describes the rate at which seeds were
+   * actually planted by the equipment. Target measurements may be consistent
+   * throughout the entire operation (the operator may have applied a single
+   * rate across an entire field) but result measurements will vary during the
+   * operation as they account for machine error, operator error, and
+   * environmental factors. The difference in rate and location are easily
+   * visible in the associated map image. Note: The values included in the
+   * responses will depend on their availability as well as the field operation
+   * type (Seeding, Application Tank Mix, Application Single Product, Harvest
+   * Yield Contour, or Harvest Yield Result). Please refer . "carting"
+   * operations as well as construction operations "constructionmilling",
+   * "constructionpaving", "constructioncompacting", "constructioncrushing",
+   * "constructionstabilizingrecycling" are not supported at this time.
+   * @generated from GET /fieldOperations/{operationId}/measurementTypes
+   */
+  async listMeasurementTypes(
+    operationId: string,
+    options?: RequestOptions
+  ): Promise<PaginatedResponse<unknown>> {
+    const path = `/fieldOperations/${operationId}/measurementTypes`;
+    return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
+  }
+
+  /**
+   * Field Operation Measurement
+   * @description Field Operations include a variety of measurements collected
+   * when the operation is performed in the field. This endpoint returns an
+   * array of measurement types available for a given field operation. Two
+   * categories of measurements are available today: Target: Target measurements
+   * refer to what the machine or implement attempted to perform in the field.
+   * Result: Result measurements refer to what the machine or implement actually
+   * accomplished in the field. For example, the SeedingRateTarget measurement
+   * describes the rate at which the equipment attempted to plant seeds, while
+   * the SeedingRateResult measurement describes the rate at which seeds were
+   * actually planted by the equipment. Target measurements may be consistent
+   * throughout the entire operation (the operator may have applied a single
+   * rate across an entire field) but result measurements will vary during the
+   * operation as they account for machine error, operator error, and
+   * environmental factors. The difference in rate and location are easily
+   * visible in the associated map image. Note: The values included in the
+   * responses will depend on their availability as well as the field operation
+   * type (Seeding, Application Tank Mix, Application Single Product, Harvest
+   * Yield Contour, or Harvest Yield Result). To view the different responses
+   * for each field operation type, view the documentation above. Please refer
+   * Note: This API has two possible accept headers. One will give a response
+   * with totals, and the other will give a response with a Base64 encoded
+   * image. For the image layer, A map image is available for each measurement
+   * offering a visual depiction of the data. Argonomic data points are grouped
+   * either by label (such as variety name) or numerical range, and this
+   * information provided in the JSON response as a map legend.
+   * @generated from GET /fieldOperations/{operationId}/measurementTypes/{measurementType}
+   */
+  async getMeasurementTypes(
+    operationId: string,
+    measurementType: string,
+    options?: RequestOptions
+  ): Promise<components['schemas']['FieldOperationMeasurementType']> {
+    const path = `/fieldOperations/${operationId}/measurementTypes/${measurementType}`;
+    return this.client.get<components['schemas']['FieldOperationMeasurementType']>(
+      this.spec,
+      path,
+      options
+    );
+  }
+
+  /**
    * Asynchronous Shapefile Download
    * @description An ESRI Shapefile is available for each Field Operation.
    * Please see the for details on the shapefile format and how to consume it.

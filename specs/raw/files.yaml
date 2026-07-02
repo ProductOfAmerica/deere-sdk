@@ -13,6 +13,144 @@ servers:
   - url: "https://apidev.tal.deere.com/platform"
     description: "Development API endpoint"
 paths:
+  /fileTransfers:
+    get:
+      summary: "List File Transfer Requests"
+      description: "This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
+      parameters:
+        - $ref: "#/components/parameters/Source2"
+        - $ref: "#/components/parameters/X-deere-signature_FileTransfers"
+      security:
+        - OAuth2:
+            - "files"
+      responses:
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileValue"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/fileTransfers"
+                    total: 2
+                    values:
+                      - file:
+                          name: "transferedFile1.zip"
+                          type: "SETUP"
+                          createdTime: "2014-01-13T12:15:51.159Z"
+                          modifiedTime: "2014-01-13T12:16:09.443Z"
+                          nativeSize: 927025
+                          source: "FitzwilliamDarcy"
+                          status: "READY"
+                          archived: false
+                          links:
+                            - rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/7456"
+                          id: "51234"
+                        source: "HOST"
+                        transferInitiationTime: "2014-01-13T12:16:15.924Z"
+                        lastUpdatedTime: "2014-01-13T12:16:15.924Z"
+                        status: "WDT_IN_PROCESS"
+                        links:
+                          - rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/612"
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/1523"
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/6234"
+                        id: "4799048"
+                      - file:
+                          name: "transferedFile2.zip"
+                          type: "SETUP"
+                          createdTime: "2015-01-17T15:15:55.732Z"
+                          modifiedTime: "2015-01-17T15:15:56.242Z"
+                          nativeSize: 6813
+                          source: "LydiaBennett"
+                          status: "READY"
+                          archived: false
+                          links:
+                            - rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/12345"
+                          id: "1219063"
+                        source: "HOST"
+                        transferInitiationTime: "2013-01-17T15:18:41.512Z"
+                        lastUpdatedTime: "2013-05-02T20:06:43.732Z"
+                        status: "WDT_OPERATOR_REJECTED"
+                        links:
+                          - rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/615"
+                          - rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/243"
+                          - rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/7354"
+                        id: "1219096"
+  /fileTransfers/{id}:
+    get:
+      summary: "View a File Transfer Request"
+      description: "This resource allows the client to check the status of a file transfer request that has already been submitted. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
+      parameters:
+        - $ref: "#/components/parameters/Source"
+        - $ref: "#/components/parameters/Id"
+      security:
+        - OAuth2:
+            - "files"
+      responses:
+        "200":
+          description: "File Transfer by ID."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersValue"
+              examples:
+                No Header:
+                  description: "200 OK<br/>Content-Type: application/vnd.deere.axiom.v3+json"
+                  value:
+                    file:
+                      name: "transferredFile1.zip"
+                      type: "SETUP"
+                      createdTime: "2015-06-09T09:42:55.817Z"
+                      modifiedTime: "2015-06-09T09:43:01.693Z"
+                      nativeSize: 9440
+                      source: "FitzwilliamDarcy"
+                      status: "READY"
+                      archived: false
+                      links:
+                        - rel: "self"
+                          uri: "https://sandboxapi.deere.com/platform/files/15234"
+                      id: "15234"
+                    source: "HOST"
+                    transferInitiationTime: "2015-06-09T09:43:01.381Z"
+                    lastUpdatedTime: "2015-06-09T09:43:01.384Z"
+                    status: "WDT_IN_PROCESS"
+                    links:
+                      - rel: "file"
+                        uri: "https://sandboxapi.deere.com/platform/files/15234"
+                      - rel: "machine"
+                        uri: "https://sandboxapi.deere.com/platform/machines/8237"
+                      - rel: "owningOrganization"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234"
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/fileTransfers/61243"
+                    id: "571637605"
   /files:
     get:
       summary: "List Files"
@@ -119,6 +257,139 @@ paths:
           application/vnd.deere.axiom.v3+json:
             schema:
               $ref: "#/components/schemas/PutFiles"
+  /organizations/{orgId}/fileTransfers:
+    post:
+      summary: "Submit a File Transfer Request"
+      description: "This resource allows you to select a file and machine, and use the client software to submit a file transfer request. After that, MyJohnDeere API v3's infrastructure transfers the selected file to the selected machine, where it becomes available for the machine operator to use. The response links to the following resources: <ul> <li><strong>file</strong>: The file for which the transfer is being requested.</li> <li><strong>machine</strong>: The machine to which the transfer is being requested.</li> </ul>"
+      note: "<b>Note there is a 800MB file size limit. Files larger than 800MB cannot be transferred using this API.</b>"
+      parameters:
+        - $ref: "#/components/parameters/OrgId2"
+      security:
+        - OAuth2:
+            - "files"
+      requestBody:
+        content:
+          application/vnd.deere.axiom.v3+json:
+            schema:
+              $ref: "#/components/schemas/FileTransfersPost"
+            examples:
+              Example with file and equipment link:
+                summary: "Example with file and equipment link"
+                value:
+                  links:
+                    - rel: "file"
+                      uri: "https://sandboxapi.deere.com/platform/files/{fileId}"
+                    - rel: "equipment"
+                      uri: "https://equipmentapi.deere.com/isg/equipment?principalIds={machinePrincipalId}"
+      responses:
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                $ref: "#/components/schemas/PostFileTransfersResponse"
+    get:
+      summary: "Get File Transfer List by Organization"
+      description: "This resource will retrieve list of all File Transfer by an Organization. The response will contain links to the following resources: <ul> <li><strong>file</strong>: View the file for which the transfer was requested.</li> <li><strong>machine</strong>: View the machine to which the transfer was requested.</li> </ul>"
+      note: "Please Note: This API does not support eTags."
+      parameters:
+        - $ref: "#/components/parameters/OrgId"
+        - $ref: "#/components/parameters/Source"
+      security:
+        - OAuth2:
+            - "files"
+      responses:
+        "200":
+          description: "File Transfer."
+          content:
+            application/vnd.deere.axiom.v3+json:
+              schema:
+                type: "object"
+                properties:
+                  links:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersLinkGet"
+                  values:
+                    items:
+                      $ref: "#/components/schemas/FileTransfersValue"
+              examples:
+                No Header:
+                  description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
+                  value:
+                    links:
+                      - rel: "self"
+                        uri: "https://sandboxapi.deere.com/platform/organizations/1234/fileTransfers?source=ORGANIZATION"
+                    total: 2
+                    values:
+                      - "@type": "FileTransfer"
+                        file:
+                          "@type": "File"
+                          name: "1H0S670SAE0765947_032020180053.zip"
+                          type: "SETUP"
+                          createdTime: "2018-03-20T05:53:47.476Z"
+                          modifiedTime: "2018-03-20T21:10:41.325Z"
+                          nativeSize: 80480
+                          source: "1H0S670SAE0765947"
+                          status: "READY"
+                          archived: false
+                          id: "73391610"
+                          links:
+                            - "@type": "Link"
+                              rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                        source: "HOST"
+                        transferInitiationTime: "2018-03-20T18:52:22.155Z"
+                        lastUpdatedTime: "2018-03-20T21:11:35.519Z"
+                        status: "WDT_AVAILABLE_TO_DISPLAY"
+                        id: "73416642"
+                        links:
+                          - "@type": "Link"
+                            rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                          - "@type": "Link"
+                            rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/8257"
+                          - "@type": "Link"
+                            rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/2551"
+                          - "@type": "Link"
+                            rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/73416642"
+                      - "@type": "FileTransfer"
+                        file:
+                          "@type": "File"
+                          name: "1H0S670SAE0765947_032020180053.zip"
+                          type: "SETUP"
+                          createdTime: "2018-03-20T05:53:47.476Z"
+                          modifiedTime: "2018-03-20T21:10:41.325Z"
+                          nativeSize: 80480
+                          source: "1H0S670SAE0765947"
+                          status: "READY"
+                          archived: false
+                          id: "73391610"
+                          links:
+                            - "@type": "Link"
+                              rel: "self"
+                              uri: "https://sandboxapi.deere.com/platform/files/73391610"
+                        source: "HOST"
+                        transferInitiationTime: "2018-03-20T18:52:22.071Z"
+                        lastUpdatedTime: "2018-03-20T21:11:34.379Z"
+                        status: "WDT_AVAILABLE_TO_DISPLAY"
+                        id: "73416640"
+                        links:
+                          - "@type": "Link"
+                            rel: "file"
+                            uri: "https://sandboxapi.deere.com/platform/files/73391611"
+                          - "@type": "Link"
+                            rel: "machine"
+                            uri: "https://sandboxapi.deere.com/platform/machines/8257"
+                          - "@type": "Link"
+                            rel: "owningOrganization"
+                            uri: "https://sandboxapi.deere.com/platform/organizations/2551"
+                          - "@type": "Link"
+                            rel: "self"
+                            uri: "https://sandboxapi.deere.com/platform/fileTransfers/73416640"
   /organizations/{orgId}/files:
     get:
       summary: "List an Org's Files"
@@ -286,6 +557,15 @@ components:
         default: "ALL"
         format: "int64"
         example: "MACHINE"
+    Id:
+      name: "id"
+      in: "path"
+      description: "File Transfer ID"
+      required: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 1628996
     Links:
       name: "links"
       description: "Currently only supports a copyFrom rel, which can be passed to copy another file into the destination organization."
@@ -310,6 +590,23 @@ components:
         type: "integer"
         default: "N/A"
         example: -1
+    OrgId:
+      name: "orgId"
+      in: "path"
+      description: "Organization"
+      required: true
+      schema:
+        type: "string"
+        default: "N/A"
+        example: 1234
+    OrgId2:
+      name: "orgId"
+      in: "path"
+      description: "Organization"
+      required: true
+      schema:
+        type: "string"
+        example: 1234
     OrganizationID:
       in: "path"
       name: "orgId"
@@ -345,6 +642,21 @@ components:
         type: "integer"
         default: "N/A"
         example: -1
+    Source:
+      name: "source"
+      in: "query"
+      description: "The source of the file transfer. Takes the values ORGANIZATION or MACHINE."
+      schema:
+        type: "string"
+        default: "N/A"
+        example: "ORGANIZATION"
+    Source2:
+      name: "source"
+      in: "query"
+      description: "The source of the file transfer. Takes the values ORGANIZATION or MACHINE."
+      schema:
+        type: "string"
+        example: "ORGANIZATION"
     StartDate:
       name: "startDate"
       in: "query"
@@ -386,6 +698,13 @@ components:
       schema:
         type: "string"
         example: "520122365ebb4870a344784570d202c7"
+    X-deere-signature_FileTransfers:
+      name: "x-deere-signature"
+      in: "header"
+      description: "x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time."
+      schema:
+        type: "string"
+        example: "877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
   responses:
     FileIdGet:
       description: "Successful operation"
@@ -506,6 +825,86 @@ components:
           type: "boolean"
           description: "If set to true, then processing of the file will be delayed until this is toggled to false."
           example: false
+    FileLinkGet:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/612"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/1523"
+          description: "Machines Link."
+    FileTransfersLink:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/fileID"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/machineID"
+          description: "Machines Link."
+    FileTransfersLinkAPIInteractions:
+      properties:
+        Status:
+          description: "Status."
+        location:
+          description: "The url of the created resources"
+          schema:
+            type: "string"
+            example: "https://sandboxapi.deere.com/platform/FileTransfer/7482"
+    FileTransfersLinkGet:
+      properties:
+        file:
+          example: "https://sandboxapi.deere.com/platform/files/15234"
+          description: "Files Link."
+        machine:
+          example: "https://sandboxapi.deere.com/platform/machines/8237"
+          description: "Machines Link."
+        owningOrganization:
+          example: "https://sandboxapi.deere.com/platform/organizations/1234"
+          description: "Organization Link."
+    FileTransfersPost:
+      type: "object"
+      properties:
+        links:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              rel:
+                type: "string"
+                enum:
+                  - "file"
+                  - "equipment"
+                required: true
+              uri:
+                type: "string"
+                format: "uri"
+                required: true
+    FileTransfersValue:
+      properties:
+        file:
+          description: "Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived."
+          example: "See sample response below."
+          type: "---"
+        id:
+          type: "string"
+          description: "File Transfer ID"
+          example: 1628996
+        source:
+          type: "string"
+          description: "File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST."
+          example: "HOST"
+        transferInitiationTime:
+          type: "datetime"
+          description: "Timestamp of when the file transfer was initiated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2015-06-09T09:43:01.381Z"
+        lastUpdatedTime:
+          type: "datetime"
+          description: "Timestamp of when the file transfer was last updated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2015-06-09T09:43:01.384Z"
+        status<sup><a href="#file-transfer-additional">1</a></sup>:
+          type: "string"
+          description: "Status of the file transfer."
+          example: "WDT_AVAILABLE_TO_DISPLAY"
     FileType:
       type: "string"
       enum:
@@ -524,6 +923,38 @@ components:
         - "BOUNDARY"
         - "EXCEL"
       example: "SETUP"
+    FileValue:
+      properties:
+        x-deere-signature:
+          type: "string"
+          example: "877280ba-c8fe-49f0-a0ea-b6855cebd36f.1639958400000"
+          description: "A new x-deere-signature response header will be included if the response has changed since last api call."
+        file:
+          description: "Information on the transferred file, including name, type, created type, modified time, native size, source, status, and whether it was archived."
+          example: "See sample response below."
+          type: "object"
+        id:
+          type: "string"
+          default: "N/A"
+          description: "File Transfer ID"
+          example: 51234
+        source:
+          type: "string"
+          default: "N/A"
+          description: "File source. If the request parameter value for source is MACHINE, this response value will also be MACHINE. If the request parameter value for source is ORGANIZATION, this response value will be HOST."
+          example: "HOST"
+        transferInitiationTime:
+          type: "string"
+          description: "Timestamp of when the file transfer was initiated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2018-03-20T18:52:22.155Z"
+        lastUpdatedTime:
+          type: "string"
+          description: "Timestamp of when the file transfer was last updated.All timestamps are formatted according to the <a href=\"https://en.wikipedia.org/wiki/ISO_8601\" target=\"_blank\">ISO 8601</a> standard."
+          example: "2018-03-20T21:11:35.519Z"
+        status<sup><a href="#file-transfer-additional">1</a></sup>:
+          type: "string"
+          description: "Status of the file transfer."
+          example: "WDT_IN_PROCESS"
     FilesGet:
       type: "object"
       properties:
@@ -604,6 +1035,13 @@ components:
         partnerships:
           example: "https://sandboxapi.deere.com/platform/files/466578633/partnerships"
           description: "Partnership Link."
+    PostFileTransfersResponse:
+      description: "File Transfers Post Api Response."
+      properties:
+        Location:
+          description: "The URL of the created resource."
+          type: "string"
+          example: "https://sandboxapi.deere.com/platform/fileTransfers/7482"
     PostFiles:
       properties:
         "201":
@@ -722,3 +1160,14 @@ components:
           scopes:
             files: "files"
             ag3: "ag3"
+    OAuth2_FileTransfers:
+      type: "oauth2"
+      flows:
+        clientCredentials:
+          scopes:
+            files: "files"
+x-source-documents:
+  - endPointName: "files-api"
+    id: 18
+  - endPointName: "file-transfers"
+    id: 19

@@ -4,6 +4,104 @@
  */
 
 export interface paths {
+  '/fileResources/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View/Download a File Resource
+     * @description This resource allows the client to view or download a File Resource. To view a File Resource's metadata, set the application/vnd.deere.axiom.v3+json Accept Header. To download the File Resource itself, choose a zip or octet-stream Accept Header.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description File Resource ID */
+          id: components['parameters']['fileId_FileResources'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['schemas']['GetFileResponseDetails'];
+      };
+    };
+    /**
+     * Upload a File Resource
+     * @description Uploads a binary File Resource for a given Map Layer. The client must first create a File Resource ID by calling POST /mapLayers/{id}/fileResources API before uploading. Check the status of the upload by requesting the File Resource's targetResource Link.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description File Resource ID */
+          id: components['parameters']['fileId_FileResources'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+      };
+    };
+    post?: never;
+    /**
+     * Delete a File Resource
+     * @description Deletes a file resource.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description File Resource ID */
+          id: components['parameters']['fileId_FileResources'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/mapLayerSummaries/{id}': {
     parameters: {
       query?: never;
@@ -86,6 +184,257 @@ export interface paths {
         429: components['responses']['429'];
       };
     };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mapLayerSummaries/{id}/mapLayers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List Map Layers
+     * @description This resource lists all Map Layers for a specific Map Layer Summary. Note: This API does not support eTags.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Set includePartialLayers to true to include Map Layers without File Resources. */
+          includePartialLayers?: components['parameters']['includePartialLayers'];
+        };
+        header?: never;
+        path: {
+          /** @description Map Layer Summary ID */
+          id: components['parameters']['id_MapLayers'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['schemas']['MapLayerCollection_MapLayers'];
+      };
+    };
+    put?: never;
+    /**
+     * Create a Map Layer
+     * @description Creates a new Map Layer resource.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer Summary ID */
+          id: components['parameters']['id_MapLayers'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostResponse_MapLayers'];
+          'Create Map Layer': unknown;
+        };
+      };
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @description Number of results in the list
+               * @example 761
+               */
+              total?: number;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mapLayers/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a Map Layer
+     * @description Returns a specific Map Layer resource.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer ID */
+          id: components['parameters']['getId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+              links?: unknown;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    /**
+     * Delete a Map Layer
+     * @description Deletes a Map Layer and its underlying File Resource.
+     */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer ID */
+          id: components['parameters']['getMapId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Deleted */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              /**
+               * Format: int32
+               * @example 1
+               */
+              total?: number;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mapLayers/{id}/fileResources': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a Map Layer File Resource
+     * @description This resource will return the File Resource associated to the specified Map Layer. Note: This API does not support eTags.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer ID */
+          id: components['parameters']['id_FileResources'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        200: components['schemas']['GetFileResponse'];
+      };
+    };
+    put?: never;
+    /**
+     * Create a Map Layer File Resource
+     * @description This resource will create a new File Resource for a Map Layer.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer ID */
+          id: components['parameters']['id_FileResources'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['RequestDetails'];
+          'Create a new File Resource': unknown;
+        };
+      };
+      responses: {
+        200: components['schemas']['PostFileResponse'];
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mapLayers/{mapLayerId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Extract Map Layer Image
+     * @description Returns the image file associated with the Map Layer resource.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description Map Layer ID */
+          id: components['parameters']['getMapId'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Created */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'image/png OR application/octet-stream': unknown;
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -228,6 +577,60 @@ export interface components {
        */
       createMapLayer?: unknown;
     };
+    AvailableLinks_FileResources: {
+      /**
+       * @description This File Resource Link.
+       * @example https://sandboxapi.deere.com/platform/fileResources/FILE_RESOURCE_ID
+       */
+      self?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID
+       */
+      targetResource?: unknown;
+    };
+    AvailableLinks_MapLayers: {
+      /**
+       * @description This Map Layer List Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
+       */
+      'self (map list)'?: unknown;
+      /**
+       * @description This Map Layer Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID
+       */
+      'self (map layer)'?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Map Layer Summary Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
+       */
+      mapLayerSummary?: unknown;
+      /**
+       * @description Map Layer's File Resources Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/fileResources
+       */
+      fileResources?: unknown;
+      /**
+       * @description Map Layer's PNG Image Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/image
+       */
+      image?: unknown;
+      /**
+       * @description Map Layer's File Resources Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/fileResources
+       */
+      createFileResource?: unknown;
+    };
     CollectionBase: {
       links?: {
         /**
@@ -292,6 +695,48 @@ export interface components {
       /** @description The primary resource listing. */
       values?: unknown[];
     };
+    ContributedMapLayer_FileResources: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below Readonly: Yes, except owningOrganization
+       */
+      links?: unknown[];
+      /**
+       * @description File Resource ID
+       * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd Readonly: Yes
+       */
+      id?: string;
+      /**
+       * @description An array of key value pair items about the File Resource.
+       * @example See sample response below Readonly: No
+       */
+      metadata?: unknown[];
+      /**
+       * @description Valid values are image/png, image/tif, image/tiff and application/zip
+       * @example image/png Readonly: No
+       */
+      mimeType?: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2019-03-02T16:14:23.421Z Readonly: No
+       */
+      timestamp?: string;
+    };
+    ContributedMapLayer_MapLayers: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below
+       */
+      links?: unknown[];
+      /**
+       * @description Count of Map Layer Summaries in response.
+       * @example 3
+       */
+      total?: number;
+      /** @description The primary resource listing. */
+      values?: Record<string, never>;
+    };
     FileResource: {
       /** @example FileResource */
       '@type'?: string;
@@ -315,6 +760,51 @@ export interface components {
       /** @description Links for self, targetResource, and owningOrganization */
       links: components['schemas']['Link'][];
     };
+    FileResourceAvailableLinks: {
+      /**
+       * @description Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/fileResources/FILE_RESOURCE_ID
+       */
+      self?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Map Layers Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID
+       */
+      targetResource?: unknown;
+    };
+    FileResourceGetResponse: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below Readonly: Yes, except owningOrganization
+       */
+      links?: unknown[];
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below Readonly: Yes
+       */
+      id?: string;
+      /**
+       * @description An array of key value pair items about the File Resource.
+       * @example See sample response below Readonly: No
+       */
+      metadata?: unknown[];
+      /**
+       * @description Valid values are image/png, image/tif, image/tiff and application/zip
+       * @example image/png Readonly: No
+       */
+      mimeType?: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2019-03-02T16:14:23.421Z Readonly: No
+       */
+      timestamp?: string;
+    };
     GenericErrors: {
       /** @example Errors */
       '@type'?: string;
@@ -331,6 +821,40 @@ export interface components {
       }[];
       otherAttributes?: Record<string, never>;
     };
+    GetAvailableLinks: {
+      /**
+       * @description This Map Layer Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID
+       */
+      self?: unknown;
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+      /**
+       * @description Map Layer Summary Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID
+       */
+      mapLayerSummary?: unknown;
+      /**
+       * @description Map Layer's File Resources Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/fileResources
+       */
+      fileResources?: unknown;
+      /**
+       * @description Map Layer's PNG Image Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/image
+       */
+      image?: unknown;
+      /**
+       * @description Map Layer's File Resources Link.
+       * @example https://sandboxapi.deere.com/platform/mapLayers/MAP_LAYER_ID/fileResources
+       */
+      createFileResource?: unknown;
+    };
+    GetFileResponse: unknown;
+    GetFileResponseDetails: unknown;
     GetMapLayerSummaryAvailableLinks: {
       /**
        * @description This Map Layer Summary Link.
@@ -357,6 +881,54 @@ export interface components {
        * @example https://sandboxapi.deere.com/platform/mapLayerSummaries/MAP_LAYER_SUMMARY_ID/mapLayers
        */
       createMapLayer?: unknown;
+    };
+    GetResponseDetails: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Map Layer Available Links" below
+       */
+      links?: unknown[];
+      /**
+       * Format: uuid
+       * @description Map Layer ID
+       * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd
+       */
+      id?: string;
+      /**
+       * @description Top level name of the Map Layer
+       * @example NDVI Layer
+       */
+      title?: string;
+      /**
+       * @description Describes Map Layer. Supports limited .
+       * @example NDVI Layer for mid-season plant health based on near infrared
+       */
+      text?: string;
+      /**
+       * @description An array of key value pair items about the Map Layer. Supports limited .
+       * @example See sample request below
+       */
+      metadata?: unknown[];
+      /**
+       * @description Maximum and minimum extent of the map.
+       * @example null
+       */
+      extent?: Record<string, never>;
+      /**
+       * @description Determines the display alphabetical sort order between this Map Layer and its peers (all the Map Layers tied to the same Map Layer Summary). Defaults to the value of title.
+       * @example null
+       */
+      sortName?: string;
+      /**
+       * @description Keys the Map Layer's image data by color. Should represent all possible values and colors found in the Map Layer's File Resource image.
+       * @example null
+       */
+      legends?: Record<string, never>;
+      /**
+       * @description Map Layer image processing progress.
+       * @example VALID
+       */
+      status?: Record<string, never>;
     };
     /** @description Provides a reference to an associated object or list. */
     Link: {
@@ -402,6 +974,7 @@ export interface components {
     MapLayerCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['ContributedMapLayer'][];
     };
+    MapLayerCollection_MapLayers: unknown;
     MapLayerSummaryCollection: unknown;
     MapLegend: {
       /** @example MapLegend */
@@ -462,6 +1035,13 @@ export interface components {
        */
       contributionDefinition?: unknown;
     };
+    PostAvailableLinks_FileResources: {
+      /**
+       * @description Organizations Link.
+       * @example https://sandboxapi.deere.com/platform/organizations/ORG_ID
+       */
+      owningOrganization?: unknown;
+    };
     PostContributedMapLayerSummary: {
       /**
        * @description Links to other objects in the Deere ecosystem.
@@ -507,6 +1087,7 @@ export interface components {
        */
       lastModifiedDate?: string;
     };
+    PostFileResponse: unknown;
     PostRequest: {
       /**
        * @description Links to other objects in the Deere ecosystem.
@@ -572,6 +1153,77 @@ export interface components {
        * @example 2016-01-02T16:14:23.421Z Readonly: No
        */
       dateCreated?: string;
+    };
+    PostResponse_MapLayers: {
+      /**
+       * Format: uuid
+       * @description Map Layer ID
+       * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd Readonly: Yes
+       */
+      id?: string;
+      /**
+       * @description Top level name of the Map Layer
+       * @example NDVI Layer Readonly: No
+       */
+      title?: string;
+      /**
+       * @description Describes Map Layer. Supports limited .
+       * @example NDVI Layer for mid-season plant health based on near infrared Readonly: No
+       */
+      text?: string;
+      /**
+       * @description An array of key value pair items about the Map Layer. Supports limited
+       * @example See sample request below Readonly: No
+       */
+      metadata?: unknown[];
+      /**
+       * @description Maximum and minimum extent of the map.
+       * @example See sample request below Readonly: No
+       */
+      extent?: Record<string, never>;
+      /**
+       * @description Determines the display alphabetical sort order between this Map Layer and its peers (all the Map Layers tied to the same Map Layer Summary). Defaults to the value of title.
+       * @example 02 Readonly: No
+       */
+      sortName?: string;
+      /**
+       * @description Keys the Map Layer's image data by color. Should represent all possible values and colors found in the Map Layer's File Resource image.
+       * @example --- Readonly: No
+       */
+      legends?: Record<string, never>;
+      /**
+       * @description Map Layer image processing progress.
+       * @example VALID Readonly: Yes
+       */
+      status?: string;
+    };
+    RequestDetails: {
+      /**
+       * @description Links to other objects in the Deere ecosystem.
+       * @example See "Available Links" below Readonly: Yes, except owningOrganization
+       */
+      links?: unknown[];
+      /**
+       * @description File Resource ID
+       * @example 83ks9gh3-29fj-9302-837j-92jlsk92jd095kd Readonly: Yes
+       */
+      id?: string;
+      /**
+       * @description An array of key value pair items about the File Resource.
+       * @example See sample response below Readonly: No
+       */
+      metadata?: unknown[];
+      /**
+       * @description Valid values are image/png, image/tif, image/tiff and application/zip
+       * @example image/png Readonly: No
+       */
+      mimeType?: string;
+      /**
+       * Format: date-time
+       * @description ISO 8601 Date and time in UTC this resource was created.
+       * @example 2019-03-02T16:14:23.421Z Readonly: No
+       */
+      timestamp?: string;
     };
   };
   responses: {
@@ -647,8 +1299,20 @@ export interface components {
     fieldId: string;
     /** @description Field ID */
     fileId: string;
+    /** @description File Resource ID */
+    fileId_FileResources: string;
+    /** @description Map Layer ID */
+    getId: string;
+    /** @description Map Layer ID */
+    getMapId: string;
     /** @description Map Layer Summary ID */
     id: string;
+    /** @description Map Layer ID */
+    id_FileResources: string;
+    /** @description Map Layer Summary ID */
+    id_MapLayers: string;
+    /** @description Set includePartialLayers to true to include Map Layers without File Resources. */
+    includePartialLayers: boolean;
     /** @description Set includePartialSummaries to true to include Map Layer Summaries without File Resources. */
     includePartialSummaries: boolean;
   };

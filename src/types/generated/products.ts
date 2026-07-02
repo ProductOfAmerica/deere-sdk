@@ -4,6 +4,1810 @@
  */
 
 export interface paths {
+  '/activeIngredients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List of available active ingredients
+     * @description Returns a list of all available active ingredients.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filters the results by the provided entity type. Example: CHEMICAL */
+          entityType?: components['parameters']['EntityTypeQueryParam'];
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of available active ingredients. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ActiveIngredientsCollection'];
+          };
+        };
+        /** @description The user does not have access to the list of active ingredients. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/chemicals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reference list of all known chemicals
+     * @description List of all chemicals from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description performs a fuzzy search on product name, manufacturer, and chemical type. The search string must be at least 3 characters long. */
+          searchString?: string;
+          /** @description Specifies the registration number of the chemical based on the country or region/state of use. */
+          chemicalType?:
+            | 'ADDITIVE'
+            | 'ADJUVANT'
+            | 'DEFOLIANT'
+            | 'FUNGICIDE'
+            | 'GROWTH_REGULATOR'
+            | 'HERBICIDE'
+            | 'INSECTICIDE'
+            | 'NITROGEN_STABILIZER';
+          /** @description Specifies the name of the chemical in the global reference list. */
+          productName?: string;
+          /** @description Specifies the product manufacturer name of the chemical based on the region being used. */
+          brandName?: string;
+          /** @description Specifies the registration number of the chemical based on the region of use. */
+          registration?: string;
+          /** @description Specifies the source system product id of the chemical based on the country of use. */
+          sourceSystemProductId?: string;
+          /** @description Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          countryCode?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of products matching the specified search criteria. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceChemicalCollection'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description No chemical found with this country code. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/chemicals/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a single reference chemical
+     * @description Single chemical from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A single chemical matching the specified erid. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceChemical'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description No chemical found matching this erid. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/chemicals/{erid}/associateToOrg/{organizationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Adds a single reference chemical to organization
+     * @description This endpoint will associate a reference chemical to your organization from the global reference list. The reference chemicals are immutable, however, they can still be archived or made available. If a reference chemical is created as a carrier, it cannot be changed thereafter. The registration of a reference chemical can also be updated. The response headers from the GET endpoints will include the attributes that can be overridden.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostReferenceChemical'];
+        };
+      };
+      responses: {
+        /** @description Successful association of reference chemical to org. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Unresolvable name conflict or other error occurred. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * Format: int64
+               * @example 1
+               */
+              total?: number;
+              errors?: components['schemas']['Errors'][];
+            };
+          };
+        };
+        /** @description Invalid access to products for organization */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/chemicals/{erid}/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reference list of documents for an associated chemical
+     * @description List of all the documents for a chemical from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of documents for the specified chemical. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['DocumentCollection_Chemicals'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/chemicals/{erid}/setOverridesForOrg/{organizationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Sets organizational attributes such as isCarrier, archived, registration, etc
+     * @description This endpoint will set attribute overrides while importing a reference chemical to your organization. The reference chemicals are immutable, however, they can still be archived or made available. Once set to true, the carrier attribute cannot be set to false. The registration of a reference chemical can be updated. The response headers from the GET endpoints will include the attributes that can be overridden.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['CommonReferenceChemical'];
+        };
+      };
+      responses: {
+        /** @description Successful update of overrides of reference chemical associated to your org. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductOverrideStatus_Chemicals'][];
+          };
+        };
+        /** @description Unresolvable name conflict or other error occurred. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * Format: int64
+               * @example 1
+               */
+              total?: number;
+              errors?: components['schemas']['Errors'][];
+            };
+          };
+        };
+        /** @description Invalid access to reference product associated to organization */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/documents/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Document details w/ pdf file
+     * @description Document details for a product with embedded pdf file (gzip+base64).
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Document details with included pdf file. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['DocumentWithPdfFile'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Not Found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fertilizers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reference list of all known fertilizers
+     * @description List of all fertilizers from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description performs a fuzzy search on product name, manufacturer, and fertilizer type. The search string must be at least 3 characters long. */
+          searchString?: string;
+          /** @description Specifies the registration number of the fertilizer based on the country or region/state of use. */
+          fertilizerType?: 'FERTILIZER' | 'MANURE';
+          /** @description Specifies the name of the fertilizer in the global reference list. */
+          productName?: string;
+          /** @description Specifies the product manufacturer name of the fertilizer based on the region being used. */
+          brandName?: string;
+          /** @description Specifies the registration number of the fertilizer based on the region of use. */
+          registration?: string;
+          /** @description Specifies the source system product id of the fertilizer based on the country of use. */
+          sourceSystemProductId?: string;
+          /** @description Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          countryCode?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of reference fertilizers matching the specified search criteria. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceFertilizerCollection'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description No fertilizer found with this country code. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fertilizers/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Single reference fertilizer
+     * @description Single fertilizer from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A single reference fertilizer matching the specified erid. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceFertilizer'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description No fertilizer found matching this erid. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fertilizers/{erid}/associateToOrg/{organizationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Adds a single reference fertilizer to organization
+     * @description This endpoint will associate a reference fertilizer to your organization from the global reference list. The reference fertilizers are immutable, however, they can still be archived or made available. If a reference fertilizer is created as a carrier, it cannot be changed thereafter. The registration of a reference fertilizer can also be updated. The response headers from the GET endpoints will include the attributes that can be overridden.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostReferenceFertilizer'];
+        };
+      };
+      responses: {
+        /** @description Successful association of reference fertilizer to org. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Unresolvable name conflict or other error occurred. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * Format: int64
+               * @example 1
+               */
+              total?: number;
+              errors?: components['schemas']['Errors'][];
+            };
+          };
+        };
+        /** @description Invalid access to products for organization */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fertilizers/{erid}/documents': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Reference list of documents for an associated fertilizer
+     * @description List of all the documents for a fertilizer from industry data sources, such as CDMS.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of documents for the specified fertilizer. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['DocumentCollection_Fertilizers'];
+          };
+        };
+        /** @description The user does not have access to manage products. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/fertilizers/{erid}/setOverridesForOrg/{organizationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Sets organizational attributes such as isCarrier, archived, registration, etc
+     * @description This endpoint will set attribute overrides while importing a reference fertilizer to your organization. The reference fertilizers are immutable, however, they can still be archived or made available. Once set to true, the carrier attribute cannot be set to false. The registration of a reference fertilizer can be updated. The response headers from the GET endpoints will include the attributes that can be overridden.
+     */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['CommonPostReferenceFertilizer'];
+        };
+      };
+      responses: {
+        /** @description Successful update of overrides of reference fertilizer associated to your org. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ReferenceProductOverrideStatus_Fertilizers'][];
+          };
+        };
+        /** @description Unresolvable name conflict or other error occurred. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/json': {
+              /**
+               * Format: int64
+               * @example 1
+               */
+              total?: number;
+              errors?: components['schemas']['Errors'][];
+            };
+          };
+        };
+        /** @description Invalid access to reference product associated to organization */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    trace?: never;
+  };
+  '/organizations/{organizationId}/chemicals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve unified list of custom and reference chemicals in your organization. */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filters the list based on archive status. Accepted values are ARCHIVED, AVAILABLE, and ALL. The default behavior is to return only available (non-archived) varieties. */
+          status?: components['parameters']['ArchiveStatus'];
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: components['parameters']['ChemicalEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of your org chemicals. If any of the supported embeds are used, the associated data will be present as a field in the chemical. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ChemicalCollection'];
+          };
+        };
+        /** @description The user has not been provided access to the products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Add chemical
+     * @description This endpoint will add a custom chemical into the organization. Its name+type must be unique within your organization, unless carrier is set to true. If carrier is set to true, then type is disregarded. A chemical's carrier property cannot be changed to false once set to true. A chemical cannot be archived if it is in an active tank mix or dry blend. If a chemical is marked as archived and is used in a tank mix/dry blend, if the tank mix/dry blend is made available, then this chemical will also be made available. If passing in a liquid weight or weight unit, material classification should be set to LIQUID. Additionally, POST can be used for supporting offline creation of chemicals from e.g. a mobile app, by sending a payload with an `id` generated by the client. If an `id` is present in the payload, the service checks the database for that `id`. In case no record is found, a new one is created with that `id` and the request is responded with 201. Otherwise no creation happens and the request is responded with 409 and error message that a resource with that `id` already exists.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostChemical'];
+        };
+      };
+      responses: {
+        /** @description Create Chemicals */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Schema validation error. Missing one or more of the required fields (name, company, type, material classification), or name does not meet length requirements. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+          };
+        };
+        /** @description The user has not been provided write access to the product list for the org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description A product already exists in this org with the requested Erid */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/chemicals/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve a specific chemical from an organization's asset list. */
+    get: {
+      parameters: {
+        query?: {
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: components['parameters']['ChemicalEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A chemical matching the requested erid. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Chemical'];
+          };
+        };
+        /** @description The user does not have sufficient privileges to access products in this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description There is no product matching the specified Erid */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    /**
+     * Update a single chemical
+     * @description Allows the custom chemical to be renamed, made active/archived, or flagged as a carrier.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The updated chemical object. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PutChemical'];
+        };
+      };
+      responses: {
+        /** @description The update was completed successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': unknown;
+          };
+        };
+        /** @description An invalid type or material classification was specified. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+          };
+        };
+        /** @description The user does not have sufficient privileges to update products in this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description There is no product matching the specified Erid */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/dryBlends': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve dry blends for an org */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The list of Rels, for which objects should be included in the response payload. */
+          embed?: components['parameters']['DryBlendEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of dry blends. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['DryBlendCollection'];
+          };
+        };
+        /** @description The user has not been provided access to the products for this org. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create a dry blend
+     * @description Add a dry blend to the asset list of an organization. Any chemicals or fertilizers in the dry blend must exist in the organization before the dry blend is persisted. The name of the dry blend must be unique in your organization. Additionally, POST can be used for supporting offline creation of dry blends from e.g. a mobile app, by sending a payload with an `erid` generated by the client. If an `erid` is present in the payload, the service checks the database for that `erid`. In case no record is found, a new one is created with that `erid` and the request is responded with 201. Otherwise no creation happens and the request is responded with 409 and error message that a resource with that `erid` already exists.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostDryBlend'];
+        };
+      };
+      responses: {
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Missing a required field, or an invalid value is included in a field. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+          };
+        };
+        /** @description The user is not allowed to manage products for this org. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description A dry blend already exists in this org with the requested erid. */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/dryBlends/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieves a specific dry blend */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The list of Rels, for which objects should be included in the response payload. */
+          embed?: components['parameters']['DryBlendEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A dry blend object. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['DryBlend'];
+          };
+        };
+        /** @description The user has not been provided access to the products for this org. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist, or does not contain the requested dry blend. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    /**
+     * Update a dry blend
+     * @description Allows updates to be made to the name, archival status, and components of a dry blend.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostDryBlend'];
+        };
+      };
+      responses: {
+        /** @description The update was completed successfully. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': unknown;
+          };
+        };
+        /** @description Missing a required field, or an invalid value is included in a field. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+          };
+        };
+        /** @description The user is not allowed to manage products for this org. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified dry blend does not exist in this organization. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/fertilizers': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve unified list of custom and reference fertilizers in your organization. */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filters the list based on archive status. Accepted values are ARCHIVED, AVAILABLE, and ALL. The default behavior is to return only available (non-archived) varieties. */
+          status?: components['parameters']['ArchiveStatus'];
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: components['parameters']['FertilizerEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of your org fertilizers. If any of the supported embeds are used, the associated data will be present as a field in the fertilizer.s */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['FertilizerCollection'];
+          };
+        };
+        /** @description The user has not been provided access to the products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Add fertilizer
+     * @description This endpoint will add a custom fertilizer into the organization. Its name+type must be unique within your organization, unless carrier is set to true. If carrier is set to true, then type is disregarded. A fertilizer's carrier property cannot be changed to false once set to true. A fertilizer cannot be archived if it is in an active tank mix or dry blend. If a fertilizer is marked as archived and is used in a tank mix/dry blend, if the tank mix/dry blend is made available, then this fertilizer will also be made available. If passing in a liquid weight or weight unit, material classification should be set to LIQUID. Additionally, POST can be used for supporting offline creation of fertilizers from e.g. a mobile app, by sending a payload with an `id` generated by the client. If an `id` is present in the payload, the service checks the database for that `id`. In case no record is found, a new one is created with that `id` and the request is responded with 201. Otherwise no creation happens and the request is responded with 409 and error message that a resource with that `id` already exists.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      /** @description The product to add. If an ERID is specified in the request, it should exist as part of the reference data set (/fertilizers); this ERID will be unique only within the context of an organization. If the ERID is omitted, a uuid will be assigned; in this case, the item will be considered a custom product, and there will be no association to any reference product. Using the reference Erid when adding a product will help to maintain a common parentage of products across organizations. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PostFertilizer'];
+        };
+      };
+      responses: {
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Schema validation error. Missing one or more of the required fields (name, company, type, material classification), or name does not meet length requirements. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The user has not been provided write access to the product list for the org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description A product already exists in this org with the requested Erid */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/fertilizers/{erid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Retrieve a specific fertilizer from an organization's asset list. */
+    get: {
+      parameters: {
+        query?: {
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: components['parameters']['FertilizerEmbed'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A product matching the requested Erid */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Fertilizer_Fertilizers'];
+          };
+        };
+        /** @description The user does not have sufficient privileges to access products in this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description There is no product matching the specified Erid */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    /**
+     * Update a single fertilizer
+     * @description Allows the fertilizer custom to be renamed, made active/archived, or flagged as a carrier.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /**
+           * @description A unique identifier for an entity formatted as a uuid.
+           * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
+           */
+          erid: components['parameters']['ERID'];
+        };
+        cookie?: never;
+      };
+      /** @description The updated fertilizer object. */
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['PutFertilizer'];
+        };
+      };
+      responses: {
+        /** @description The update was completed successfully */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': unknown;
+          };
+        };
+        /** @description An invalid type or material classification was specified */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['Errors'];
+          };
+        };
+        /** @description The user does not have sufficient privileges to update products in this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description There is no product matching the specified Erid */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/productCompanies': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve product companies for an org.
+     * @description A unified list of custom and reference product companies in your organization.
+     */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description An collection of Companies */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['schemas']['ProductCompany'][];
+          };
+        };
+        /** @description The user has not been provided access to the products for this org. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/tankMixes': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Retrieve tank mixes for an org
+     * @description This endpoint will retrieve tank mixes for an org.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The list of Rels, for which objects should be included in the response payload. */
+          embed?: components['parameters']['TankMixEmbed'];
+          /** @description Filter results based on status */
+          recordFilter?: components['parameters']['RecordFilter'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A collection of tank mixes */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+            };
+          };
+        };
+        /** @description The user has not been provided access to the products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    /**
+     * Create a tank mix
+     * @description Add a tank mix to the asset list of an organization. Any chemicals or fertilizers in the tank mix must exist in the organization before the tank mix is persisted. The name of the tank mix must be unique in your organization. Additionally, POST can be used for supporting offline creation of tank mixes from e.g. a mobile app, by sending a payload with an `orgUniqueErid` generated by the client. If an `orgUniqueErid` is present in the payload, the service checks the database for that `orgUniqueErid`. In case no record is found, a new one is created with that `orgUniqueErid` and the request is responded with 201. Otherwise no creation happens and the request is responded with 409 and error message that a resource with that `orgUniqueErid` already exists.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['TankMix'];
+        };
+      };
+      responses: {
+        /** @description Create Tank mix */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': components['responses']['Created'];
+          };
+        };
+        /** @description Missing a required field, or an invalid value is included in a field. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The user is not allowed to manage products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description A tank mix already exists in this org with the requested orgUniqueErid */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{organizationId}/tankMixes/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View a specific tank mix
+     * @description This endpoint will retrieve a specific tank mix.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Embeds extra information in the tank mix response */
+          embed?: components['parameters']['Embed2_TankMix'];
+        };
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /** @description TankMixes id. */
+          id: components['parameters']['Id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description A tank mix object */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': {
+              values?: unknown;
+            };
+          };
+        };
+        /** @description The user has not been provided access to the products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified organization does not exist, or does not contain the requested tank mix */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    /**
+     * Update a tank mix
+     * @description This endpoint allows to update the metadata and the composition of a tank mix.
+     */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          /** @description The identifier of the Organization. */
+          organizationId: components['parameters']['OrganizationID'];
+          /** @description TankMixes id. */
+          id: components['parameters']['Id'];
+        };
+        cookie?: never;
+      };
+      requestBody?: {
+        content: {
+          'application/vnd.deere.axiom.v3+json': components['schemas']['TankMix'];
+        };
+      };
+      responses: {
+        /** @description The update was completed successfull */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            'application/vnd.deere.axiom.v3+json': unknown;
+          };
+        };
+        /** @description Missing a required field, or an invalid value is included in a field. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The user is not allowed to manage products for this org */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The specified tank mix does not exist in this organization */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/organizations/{organizationId}/varieties': {
     parameters: {
       query?: never;
@@ -600,6 +2404,134 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    ActiveIngredient: {
+      /** @example ActiveIngredient */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the active ingredient.
+       * @example 30ca101c-e78f-4e45-a248-1ce9622c7f10
+       */
+      id?: string;
+      /**
+       * @description The name of the active ingredient.
+       * @example Urea Nitrogen
+       */
+      name?: string;
+    };
+    ActiveIngredientEmbed: {
+      /** @example ActiveIngredient */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The unique identifier for the active ingredient.
+       * @example 9ab0fd0d-7ed0-49bd-9a61-0277d89b61f4
+       */
+      guid?: string;
+      /**
+       * Format: double
+       * @description The percentage value of the active ingredient.'
+       * @example 3.14
+       */
+      percent?: number;
+      /**
+       * @description The name of the active ingredient.
+       * @example Urea Nitrogen
+       */
+      name?: string;
+      /**
+       * @description The unit of measurement used for the value of active ingredient.
+       * @example %
+       */
+      unit?: string;
+      /**
+       * Format: double
+       * @description The value of the active ingredient in the Chemical/Fertilizer.
+       * @example 3.14
+       */
+      value?: number;
+    };
+    ActiveIngredientEmbed_DryBlends: {
+      /** @example ActiveIngredient */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the active ingredient.
+       * @example 30ca101c-e78f-4e45-a248-1ce9622c7f10
+       */
+      id?: string;
+      /**
+       * @description The name of the active ingredient.
+       * @example Urea Nitrogen
+       */
+      name?: string;
+      /**
+       * @description The unit of measurement used for the value of active ingredient.
+       * @example %
+       */
+      unit?: string;
+      /**
+       * Format: double
+       * @description The value of the active ingredient in the chemical/fertilizer.
+       * @example 3.14
+       */
+      value?: number;
+    };
+    ActiveIngredientEmbed_Fertilizers: {
+      /** @example ActiveIngredient */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the active ingredient.
+       * @example 30ca101c-e78f-4e45-a248-1ce9622c7f10
+       */
+      id?: string;
+      /**
+       * @description The name of the active ingredient.
+       * @example Urea Nitrogen
+       */
+      name?: string;
+      /**
+       * @description The unit of measurement used for the value of active ingredient.
+       * @example %
+       */
+      unit?: string;
+      /**
+       * Format: double
+       * @description The value of the active ingredient in the Chemical/Fertilizer.
+       * @example 3.14
+       */
+      value?: number;
+    };
+    ActiveIngredientEmbed_TankMix: {
+      /** @example ActiveIngredient */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the active ingredient.
+       * @example 30ca101c-e78f-4e45-a248-1ce9622c7f10
+       */
+      id?: string;
+      /**
+       * @description The name of the active ingredient.
+       * @example Urea Nitrogen
+       */
+      name?: string;
+      /**
+       * @description The unit of measurement used for the value of active ingredient.
+       * @example %
+       */
+      unit?: string;
+      /**
+       * Format: double
+       * @description The value of the active ingredient in the chemical/fertilizer.
+       * @example 3.14
+       */
+      value?: number;
+    };
+    ActiveIngredientsCollection: components['schemas']['CollectionBase_ActiveIngredients'] & {
+      values?: components['schemas']['ActiveIngredient'][];
+    };
     BaseResource: {
       /** @example BaseResource */
       '@type'?: string;
@@ -621,6 +2553,511 @@ export interface components {
        * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
        */
       id?: string;
+    };
+    BaseResource_Chemicals: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description Primary identifier for resource.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_Chemicals'][];
+    };
+    BaseResource_Companies: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_Companies'][];
+    };
+    BaseResource_Documents: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description Primary identifier for resource.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_Documents'][];
+    };
+    BaseResource_DryBlends: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description Primary identifier for resource.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_DryBlends'][];
+    };
+    BaseResource_TankMix: {
+      /** @example BaseResource */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description Primary identifier for resource.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_TankMix'][];
+    };
+    Chemical: components['schemas']['BaseResource_Chemicals'] & {
+      /** @example Chemical */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @deprecated
+       * @description The primary identifier for the chemical that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the chemical.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the chemical.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description Specifies the type of the chemical. Manure and Fertilizer are deprecated, please use fertilizer endpoints.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the chemical from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceId?: string;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /**
+       * @description Country of the product to which it belongs.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Parent id of the child in which the product is merged
+       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
+       */
+      parentErid?: string;
+      /**
+       * @description Showing the status of cleanup.
+       * @example MERGED
+       */
+      cleanupStatus?: string;
+      /**
+       * @description Clean up action time
+       * @example 2025-09-22T11:24:43.855Z
+       */
+      cleanupActionDate?: string;
+      /** @description List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed'][];
+      /** @description List of available registrations for the countries this product is registered in. Only present when `embed=availableRegistrations` is used. */
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document_Chemicals'][];
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /** @description Registration detail used for regulatory purposes. */
+      agencyRegistrations?: components['schemas']['agencyRegistrations'][];
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /** @description List of child products. */
+      childProducts?: components['schemas']['ChildChemical'][];
+    };
+    ChemicalCollection: components['schemas']['CollectionBase_Chemicals'] & {
+      values?: components['schemas']['Chemical'][];
+    };
+    Chemical_DryBlends: components['schemas']['BaseResource_DryBlends'] & {
+      /** @example Chemical */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier for the chemical/fertilizer that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the chemical/fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the chemical/fertilizer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description Specifies the type of the chemical/fertilizer.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @default false
+       */
+      restrictedUse: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the chemical/fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @default false
+       */
+      archived: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @default false
+       */
+      carrier: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the chemical/fertilizer's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the chemical/fertilizer's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the chemical/fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_DryBlends'][];
+      /** @description List of available registrations for the countries this product is registered in. Only present when `embed=availableRegistrations` is used */
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documents?: components['schemas']['Document_DryBlends'][];
+    };
+    ChildChemical: components['schemas']['BaseResource_Chemicals'] & {
+      /** @example Chemical */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @deprecated
+       * @description The primary identifier for the chemical that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the chemical.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description The brand of the chemical.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description Specifies the type of the chemical. Manure and Fertilizer are deprecated, please use fertilizer endpoints.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the chemical from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /** @description List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed'][];
+      /** @description List of available registrations for the countries this product is registered in. Only present when `embed=availableRegistrations` is used. */
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document_Chemicals'][];
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /** @description Registration detail used for regulatory purposes. */
+      agencyRegistrations?: components['schemas']['agencyRegistrations'][];
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /**
+       * @description Parent id of the child in which the product is merged
+       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
+       */
+      parentErid?: string;
+      /**
+       * @description Showing the status of cleanup.
+       * @example MERGED
+       */
+      cleanupStatus?: string;
+      /**
+       * @description Clean up action time
+       * @example 2025-09-22T11:24:43.855Z
+       */
+      cleanupActionDate?: string;
+      /**
+       * @description Country of the product to which it belongs.
+       * @example USA
+       */
+      countryCode?: string;
+    };
+    ChildFertilizer: components['schemas']['BaseResource'] & {
+      /** @example Fertilizer */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier for the fertilizer that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the fertilizer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Specifies the state of the fertilizer.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * @description The type of the fertilizer.
+       * @example MANURE
+       * @enum {string}
+       */
+      type?: 'MANURE' | 'FERTILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_Fertilizers'][];
+      /** @description List of available registrations for the countries this product is registered in. Only present when `embed=availableRegistrations` is used. */
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document'][];
+      /**
+       * @description Parent id of the child in which the product is merged
+       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
+       */
+      parentErid?: string;
+      /**
+       * @description Showing the status of cleanup.
+       * @example MERGED
+       */
+      cleanupStatus?: string;
+      /**
+       * @description Clean up action time
+       * @example 2025-09-22T11:24:43.855Z
+       */
+      cleanupActionDate?: string;
+      /**
+       * @description Country of the product to which it belongs.
+       * @example USA
+       */
+      countryCode?: string;
+      /** @description production registration number details */
+      agencyRegistrations?: components['schemas']['agencyRegistrations'][];
+      /**
+       * @description production registration number
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
     };
     ChildVariety: components['schemas']['BaseResource'] & {
       /** @example Variety */
@@ -700,8 +3137,147 @@ export interface components {
        */
       total?: number;
     };
+    CollectionBase_ActiveIngredients: {
+      /**
+       * Format: int32
+       * @example 100
+       */
+      total?: number;
+      links?: components['schemas']['Link_ActiveIngredients'][];
+    };
+    CollectionBase_Chemicals: {
+      /** @description Provides a reference to an associated object or list. */
+      links?: [components['schemas']['Link_Chemicals']];
+      /**
+       * Format: int32
+       * @example 100
+       */
+      total?: number;
+    };
+    CollectionBase_DryBlends: {
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_DryBlends'][];
+      /**
+       * Format: int32
+       * @example 100
+       */
+      total?: number;
+    };
+    CollectionBase_Fertilizers: {
+      links?: components['schemas']['Link'][];
+      /**
+       * Format: int32
+       * @example 100
+       */
+      total?: number;
+    };
+    CommonPostReferenceFertilizer: {
+      overrides?: {
+        /**
+         * @description Key for override parameter when setting overrides for a reference product
+         * @example archived
+         * @enum {string}
+         */
+        key?: 'isCarrier' | 'archived' | 'registration';
+        /**
+         * @description Value for the override parameter
+         * @example true
+         */
+        value?: string;
+      }[];
+    };
     CommonProductPointerRequest: {
       overrides?: components['schemas']['OverrideKeyValuePair'][] | null;
+    };
+    CommonReferenceChemical: {
+      overrides?: {
+        /**
+         * @description Key for override parameter when setting overrides for a reference product
+         * @example archived
+         * @enum {string}
+         */
+        key?: 'isCarrier' | 'archived' | 'registration';
+        /**
+         * @description Value for the override parameter
+         * @example true
+         */
+        value?: string;
+      }[];
+    };
+    Created: {
+      /**
+       * @description The common name of this product.
+       * @example Tide Propiconazole 41.8EC
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Tide International USA, Inc.turer
+       */
+      companyName?: string;
+      /**
+       * @description The type of chemical
+       * @example HERBICIDE
+       */
+      type?: string;
+      /**
+       * @description Whether or not this product is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Material classification of a product.
+       * @example DRY
+       */
+      materialClassification?: string;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * @description Registration Id
+       * @example 0084229-00011-AA-0000000
+       */
+      registrationId?: string;
+    };
+    Created_Fertilizers: {
+      /**
+       * @description The common name of this product.
+       * @example Tide Propiconazole 41.8EC
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Tide International USA, Inc.
+       */
+      companyName?: string;
+      /**
+       * @description The type of fertilizer
+       * @example FERTILIZER
+       */
+      type?: string;
+      /**
+       * @description Whether or not this product is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Material classification of a product.
+       * @example DRY
+       */
+      materialClassification?: string;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * @description Registration Id
+       * @example 0084229-00011-AA-0000000
+       */
+      registrationId?: string;
+      activeIngredients?: unknown[] & components['schemas']['ActiveIngredientEmbed_Fertilizers'];
     };
     Document: {
       /** @example Document */
@@ -740,6 +3316,410 @@ export interface components {
     DocumentCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['Document'][];
     };
+    DocumentCollection_Chemicals: components['schemas']['CollectionBase_Chemicals'] & {
+      values?: components['schemas']['Document_Chemicals'][];
+    };
+    DocumentCollection_Fertilizers: components['schemas']['CollectionBase_Fertilizers'] & {
+      values?: components['schemas']['Document'][];
+    };
+    DocumentWithPdfFile: components['schemas']['Document_Documents'] & {
+      /**
+       * @description The pdf file of the document after compression (gzip) and encoding (base64)
+       * @example H4sIAAAAAAAAAIy7BVhduxI2XNy1aLFNcYe9cXd3l01xd3eKuzsUd5fiBYq7u0OLe6G4f+05175z7n+/f60nzySTWZPJ5J1kW...
+       */
+      pdfFile?: string;
+    };
+    Document_Chemicals: {
+      /** @example Document */
+      '@type': unknown;
+      /**
+       * @description The Unique id of the product where document attached.
+       * @example 388ab719-277d-4032-a2c3-40a297d8f482
+       */
+      productErid: string;
+      /**
+       * @description The Unique id of the document.
+       * @example 2e3d70e1-e1c2-40e8-97e8-8e6e095f9da7
+       */
+      erid?: string;
+      /**
+       * @description Type of document for this product.
+       * @example 24(c) Registration
+       */
+      docType: string;
+      /**
+       * @description Information about the document.
+       * @example CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed
+       */
+      description: string;
+      /**
+       * @description The filename of the document.
+       * @example ld7OD026.pdf
+       */
+      fileName: string;
+      /**
+       * Format: date
+       * @example 2017-03-22
+       */
+      readonly expirationDate?: string | null;
+    };
+    Document_Documents: {
+      /**
+       * @description The type of the document.
+       * @example Document
+       */
+      '@type'?: string;
+      /**
+       * Format: uuid
+       * @description The unique identifier for the document.
+       * @example cff5ba0b-1768-48a3-b3ec-dd62aac1cff3
+       */
+      erid?: string;
+      /**
+       * Format: uuid
+       * @description The unique identifier for the product associated with the document.
+       * @example 7d9ec6a6-6b8f-4312-92c7-bc022b7f5351
+       */
+      productErid?: string;
+      /**
+       * @description The name of the file.
+       * @example ld8NF004.pdf
+       */
+      fileName?: string;
+      /**
+       * @description The type of the document.
+       * @example Specimen Label
+       */
+      docType?: string;
+      /**
+       * @description A description of the document.
+       * @example SAL 7/27/11
+       */
+      description?: string;
+      /**
+       * Format: date
+       * @example 2017-03-22
+       */
+      readonly expirationDate?: string | null;
+    };
+    Document_DryBlends: WithRequired<components['schemas']['BaseResource_DryBlends'], '@type'> & {
+      /** @example Document */
+      '@type': unknown;
+      /**
+       * @description The Unique id of the product.
+       * @example 388ab719-277d-4032-a2c3-40a297d8f482
+       */
+      productId: string;
+      /**
+       * @description The Unique id of the document.
+       * @example 2e3d70e1-e1c2-40e8-97e8-8e6e095f9da7
+       */
+      erid?: string;
+      /**
+       * @description Type of document for this product.
+       * @example 24(c) Registration
+       */
+      docType: string;
+      /**
+       * @description Information about the document.
+       * @example CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed
+       */
+      description: string;
+      /**
+       * @description The filename of the document.
+       * @example ld7OD026.pdf
+       */
+      fileName: string;
+      /**
+       * Format: date
+       * @example 2017-03-22
+       */
+      readonly expirationDate?: string | null;
+    };
+    Document_TankMix: WithRequired<components['schemas']['BaseResource_TankMix'], '@type'> & {
+      /** @example Document */
+      '@type': unknown;
+      /**
+       * @description The Unique id of the product where document attached.
+       * @example 388ab719-277d-4032-a2c3-40a297d8f482
+       */
+      productId: string;
+      /**
+       * @description The Unique id of the document.
+       * @example 2e3d70e1-e1c2-40e8-97e8-8e6e095f9da7
+       */
+      erid?: string;
+      /**
+       * @description Type of document for this product.
+       * @example 24(c) Registration
+       */
+      docType: string;
+      /**
+       * @description Information about the document.
+       * @example CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed
+       */
+      description: string;
+      /**
+       * @description The filename of the document.
+       * @example ld7OD026.pdf
+       */
+      fileName: string;
+      /**
+       * Format: date
+       * @example 2017-03-22
+       */
+      readonly expirationDate?: string | null;
+    };
+    DryBlend: {
+      /**
+       * @description The type of the dry blend.
+       * @example DryBlend
+       */
+      '@type'?: string;
+      links?: {
+        /**
+         * @description The type of the link.
+         * @example Link
+         */
+        '@type'?: string;
+        /**
+         * @description The relationship of the link.
+         * @example self
+         */
+        rel?: string;
+        /**
+         * @description The URI of the linked resource.
+         * @example https://sandboxapi.deere.com/platform/organizations/350519/dryBlends/af20cf1a-2def-47ce-9861-35f51afc1ad8
+         */
+        uri?: string;
+      }[];
+      /**
+       * @description The unique identifier for the dry blend.
+       * @example af20cf1a-2def-47ce-9861-35f51afc1ad8
+       */
+      erid?: string;
+      /**
+       * @description The name of the dry blend.
+       * @example dryblend_alfa
+       */
+      name?: string;
+      solutionRate?: {
+        /**
+         * @description The type of the measurement.
+         * @example MeasurementAsDouble
+         */
+        '@type'?: string;
+        /**
+         * Format: double
+         * @description The solution rate value as a double.
+         * @example 10
+         */
+        valueAsDouble?: number;
+        /**
+         * @description The domain ID for the solution rate measurement.
+         * @example vrSolutionRateMass
+         */
+        vrDomainId?: string;
+        /**
+         * @description The unit of measure for the solution rate.
+         * @example lb1ac-1
+         */
+        unit?: string;
+      };
+      /**
+       * @description Material classification of the dry blend.
+       * @example DRY
+       */
+      materialClassification?: string;
+      /**
+       * @description Whether or not this dry blend is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Notes about the dry blend.
+       * @example notes
+       */
+      notes?: string;
+      components?: {
+        /**
+         * @description The type of the dry blend component.
+         * @example DryBlendComponent
+         */
+        '@type'?: string;
+        rate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The rate value as a double.
+           * @example 5
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the rate measurement.
+           * @example vrSolutionRateMass
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the rate.
+           * @example lb1ac-1
+           */
+          unit?: string;
+        };
+        product?: {
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example Chemical
+           */
+          '@type'?: string;
+          links?: {
+            /**
+             * @description The type of the link.
+             * @example Link
+             */
+            '@type'?: string;
+            /**
+             * @description The relationship of the link.
+             * @example self
+             */
+            rel?: string;
+            /**
+             * @description The URI of the linked resource.
+             * @example https://sandboxapi.deere.com/platform/organizations/350519/chemicals/a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+             */
+            uri?: string;
+          }[];
+          /**
+           * @description The unique identifier for the chemical/fertilizer.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          id?: string;
+          /**
+           * @description The name of the chemical/fertilizer.
+           * @example TELIA
+           */
+          name?: string;
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example FUNGICIDE
+           */
+          type?: string;
+          /**
+           * @description The category of the chemical/fertilizer.
+           * @example CHEMICAL
+           */
+          category?: string;
+          /**
+           * @description The name of the company that manufactures the chemical/fertilizer.
+           * @example BASF
+           */
+          companyName?: string;
+          /**
+           * @description The EPA registration status of the chemical/fertilizer.
+           * @example EXEMPT
+           */
+          epaRegistration?: string;
+          /**
+           * @description The registration status of the chemical/fertilizer.
+           * @example EXEMPT
+           */
+          registration?: string;
+          /**
+           * Format: date-time
+           * @description The time when the chemical/fertilizer was last modified.
+           * @example 2024-08-21T09:25:24.220763Z
+           */
+          modifiedTime?: string;
+          /**
+           * @description The carrier ID of the chemical/fertilizer.
+           * @example 58984d7a-126e-4d31-98e9-1ed65a582d91
+           */
+          carrierId?: string;
+          /**
+           * @description The reference ID of the chemical/fertilizer.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          referenceId?: string;
+          /**
+           * @description The reference GUID of the chemical/fertilizer.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          referenceGuid?: string;
+          /**
+           * @description Whether or not the chemical/fertilizer is a carrier.
+           * @example true
+           */
+          carrier?: boolean;
+          /**
+           * @description Whether or not the chemical/fertilizer is actively used.
+           * @example false
+           */
+          archived?: boolean;
+          /**
+           * @description Whether or not the chemical/fertilizer is restricted use.
+           * @example false
+           */
+          restrictedUse?: boolean;
+          /**
+           * @description Country of the product to which it belongs
+           * @example USA
+           */
+          countryCode?: string;
+          agencyRegistrations?: {
+            /**
+             * @description The type of the agency registration.
+             * @example AgencyRegistration
+             */
+            '@type'?: string;
+            links?: {
+              /**
+               * @description The type of the link.
+               * @example Link
+               */
+              '@type'?: string;
+              /**
+               * @description The relationship of the link.
+               * @example agency
+               */
+              rel?: string;
+              /**
+               * @description The URI of the linked resource.
+               * @example https://sandboxapi.deere.com/platform/agencies/8fb34898-64f5-5a1e-a698-34ab348220a7
+               */
+              uri?: string;
+            }[];
+            /**
+             * @description The registration ID of the agency registration.
+             * @example EXEMPT
+             */
+            registrationId?: string;
+          }[];
+        };
+      }[];
+      /**
+       * @description The name of the crop that this variety is associated with.
+       * @example [
+       *       "CORN_WET",
+       *       "ALFALFA"
+       *     ]
+       */
+      targetCrops?: Record<string, never>;
+    };
+    DryBlendCollection: components['schemas']['CollectionBase_DryBlends'] & {
+      values?: components['schemas']['DryBlend'][];
+    };
+    DryBlendComponent: {
+      /** @example DryBlend Component */
+      '@type'?: string;
+      rate?: components['schemas']['MeasurementAsDouble'];
+      product?: components['schemas']['Chemical_DryBlends'];
+      /** @description Provides a reference to an associated object or list. */
+      links?: components['schemas']['Link_DryBlends'][];
+    };
     /** Format: Errors/DataValidationException */
     Errors: {
       /** @example Errors */
@@ -776,6 +3756,227 @@ export interface components {
       /** @example {} */
       otherAttributes?: Record<string, never>;
     };
+    Fertilizer: components['schemas']['BaseResource_DryBlends'] & {
+      /** @example Fertilizer */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier for the fertilizer that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the fertilizer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Specifies the state of the fertilizer.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * @description The type of the fertilizer.
+       * @example MANURE
+       * @enum {string}
+       */
+      type?: 'MANURE' | 'FERTILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @default false
+       */
+      restrictedUse: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @default false
+       */
+      archived: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @default false
+       */
+      carrier: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_DryBlends'][];
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documents?: components['schemas']['Document_DryBlends'][];
+    };
+    FertilizerCollection: components['schemas']['CollectionBase_Fertilizers'] & {
+      values?: components['schemas']['Fertilizer_Fertilizers'][];
+    };
+    Fertilizer_Fertilizers: components['schemas']['BaseResource'] & {
+      /** @example Fertilizer */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier for the fertilizer that is unique to your organization.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * @description The common name of the fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the fertilizer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Specifies the state of the fertilizer.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * @description The type of the fertilizer.
+       * @example MANURE
+       * @enum {string}
+       */
+      type?: 'MANURE' | 'FERTILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceId?: string;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: uuid
+       * @description The primary identifier in case it is a carrier.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      carrierId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_Fertilizers'][];
+      /** @description List of available registrations for the countries this product is registered in. Only present when `embed=availableRegistrations` is used. */
+      availableRegistrations?: string[];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document'][];
+      /**
+       * @description Parent id of the child in which the product is merged
+       * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
+       */
+      parentErid?: string;
+      /**
+       * @description Showing the status of cleanup.
+       * @example MERGED
+       */
+      cleanupStatus?: string;
+      /**
+       * @description Clean up action time
+       * @example 2025-09-22T11:24:43.855Z
+       */
+      cleanupActionDate?: string;
+      /**
+       * @description Country of the product to which it belongs.
+       * @example USA
+       */
+      countryCode?: string;
+      /** @description production registration number details */
+      agencyRegistrations?: components['schemas']['agencyRegistrations'][];
+      /**
+       * @description production registration number
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /** @description List of child products. */
+      childProducts?: components['schemas']['ChildFertilizer'][];
+    };
     Link: {
       /**
        * @description The type of the link.
@@ -794,6 +3995,116 @@ export interface components {
        */
       uri?: string;
     };
+    /** @description Provides a reference to an associated object or list. */
+    Link_ActiveIngredients: {
+      /**
+       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
+       * @example self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The location of the resource
+       * @example https://sandboxapi.deere.com/platform/organizations/876542/activeIngredients?itemLimit=10&pageOffset=0
+       */
+      uri: string;
+    };
+    Link_Chemicals: {
+      /**
+       * @description The type of the link.
+       * @example Link
+       */
+      '@type'?: string;
+      /**
+       * @description The relationship of the link.
+       * @example self
+       */
+      rel?: string;
+      /**
+       * @description The URI of the route.
+       * @example https://sandboxapi.deere.com/platform/{api_route}
+       */
+      uri?: string;
+    };
+    Link_Companies: {
+      /**
+       * @description The identifier for the associated resource. If the resource is embeddable, this is also the "embed" value.
+       * @example self
+       */
+      rel: string;
+      /**
+       * Format: uri
+       * @description The location of the resource
+       * @example https://sandboxapi.deere.com/platform/organizations/876542/productCompanies?itemLimit=10&pageOffset=0
+       */
+      uri: string;
+    };
+    Link_Documents: {
+      /**
+       * @description The identifier for the associated resource. If the resource is embeddable, this is also the 'embed' value.
+       * @example self
+       */
+      rel?: string;
+      /**
+       * Format: uri
+       * @description The location of the resource
+       * @example https://sandboxapi.deere.com/platform/
+       */
+      uri?: string;
+    };
+    Link_DryBlends: {
+      /**
+       * @description The type of the link.
+       * @example Link
+       */
+      '@type'?: string;
+      /**
+       * @description The relationship of the link.
+       * @example self
+       */
+      rel?: string;
+      /**
+       * @description The URI of the route.
+       * @example https://sandboxapi.deere.com/platform/{api_route}
+       */
+      uri?: string;
+    }[];
+    Link_TankMix: {
+      /**
+       * @description The type of the link.
+       * @example Link
+       */
+      '@type'?: string;
+      /**
+       * @description The relationship of the link.
+       * @example self
+       */
+      rel?: string;
+      /**
+       * @description The URI of the route.
+       * @example https://sandboxapi.deere.com/platform/{api_route}
+       */
+      uri?: string;
+    }[];
+    MeasurementAsDouble: {
+      /** @example MeasurementAsDouble */
+      '@type'?: string;
+      /**
+       * Format: double
+       * @example 3.14
+       */
+      valueAsDouble?: number;
+      /**
+       * @description The unit of measure for this value.
+       * @example gal1ac-1
+       */
+      unit?: string;
+      /**
+       * @description The corresponding domainErid from the EIC/Adapt representation system.
+       * @example vrSolutionRateLiquid
+       */
+      vrDomainId?: string;
+    };
     OverrideKeyValuePair: {
       /**
        * @description Key for override parameter when setting overrides for a reference product
@@ -807,6 +4118,285 @@ export interface components {
        */
       value: Record<string, never>;
     };
+    PostChemical: {
+      /** @example Chemical */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the chemical.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the chemical.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Specifies the state of the chemical.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description The type of the chemical. Manure and Fertilizer are deprecated, please use fertilizer endpoints.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the chemical from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /** @description Registration detail used for regulatory purposes. */
+      agencyRegistrations?: components['schemas']['agencyRegistrations'][];
+    };
+    PostDryBlend: {
+      DryBlend?: {
+        /**
+         * @description The type of the dry blend.
+         * @example DryBlend
+         */
+        '@type'?: string;
+        /**
+         * @description The name of the dry blend.
+         * @example TestDryBlend
+         */
+        name?: string;
+        solutionRate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The value of the measurement as a double.
+           * @example 0
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the measurement.
+           * @example vrSolutionRateMass
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the value.
+           * @example lb1ac-1
+           */
+          unit?: string;
+        };
+        /**
+         * @description Material classification of the dry blend.
+         * @example DRY
+         */
+        materialClassification?: string;
+        /**
+         * @description Whether or not this dry blend is actively used.
+         * @example false
+         */
+        archived?: boolean;
+        /**
+         * @description Notes about the dry blend.
+         * @example Mix in the carrier last
+         */
+        notes?: string;
+        components?: {
+          /**
+           * @description The type of the dry blend component.
+           * @example DryBlendComponent
+           */
+          '@type'?: string;
+          rate?: {
+            /**
+             * @description The type of the measurement.
+             * @example MeasurementAsDouble
+             */
+            '@type'?: string;
+            /**
+             * Format: double
+             * @description The rate value as a double.
+             * @example 100
+             */
+            valueAsDouble?: number;
+            /**
+             * @description The domain ID for the rate measurement.
+             * @example vrSolutionRateLiquid
+             */
+            vrDomainId?: string;
+            /**
+             * @description The unit of measure for the rate.
+             * @example gal1ac-1
+             */
+            unit?: string;
+          };
+          links?: {
+            /**
+             * @description The type of the link.
+             * @example Link
+             */
+            '@type'?: string;
+            /**
+             * @description The relationship of the link either fertilizer or chemical.
+             * @example chemical
+             */
+            rel?: string;
+            /**
+             * @description The URI of the linked resource.
+             * @example https://sandboxapi.deere.com/platform/organizations/254751/chemicals/0d373fc5-d2a0-4afc-be6e-f8f34eabaaac
+             */
+            uri?: string;
+          }[];
+        }[];
+        /**
+         * @description The name of the crop that this variety is associated with.
+         * @example [
+         *       "CORN_WET",
+         *       "ALFALFA"
+         *     ]
+         */
+        targetCrops?: Record<string, never>;
+      };
+    };
+    PostFertilizer: {
+      /** @example Fertilizer */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the fertilizer.
+       * @example Manure
+       */
+      name: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the fertilizer.
+       * @example Monsanto
+       */
+      companyName: string;
+      /**
+       * @description Specifies the state of the fertilizer.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * @description The type for the fertilizer.
+       * @enum {string}
+       */
+      type: 'MANURE' | 'FERTILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_Fertilizers'][];
+      /**
+       * @description production registration number
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+    };
+    PostReferenceChemical: {
+      /**
+       * @description Country of the product to which it belongs
+       * @example USA
+       */
+      countryCode: string;
+    } & components['schemas']['CommonReferenceChemical'];
+    PostReferenceFertilizer: {
+      /**
+       * @description Country of the product to which it belongs
+       * @example USA
+       */
+      countryCode?: string;
+    } & components['schemas']['CommonPostReferenceFertilizer'];
     PostVariety: {
       /** @example Variety */
       '@type'?: unknown;
@@ -845,6 +4435,183 @@ export interface components {
        * Format: date-time
        * @description product modified time
        * @example 2018-04-06T15:12:52.910Z
+       */
+      modifiedTime?: string;
+    };
+    ProductCompany: {
+      /**
+       * @description The name of the input manufacturer for chemical, fertilizer or variety.
+       * @example Monsanto
+       */
+      companyName: string;
+      /** @example ProductCompany */
+      '@type': unknown;
+    };
+    PutChemical: {
+      /** @example Chemical */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the chemical.
+       * @example Round Up
+       */
+      name: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the chemical.
+       * @example Monsanto
+       */
+      companyName: string;
+      /**
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description The type for the chemical. Manure and Fertilizer are deprecated, please use fertilizer endpoints.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the chemical from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2017-03-21T21:12:53.865Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2018-04-06T15:12:52.910Z
+       */
+      readonly modifiedTime?: string;
+      /**
+       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed'][];
+    };
+    PutFertilizer: {
+      /** @example Fertilizer */
+      '@type'?: unknown;
+      /**
+       * @description The common name of the fertilizer.
+       * @example Manure
+       */
+      name: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description The brand of the fertilizer.
+       * @example Monsanto
+       */
+      companyName: string;
+      /**
+       * @description Specifies the state of the fertilizer.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * @description The type for the fertilizer.
+       * @enum {string}
+       */
+      type: 'MANURE' | 'FERTILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * @description Whether or not this product is actively used in your organization. A value of true will hide the fertilizer from display in your organization. A carrier cannot be archived if it is being used in an active tank mix.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * Format: double
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example 3.14
+       */
+      liquidWeight?: number;
+      /**
+       * @description Optional. Will be present if the fertilizer's materialClassification is LIQUID and has density information available.
+       * @example lb/gal
+       */
+      weightUnit?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_Fertilizers'][];
+      /**
+       * @description production registration number
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
        */
       modifiedTime?: string;
     };
@@ -889,6 +4656,216 @@ export interface components {
        */
       modifiedTime?: string;
     };
+    /** @description Data structure for record metadata capturing information about the creation and last update of an entity. For more information on Record Metadata visit [this confluence page](https://confluence.deere.com/x/eSGLDg). NOTES * Some attributes are only visible if the API Client has the required license. * Attributes dealing with modification will be null if the entity has been created but not modified. (Some legacy data may have set the create and modify timestamp at time of creation.) */
+    RecordMetadata: {
+      /**
+       * @description Timestamp of entity creation
+       * @example 2018-04-30T10:23:50.000Z
+       */
+      readonly userCreationTimestamp?: string;
+      /**
+       * @description Timestamp of entity modification
+       * @example 2018-05-01T08:11:23.000Z
+       */
+      readonly userLastModifiedTimestamp?: string;
+    };
+    ReferenceChemical: components['schemas']['BaseResource_Chemicals'] & {
+      /** @example ReferenceChemical */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the reference chemical.
+       * @example 8fb34898-64f5-5a1e-a698-34ab348220a7
+       */
+      id?: string;
+      /**
+       * @description The common name of the reference chemical.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example 8fb34898-64f5-5a1e-a698-34ab348220a7
+       */
+      referenceId?: string;
+      /**
+       * @description The state of reference chemical.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description Specifies the region the reference chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Specifies the type of chemical.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * Format: integer
+       * @description The source system for the reference chemical.
+       * @example 3
+       */
+      sourceSystem?: string;
+      /**
+       * @description The source system identifier for the reference chemical.
+       * @example 905P24925
+       */
+      sourceSystemProductId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * @description product registration id
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+    };
+    ReferenceChemicalCollection: components['schemas']['CollectionBase_Chemicals'] & {
+      values?: components['schemas']['ReferenceChemical'][];
+    };
+    ReferenceFertilizer: components['schemas']['BaseResource'] & {
+      /** @example Fertilizer */
+      '@type'?: string;
+      /**
+       * @description The primary identifier for the fertilizer.
+       * @example beaa8d07-1cef-4eea-99b6-19f129e988ed
+       */
+      id?: string;
+      /**
+       * @description The common name of the reference fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description Specifies the state of the chemical.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * @description Specifies the region the reference fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Specifies the type of the reference fertilizer.
+       * @example MANURE
+       * @enum {string}
+       */
+      type?: 'MANURE' | 'FERTILIZER';
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example beaa8d07-1cef-4eea-99b6-19f129e988ed
+       */
+      referenceId?: string;
+      /**
+       * @description production registration number details
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * Format: integer
+       * @description The source system for the reference fertilizer.
+       * @example 3
+       */
+      sourceSystem?: string;
+      /**
+       * @description The source system identifier for the reference fertilizer.
+       * @example 905P24925
+       */
+      sourceSystemProductId?: string;
+    };
+    ReferenceFertilizerCollection: components['schemas']['CollectionBase_Fertilizers'] & {
+      values?: components['schemas']['ReferenceFertilizer'][];
+    };
     ReferenceProductOverrideStatus: {
       /**
        * @description Key for override parameter when setting overrides for a reference product
@@ -896,6 +4873,34 @@ export interface components {
        * @enum {string}
        */
       key?: 'archived';
+      /**
+       * @description Whether or not the override was successfully applied
+       * @example true
+       */
+      success?: boolean;
+      errors?: components['schemas']['Errors'];
+    };
+    ReferenceProductOverrideStatus_Chemicals: {
+      /**
+       * @description Key for override parameter when setting overrides for a reference product
+       * @example isCarrier
+       * @enum {string}
+       */
+      key?: 'isCarrier' | 'archived' | 'registration (chemicals and fertilizers only)';
+      /**
+       * @description Whether or not the override was successfully applied
+       * @example true
+       */
+      success?: boolean;
+      errors?: components['schemas']['Errors'];
+    };
+    ReferenceProductOverrideStatus_Fertilizers: {
+      /**
+       * @description Key for override parameter when setting overrides for a reference product
+       * @example isCarrier
+       * @enum {string}
+       */
+      key?: 'isCarrier' | 'archived' | 'registration (chemicals and fertilizers only)';
       /**
        * @description Whether or not the override was successfully applied
        * @example true
@@ -982,6 +4987,716 @@ export interface components {
     };
     ReferenceVarietyCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['ReferenceVariety'][];
+    };
+    TankMix: {
+      /**
+       * @description The type of the tank mix.
+       * @example TankMix
+       */
+      '@type'?: string;
+      /**
+       * @description The name of the tank mix.
+       * @example TankMix_with_All_Crop
+       */
+      name?: string;
+      /**
+       * @description Notes about the Tank mix.
+       * @example Mix in the carrier last
+       */
+      notes?: string;
+      solutionRate?: {
+        /**
+         * @description The type of the measurement.
+         * @example MeasurementAsDouble
+         */
+        '@type'?: string;
+        /**
+         * Format: double
+         * @description The value of the measurement as a double.
+         * @example 5
+         */
+        valueAsDouble?: number;
+        /**
+         * @description The domain ID for the measurement.
+         * @example vrSolutionRateLiquid
+         */
+        vrDomainId?: string;
+        /**
+         * @description The unit of measure for the value.
+         * @example gal1ac-1
+         */
+        unit?: string;
+      };
+      volume?: {
+        /**
+         * @description The type of the measurement.
+         * @example MeasurementAsDouble
+         */
+        '@type'?: string;
+        /**
+         * Format: double
+         * @description The volume value as a double.
+         * @example 1200
+         */
+        valueAsDouble?: number;
+        /**
+         * @description The domain ID for the volume measurement.
+         * @example vrSolutionRateLiquid
+         */
+        vrDomainId?: string;
+        /**
+         * @description The unit of measure for the volume.
+         * @example gal
+         */
+        unit?: string;
+      };
+      carrier?: {
+        /**
+         * @description The type of the tank mix component.
+         * @example TankMixComponent
+         */
+        '@type'?: string;
+        rate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The rate value as a double.
+           * @example 4.465466816647919
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the rate measurement.
+           * @example vrSolutionRateLiquid
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the rate.
+           * @example gal1ac-1
+           */
+          unit?: string;
+        };
+        links?: {
+          /**
+           * @description The type of the link.
+           * @example Link
+           */
+          '@type'?: string;
+          /**
+           * @description The relationship of the link.
+           * @example fertilizer
+           */
+          rel?: string;
+          /**
+           * @description The URI of the linked resource.
+           * @example https://sandboxapi.deere.com/platform/organizations/254751/fertilizers/57fb0c12-257d-496c-84ef-e300012387d1
+           */
+          uri?: string;
+        }[];
+      };
+      components?: {
+        /**
+         * @description The type of the tank mix component.
+         * @example TankMixComponent
+         */
+        '@type'?: string;
+        rate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The rate value as a double.
+           * @example 3
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the rate measurement.
+           * @example vrSolutionRateMass
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the rate.
+           * @example kg1ha-1
+           */
+          unit?: string;
+        };
+        links?: {
+          /**
+           * @description The type of the link.
+           * @example Link
+           */
+          '@type'?: string;
+          /**
+           * @description The relationship of the link either fertilizer or chemical.
+           * @example fertilizer
+           */
+          rel?: string;
+          /**
+           * @description The URI of the linked resource.
+           * @example https://sandboxapi.deere.com/platform/organizations/254751/fertilizers/00ae89c2-2213-4f34-aa57-40cd0191023b
+           */
+          uri?: string;
+        }[];
+      }[];
+      /**
+       * @description Whether or not this tank mix is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description Material classification of the tank mix.
+       * @example LIQUID
+       */
+      materialClassification?: string;
+      /**
+       * @description The name of the crop that this variety is associated with.
+       * @example [
+       *       "CORN_WET",
+       *       "ALFALFA"
+       *     ]
+       */
+      targetCrops?: Record<string, never>;
+    };
+    TankMixCollection: {
+      /**
+       * @description A new x-deere-signature response header will be included if the response has changed since last api call.
+       * @example 3b5392615e4b4e1c92013026f47109bb
+       */
+      'x-deere-signature'?: string;
+      /**
+       * @description The type of the tank mix.
+       * @example TankMix
+       */
+      '@type'?: string;
+      /**
+       * @description The name of the tank mix.
+       * @example TankMix_with_All_Crop
+       */
+      name?: string;
+      /**
+       * @description The unique identifier for the organization.
+       * @example 0585cd6d-898a-4298-ac09-a61db88d9e7d
+       */
+      orgUniqueId?: string;
+      solutionRate?: {
+        /**
+         * @description The type of the measurement.
+         * @example MeasurementAsDouble
+         */
+        '@type'?: string;
+        /**
+         * Format: double
+         * @description The value of the measurement as a double.
+         * @example 100
+         */
+        valueAsDouble?: number;
+        /**
+         * @description The domain ID for the measurement.
+         * @example vrSolutionRateLiquid
+         */
+        vrDomainId?: string;
+        /**
+         * @description The unit of measure for the value.
+         * @example gal1ac-1
+         */
+        unit?: string;
+      };
+      volume?: {
+        /**
+         * @description The type of the measurement.
+         * @example MeasurementAsDouble
+         */
+        '@type'?: string;
+        /**
+         * Format: double
+         * @description The volume value as a double.
+         * @example 1200
+         */
+        valueAsDouble?: number;
+        /**
+         * @description The domain ID for the volume measurement.
+         * @example vrSolutionRateLiquid
+         */
+        vrDomainId?: string;
+        /**
+         * @description The unit of measure for the volume.
+         * @example gal
+         */
+        unit?: string;
+      };
+      carrier?: {
+        /**
+         * @description The type of the tank mix component.
+         * @example TankMixComponent
+         */
+        '@type'?: string;
+        rate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The rate value as a double.
+           * @example 90
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the rate measurement.
+           * @example vrSolutionRateLiquid
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the rate.
+           * @example gal1ac-1
+           */
+          unit?: string;
+        };
+        chemical?: {
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example Fertilizer
+           */
+          '@type'?: string;
+          links?: {
+            /**
+             * @description The type of the link.
+             * @example Link
+             */
+            '@type'?: string;
+            /**
+             * @description The relationship of the link.
+             * @example self
+             */
+            rel?: string;
+            /**
+             * @description The URI of the linked resource.
+             * @example https://sandboxapi.deere.com/platform/organizations/132456/fertilizers/3678dedb-55d4-4c6a-a93a-24e909c70bfd
+             */
+            uri?: string;
+          }[];
+          /**
+           * @description The identifier for the chemical/fertilizer.
+           * @example 3678dedb-55d4-4c6a-a93a-24e909c70bfd
+           */
+          id?: string;
+          /**
+           * @description The name of the chemical/fertilizer.
+           * @example 28-0-0 UAN
+           */
+          name?: string;
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example FERTILIZER
+           */
+          type?: string;
+          /**
+           * @description The category of the chemical/fertilizer.
+           * @example FERTILIZER
+           */
+          category?: string;
+          /**
+           * @description The name of the company.
+           * @example BASF
+           */
+          companyName?: string;
+          /**
+           * @description The EPA registration status.
+           * @example EXEMPT
+           */
+          epaRegistration?: string;
+          /**
+           * @description The registration status.
+           * @example EXEMPT
+           */
+          registration?: string;
+          /**
+           * @description The material classification.
+           * @example LIQUID
+           */
+          materialClassification?: string;
+          /**
+           * Format: date-time
+           * @description The time when the chemical/fertilizer was created.
+           * @example 2024-11-07T06:47:38.220Z
+           */
+          createdTime?: string;
+          /**
+           * @description The carrier ID.
+           * @example 274bbd7b-24ae-11ee-9389-123df1de64f7
+           */
+          carrierId?: string;
+          /**
+           * @description The reference ID.
+           * @example 3678dedb-55d4-4c6a-a93a-24e909c70bfd
+           */
+          referenceId?: string;
+          /**
+           * @description The reference GUID.
+           * @example 3678dedb-55d4-4c6a-a93a-24e909c70bfd
+           */
+          referenceGuid?: string;
+          /**
+           * @description Whether the chemical/fertilizer is a carrier.
+           * @example true
+           */
+          carrier?: boolean;
+          /**
+           * @description Whether the chemical/fertilizer is archived.
+           * @example false
+           */
+          archived?: boolean;
+          /**
+           * @description Whether the chemical/fertilizer is restricted use.
+           * @example false
+           */
+          restrictedUse?: boolean;
+          /**
+           * @description Country of the product to which it belongs
+           * @example USA
+           */
+          countryCode?: string;
+          agencyRegistrations?: {
+            /**
+             * @description The type of the agency registration.
+             * @example AgencyRegistration
+             */
+            '@type'?: string;
+            links?: {
+              /**
+               * @description The type of the link.
+               * @example Link
+               */
+              '@type'?: string;
+              /**
+               * @description The relationship of the link.
+               * @example agency
+               */
+              rel?: string;
+              /**
+               * @description The URI of the linked resource.
+               * @example https://sandboxapi.deere.com/platform/agencies/8fb34898-64f5-5a1e-a698-34ab348220a7
+               */
+              uri?: string;
+            }[];
+            /**
+             * @description The registration ID.
+             * @example EXEMPT
+             */
+            registrationId?: string;
+          }[];
+        };
+        links?: {
+          /**
+           * @description The type of the link.
+           * @example Link
+           */
+          '@type'?: string;
+          /**
+           * @description The relationship of the link.
+           * @example fertilizer
+           */
+          rel?: string;
+          /**
+           * @description The URI of the linked resource.
+           * @example https://sandboxapi.deere.com/platform/organizations/132456/fertilizers/3678dedb-55d4-4c6a-a93a-24e909c70bfd
+           */
+          uri?: string;
+        }[];
+      };
+      components?: {
+        /**
+         * @description The type of the tank mix component.
+         * @example TankMixComponent
+         */
+        '@type'?: string;
+        rate?: {
+          /**
+           * @description The type of the measurement.
+           * @example MeasurementAsDouble
+           */
+          '@type'?: string;
+          /**
+           * Format: double
+           * @description The rate value as a double.
+           * @example 10
+           */
+          valueAsDouble?: number;
+          /**
+           * @description The domain ID for the rate measurement.
+           * @example vrSolutionRateLiquid
+           */
+          vrDomainId?: string;
+          /**
+           * @description The unit of measure for the rate.
+           * @example gal1ac-1
+           */
+          unit?: string;
+        };
+        chemical?: {
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example Chemical
+           */
+          '@type'?: string;
+          links?: {
+            /**
+             * @description The type of the link.
+             * @example Link
+             */
+            '@type'?: string;
+            /**
+             * @description The relationship of the link.
+             * @example self
+             */
+            rel?: string;
+            /**
+             * @description The URI of the linked resource.
+             * @example https://sandboxapi.deere.com/platform/organizations/123456/chemicals/a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+             */
+            uri?: string;
+          }[];
+          /**
+           * @description The identifier for the chemical/fertilizer.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          id?: string;
+          /**
+           * @description The name of the chemical/fertilizer.
+           * @example TELIA
+           */
+          name?: string;
+          /**
+           * @description The type of the chemical/fertilizer.
+           * @example FUNGICIDE
+           */
+          type?: string;
+          /**
+           * @description The category of the chemical/fertilizer.
+           * @example CHEMICAL
+           */
+          category?: string;
+          /**
+           * @description The name of the company.
+           * @example BASF
+           */
+          companyName?: string;
+          /**
+           * @description The EPA registration status.
+           * @example EXEMPT
+           */
+          epaRegistration?: string;
+          /**
+           * @description The registration status.
+           * @example EXEMPT
+           */
+          registration?: string;
+          /**
+           * Format: date-time
+           * @description The time when the chemical/fertilizer was modified.
+           * @example 2024-08-21T09:25:24.220763Z
+           */
+          modifiedTime?: string;
+          /**
+           * @description The carrier ID.
+           * @example 58984d7a-126e-4d31-98e9-1ed65a582d91
+           */
+          carrierId?: string;
+          /**
+           * @description The reference ID.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          referenceId?: string;
+          /**
+           * @description The reference GUID.
+           * @example a3aaa1b4-6c5b-4b04-ac39-6d316be7fd8d
+           */
+          referenceGuid?: string;
+          /**
+           * @description Whether the chemical/fertilizer is a carrier.
+           * @example true
+           */
+          carrier?: boolean;
+          /**
+           * @description Whether the chemical/fertilizer is archived.
+           * @example false
+           */
+          archived?: boolean;
+          /**
+           * @description Whether the chemical/fertilizer is restricted use.
+           * @example false
+           */
+          restrictedUse?: boolean;
+          /**
+           * @description Country of the product to which it belongs
+           * @example USA
+           */
+          countryCode?: string;
+          agencyRegistrations?: {
+            /**
+             * @description The type of the agency registration.
+             * @example AgencyRegistration
+             */
+            '@type'?: string;
+            links?: {
+              /**
+               * @description The type of the link.
+               * @example Link
+               */
+              '@type'?: string;
+              /**
+               * @description The relationship of the link.
+               * @example agency
+               */
+              rel?: string;
+              /**
+               * @description The URI of the linked resource.
+               * @example https://sandboxapi.deere.com/platform/agencies/8fb34898-64f5-5a1e-a698-34ab348220a7
+               */
+              uri?: string;
+            }[];
+            /**
+             * @description The registration ID.
+             * @example EXEMPT
+             */
+            registrationId?: string;
+          }[];
+        };
+      }[];
+      /**
+       * @description Notes about the tank mix.
+       * @example this is tankmix notes
+       */
+      notes?: string;
+      /**
+       * @description Whether or not this tank mix is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * Format: date-time
+       * @description The time when the tank mix was created.
+       * @example 2024-11-07T06:47:39.246Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description The time when the tank mix was modified.
+       * @example 2024-11-07T06:47:39.246Z
+       */
+      modifiedTime?: string;
+      /**
+       * @description Material classification of the tank mix.
+       * @example LIQUID
+       */
+      materialClassification?: string;
+      /**
+       * @description The name of the crop that this variety is associated with.
+       * @example [
+       *       "CORN_WET",
+       *       "ALFALFA"
+       *     ]
+       */
+      targetCrops?: Record<string, never>;
+      links?: {
+        /**
+         * @description The type of the link.
+         * @example Link
+         */
+        '@type'?: string;
+        /**
+         * @description The relationship of the link.
+         * @example self
+         */
+        rel?: string;
+        /**
+         * @description The URI of the linked resource.
+         * @example https://sandboxapi.deere.com/platform/organizations/123456/tankMixes/0585cd6d-898a-4298-ac09-a61db88d9e7d
+         */
+        uri?: string;
+      }[];
+    };
+    Updated: {
+      /**
+       * @description The common name of this product.
+       * @example Tide Propiconazole 41.8EC
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Tide International USA, Inc.turer
+       */
+      companyName?: string;
+      /**
+       * @description The type of chemical
+       * @example HERBICIDE
+       */
+      type?: string;
+      /**
+       * @description Whether or not this product is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description The product form. This is required during updates (as it may currently be null), but cannot be changed once set.
+       * @example DRY
+       */
+      materialClassification?: string;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * @description Registration Id
+       * @example 0084229-00011-AA-0000000
+       */
+      registrationId?: string;
+    };
+    Updated_Fertilizers: {
+      /**
+       * @description The common name of this product.
+       * @example Tide Propiconazole 41.8EC
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Tide International USA, Inc.
+       */
+      companyName?: string;
+      /**
+       * @description The type of fertilizer
+       * @example FERTILIZER
+       */
+      type?: string;
+      /**
+       * @description Whether or not this product is actively used.
+       * @example false
+       */
+      archived?: boolean;
+      /**
+       * @description The product form. This is required during updates (as it may currently be null), but cannot be changed once set.
+       * @example DRY
+       */
+      materialClassification?: string;
+      /**
+       * @description Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context.
+       * @example false
+       */
+      carrier?: boolean;
+      /**
+       * @description Registration Id
+       * @example 0084229-00011-AA-0000000
+       */
+      registrationId?: string;
+      activeIngredients?: unknown[] & components['schemas']['ActiveIngredientEmbed_Fertilizers'];
     };
     Variety: components['schemas']['BaseResource'] & {
       /** @example Variety */
@@ -1118,6 +5833,7 @@ export interface components {
        */
       archived?: boolean;
     };
+    agencyRegistrations: unknown[];
   };
   responses: {
     /** @description Created */
@@ -1129,8 +5845,22 @@ export interface components {
     };
   };
   parameters: {
+    /** @description Translates the name to the desired locale if supported. Follows RFC-3282 specifications (https://datatracker.ietf.org/doc/html/rfc3282). */
+    AcceptLanguageRequestHeader: string;
+    /** @description Determines the response schema. */
+    AcceptRequestHeader: 'application/json' | 'application/vnd.deere.axiom.v3+json';
     /** @description Filters the list based on archive status. Accepted values are ARCHIVED, AVAILABLE, and ALL. The default behavior is to return only available (non-archived) varieties. */
     ArchiveStatus: 'AVAILABLE' | 'ARCHIVED' | 'ALL';
+    /** @description An embeddable list of properties which are optional by default. */
+    ChemicalEmbed:
+      | 'activeIngredients'
+      | 'availableRegistrations'
+      | 'documents'
+      | 'showMergedProducts';
+    /** @description The chemical Id to find. */
+    ChemicalId: string;
+    /** @description The list of Rels, for which objects should be included in the response payload. */
+    DryBlendEmbed: 'product';
     /**
      * @description A unique identifier for an entity formatted as a uuid.
      * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
@@ -1140,12 +5870,44 @@ export interface components {
     Embed: string;
     /** @description Embeds extra information in the variety response */
     Embed2: string;
+    /** @description Embeds extra information in the tank mix response */
+    Embed2_TankMix: string;
+    /** @description Embeds extra information in the org chemical response */
+    Embed_Chemicals: string;
+    /** @description Embeds extra information in the fertilizer response. */
+    Embed_Fertilizers: string;
+    /** @description Embeds extra information in the org tank mixes response */
+    Embed_TankMix: string;
+    /** @description Filters the results by the provided entity type. Example: CHEMICAL */
+    EntityTypeQueryParam: 'CHEMICAL' | 'FERTILIZER';
+    /** @description An embeddable list of properties which are optional by default. */
+    FertilizerEmbed:
+      | 'activeIngredients'
+      | 'availableRegistrations'
+      | 'documents'
+      | 'showMergedProducts';
+    /** @description The fertilizer Id to find. */
+    FertilizerId: string;
+    /** @description TankMixes id. */
+    Id: string;
     /** @description The organization owning the varieties. */
     OrgId: number;
+    /** @description The organization owning the chemicals. */
+    OrgId2: number;
+    /** @description The owning organization of the product. */
+    OrgId2_Fertilizers: number;
+    /** @description The organization owning the chemicals. */
+    OrgId_Chemicals: number;
+    /** @description The organization owning the fertilizers. */
+    OrgId_Fertilizers: number;
+    /** @description The organization owning the tank mix. */
+    OrgId_TankMix: number;
     /** @description The identifier of the Organization. */
     OrganizationID: number;
     /** @description Filter results based on status */
     RecordFilter: string;
+    /** @description The list of Rels, for which objects should be included in the response payload. */
+    TankMixEmbed: 'chemical';
     /** @description An embeddable list of properties which are optional by default. */
     VarietyEmbed: 'documents' | 'showMergedProducts';
     /** @description The variety Id to find. */
@@ -1154,10 +5916,17 @@ export interface components {
     VarietyId2: string;
     /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
     'X-deere-signature': string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same GUID next time. */
+    'X-deere-signature_Chemicals': string;
+    /** @description x-deere-signature should be managed by the client per user per API. For a new user/new API, the first request will have a blank value for x-deere-signature. Changes can be tracked with the x-deere-signature returned in the response. If the response has not changed since the last API call, the value of x-deere-signature is not changed and the client should use the same String Token next time. */
+    'X-deere-signature_Fertilizers': string;
   };
   requestBodies: never;
   headers: never;
   pathItems: never;
 }
 export type $defs = Record<string, never>;
+type WithRequired<T, K extends keyof T> = T & {
+  [P in K]-?: T[P];
+};
 export type operations = Record<string, never>;
