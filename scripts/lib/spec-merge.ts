@@ -57,6 +57,14 @@ export interface MergeOptions {
    * guard.
    */
   maxRenameIterations?: number;
+  /**
+   * Invoked once per declaring document whose servers block carries a
+   * non-deere.com placeholder URL (a documentation-editor default such as
+   * `https://server.com`). The message names the slug, the document, and the
+   * offending URL(s). fetch-specs wires this to the console so CI logs surface
+   * the spec-quality defect; unit tests that do not assert on it leave it unset.
+   */
+  onWarning?: (message: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -418,29 +426,136 @@ function foldTopLevelExtras(merged: Record<string, unknown>, entry: OrderedDoc):
   }
 }
 
+// ---------------------------------------------------------------------------
+// Servers reconciliation (family-aware)
+//
+// John Deere's portal documents for one slug carry servers blocks that differ
+// only as environment instances or documentation defects of the single
+// "platform" family (`https://{environment}.deere.com/platform`): an `api` vs
+// `partnerapi` host, a dropped `/platform` segment, omitted `variables`/`enum`,
+// or a bare `https://server.com` editor placeholder. Declaring documents that
+// all belong to the platform family resolve to the primary's block (which
+// fix-specs later normalizes to the templated form); a genuinely different
+// server family (a deere host on a non-platform path, or mixed families) still
+// refuses to merge, preserving the trust boundary against routing one family's
+// endpoints through another family's host.
+// ---------------------------------------------------------------------------
+
+type ServerFamily = 'platform' | 'other' | 'junk';
+
+/** The `url` string of a server entry, or undefined if it has none. */
+function serverUrl(entry: unknown): string | undefined {
+  const url = asObject(entry)?.url;
+  return typeof url === 'string' ? url : undefined;
+}
+
+/** Parses to an https URL whose host ends in `.deere.com` (case-insensitive). */
+function isDeereHttpsUrl(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  return parsed.protocol === 'https:' && parsed.hostname.toLowerCase().endsWith('.deere.com');
+}
+
+/**
+ * A deere.com https URL on the shared platform family: path `/platform` or a
+ * bare host (`/` or empty). Node's URL parser accepts the templated
+ * `https://{environment}.deere.com/platform` form, reporting host
+ * `{environment}.deere.com` and path `/platform`, so the templated and static
+ * platform shapes classify identically here.
+ */
+function isPlatformFamilyUrl(url: string): boolean {
+  if (!isDeereHttpsUrl(url)) return false;
+  const path = new URL(url).pathname.replace(/\/$/, '');
+  return path === '' || path === '/platform';
+}
+
+interface ServerClassification {
+  family: ServerFamily;
+  /** URLs that do not resolve to a deere.com host (editor placeholders). */
+  placeholders: string[];
+}
+
+/**
+ * Classify one document's servers list. Non-deere URLs are documentation-editor
+ * placeholders (`https://server.com`): they are collected as `placeholders` and
+ * ignored for the family decision, so a stray placeholder never forces an
+ * otherwise-platform document into a conflict. A list whose only URLs are
+ * placeholders declares nothing usable (`junk`). Otherwise the deere URLs
+ * decide: all on the platform family -> `platform`, any deere host on a
+ * non-platform path -> `other`.
+ */
+function classifyServers(servers: readonly unknown[]): ServerClassification {
+  const placeholders: string[] = [];
+  const deereUrls: string[] = [];
+  for (const entry of servers) {
+    const url = serverUrl(entry);
+    if (url === undefined) continue;
+    if (isDeereHttpsUrl(url)) deereUrls.push(url);
+    else placeholders.push(url);
+  }
+  if (deereUrls.length === 0) return { family: 'junk', placeholders };
+  return { family: deereUrls.every(isPlatformFamilyUrl) ? 'platform' : 'other', placeholders };
+}
+
 function applyServers(
   slug: string,
   merged: Record<string, unknown>,
-  docs: readonly OrderedDoc[]
+  docs: readonly OrderedDoc[],
+  onWarning?: (message: string) => void
 ): void {
-  const declared = docs
+  const rawDeclared = docs
     .map((entry) => ({ endPointName: entry.endPointName, servers: asObject(entry.doc)?.servers }))
     .filter(
       (entry): entry is { endPointName: string; servers: unknown[] } =>
         Array.isArray(entry.servers) && entry.servers.length > 0
     );
-  if (declared.length === 0) return;
+  if (rawDeclared.length === 0) return;
 
-  const reference = declared[0];
-  for (const other of declared.slice(1)) {
-    if (!deepEqualUnordered(other.servers, reference.servers)) {
-      throw new Error(
-        `mergeSpecDocs: slug "${slug}": documents "${reference.endPointName}" and ` +
-          `"${other.endPointName}" declare different servers blocks. All declaring ` +
-          `documents must agree; a human must reconcile them.`
+  // Classify each declaring document. A placeholder-only block declares nothing
+  // usable and is dropped to non-declaring (it inherits the merged block); every
+  // placeholder, dropped or merely ignored, is surfaced through onWarning so CI
+  // logs the spec-quality defect.
+  const declared: Array<{ endPointName: string; servers: unknown[]; family: ServerFamily }> = [];
+  for (const entry of rawDeclared) {
+    const { family, placeholders } = classifyServers(entry.servers);
+    if (placeholders.length > 0) {
+      const urls = placeholders.join(', ');
+      onWarning?.(
+        family === 'junk'
+          ? `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares only ` +
+              `placeholder server URL(s) with no deere.com host (${urls}); treating it as ` +
+              `non-declaring so it inherits the merged servers.`
+          : `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares placeholder ` +
+              `server URL(s) with no deere.com host (${urls}); ignoring them for servers reconciliation.`
       );
     }
+    if (family === 'junk') continue;
+    declared.push({ endPointName: entry.endPointName, servers: entry.servers, family });
   }
+  if (declared.length === 0) return;
+
+  // The primary declares first in merge order, so declared[0] is the primary's
+  // block when the primary declares, else the first declaring document.
+  const reference = declared[0];
+  const divergent = declared
+    .slice(1)
+    .find((other) => !deepEqualUnordered(other.servers, reference.servers));
+
+  if (divergent && declared.some((entry) => entry.family === 'other')) {
+    throw new Error(
+      `mergeSpecDocs: slug "${slug}": documents "${reference.endPointName}" and ` +
+        `"${divergent.endPointName}" declare different servers blocks. All declaring ` +
+        `documents must agree; a human must reconcile them.`
+    );
+  }
+
+  // The deep-equal fast path and the platform-family spread both resolve here to
+  // the primary's (== first declaring) block. fix-specs owns any templated-form
+  // normalization downstream; applyServers only selects, it never synthesizes.
   merged.servers = reference.servers;
 }
 
@@ -525,7 +640,7 @@ export function mergeSpecDocs(
     foldTopLevelExtras(merged, entry);
   }
 
-  applyServers(slug, merged, ordered);
+  applyServers(slug, merged, ordered, options.onWarning);
   applyTags(merged, ordered);
 
   merged['x-source-documents'] = ordered.map((entry) => ({

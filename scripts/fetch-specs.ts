@@ -174,7 +174,10 @@ async function main() {
       continue;
     }
 
-    const merged = parsedDocs.length > 1 ? mergeSpecDocs(slug, parsedDocs) : parsedDocs[0].doc;
+    const merged =
+      parsedDocs.length > 1
+        ? mergeSpecDocs(slug, parsedDocs, { onWarning: (message) => console.log(message) })
+        : parsedDocs[0].doc;
     const canonical = canonicalizeSpec(merged);
 
     // Raw files are now re-serialized canonical YAML rather than

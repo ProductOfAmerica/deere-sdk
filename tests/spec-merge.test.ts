@@ -442,7 +442,137 @@ describe('mergeSpecDocs: servers', () => {
     assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
   });
 
-  it('throws when two docs declare conflicting servers, naming both endpoints', () => {
+  it('resolves platform-family host variants (api vs partnerapi) to the primary block', () => {
+    // The machine-locations case: location-history declares api.deere.com,
+    // breadcrumbs declares partnerapi.deere.com. Both are environment instances
+    // of the one platform family, so the primary (api) wins with no throw;
+    // fix-specs later normalizes the single static block to the templated form.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://partnerapi.deere.com/platform' }],
+    };
+    const merged = mergeSpecDocs('machine-locations', [
+      { endPointName: 'location-history', id: 1, doc: primary },
+      { endPointName: 'breadcrumbs', id: 2, doc: secondary },
+    ]) as MergedSpec;
+
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
+  });
+
+  it('treats a bare deere.com host (no /platform path) as platform-family', () => {
+    // active-ingredients ships a defect: a deere.com host with no /platform
+    // path. It must count as platform-family (not a different family), so
+    // pairing it with a platform block does not throw and the primary wins.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://sandboxapi.deere.com' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const merged = mergeSpecDocs('products', [
+      { endPointName: 'varieties', id: 1, doc: primary },
+      { endPointName: 'chemicals', id: 2, doc: secondary },
+    ]) as MergedSpec;
+
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://sandboxapi.deere.com' }]);
+  });
+
+  it('resolves a templated + static platform mix to the primary block', () => {
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [
+        {
+          url: 'https://{environment}.deere.com/platform',
+          variables: { environment: { default: 'api', enum: ['api', 'sandboxapi'] } },
+        },
+      ],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const merged = mergeSpecDocs('products', [
+      { endPointName: 'varieties', id: 1, doc: primary },
+      { endPointName: 'chemicals', id: 2, doc: secondary },
+    ]) as MergedSpec;
+
+    assert.deepStrictEqual(merged.servers, [
+      {
+        url: 'https://{environment}.deere.com/platform',
+        variables: { environment: { default: 'api', enum: ['api', 'sandboxapi'] } },
+      },
+    ]);
+  });
+
+  it('drops a placeholder-only servers block to non-declaring and warns', () => {
+    // The products `documents` case: a bare `https://server.com` editor default.
+    // It resolves to no deere.com host, so it is treated as non-declaring (it
+    // inherits the merged block) and surfaces a warning naming the slug and doc.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://server.com', description: 'New server' }],
+    };
+    const warnings: string[] = [];
+    const merged = mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'documents', id: 2, doc: secondary },
+      ],
+      { onWarning: (message: string) => warnings.push(message) }
+    ) as MergedSpec;
+
+    // The placeholder block is ignored; the primary's block is the merged servers.
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
+    // Exactly one warning, naming the slug, the offending doc, and the junk url.
+    assert.strictEqual(warnings.length, 1);
+    assert.ok(/products/.test(warnings[0]), 'warning names the slug');
+    assert.ok(/documents/.test(warnings[0]), 'warning names the endPointName');
+    assert.ok(/server\.com/.test(warnings[0]), 'warning names the placeholder url');
+  });
+
+  it('keeps two identical OTHER-family blocks without throwing', () => {
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://equipmentapi.deere.com/isg' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://equipmentapi.deere.com/isg' }],
+    };
+    const merged = mergeSpecDocs('products', [
+      { endPointName: 'varieties', id: 1, doc: primary },
+      { endPointName: 'chemicals', id: 2, doc: secondary },
+    ]) as MergedSpec;
+
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://equipmentapi.deere.com/isg' }]);
+  });
+
+  it('throws when a declaring doc is a different server family, naming both endpoints', () => {
+    // Genuine cross-family divergence still refuses to merge: routing one
+    // family's endpoints through another family's host is the v1-class bug this
+    // guard prevents. equipmentapi.deere.com/isg is a deere host on a
+    // non-platform path, so it is OTHER, not a platform-family variant.
     const primary = {
       info: {},
       paths: {},
