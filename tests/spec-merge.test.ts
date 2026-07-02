@@ -667,6 +667,42 @@ describe('mergeSpecDocs: servers', () => {
     assert.ok(!/no deere\.com host/.test(warnings[0]), 'does not misstate the reason');
   });
 
+  it('warns once for a mixed block that pairs a good platform url with a url-less entry', () => {
+    // A block with both a usable platform-family url and a url-less entry must
+    // still classify platform (the good url decides the family, so the trust
+    // decision is unaffected), but the url-less entry must not be silently
+    // dropped: it is a genuine spec defect distinct from the all-bad blocks the
+    // other warning tests above cover, which collapse to junk classification.
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }, { description: 'broken' }],
+    };
+    const warnings: string[] = [];
+    const merged = mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'documents', id: 2, doc: secondary },
+      ],
+      { onWarning: (message: string) => warnings.push(message) }
+    ) as MergedSpec;
+
+    // Still platform-family, so the merge succeeds with the primary's block.
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
+    // The url-less entry is still surfaced, naming the slug, the offending
+    // document, and the rejected entry.
+    assert.strictEqual(warnings.length, 1);
+    assert.ok(/products/.test(warnings[0]), 'warning names the slug');
+    assert.ok(/documents/.test(warnings[0]), 'warning names the endPointName');
+    assert.ok(/an entry with no url/.test(warnings[0]), 'warning names the rejected entry');
+  });
+
   it('keeps two identical OTHER-family blocks without throwing', () => {
     const primary = {
       info: {},
