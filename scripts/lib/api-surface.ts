@@ -16,6 +16,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
+import { isRecord } from './spec-utils.js';
 
 // ============================================================================
 // Types
@@ -37,7 +38,7 @@ export interface ApiSurface {
 
 /** What naming needs to know about a single spec operation. */
 export interface SurfaceOp {
-  /** Synthesized upstream when the spec omits one; see extractOps. */
+  /** Synthesized when the spec omits one; see parseSpec in generate-sdk.ts. */
   operationId: string;
   method: 'get' | 'post' | 'put' | 'patch' | 'delete';
   path: string;
@@ -78,14 +79,9 @@ const OP_PATTERN = /^(GET|POST|PUT|PATCH|DELETE) (\/\S*)$/;
 const NAME_PATTERN = /^[a-z][a-zA-Z0-9]*$/;
 /** Generated-class field names a method name must never shadow. */
 const RESERVED_NAMES = new Set(['constructor', 'spec', 'client']);
-const METHODS: readonly SurfaceOp['method'][] = ['get', 'post', 'put', 'patch', 'delete'];
 
 function fail(detail: string): never {
   throw new Error(`api-surface: ${detail}`);
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function describeType(value: unknown): string {
@@ -139,7 +135,7 @@ export function loadApiSurface(filePath: string = DEFAULT_SURFACE_PATH): ApiSurf
 }
 
 function validateSurface(parsed: unknown, filePath: string): ApiSurface {
-  if (!isObject(parsed)) {
+  if (!isRecord(parsed)) {
     fail(
       `top-level value in ${filePath} must be a mapping with "version" and "specs", got ${describeType(parsed)}`
     );
@@ -149,7 +145,7 @@ function validateSurface(parsed: unknown, filePath: string): ApiSurface {
       `unsupported version ${JSON.stringify(parsed.version)} in ${filePath}; expected version: 1`
     );
   }
-  if (!isObject(parsed.specs)) {
+  if (!isRecord(parsed.specs)) {
     fail(
       `"specs" in ${filePath} must be a mapping of specName to entries, got ${describeType(parsed.specs)}`
     );
@@ -172,7 +168,7 @@ function validateSpecEntries(specName: string, entries: unknown): SurfaceEntry[]
   for (let i = 0; i < entries.length; i++) {
     const entry: unknown = entries[i];
     const where = `spec "${specName}" entry[${i}]`;
-    if (!isObject(entry)) {
+    if (!isRecord(entry)) {
       fail(`${where} must be a mapping with "op" and "name", got ${describeType(entry)}`);
     }
     if (typeof entry.op !== 'string' || entry.op.length === 0) {
@@ -312,42 +308,6 @@ function compareEntries(a: SurfaceEntry, b: SurfaceEntry): number {
 }
 
 // ============================================================================
-// Op extraction (shared by the seed script and the generator)
-// ============================================================================
-
-/**
- * Walk a parsed spec's `paths` and return one SurfaceOp per operation. The
- * operationId synthesis and isCollection rule replicate parseSpec in
- * generate-sdk.ts exactly, so the seed script and the generator see identical
- * operations. Missing / empty / malformed `paths` yield [].
- */
-export function extractOps(spec: unknown): SurfaceOp[] {
-  const ops: SurfaceOp[] = [];
-  if (!isObject(spec) || !isObject(spec.paths)) return ops;
-
-  for (const [path, pathItem] of Object.entries(spec.paths)) {
-    if (!isObject(pathItem)) continue;
-    for (const method of METHODS) {
-      const operation = pathItem[method];
-      if (!operation) continue;
-      const rawId = isObject(operation) ? operation.operationId : undefined;
-      const operationId =
-        typeof rawId === 'string' && rawId.length > 0
-          ? rawId
-          : `${method}${path.replace(/[^a-zA-Z]/g, '')}`;
-      ops.push({ operationId, method, path, isCollection: isCollectionEndpoint(path, method) });
-    }
-  }
-  return ops;
-}
-
-function isCollectionEndpoint(path: string, method: string): boolean {
-  if (method !== 'get') return false;
-  const lastSegment = path.split('/').pop() || '';
-  return !lastSegment.startsWith('{');
-}
-
-// ============================================================================
 // Name proposal for NEW operations (deterministic, no positional counters)
 // ============================================================================
 
@@ -386,7 +346,9 @@ function paramNames(path: string): string[] {
 
 /**
  * Deterministic name for a NEW operation. Verb by method (collection GETs use
- * `list`), then capHump of the last non-param segment; never a bare verb.
+ * `list`), then capHump of the last non-param segment; never a bare verb (a
+ * segment that is all punctuation strips to empty under capHump and falls back
+ * to the `Item` noun, so the result is never just the verb).
  * Tiebreak chain, first free wins: prepend preceding non-param segments
  * nearest-first up to the whole path, then append `By<LastParam>` to the
  * full-path candidate. If every candidate is taken, throw (a human picks a
@@ -404,7 +366,11 @@ export function proposeName(op: SurfaceOp, takenNames: ReadonlySet<string>): str
     candidates.push(`${verb}Item`);
   } else {
     for (let i = nonParam.length - 1; i >= 0; i--) {
-      candidates.push(`${verb}${nonParam.slice(i).map(capHump).join('')}`);
+      // capHump strips a segment with no alphanumerics to '', which would leave
+      // a bare verb like "get". Fall back to the same "Item" noun the
+      // no-segment branch uses so a proposed name is never just a verb.
+      const suffix = nonParam.slice(i).map(capHump).join('');
+      candidates.push(suffix.length > 0 ? `${verb}${suffix}` : `${verb}Item`);
     }
   }
   if (params.length > 0) {
@@ -432,7 +398,16 @@ function addImpliedTwin(taken: Set<string>, op: SurfaceOp, name: string): void {
   }
 }
 
-function displayOp(op: SurfaceOp): string {
+/**
+ * The raw display string for an operation: "METHOD /path" with real param
+ * names (e.g. "GET /organizations/{orgId}/fields") and an uppercased method.
+ * This is the exact key `resolveMethodNames` stores its returned `names` map
+ * under, so generate-sdk must build the identical string to look a name up.
+ * Sharing this one function keeps the resolver and the generator in lockstep
+ * instead of reconstructing the format inline in two places. Distinct from
+ * `opKey`, which normalizes param names to `{_}` for identity.
+ */
+export function displayOp(op: SurfaceOp): string {
   return `${op.method.toUpperCase()} ${op.path}`;
 }
 

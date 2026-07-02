@@ -106,7 +106,9 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          # Only count actual spec yaml changes, not summary.json or formatting
+          # Count substantive changes only: spec yaml, generated API/type files,
+          # and the operation-identity manifest (scripts/api-surface.yaml), not
+          # summary.json or pure formatting.
           SPEC_CHANGES=$(git diff --name-only -- 'specs/raw/*.yaml' 'specs/fixed/*.yaml' | wc -l)
           API_CHANGES=$(git diff --name-only -- 'src/api/*.ts' | wc -l)
           TYPE_CHANGES=$(git diff --name-only -- 'src/types/generated/*.ts' | grep -v 'index.ts' | wc -l)
@@ -287,6 +289,8 @@ jobs:
             echo "### ✅ Forced Release Complete" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Released version: **v${{ steps.version.outputs.new_version }}**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Classification: **$CLASSIFICATION**" >> $GITHUB_STEP_SUMMARY
           else
             echo "### ℹ️ No Changes Detected" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -304,7 +308,7 @@ jobs:
           if [[ "$CLASSIFICATION" == "breaking" ]]; then
             MISSING_OPS=$(jq -r '.missingOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json 2>/dev/null || echo "")
 
-            echo "### Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
+            echo "### ⚠️ Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
             echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true

@@ -15,7 +15,7 @@
  * silently.
  */
 
-import { toPascalCase } from './spec-utils.js';
+import { isRecord, toPascalCase } from './spec-utils.js';
 
 const PRIMARY_ENDPOINT_NAME: Record<string, string> = {
   'field-operations-api': 'field-operation',
@@ -58,11 +58,13 @@ export interface MergeOptions {
    */
   maxRenameIterations?: number;
   /**
-   * Invoked once per declaring document whose servers block carries a
-   * non-deere.com placeholder URL (a documentation-editor default such as
-   * `https://server.com`). The message names the slug, the document, and the
-   * offending URL(s). fetch-specs wires this to the console so CI logs surface
-   * the spec-quality defect; unit tests that do not assert on it leave it unset.
+   * Invoked once per declaring document whose servers block carries an entry
+   * that is not a usable deere.com https URL: a documentation-editor placeholder
+   * (`https://server.com`), a non-https or non-deere host, an unparseable url,
+   * or a url-less/malformed entry. The message names the slug, the document, and
+   * each offending entry with the reason it was rejected. fetch-specs wires this
+   * to the console so CI logs surface the spec-quality defect; unit tests that
+   * do not assert on it leave it unset.
    */
   onWarning?: (message: string) => void;
 }
@@ -71,12 +73,8 @@ export interface MergeOptions {
 // Small structural helpers
 // ---------------------------------------------------------------------------
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 function asObject(value: unknown): Record<string, unknown> | undefined {
-  return isPlainObject(value) ? value : undefined;
+  return isRecord(value) ? value : undefined;
 }
 
 function compareStrings(a: string, b: string): number {
@@ -98,7 +96,7 @@ function deepEqualUnordered(a: unknown, b: unknown): boolean {
     }
     return true;
   }
-  if (isPlainObject(a) && isPlainObject(b)) {
+  if (isRecord(a) && isRecord(b)) {
     const aKeys = Object.keys(a);
     const bKeys = Object.keys(b);
     if (aKeys.length !== bKeys.length) return false;
@@ -172,7 +170,7 @@ function rewriteRefStrings(node: unknown, oldRef: string, newRef: string): void 
     for (const item of node) rewriteRefStrings(item, oldRef, newRef);
     return;
   }
-  if (!isPlainObject(node)) return;
+  if (!isRecord(node)) return;
   for (const key of Object.keys(node)) {
     const value = node[key];
     if (key === '$ref' && value === oldRef) {
@@ -378,9 +376,10 @@ function mergePaths(
       if (deepEqualUnordered(mergedItem[key], incomingValue)) continue;
       const firstOwner = owner.get(pathMethodKey(path, key)) ?? '(unknown)';
       throw new Error(
-        `mergeSpecDocs: slug "${slug}": conflicting definitions for ${key.toUpperCase()} ` +
-          `${path} between documents "${firstOwner}" and "${entry.endPointName}". The same ` +
-          `path and method is defined differently in two documents; a human must reconcile them.`
+        `mergeSpecDocs: slug "${slug}": conflicting definitions for path item member ` +
+          `"${key}" on "${path}" between documents "${firstOwner}" and "${entry.endPointName}". ` +
+          `The same path item member (an HTTP method, or a shared key such as parameters or ` +
+          `description) is defined differently in two documents; a human must reconcile them.`
       );
     }
   }
@@ -449,7 +448,12 @@ function serverUrl(entry: unknown): string | undefined {
   return typeof url === 'string' ? url : undefined;
 }
 
-/** Parses to an https URL whose host ends in `.deere.com` (case-insensitive). */
+/**
+ * Parses to an https URL whose host is `deere.com` itself or any subdomain of
+ * it (case-insensitive). The match is on a label boundary (host equals
+ * `deere.com` OR ends with `.deere.com`), so the apex host counts while a
+ * lookalike like `notdeere.com` does not.
+ */
 function isDeereHttpsUrl(url: string): boolean {
   let parsed: URL;
   try {
@@ -457,7 +461,9 @@ function isDeereHttpsUrl(url: string): boolean {
   } catch {
     return false;
   }
-  return parsed.protocol === 'https:' && parsed.hostname.toLowerCase().endsWith('.deere.com');
+  if (parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname.toLowerCase();
+  return host === 'deere.com' || host.endsWith('.deere.com');
 }
 
 /**
@@ -475,30 +481,56 @@ function isPlatformFamilyUrl(url: string): boolean {
 
 interface ServerClassification {
   family: ServerFamily;
-  /** URLs that do not resolve to a deere.com host (editor placeholders). */
-  placeholders: string[];
+  /**
+   * One human-readable descriptor per server entry that is not a usable
+   * deere.com https URL: a url-less/malformed entry, or a url that is
+   * unparseable, non-https, or on a non-deere host. Empty when every entry is a
+   * usable deere URL. Drives the onWarning message; never affects the family.
+   */
+  rejected: string[];
 }
 
 /**
- * Classify one document's servers list. Non-deere URLs are documentation-editor
- * placeholders (`https://server.com`): they are collected as `placeholders` and
- * ignored for the family decision, so a stray placeholder never forces an
- * otherwise-platform document into a conflict. A list whose only URLs are
- * placeholders declares nothing usable (`junk`). Otherwise the deere URLs
+ * Describe why one server entry is not a usable deere.com https URL, for the
+ * onWarning message. Called only on entries classifyServers has already
+ * rejected, so it names the concrete reason: a url-less/malformed entry, or a
+ * url that is unparseable, non-https, or points at a non-deere host. It never
+ * claims "no deere.com host" for an `http://x.deere.com` entry whose real
+ * defect is the non-https scheme.
+ */
+function describeRejection(entry: unknown): string {
+  const url = serverUrl(entry);
+  if (url === undefined) return 'an entry with no url';
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return `${url} (unparseable)`;
+  }
+  if (parsed.protocol !== 'https:') return `${url} (non-https)`;
+  return `${url} (non-deere host)`;
+}
+
+/**
+ * Classify one document's servers list. An entry that is not a usable deere.com
+ * https URL (a documentation-editor placeholder like `https://server.com`, a
+ * non-https scheme, an unparseable url, or a url-less/malformed entry) is
+ * described in `rejected` and ignored for the family decision, so a stray bad
+ * entry never forces an otherwise-platform document into a conflict. A list
+ * with no usable deere URL declares nothing (`junk`). Otherwise the deere URLs
  * decide: all on the platform family -> `platform`, any deere host on a
  * non-platform path -> `other`.
  */
 function classifyServers(servers: readonly unknown[]): ServerClassification {
-  const placeholders: string[] = [];
+  const rejected: string[] = [];
   const deereUrls: string[] = [];
   for (const entry of servers) {
     const url = serverUrl(entry);
-    if (url === undefined) continue;
-    if (isDeereHttpsUrl(url)) deereUrls.push(url);
-    else placeholders.push(url);
+    if (url !== undefined && isDeereHttpsUrl(url)) deereUrls.push(url);
+    else rejected.push(describeRejection(entry));
   }
-  if (deereUrls.length === 0) return { family: 'junk', placeholders };
-  return { family: deereUrls.every(isPlatformFamilyUrl) ? 'platform' : 'other', placeholders };
+  if (deereUrls.length === 0) return { family: 'junk', rejected };
+  return { family: deereUrls.every(isPlatformFamilyUrl) ? 'platform' : 'other', rejected };
 }
 
 function applyServers(
@@ -515,22 +547,25 @@ function applyServers(
     );
   if (rawDeclared.length === 0) return;
 
-  // Classify each declaring document. A placeholder-only block declares nothing
-  // usable and is dropped to non-declaring (it inherits the merged block); every
-  // placeholder, dropped or merely ignored, is surfaced through onWarning so CI
-  // logs the spec-quality defect.
+  // Classify each declaring document. A block with no usable deere URL declares
+  // nothing and is dropped to non-declaring (it inherits the merged block).
+  // Every rejected entry (a placeholder, a non-https or non-deere url, an
+  // unparseable url, or a url-less/malformed entry), whether it made the block
+  // junk or was merely ignored alongside good urls, is surfaced through
+  // onWarning so CI logs the spec-quality defect.
   const declared: Array<{ endPointName: string; servers: unknown[]; family: ServerFamily }> = [];
   for (const entry of rawDeclared) {
-    const { family, placeholders } = classifyServers(entry.servers);
-    if (placeholders.length > 0) {
-      const urls = placeholders.join(', ');
+    const { family, rejected } = classifyServers(entry.servers);
+    if (rejected.length > 0) {
+      const detail = rejected.join(', ');
       onWarning?.(
         family === 'junk'
-          ? `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares only ` +
-              `placeholder server URL(s) with no deere.com host (${urls}); treating it as ` +
-              `non-declaring so it inherits the merged servers.`
-          : `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares placeholder ` +
-              `server URL(s) with no deere.com host (${urls}); ignoring them for servers reconciliation.`
+          ? `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares no usable ` +
+              `deere.com https server URL (${detail}); treating it as non-declaring so it ` +
+              `inherits the merged servers.`
+          : `mergeSpecDocs: slug "${slug}": document "${entry.endPointName}" declares server ` +
+              `entries that are not usable deere.com https URLs (${detail}); ignoring them for ` +
+              `servers reconciliation.`
       );
     }
     if (family === 'junk') continue;
@@ -569,7 +604,7 @@ function applyTags(merged: Record<string, unknown>, docs: readonly OrderedDoc[])
     if (!Array.isArray(tags)) continue;
     sawTags = true;
     for (const tag of tags) {
-      const name = isPlainObject(tag) && typeof tag.name === 'string' ? tag.name : undefined;
+      const name = isRecord(tag) && typeof tag.name === 'string' ? tag.name : undefined;
       if (name !== undefined) {
         if (seen.has(name)) continue;
         seen.add(name);

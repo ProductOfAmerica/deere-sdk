@@ -12,10 +12,7 @@
  */
 
 import * as yaml from 'yaml';
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from './spec-utils.js';
 
 function compareStrings(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -43,7 +40,7 @@ function canonicalizeComponents(components: Record<string, unknown>): Record<str
   const result: Record<string, unknown> = {};
   for (const category of Object.keys(components).sort(compareStrings)) {
     const value = components[category];
-    result[category] = isPlainObject(value) ? sortKeys(value) : value;
+    result[category] = isRecord(value) ? sortKeys(value) : value;
   }
   return result;
 }
@@ -66,15 +63,15 @@ function canonicalizeComponents(components: Record<string, unknown>): Record<str
  * reference with the input, unchanged.
  */
 export function canonicalizeSpec(doc: unknown): unknown {
-  if (!isPlainObject(doc)) return doc;
+  if (!isRecord(doc)) return doc;
 
   const result: Record<string, unknown> = { ...doc };
 
-  if (isPlainObject(doc.paths)) {
+  if (isRecord(doc.paths)) {
     result.paths = sortKeys(doc.paths);
   }
 
-  if (isPlainObject(doc.components)) {
+  if (isRecord(doc.components)) {
     result.components = canonicalizeComponents(doc.components);
   }
 

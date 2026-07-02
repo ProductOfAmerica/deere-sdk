@@ -97,7 +97,13 @@ const categoryNameArb = fc.constantFrom(
   'responses',
   'requestBodies',
   'headers',
-  'securitySchemes'
+  'securitySchemes',
+  // A synthetic non-OpenAPI category: canonicalizeComponents is whitelist-free,
+  // so an unknown extension category must sort by name and have its members
+  // sorted exactly like a standard one. Including it here exercises that
+  // tolerance in the order-independence and idempotence properties, not just the
+  // deterministic test below.
+  'x-futureCategory'
 );
 const memberNameArb = fc.constantFrom('Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta');
 
@@ -278,6 +284,29 @@ describe('canonicalizeSpec: preserves non-target ordering', () => {
       result.servers.map((s) => s.url),
       ['https://b.deere.com', 'https://a.deere.com']
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Unknown (non-OpenAPI) component categories: the sorter has no whitelist
+// ---------------------------------------------------------------------------
+
+describe('canonicalizeSpec: tolerates unknown component categories', () => {
+  it('sorts an x- extension category and its members like any standard category', () => {
+    const doc = {
+      components: {
+        schemas: { B: {}, A: {} },
+        'x-futureCategory': { Zeta: { type: 'object' }, Alpha: { type: 'object' } },
+      },
+    };
+    const result = canonicalizeSpec(doc) as {
+      components: Record<string, Record<string, unknown>>;
+    };
+    // Category names sort, so the unknown x- category lands after schemas...
+    assert.deepStrictEqual(Object.keys(result.components), ['schemas', 'x-futureCategory']);
+    // ...and its members are sorted too, with no special-casing of known names.
+    assert.deepStrictEqual(Object.keys(result.components['x-futureCategory']), ['Alpha', 'Zeta']);
+    assert.deepStrictEqual(Object.keys(result.components.schemas), ['A', 'B']);
   });
 });
 
