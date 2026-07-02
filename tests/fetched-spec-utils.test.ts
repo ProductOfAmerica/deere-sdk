@@ -2,21 +2,8 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   normalizeSpecContent,
-  validateFetchedSpec,
   validateFetchedSpecDocs,
 } from '../scripts/lib/fetched-spec-utils.js';
-
-const allowedSlugs = new Set(['fields']);
-
-function validResponse(yml_content = "openapi: '3.0.0'\ninfo:\n  title: Fields\npaths: {}\n") {
-  return [
-    {
-      id: 123,
-      name: 'Fields',
-      yml_content,
-    },
-  ];
-}
 
 describe('fetched spec utilities', () => {
   describe('normalizeSpecContent', () => {
@@ -24,46 +11,6 @@ describe('fetched spec utilities', () => {
       assert.strictEqual(
         normalizeSpecContent('openapi: 3.0.0\r\npaths: {}\r\n'),
         'openapi: 3.0.0\npaths: {}\n'
-      );
-    });
-  });
-
-  describe('validateFetchedSpec', () => {
-    it('accepts a known slug with a valid OpenAPI response payload', () => {
-      assert.deepStrictEqual(validateFetchedSpec('fields', validResponse(), allowedSlugs), {
-        slug: 'fields',
-        id: 123,
-        name: 'Fields',
-        ymlContent: "openapi: '3.0.0'\ninfo:\n  title: Fields\npaths: {}\n",
-      });
-    });
-
-    it('rejects unexpected response shapes', () => {
-      assert.strictEqual(validateFetchedSpec('fields', {}, allowedSlugs), null);
-      assert.strictEqual(validateFetchedSpec('fields', [], allowedSlugs), null);
-      assert.strictEqual(validateFetchedSpec('fields', [{ id: '123' }], allowedSlugs), null);
-    });
-
-    it('rejects empty or invalid OpenAPI content', () => {
-      assert.strictEqual(validateFetchedSpec('fields', validResponse(''), allowedSlugs), null);
-      assert.strictEqual(
-        validateFetchedSpec('fields', validResponse('openapi: [\n'), allowedSlugs),
-        null
-      );
-      assert.strictEqual(
-        validateFetchedSpec(
-          'fields',
-          validResponse('info:\n  title: Missing version\npaths: {}\n'),
-          allowedSlugs
-        ),
-        null
-      );
-    });
-
-    it('throws on slugs outside the trusted local catalog', () => {
-      assert.throws(
-        () => validateFetchedSpec('not-a-local-slug', validResponse(), allowedSlugs),
-        /Unexpected API slug/
       );
     });
   });
@@ -81,6 +28,20 @@ describe('fetched spec utilities', () => {
     ): Record<string, unknown> {
       return { id, name: 'products', end_point_name, yml_content };
     }
+
+    it('validates a single-document response the same way multi-document slugs are validated', () => {
+      const body = [element(1, 'varieties', varietiesYml)];
+      const result = validateFetchedSpecDocs('products', body, multiAllowed);
+      assert.ok(result, 'expected a non-null array');
+      assert.strictEqual(result.length, 1);
+      assert.deepStrictEqual(result[0], {
+        slug: 'products',
+        id: 1,
+        name: 'products',
+        endPointName: 'varieties',
+        ymlContent: varietiesYml,
+      });
+    });
 
     it('validates every element, captures endPointName, and applies redaction', () => {
       const body = [element(1, 'varieties', varietiesYml), element(2, 'chemicals', chemicalsYml)];
@@ -114,12 +75,37 @@ describe('fetched spec utilities', () => {
       assert.strictEqual(validateFetchedSpecDocs('products', body, multiAllowed), null);
     });
 
-    it('fails the slug (null) when one element has invalid OpenAPI content', () => {
+    it('fails the slug (null) when one element has an invalid field type', () => {
       const body = [
         element(1, 'varieties', varietiesYml),
-        element(2, 'chemicals', 'info:\n  title: No version\npaths: {}\n'),
+        { id: '2', name: 'products', end_point_name: 'chemicals', yml_content: chemicalsYml },
       ];
       assert.strictEqual(validateFetchedSpecDocs('products', body, multiAllowed), null);
+    });
+
+    it('fails the slug (null) when one element is not an object', () => {
+      const body = [element(1, 'varieties', varietiesYml), 'not-an-object'];
+      assert.strictEqual(validateFetchedSpecDocs('products', body, multiAllowed), null);
+    });
+
+    it('fails the slug (null) when one element has empty or invalid OpenAPI content', () => {
+      const bodyWith = (yml_content: string) => [
+        element(1, 'varieties', varietiesYml),
+        element(2, 'chemicals', yml_content),
+      ];
+      assert.strictEqual(validateFetchedSpecDocs('products', bodyWith(''), multiAllowed), null);
+      assert.strictEqual(
+        validateFetchedSpecDocs('products', bodyWith('openapi: [\n'), multiAllowed),
+        null
+      );
+      assert.strictEqual(
+        validateFetchedSpecDocs(
+          'products',
+          bodyWith('info:\n  title: Missing version\npaths: {}\n'),
+          multiAllowed
+        ),
+        null
+      );
     });
 
     it('returns null for an empty array', () => {
