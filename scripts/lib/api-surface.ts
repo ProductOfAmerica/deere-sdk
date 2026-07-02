@@ -568,3 +568,68 @@ export function classifyRun(input: {
   if (input.newEntries.length > 0) return 'additive';
   return 'benign';
 }
+
+// ============================================================================
+// Sync report (aggregated across specs; serialized to sync-report.json)
+// ============================================================================
+
+export interface SyncReportOperation {
+  spec: string;
+  method: string;
+  path: string;
+  name: string;
+}
+
+export interface SyncReport {
+  classification: 'benign' | 'additive' | 'breaking';
+  newOperations: SyncReportOperation[];
+  missingOperations: SyncReportOperation[];
+}
+
+/**
+ * Split an "METHOD /path" display string on its first space. Every op reaching
+ * here is either a validated manifest entry or displayOp(op) output, so it is
+ * always METHOD, a single space, then a param-bearing path (which never
+ * contains a space).
+ */
+function splitOpDisplay(op: string): { method: string; path: string } {
+  const space = op.indexOf(' ');
+  return { method: op.slice(0, space), path: op.slice(space + 1) };
+}
+
+function compareSyncOps(a: SyncReportOperation, b: SyncReportOperation): number {
+  if (a.spec !== b.spec) return compareStrings(a.spec, b.spec);
+  if (a.method !== b.method) return compareStrings(a.method, b.method);
+  return compareStrings(a.path, b.path);
+}
+
+/**
+ * Aggregate per-spec resolveMethodNames output into one run-level report.
+ * New and missing operations are flattened across specs, each op display
+ * string split into method + path, both arrays sorted by (spec, method, path)
+ * for deterministic output, and the run classified via classifyRun over the
+ * aggregated totals. The workflow consumes this as sync-report.json.
+ */
+export function buildSyncReport(
+  perSpec: Array<{ specName: string; newEntries: SurfaceEntry[]; missing: SurfaceEntry[] }>
+): SyncReport {
+  const newOperations: SyncReportOperation[] = [];
+  const missingOperations: SyncReportOperation[] = [];
+  for (const { specName, newEntries, missing } of perSpec) {
+    for (const entry of newEntries) {
+      const { method, path } = splitOpDisplay(entry.op);
+      newOperations.push({ spec: specName, method, path, name: entry.name });
+    }
+    for (const entry of missing) {
+      const { method, path } = splitOpDisplay(entry.op);
+      missingOperations.push({ spec: specName, method, path, name: entry.name });
+    }
+  }
+  newOperations.sort(compareSyncOps);
+  missingOperations.sort(compareSyncOps);
+  return {
+    classification: classifyRun({ newEntries: newOperations, missing: missingOperations }),
+    newOperations,
+    missingOperations,
+  };
+}

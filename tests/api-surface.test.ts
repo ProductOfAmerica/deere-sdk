@@ -19,6 +19,7 @@ import { describe, it } from 'node:test';
 import * as fc from 'fast-check';
 import {
   type ApiSurface,
+  buildSyncReport,
   classifyRun,
   extractOps,
   loadApiSurface,
@@ -685,6 +686,105 @@ describe('classifyRun', () => {
   });
   it('is benign when nothing is new or missing', () => {
     assert.strictEqual(classifyRun({ newEntries: [], missing: [] }), 'benign');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildSyncReport
+// ---------------------------------------------------------------------------
+
+describe('buildSyncReport', () => {
+  it('classifies empty input as benign with two empty arrays', () => {
+    const report = buildSyncReport([]);
+    assert.strictEqual(report.classification, 'benign');
+    assert.deepStrictEqual(report.newOperations, []);
+    assert.deepStrictEqual(report.missingOperations, []);
+  });
+
+  it('classifies new-only as additive and carries the additions', () => {
+    const report = buildSyncReport([
+      {
+        specName: 'equipment',
+        newEntries: [{ op: 'GET /widgets', name: 'listWidgets' }],
+        missing: [],
+      },
+    ]);
+    assert.strictEqual(report.classification, 'additive');
+    assert.deepStrictEqual(report.newOperations, [
+      { spec: 'equipment', method: 'GET', path: '/widgets', name: 'listWidgets' },
+    ]);
+    assert.deepStrictEqual(report.missingOperations, []);
+  });
+
+  it('classifies any missing as breaking, even alongside new entries', () => {
+    const report = buildSyncReport([
+      {
+        specName: 'field-operations-api',
+        newEntries: [{ op: 'POST /fieldOperations', name: 'create' }],
+        missing: [{ op: 'GET /fieldOps/{operationId}', name: 'getFieldops' }],
+      },
+    ]);
+    assert.strictEqual(report.classification, 'breaking');
+    assert.deepStrictEqual(report.missingOperations, [
+      {
+        spec: 'field-operations-api',
+        method: 'GET',
+        path: '/fieldOps/{operationId}',
+        name: 'getFieldops',
+      },
+    ]);
+  });
+
+  it('splits each op display string into method and path (paths with params intact)', () => {
+    const report = buildSyncReport([
+      {
+        specName: 'fields',
+        newEntries: [{ op: 'DELETE /organizations/{orgId}/fields/{fieldId}', name: 'delete' }],
+        missing: [],
+      },
+    ]);
+    assert.deepStrictEqual(report.newOperations[0], {
+      spec: 'fields',
+      method: 'DELETE',
+      path: '/organizations/{orgId}/fields/{fieldId}',
+      name: 'delete',
+    });
+  });
+
+  it('sorts newOperations by (spec, method, path) across specs', () => {
+    const report = buildSyncReport([
+      { specName: 'zeta', newEntries: [{ op: 'GET /b', name: 'getB' }], missing: [] },
+      {
+        specName: 'alpha',
+        newEntries: [
+          { op: 'POST /a', name: 'createA' },
+          { op: 'GET /a', name: 'getA' },
+        ],
+        missing: [],
+      },
+    ]);
+    assert.deepStrictEqual(
+      report.newOperations.map((o) => `${o.spec} ${o.method} ${o.path}`),
+      ['alpha GET /a', 'alpha POST /a', 'zeta GET /b']
+    );
+  });
+
+  it('sorts missingOperations by (spec, method, path) across specs', () => {
+    const report = buildSyncReport([
+      { specName: 'zeta', newEntries: [], missing: [{ op: 'GET /z', name: 'getZ' }] },
+      {
+        specName: 'alpha',
+        newEntries: [],
+        missing: [
+          { op: 'GET /m', name: 'getM' },
+          { op: 'DELETE /m', name: 'deleteM' },
+        ],
+      },
+    ]);
+    assert.deepStrictEqual(
+      report.missingOperations.map((o) => `${o.spec} ${o.method} ${o.path}`),
+      ['alpha DELETE /m', 'alpha GET /m', 'zeta GET /z']
+    );
   });
 });
 

@@ -13,8 +13,14 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
-import { normalizePathPattern } from './lib/api-surface.js';
-import { resolveLegacyMethodNames } from './lib/legacy-method-names.js';
+import {
+  buildSyncReport,
+  loadApiSurface,
+  normalizePathPattern,
+  resolveMethodNames,
+  type SurfaceEntry,
+  serializeApiSurface,
+} from './lib/api-surface.js';
 import {
   collectionItemType,
   computeReturnType,
@@ -525,11 +531,32 @@ ${lines.join('\n')}
   }${listAllMethod}`;
 }
 
-function generateApiClass(api: GeneratedApi): string {
-  const names = resolveLegacyMethodNames(api.operations);
-
+function generateApiClass(api: GeneratedApi, names: Map<string, string>): string {
+  // The ops array drives emission order (stable, same as the spec's paths
+  // block); the names map is only ever consulted by key, never iterated,
+  // because its iteration order is not canonical.
+  const emitted = new Set<string>();
   const methods = api.operations
-    .map((op) => generateMethod(op, names.get(`${op.method.toUpperCase()} ${op.path}`)!))
+    .map((op) => {
+      // resolveMethodNames keys its map by each op's raw display string
+      // (`METHOD /path` with real param names), NOT the normalized opKey.
+      const key = `${op.method.toUpperCase()} ${op.path}`;
+      const methodName = names.get(key);
+      if (!methodName) {
+        throw new Error(
+          `generate-sdk: no resolved method name for ${key} in spec "${api.specName}". ` +
+            `resolveMethodNames must return a name for every operation it is handed.`
+        );
+      }
+      if (emitted.has(methodName)) {
+        throw new Error(
+          `generate-sdk: method name "${methodName}" would be emitted twice in class ${api.className} ` +
+            `(second occurrence at ${key}); public method names must be unique within a class.`
+        );
+      }
+      emitted.add(methodName);
+      return generateMethod(op, methodName);
+    })
     .join('\n\n');
 
   // Determine which imports are actually used. PaginatedResponse is needed by
@@ -904,9 +931,73 @@ async function main() {
     `\nParsed ${apis.length} APIs with ${apis.reduce((sum, a) => sum + a.operations.length, 0)} operations\n`
   );
 
+  // Resolve every public method name from the committed operation-identity
+  // manifest. loadApiSurface hard-fails when the manifest is absent: the
+  // generator never auto-seeds, because seeding from freshly fetched specs is
+  // the exact incident this pipeline exists to prevent.
+  const surface = loadApiSurface();
+
+  const namesBySpec = new Map<string, Map<string, string>>();
+  const perSpec: Array<{ specName: string; newEntries: SurfaceEntry[]; missing: SurfaceEntry[] }> =
+    [];
+  for (const api of apis) {
+    const { names, newEntries, missing } = resolveMethodNames(
+      api.specName,
+      api.operations,
+      surface
+    );
+    namesBySpec.set(api.specName, names);
+    perSpec.push({ specName: api.specName, newEntries, missing });
+  }
+
+  // The workflow's classify step reads sync-report.json unconditionally, so
+  // write it on EVERY run, before any generated file or the manifest.
+  const report = buildSyncReport(perSpec);
+  const reportPath = join(process.cwd(), 'sync-report.json');
+  writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  console.log(`Sync classification: ${report.classification} (wrote ${reportPath})\n`);
+
+  if (report.classification === 'breaking') {
+    console.error(
+      'BREAKING: manifest operations are missing upstream. Nothing was generated, ' +
+        'and the manifest was left untouched.\n'
+    );
+    const remediation =
+      "upstream renamed the path: edit this entry's op: in scripts/api-surface.yaml " +
+      'to the new path to keep the name; endpoint removed upstream: delete the entry, ' +
+      'understanding the public method disappears, a major-version consideration';
+    for (const op of report.missingOperations) {
+      console.error(`  ${op.spec}: ${op.method} ${op.path}`);
+      console.error(`    bound method name: ${op.name}`);
+      console.error(`    remediation: ${remediation}`);
+    }
+    process.exit(1);
+  }
+
+  // Additive: fold newly discovered operations into the manifest and persist
+  // it, so their proposed names become pinned identity from now on. A
+  // brand-new spec file gets its key created here.
+  const additive = perSpec.filter((r) => r.newEntries.length > 0);
+  if (additive.length > 0) {
+    console.log('New operations discovered; updating scripts/api-surface.yaml:');
+    for (const { specName, newEntries } of additive) {
+      surface.specs[specName] = [...(surface.specs[specName] ?? []), ...newEntries];
+      for (const entry of newEntries) {
+        console.log(`  ${specName}: ${entry.op} -> ${entry.name}`);
+      }
+    }
+    const surfacePath = join(process.cwd(), 'scripts', 'api-surface.yaml');
+    writeFileSync(surfacePath, serializeApiSurface(surface));
+    console.log(`  Wrote ${surfacePath}\n`);
+  }
+
   console.log('Generating API wrapper classes...');
   for (const api of apis) {
-    const code = generateApiClass(api);
+    const names = namesBySpec.get(api.specName);
+    if (!names) {
+      throw new Error(`generate-sdk: no resolved names for spec "${api.specName}"`);
+    }
+    const code = generateApiClass(api, names);
     const outputPath = join(OUTPUT_DIR, `${api.specName}.ts`);
     writeFileSync(outputPath, code);
     console.log(`  ${api.className} -> ${api.specName}.ts`);
