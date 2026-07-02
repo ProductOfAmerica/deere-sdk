@@ -154,3 +154,13 @@ actionlint .github/workflows/sync-api.yml
 ```
 
 Plus GitNexus `detect_changes` before each commit. The workflow's classification branches can only be fully exercised by scheduled runs; the first post-merge sync (expected: benign, no release) is the final end-to-end check.
+
+## Amendments (2026-07-02, during execution)
+
+These record where the implementation refined or diverged from the design above. The superseded passages are left intact as a historical design record; where an amendment conflicts with the original text, the amendment is authoritative.
+
+1. **Sibling identity exception (supersedes the line-61 merge rule; qualifies the line-30 identity rule).** Two entries that share a normalized key are legal when their raw paths differ, and such siblings are matched by exact literal path, not by normalized key alone. A param rename on one of them (for example `{name}` becoming `{id}`) therefore surfaces as a breaking change rather than being silently absorbed. This qualifies line 30's claim that param renames never change identity: it holds for a lone operation, but two siblings sharing one normalized pattern stay distinct by their literal paths. It supersedes line 61's rule that different literal paths sharing a normalized pattern plus a method are always a loud merge error. Motivated by crop-types, which declares both `GET /cropTypes/{name}` and `GET /cropTypes/{id}`: these normalize identically yet are distinct operations that must retain distinct names.
+
+2. **Platform-family servers reconciliation (extends the line-63 servers rule).** Declaring docs within the John Deere `platform` server family resolve to the primary doc's servers block instead of refusing on any textual difference. Junk placeholder server blocks inherit the primary's block with a warning. Genuinely different server families (a real host-family divergence) still refuse to merge, as line 63 originally specified. Motivated by machine-locations, whose `api` versus `partnerapi` platform variants are the same family, and by products, whose placeholder server blocks are not a real divergence.
+
+3. **Corrected accounting (supersedes the "~133 entries; 156 methods" counts near line 102).** The seeded manifest holds 123 entries, which expand to 146 operations once the 23 derived `listAll` twins are counted (123 + 23 = 146 operations pre-fetch). After the 56 additive operations from the previously dropped portal documents land, the manifest holds 179 entries and 202 operations; the 56 new ops are all `listFoo`-named rather than bare `list`, so they add no twins (146 + 56 = 202).

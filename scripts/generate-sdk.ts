@@ -913,6 +913,7 @@ async function main() {
   console.log(`Found ${yamlFiles.length} OpenAPI specs\n`);
 
   const apis: GeneratedApi[] = [];
+  const parseFailures: string[] = [];
 
   for (const yamlFile of yamlFiles) {
     const specPath = join(SPECS_DIR, yamlFile);
@@ -924,7 +925,23 @@ async function main() {
       console.log(` OK (${api.operations.length} operations)`);
     } else {
       console.log(' FAILED');
+      parseFailures.push(yamlFile);
     }
+  }
+
+  // A spec that fails to parse silently vanishes from generation AND from the
+  // missing-operation detector below (its manifest entries are never checked),
+  // so a corrupt fixed spec could auto-publish an SDK missing an entire API
+  // class without ever tripping the breaking classification. Fail loudly and
+  // immediately, before any name resolution, manifest write, or file emission.
+  if (parseFailures.length > 0) {
+    console.error(
+      `\ngenerate-sdk: ${parseFailures.length} spec(s) failed to parse; aborting before generation so a dropped spec cannot silently ship:`
+    );
+    for (const file of parseFailures) {
+      console.error(`  ${file}`);
+    }
+    process.exit(1);
   }
 
   console.log(

@@ -69,6 +69,14 @@ jobs:
         id: classify
         run: |
           CLASSIFICATION=$(jq -r .classification sync-report.json)
+          # Validate against the closed set before it flows into $GITHUB_OUTPUT
+          # and later shell steps. sync-report.json is derived from uncontrolled
+          # portal input; an unexpected value here is a corrupt report, not a
+          # valid state, so fail loudly rather than propagate it.
+          case "$CLASSIFICATION" in
+            benign|additive|breaking) ;;
+            *) echo "Unexpected classification: $CLASSIFICATION"; exit 1 ;;
+          esac
           ADDED_COUNT=$(jq '.newOperations | length' sync-report.json)
 
           echo "Classification: $CLASSIFICATION"
@@ -77,9 +85,12 @@ jobs:
           echo "classification=$CLASSIFICATION" >> $GITHUB_OUTPUT
           echo "added_count=$ADDED_COUNT" >> $GITHUB_OUTPUT
 
+          # Neutralize embedded CR/LF in portal-derived fields (spec, path, name)
+          # so a newline inside an operation string cannot inject a spurious
+          # heredoc terminator or a new key=value line into $GITHUB_OUTPUT.
           {
             echo "added_ops<<EOF"
-            jq -r '.newOperations[] | "- `" + .spec + "`: " + .method + " " + .path + " (as `" + .name + "`)"' sync-report.json
+            jq -r '.newOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
@@ -117,6 +128,8 @@ jobs:
       - name: Determine version bump
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
         id: version
+        env:
+          CLASSIFICATION: ${{ steps.classify.outputs.classification }}
         run: |
           # Get current version from package.json
           CURRENT_VERSION=$(node -p "require('./package.json').version")
@@ -128,8 +141,9 @@ jobs:
           # Additive changes bump minor and reset patch to 0; everything else
           # (benign spec churn, forced release) keeps the patch-only bump.
           # Guarded strictly on the classification value, never on whether
-          # scripts/api-surface.yaml itself shows a diff.
-          if [[ "${{ steps.classify.outputs.classification }}" == "additive" ]]; then
+          # scripts/api-surface.yaml itself shows a diff. CLASSIFICATION travels
+          # through step env rather than direct expression interpolation.
+          if [[ "$CLASSIFICATION" == "additive" ]]; then
             NEW_MINOR=$((MINOR + 1))
             NEW_VERSION="${MAJOR}.${NEW_MINOR}.0"
           else
@@ -150,10 +164,10 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
         env:
           ADDED_OPS: ${{ steps.classify.outputs.added_ops }}
+          CLASSIFICATION: ${{ steps.classify.outputs.classification }}
         run: |
           DATE=$(date +%Y-%m-%d)
           VERSION="${{ steps.version.outputs.new_version }}"
-          CLASSIFICATION="${{ steps.classify.outputs.classification }}"
 
           # Additive runs render the new operations under their own heading;
           # everything else keeps today's plain entry. ADDED_OPS travels
@@ -252,9 +266,8 @@ jobs:
       - name: Summary
         env:
           ADDED_OPS: ${{ steps.classify.outputs.added_ops }}
+          CLASSIFICATION: ${{ steps.classify.outputs.classification }}
         run: |
-          CLASSIFICATION="${{ steps.classify.outputs.classification }}"
-
           if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
             echo "### ✅ API Sync Complete" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -289,7 +302,7 @@ jobs:
           fi
 
           if [[ "$CLASSIFICATION" == "breaking" ]]; then
-            MISSING_OPS=$(jq -r '.missingOperations[] | "- `" + .spec + "`: " + .method + " " + .path + " (as `" + .name + "`)"' sync-report.json 2>/dev/null || echo "")
+            MISSING_OPS=$(jq -r '.missingOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json 2>/dev/null || echo "")
 
             echo "### Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
