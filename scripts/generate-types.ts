@@ -32,7 +32,9 @@ async function main() {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  const yamlFiles = readdirSync(SPECS_DIR).filter((f) => f.endsWith('.yaml'));
+  const yamlFiles = readdirSync(SPECS_DIR)
+    .filter((f) => f.endsWith('.yaml'))
+    .sort();
   console.log(`Found ${yamlFiles.length} OpenAPI specs\n`);
 
   const generated: { name: string; module: string; file: string }[] = [];
@@ -75,7 +77,7 @@ async function main() {
  * John Deere API TypeScript Types
  * Auto-generated from OpenAPI specifications
  *
- * @generated ${new Date().toISOString()}
+ * @generated
  */
 
 ${generated.map((g) => `export * as ${g.module} from './${basename(g.file, '.ts')}.js';`).join('\n')}
@@ -90,4 +92,7 @@ ${generated.map((g) => `export type { paths as ${g.module}Paths, components as $
   console.log('\nNext: Run `pnpm generate-sdk` to generate SDK wrappers');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

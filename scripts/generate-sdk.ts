@@ -1005,4 +1005,7 @@ async function main() {
   console.log('\nNext: Run `pnpm build` to compile TypeScript');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

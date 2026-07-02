@@ -121,4 +121,7 @@ async function main() {
   console.log('\nNext: Run `pnpm fix-specs` to fix common issues');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

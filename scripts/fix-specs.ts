@@ -816,8 +816,17 @@ async function main() {
   }
 
   console.log(`\nFixed ${fixed} specs, ${failed} failed`);
+  if (failed > 0) {
+    console.error(
+      `fix-specs: ${failed} spec(s) failed to process; failing the run so CI cannot ship stale fixed specs.`
+    );
+    process.exitCode = 1;
+  }
   console.log(`Output: ${OUTPUT_DIR}`);
   console.log('\nNext: Run `pnpm generate-types` to generate TypeScript types');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
