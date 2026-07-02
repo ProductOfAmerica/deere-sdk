@@ -13,13 +13,14 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
+import { resolveLegacyMethodNames } from './lib/legacy-method-names.js';
 import {
   collectionItemType,
   computeReturnType,
   resolveContentSchemaRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
-import { refName, stripDocumentationMarkup } from './lib/spec-utils.js';
+import { refName, stripDocumentationMarkup, toCamelCase, toPascalCase } from './lib/spec-utils.js';
 
 // ============================================================================
 // Configuration
@@ -133,13 +134,6 @@ interface GeneratedApi {
 // Parsing Utilities
 // ============================================================================
 
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_.]/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
-}
-
 // Input is trusted JD spec param names; output is a TS identifier, not HTML. Stripping tags is safe here.
 function toSafeIdentifier(str: string): string {
   const stripped = stripDocumentationMarkup(str);
@@ -153,11 +147,6 @@ function toSafeIdentifier(str: string): string {
 // Output flows to emitted TS source (type unions, URLSearchParams keys), not HTML.
 function cleanParamName(str: string): string {
   return stripDocumentationMarkup(str);
-}
-
-function toCamelCase(str: string): string {
-  const pascal = toPascalCase(str);
-  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
 }
 
 function toClassName(specName: string): string {
@@ -200,36 +189,6 @@ function isCollectionEndpoint(path: string, method: string): boolean {
   if (method !== 'get') return false;
   const lastSegment = path.split('/').pop() || '';
   return !lastSegment.startsWith('{');
-}
-
-function inferMethodName(op: ParsedOperation): string {
-  const id = (op.operationId || '').toLowerCase();
-
-  if (id.startsWith('getall') || id.startsWith('list') || id.match(/^get[a-z]+s$/)) {
-    return 'list';
-  }
-  if (id.startsWith('get') && !id.includes('all')) {
-    return 'get';
-  }
-  if (id.startsWith('create') || (id.startsWith('post') && !id.includes('get'))) {
-    return 'create';
-  }
-  if (id.startsWith('update') || id.startsWith('put')) {
-    return 'update';
-  }
-  if (id.startsWith('delete') || id.startsWith('remove')) {
-    return 'delete';
-  }
-
-  if (op.method === 'get') {
-    return op.isCollection ? 'list' : 'get';
-  }
-  if (op.method === 'post') return 'create';
-  if (op.method === 'put') return 'update';
-  if (op.method === 'patch') return 'patch';
-  if (op.method === 'delete') return 'delete';
-
-  return toCamelCase(op.operationId || `${op.method}Unknown`);
 }
 
 function getSchemaType(schema: SchemaObject | undefined): string {
@@ -462,22 +421,7 @@ function parseSpec(specPath: string): GeneratedApi | null {
 // Code Generation
 // ============================================================================
 
-function generateMethod(op: ParsedOperation, usedMethodNames: Set<string>): string {
-  let methodName = inferMethodName(op);
-
-  if (usedMethodNames.has(methodName)) {
-    const pathParts = op.path.split('/').filter((p) => !p.startsWith('{') && p);
-    const suffix = toPascalCase(pathParts[pathParts.length - 1] || 'Item');
-    methodName = `${methodName}${suffix}`;
-
-    let counter = 2;
-    while (usedMethodNames.has(methodName)) {
-      methodName = `${methodName}${counter}`;
-      counter++;
-    }
-  }
-  usedMethodNames.add(methodName);
-
+function generateMethod(op: ParsedOperation, methodName: string): string {
   const params: string[] = [];
 
   for (const pp of op.pathParams) {
@@ -581,9 +525,11 @@ ${lines.join('\n')}
 }
 
 function generateApiClass(api: GeneratedApi): string {
-  const usedMethodNames = new Set<string>();
+  const names = resolveLegacyMethodNames(api.operations);
 
-  const methods = api.operations.map((op) => generateMethod(op, usedMethodNames)).join('\n\n');
+  const methods = api.operations
+    .map((op) => generateMethod(op, names.get(`${op.method.toUpperCase()} ${op.path}`)!))
+    .join('\n\n');
 
   // Determine which imports are actually used. PaginatedResponse is needed by
   // EVERY collection GET, including the PaginatedResponse<unknown> fallback for
