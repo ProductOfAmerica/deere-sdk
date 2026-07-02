@@ -61,6 +61,11 @@ bug that took the daily sync down in June 2026.
   to `unknown`. A guarded `fix-specs` transform restores the refs while the
   schemas exist and no-ops once JD repairs the doc.
 
+## [2.3.1] - 2026-06-19
+
+### Changed
+- Synced with latest John Deere API specifications
+
 ## [2.3.0] - 2026-06-18
 
 ### Changed
