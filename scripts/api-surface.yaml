@@ -309,8 +309,6 @@ specs:
       name: list
     - op: GET /organizations/{orgId}
       name: get
-    - op: GET /organizations/{orgId}/users
-      name: listUsers
     - op: GET /users/{userName}/organizations
       name: listOrganizations
   partnerships:

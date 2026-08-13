@@ -218,9 +218,6 @@ const allOrgs = await deere.organizations.listAll();
 
 // Get a specific organization
 const org = await deere.organizations.get('org-id');
-
-// List users in an organization
-const users = await deere.organizations.listUsers('org-id');
 ```
 
 </details>
