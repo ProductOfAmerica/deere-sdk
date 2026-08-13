@@ -496,10 +496,15 @@ describe('mergeSpecDocs: servers', () => {
     assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
   });
 
-  it('treats a bare deere.com host (no /platform path) as platform-family', () => {
-    // active-ingredients ships a defect: a deere.com host with no /platform
-    // path. It must count as platform-family (not a different family), so
-    // pairing it with a platform block does not throw and the primary wins.
+  // This block previously asserted the opposite: that a bare deere.com host
+  // "must count as platform-family... so pairing it with a platform block does
+  // not throw and the primary wins", naming active-ingredients as the case it
+  // was written for. That premise is wrong. Measured 2026-08-13, `/` and
+  // `/platform` are different routing prefixes on the same host:
+  // https://api.deere.com/activeIngredients returns 403 (no such base path),
+  // /platform/activeIngredients returns 404, /isg/activeIngredients returns 401.
+  // Collapsing them silently is exactly how products shipped a 404.
+  it('refuses to merge a bare deere.com host with a /platform block', () => {
     const primary = {
       info: {},
       paths: {},
@@ -510,12 +515,80 @@ describe('mergeSpecDocs: servers', () => {
       paths: {},
       servers: [{ url: 'https://api.deere.com/platform' }],
     };
-    const merged = mergeSpecDocs('products', [
-      { endPointName: 'varieties', id: 1, doc: primary },
-      { endPointName: 'chemicals', id: 2, doc: secondary },
-    ]) as MergedSpec;
 
-    assert.deepStrictEqual(merged.servers, [{ url: 'https://sandboxapi.deere.com' }]);
+    assert.throws(
+      () =>
+        mergeSpecDocs('products', [
+          { endPointName: 'varieties', id: 1, doc: primary },
+          { endPointName: 'chemicals', id: 2, doc: secondary },
+        ]),
+      (error: unknown) =>
+        error instanceof Error &&
+        /different servers blocks/.test(error.message) &&
+        /routing-overrides\.yaml/.test(error.message) &&
+        /varieties/.test(error.message) &&
+        /chemicals/.test(error.message)
+    );
+  });
+
+  it('merges divergent families when the divergence is acknowledged, and warns', () => {
+    const primary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: {},
+      servers: [{ url: 'https://sandboxapi.deere.com' }],
+    };
+    const warnings: string[] = [];
+
+    const merged = mergeSpecDocs(
+      'products',
+      [
+        { endPointName: 'varieties', id: 1, doc: primary },
+        { endPointName: 'active-ingredients', id: 2, doc: secondary },
+      ],
+      {
+        acknowledgedDivergentServers: true,
+        onWarning: (message) => warnings.push(message),
+      }
+    ) as MergedSpec;
+
+    // The primary still wins; per-path overrides carry the rest.
+    assert.deepStrictEqual(merged.servers, [{ url: 'https://api.deere.com/platform' }]);
+    assert.strictEqual(warnings.length, 1, `expected one warning, got ${JSON.stringify(warnings)}`);
+    assert.match(warnings[0], /acknowledgement recorded/);
+    assert.match(warnings[0], /active-ingredients/);
+  });
+
+  it('does not let the acknowledgement suppress an unrelated conflict', () => {
+    // Acknowledging divergent servers must not become a blanket override: a
+    // conflicting path definition still throws.
+    const primary = {
+      info: {},
+      paths: { '/x': { get: { summary: 'one' } } },
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+    const secondary = {
+      info: {},
+      paths: { '/x': { get: { summary: 'two' } } },
+      servers: [{ url: 'https://api.deere.com/platform' }],
+    };
+
+    assert.throws(
+      () =>
+        mergeSpecDocs(
+          'products',
+          [
+            { endPointName: 'varieties', id: 1, doc: primary },
+            { endPointName: 'chemicals', id: 2, doc: secondary },
+          ],
+          { acknowledgedDivergentServers: true }
+        ),
+      (error: unknown) => error instanceof Error && /conflicting definitions/.test(error.message)
+    );
   });
 
   it('treats an apex deere.com host (no subdomain) as platform-family', () => {

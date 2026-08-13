@@ -161,6 +161,21 @@ paths:
           description: "Not authorized"
         "404":
           description: "Not Found"
+    servers:
+      - url: "https://{environment}.deere.com/isg"
+        variables:
+          environment:
+            default: "api"
+            enum: &a1
+              - "api"
+              - "sandboxapi"
+              - "partnerapi"
+              - "apicert"
+              - "apiqa.tal"
+              - "apidev.tal"
+              - "partnerapicert"
+              - "partnerapiqa"
+              - "sandboxapiqa"
   /organizations/{orgId}/notifications/events:
     get:
       description: "This endpoint will let you search Notifications based on criteria specified in request parameters. The return value is the list of notifications that exist only in the user’s staff organization(s). This API cannot be used with a partner organization ID in the path. If partnership permissions are set up properly in Operations Center, partner notifications for shared resources will be available in the users staff organization which holds the partnership. Each data point will include links to: targetResource: View the target (like file) associated with this notification within each MinimizedNotification object. Please refer to sample response below to see the example. contributionDefinition: View the definition of \"notification\"."
@@ -506,13 +521,4 @@ servers:
     variables:
       environment:
         default: "api"
-        enum:
-          - "api"
-          - "sandboxapi"
-          - "partnerapi"
-          - "apicert"
-          - "apiqa.tal"
-          - "apidev.tal"
-          - "partnerapicert"
-          - "partnerapiqa"
-          - "sandboxapiqa"
+        enum: *a1

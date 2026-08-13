@@ -66,6 +66,21 @@ paths:
                         name: "1-Methylcyclopropene"
         "401":
           description: "The user does not have access to the list of active ingredients."
+    servers:
+      - url: "https://{environment}.deere.com/isg"
+        variables:
+          environment:
+            default: "api"
+            enum:
+              - "api"
+              - "sandboxapi"
+              - "partnerapi"
+              - "apicert"
+              - "apiqa.tal"
+              - "apidev.tal"
+              - "partnerapicert"
+              - "partnerapiqa"
+              - "sandboxapiqa"
   /chemicals:
     get:
       tags:

@@ -155,6 +155,7 @@ const TRUSTED_HOSTS = /^([a-z0-9-]+\.)*deere\.com$/i;
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
 import { HATEOAS_MAP } from './hateoas-map.js';
+import { pathSegments, segmentsMatchPattern } from './path-pattern.js';
 
 class LinkCache {
   private cache = new Map<string, Link[]>();
@@ -568,25 +569,12 @@ export class DeereClient {
   private matchHateoasPattern(
     concretePath: string
   ): { concreteParentPath: string; rel: string; parentSpec?: SpecName } | null {
-    const concreteSegments = concretePath.split('/').filter(Boolean);
+    const concreteSegments = pathSegments(concretePath);
 
     for (const [pattern, route] of Object.entries(HATEOAS_MAP)) {
-      const patternSegments = pattern.split('/').filter(Boolean);
-
-      if (concreteSegments.length !== patternSegments.length) continue;
-
-      let matches = true;
-      for (let i = 0; i < patternSegments.length; i++) {
-        if (patternSegments[i].startsWith('{')) continue; // wildcard
-        if (patternSegments[i] !== concreteSegments[i]) {
-          matches = false;
-          break;
-        }
-      }
-
-      if (matches) {
+      if (segmentsMatchPattern(concreteSegments, pattern)) {
         // Build the concrete parent path by substituting actual values
-        const parentSegments = route.parentPath.split('/').filter(Boolean);
+        const parentSegments = pathSegments(route.parentPath);
         const concreteParentParts = parentSegments.map((seg, i) =>
           seg.startsWith('{') ? concreteSegments[i] : seg
         );

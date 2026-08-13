@@ -1,0 +1,111 @@
+# Routing overrides — scripts/routing-overrides.yaml
+#
+# Where John Deere's published spec states the wrong base URL for an operation,
+# or states none at all. Consumed by scripts/lib/routing-overrides.ts (loader +
+# validation), applied by scripts/fix-specs.ts as OpenAPI path-level `servers`,
+# read by scripts/generate-api-servers.ts, and consulted at runtime by
+# resolveRequestUrl.
+#
+# Committed and hand-edited. No generator rewrites this file, so comments here
+# survive.
+#
+# ---------------------------------------------------------------------------
+# Why every entry must carry evidence
+# ---------------------------------------------------------------------------
+#
+# This file replaces two stages that manufactured routing data and presented it
+# downstream as though Deere had published it:
+#
+#   1. fix-specs invented `https://{environment}.deere.com/platform` for any
+#      spec declaring no servers block. API_SERVERS then reported
+#      `kind: 'templated'` with total confidence and no trace that the value was
+#      a guess. For notifications that guess is wrong for one path in four.
+#
+#   2. An endpoint injected in 2026-01 on a real but unrecorded observation
+#      (GET /organizations/{orgId}/users, OrganizationsApi.listUsers) returned
+#      404 for months. It was removed in the commit that added this file. The
+#      defect was never that someone invented it; the header comment said
+#      "undocumented but working" and it probably was. The defect was that
+#      nothing recorded HOW it was known, and nothing watched it, so when it
+#      broke there was no way to tell what had changed.
+#
+# A value here is not more trustworthy because it is committed. It is more
+# trustworthy because `evidence:` states what was observed and when, so the next
+# person can re-measure instead of inheriting. The loader enforces this: an
+# override without evidence is rejected.
+#
+# ---------------------------------------------------------------------------
+# How the measurements below were taken
+# ---------------------------------------------------------------------------
+#
+# Unauthenticated GET against the live gateway, which distinguishes a missing
+# route from a route that needs auth. Verified with controls on the same host in
+# the same run:
+#
+#   401  route exists, auth is checked before resource lookup
+#   405  route exists, GET is not allowed on it
+#   404  no such route
+#   403  no such base path (nginx, not the API gateway)
+#
+# ---------------------------------------------------------------------------
+# Known upstream defect with no override, recorded so it is not rediscovered
+# ---------------------------------------------------------------------------
+#
+# GET /organizations/{orgId}/staff returns 401 on api.deere.com/platform and
+# appears in no Deere spec and on no Deere doc page (checked 2026-08-13). It is
+# the most likely successor to the removed listUsers endpoint. It is NOT added
+# here, because adding a path needs its response shape captured, not just its
+# route confirmed. Restoring it correctly needs one authenticated call, the
+# response saved as a fixture, and an entry carrying that evidence.
+
+version: 1
+
+specs:
+  notifications:
+    # The upstream document declares no `servers` block at all. Until now
+    # fix-specs assumed /platform for the whole spec, which is right for three
+    # of its four paths and wrong for the fourth.
+    servers: https://{environment}.deere.com/platform
+    evidence: >-
+      Measured 2026-08-13 on api, sandboxapi, partnerapi and apicert. On
+      /platform: POST /notificationEvents 405 (route exists, GET not allowed),
+      DELETE /notificationEvents/{sourceEvent} 401, GET
+      /organizations/{orgId}/notifications/events 401. The same three paths
+      return 404 on /isg, so /platform is correct for them.
+    paths:
+      /notifications/{sourceEvent}:
+        servers: https://{environment}.deere.com/isg
+        evidence: >-
+          Measured 2026-08-13 on api, sandboxapi, partnerapi and apicert:
+          /platform/notifications/{id} returns 404 (no such route) and
+          /isg/notifications/{id} returns 401 (route exists). Deere's own
+          rendered doc page for this operation prints the Request URI as
+          https://sandboxapi.deere.com/isg/notifications/{sourceEvent}, while
+          printing /platform for the other operations in the same document.
+
+  products:
+    # The portal returns 8 documents for this slug. Seven declare
+    # https://{environment}.deere.com/platform; active-ingredients declares
+    # https://{environment}.deere.com/ (no path). mergeSpecDocs refuses to
+    # collapse genuinely divergent server families, so the divergence is
+    # acknowledged here and the affected path is corrected below.
+    acknowledgedDivergentServers: true
+    evidence: >-
+      Measured 2026-08-13. The eight documents for this slug do not agree on
+      servers: active-ingredients declares a bare deere.com host while the other
+      seven declare /platform, and the documents document declares the
+      placeholder https://server.com, which the merge already drops as junk.
+      Neither the primary's /platform block nor active-ingredients' bare host is
+      correct for /activeIngredients; see the path override below.
+    paths:
+      /activeIngredients:
+        servers: https://{environment}.deere.com/isg
+        evidence: >-
+          Measured 2026-08-13 on api, sandboxapi, partnerapi and apicert:
+          /platform/activeIngredients returns 404 and /isg/activeIngredients
+          returns 401. The bare host this document actually declares,
+          https://api.deere.com/activeIngredients, returns 403 (no such base
+          path), so the upstream servers block is wrong too and preserving it
+          through the merge would not have fixed this. Sibling paths from the
+          same slug (/varieties, /chemicals) return 401 on /platform and stay
+          there.

@@ -30,6 +30,7 @@ import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
 import { explainSlug, fetchPortalCatalog } from './lib/portal-catalog.js';
+import { findSpecOverride, loadRoutingOverrides } from './lib/routing-overrides.js';
 import { canonicalizeSpec, stringifySpec } from './lib/spec-canonicalize.js';
 import { type FetchedDoc, mergeSpecDocs } from './lib/spec-merge.js';
 import { loadSpecRegistry, type SpecRegistryEntry } from './lib/spec-registry.js';
@@ -223,6 +224,11 @@ async function main() {
       `${frozenCount} frozen)\n`
   );
 
+  // Only consulted for acknowledgedDivergentServers here; fix-specs applies the
+  // overrides themselves. Loaded up front so a malformed registry fails before
+  // any spec is written.
+  const routingOverrides = loadRoutingOverrides();
+
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
@@ -275,7 +281,14 @@ async function main() {
 
     const merged =
       parsedDocs.length > 1
-        ? mergeSpecDocs(name, parsedDocs, { onWarning: (message) => console.log(message) })
+        ? mergeSpecDocs(name, parsedDocs, {
+            onWarning: (message) => console.log(message),
+            // A slug whose documents declare different server families only
+            // merges when a human has recorded why, with evidence, in
+            // scripts/routing-overrides.yaml.
+            acknowledgedDivergentServers:
+              findSpecOverride(routingOverrides, name)?.acknowledgedDivergentServers ?? false,
+          })
         : parsedDocs[0].doc;
     const canonical = canonicalizeSpec(merged);
 
