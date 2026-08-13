@@ -44,6 +44,14 @@ interface OpenAPISpec {
   openapi?: string;
   info?: { title?: string };
   servers?: OpenAPIServer[];
+  /**
+   * Read for path-level `servers` only. OpenAPI allows a path item to override
+   * the document's servers, and Deere serves a handful of operations from a
+   * different base than the spec they live in declares (measured, see
+   * scripts/routing-overrides.yaml). Ignoring this key is how
+   * `GET /activeIngredients` shipped resolving to a URL that returns 404.
+   */
+  paths?: Record<string, { servers?: OpenAPIServer[] } | undefined>;
   'x-deere-proxy-info'?: DeereProxyInfo;
 }
 
@@ -67,10 +75,25 @@ interface DeereProxyInfo {
 
 type Tier = 'prod' | 'cert' | 'qual' | 'sandbox';
 
+/**
+ * A path item whose `servers` differ from the document's. Carried as an
+ * optional field on the existing config variants rather than as a fourth
+ * `kind`: adding a variant would break the narrowing in
+ * src/environment-resolver.ts, while an optional field is invisible to every
+ * existing consumer.
+ */
+interface PathServerOverride {
+  /** Path pattern exactly as written in the spec; `{param}` matches any segment. */
+  pattern: string;
+  urlTemplate: string;
+  supportedEnvironments: string[];
+}
+
 interface TemplatedConfig {
   kind: 'templated';
   urlTemplate: string;
   supportedEnvironments: string[];
+  pathOverrides?: PathServerOverride[];
 }
 
 interface StaticConfig {
@@ -137,6 +160,50 @@ function classifyHostname(hostname: string): Tier {
 // Spec classification
 // ============================================================================
 
+/**
+ * Collect path items whose `servers` differ from the document's.
+ *
+ * Only the templated form is supported, because that is the only form
+ * scripts/routing-overrides.yaml can express, and a path-level block is only
+ * ever written by that registry. Anything else is a spec Deere published in a
+ * shape this generator has never seen, so it throws rather than silently
+ * dropping the override and resolving the path to the document's base, which
+ * is exactly the 404 this feature exists to fix.
+ */
+function collectPathOverrides(spec: OpenAPISpec, specName: string): PathServerOverride[] {
+  const overrides: PathServerOverride[] = [];
+
+  for (const [pattern, item] of Object.entries(spec.paths ?? {})) {
+    const servers = item?.servers;
+    if (!Array.isArray(servers) || servers.length === 0) continue;
+
+    const url = servers[0]?.url;
+    if (typeof url !== 'string' || !url.includes('{environment}')) {
+      throw new Error(
+        `${specName}.yaml path "${pattern}" declares a servers block that is not templated ` +
+          `(${JSON.stringify(url)}). Path-level servers are written by ` +
+          `scripts/routing-overrides.yaml, which only emits the templated form; a different ` +
+          `shape means an assumption here is stale.`
+      );
+    }
+
+    const enumValues = Array.isArray(servers[0].variables?.environment?.enum)
+      ? servers[0].variables.environment.enum.filter((v): v is string => typeof v === 'string')
+      : [];
+    if (enumValues.length === 0) {
+      throw new Error(
+        `${specName}.yaml path "${pattern}" declares a templated servers URL with no ` +
+          `environment enum, so no environment could resolve it.`
+      );
+    }
+
+    overrides.push({ pattern, urlTemplate: url, supportedEnvironments: enumValues });
+  }
+
+  overrides.sort((a, b) => (a.pattern < b.pattern ? -1 : a.pattern > b.pattern ? 1 : 0));
+  return overrides;
+}
+
 function classifySpec(spec: OpenAPISpec, specName: string): SpecConfig {
   const servers = spec.servers;
 
@@ -164,10 +231,12 @@ function classifySpec(spec: OpenAPISpec, specName: string): SpecConfig {
         reason: `${specName}.yaml has a templated servers URL but declares no environment enum.`,
       };
     }
+    const pathOverrides = collectPathOverrides(spec, specName);
     return {
       kind: 'templated',
       urlTemplate: first.url,
       supportedEnvironments: enumValues,
+      ...(pathOverrides.length > 0 ? { pathOverrides } : {}),
     };
   }
 
@@ -395,6 +464,23 @@ export const DEFAULT_ENVIRONMENT: Environment = 'sandboxapi';
 // SpecServerConfig — per-spec URL resolution config
 // ============================================================================
 
+/**
+ * A path served from a different base than its own spec declares.
+ *
+ * Deere does this: \`GET /notifications/{sourceEvent}\` lives on \`/isg\` while
+ * the other three operations in the same document live on \`/platform\`.
+ * Sourced from path-level \`servers\` in specs/fixed, written there by
+ * scripts/routing-overrides.yaml, which requires measured evidence per entry.
+ */
+export interface PathServerOverride {
+  /** Path pattern; a \`{param}\` segment matches any single segment. */
+  pattern: string;
+  /** URL template with \`{environment}\` placeholder. */
+  urlTemplate: string;
+  /** Envs declared in this path item's servers.variables.environment.enum. */
+  supportedEnvironments: readonly Environment[];
+}
+
 export type SpecServerConfig =
   | {
       kind: 'templated';
@@ -402,6 +488,11 @@ export type SpecServerConfig =
       urlTemplate: string;
       /** Envs declared in the spec's servers.variables.environment.enum. */
       supportedEnvironments: readonly Environment[];
+      /**
+       * Paths that override the template above. Absent for the 26 specs where
+       * every path shares the document's base. Checked before \`urlTemplate\`.
+       */
+      pathOverrides?: readonly PathServerOverride[];
     }
   | {
       kind: 'static';
@@ -428,6 +519,27 @@ ${apiServersEntries}
 `;
 }
 
+/** Renders the optional pathOverrides field, or nothing when there are none. */
+function emitPathOverrides(overrides: PathServerOverride[] | undefined): string {
+  if (!overrides || overrides.length === 0) return '';
+
+  const entries = overrides
+    .map((o) => {
+      const envs = o.supportedEnvironments.map((e) => `'${e}'`).join(', ');
+      return `      {
+        pattern: '${o.pattern}',
+        urlTemplate: '${o.urlTemplate}',
+        supportedEnvironments: [${envs}],
+      },`;
+    })
+    .join('\n');
+
+  return `
+    pathOverrides: [
+${entries}
+    ],`;
+}
+
 function emitSpecEntry({ specName, config }: ClassifiedSpec): string {
   const key = needsQuotes(specName) ? `'${specName}'` : specName;
 
@@ -443,7 +555,7 @@ function emitSpecEntry({ specName, config }: ClassifiedSpec): string {
     return `  ${key}: {
     kind: 'templated',
     urlTemplate: '${config.urlTemplate}',
-    supportedEnvironments: [${envs}],
+    supportedEnvironments: [${envs}],${emitPathOverrides(config.pathOverrides)}
   },`;
   }
 
