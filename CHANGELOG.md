@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-08-13
+
+Two published methods were resolving to URLs that do not exist, and a third was
+built on an endpoint John Deere had retired. None of it was detectable from
+inside this repo, because nothing checked whether a generated URL corresponded
+to a real route.
+
+The direct cause of each was the same shape: a value the pipeline guessed, then
+presented downstream as though Deere had published it. A missing `servers` block
+was filled in with an assumed default. A merge collapsed eight documents with
+differing hosts down to one. An endpoint observed once in January 2026 was
+injected into the spec with no record of how it was known. All three read as
+spec-derived truth by the time they reached generated code.
+
+This release fixes the two broken routes, removes the third, and adds the checks
+that would have caught them.
+
+### Removed
+
+- **`OrganizationsApi.listUsers`.** `GET /organizations/{orgId}/users` returns
+  404 in every environment and appears in none of the 85 APIs John Deere
+  publishes. It reached the SDK through a hand-written injection added in
+  January 2026 on a real but unrecorded observation, with nothing watching it,
+  so when it broke it stayed broken silently.
+
+  Confirmed retired with a credentialed probe on 2026-08-13: `/users` returns
+  404 with a valid token on a gateway that answers 403 for routes it will not
+  let you call, so this is absence rather than a permissions failure. The
+  successor path `/organizations/{orgId}/staff` exists but returned 403 to an
+  application holding full scopes, and no response body has been captured by
+  anyone, so it is not shipped in its place. See
+  `docs/plans/2026-08-13-routing-guard.md`.
+
+### Fixed
+
+- **`notifications.get` now reaches John Deere.** `GET /notifications/{sourceEvent}`
+  is served from `/isg`, not `/platform`, and the SDK was building the
+  `/platform` URL, which returns 404 in every environment. Its three sibling
+  operations remain on `/platform` and are unchanged.
+- **`products.listActiveIngredients` now reaches John Deere.** Same failure,
+  different cause: the `active-ingredients` document declares its own servers
+  block, and the multi-document merge discarded it in favour of the primary's.
+- **Portal slug rename absorbed.** John Deere renamed `field-operations-api` to
+  `field-operations` between 2026-08-11 and 2026-08-12. The internal spec name,
+  and therefore the public `SpecName` literal, is unchanged.
+
+### Added
+
+- **Per-path routing.** A path can now declare a base URL that differs from its
+  spec's, expressed as OpenAPI's own path-level `servers` and consulted at
+  request time. Previously there was one host per spec, which cannot represent
+  what John Deere actually serves.
+- **`scripts/routing-overrides.yaml`.** A committed registry of the places where
+  the published spec states the wrong base URL, or none at all. Every entry must
+  carry evidence describing what was measured and when; the loader rejects one
+  that does not. This replaces the assumed-`/platform` default.
+- **`scripts/spec-registry.yaml`.** Records which specs exist, which portal slug
+  serves each, and which are knowingly frozen. A spec that cannot be fetched now
+  fails the sync instead of being skipped with the run reporting success, which
+  is how one spec went three months without being refreshed.
+- **A three-layer routing guard.** Hermetic invariants proving no stage
+  manufactures routing data; a committed snapshot of all 121 paths and the base
+  each resolves to, so a URL change lands as a reviewable diff; and a
+  non-blocking daily probe that asks John Deere's gateway whether every shipped
+  route exists. The probe re-validates its own discriminator each run and
+  reports nothing rather than guessing if it stops holding.
+
+### Changed
+
+- The API health badge now grades on the same rule as the pipeline. It
+  previously used its own weaker heuristic and reported a spec as healthy for
+  three months while the sync could not consume it.
+- Bounded retry on portal fetches for network errors and 5xx. A 404 is a real
+  answer and is never retried.
+
 ## [2.4.0] - 2026-07-02
 
 The first live multi-document fetch. John Deere's portal returns more than one
