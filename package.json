@@ -57,6 +57,8 @@
     "generate-api-servers": "tsx scripts/generate-api-servers.ts",
     "generate-types": "tsx scripts/generate-types.ts",
     "generate-sdk": "tsx scripts/generate-sdk.ts",
+    "generate-routing-snapshot": "tsx scripts/generate-routing-snapshot.ts",
+    "probe-routes": "tsx scripts/probe-routes.ts",
     "generate": "pnpm fetch-specs && pnpm redact-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
