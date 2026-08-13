@@ -48,15 +48,25 @@
 #   403  no such base path (nginx, not the API gateway)
 #
 # ---------------------------------------------------------------------------
-# Known upstream defect with no override, recorded so it is not rediscovered
+# Closed question, recorded so it is not reopened by probing
 # ---------------------------------------------------------------------------
 #
-# GET /organizations/{orgId}/staff returns 401 on api.deere.com/platform and
-# appears in no Deere spec and on no Deere doc page (checked 2026-08-13). It is
-# the most likely successor to the removed listUsers endpoint. It is NOT added
-# here, because adding a path needs its response shape captured, not just its
-# route confirmed. Restoring it correctly needs one authenticated call, the
-# response saved as a fixture, and an entry carrying that evidence.
+# GET /organizations/{orgId}/staff is NOT added here, and should not be.
+#
+# Probed with a valid production token against org 7294700 on 2026-08-13:
+#
+#   /platform/organizations/7294700/staff   403 Forbidden
+#   /platform/organizations/7294700/users   404 Not Found
+#
+# /users is genuinely gone, which confirms removing OrganizationsApi.listUsers
+# in #46 was right. /staff exists but returns 403 to an application holding full
+# scopes, so any method built on it would 403 for every consumer. It appears in
+# none of the 85 APIs in Deere's published catalog, which is what an
+# internal-only surface looks like rather than a withdrawn public one.
+#
+# A routing override cannot fix a permissions boundary. Reopen only if Deere
+# publishes an org-membership API or grants the scope; either would show up as a
+# new catalog entry rather than as something to rediscover by probing.
 
 version: 1
 

@@ -76,20 +76,36 @@ controls, same host, same fake orgId:
 Every sibling under the same prefix answers 401. Only `/users` answers 404. And
 `/organizations/{orgId}/staff` exists while appearing in no Deere spec and no doc page.
 
-**Most likely: the endpoint was real in January 2026 and Deere has since renamed it
-`/users` to `/staff`.**
+### Settled 2026-08-13 with a real token: do not restore this endpoint
 
-### Why it was removed rather than repointed
+The unauthenticated probe above suggested a rename but could not prove one, because an
+unauthenticated 404 might mean "not authorized to know" rather than "absent". Both paths
+were then probed with a valid production token against org 7294700, via
+`probeOrganizationStaff` in field-mcp's `scripts/jd-probe-shapes.ts`:
 
-Repointing to `/staff` without seeing a real response would repeat the original mistake:
-shipping an unverified claim as a typed fact. The `OrganizationUser` response shape has
-never been captured, so a repointed method would carry types nobody has checked, just newer
-ones.
+```
+GET /platform/organizations/7294700/staff   403 Forbidden
+GET /platform/organizations/7294700/users   404 Not Found
+```
 
-Restoring it correctly needs one authenticated `GET /organizations/{orgId}/staff` against a
-real org, the response recorded as a fixture, and an entry in the routing-override registry
-(PR 2) carrying that evidence and its date. That is a small task for whoever has
-credentials, and this document is the pointer to it.
+That answers both open questions at once.
+
+**`/users` is genuinely gone.** A 404 with a valid token, where sibling paths on the same
+host answer 401 and 403, is absence rather than authorization. Removing
+`OrganizationsApi.listUsers` was correct.
+
+**`/staff` exists but is unreachable for third-party applications.** 403 with a valid token
+and full scopes means the route is real and this application cannot call it. A method built
+on it would return 403 for every consumer holding comparable scopes, so restoring the
+capability by repointing is not available. That also fits the catalog search: no
+org-membership endpoint appears in any of Deere's 85 published APIs, which is what an
+internal-only surface looks like rather than a withdrawn public one.
+
+**Nothing further to investigate.** Earlier drafts of this document called a credentialed
+call "a small task for whoever has credentials". It has been done, and the answer is that
+there is no endpoint here to ship. Reopen only if Deere publishes an org-membership API or
+grants the scope, both of which would be visible as a new catalog entry rather than
+something to rediscover by probing.
 
 ### Also in that PR
 
