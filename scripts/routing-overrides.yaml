@@ -48,15 +48,33 @@
 #   403  no such base path (nginx, not the API gateway)
 #
 # ---------------------------------------------------------------------------
-# Known upstream defect with no override, recorded so it is not rediscovered
+# What is known about org membership, and what it would take to add it
 # ---------------------------------------------------------------------------
 #
-# GET /organizations/{orgId}/staff returns 401 on api.deere.com/platform and
-# appears in no Deere spec and on no Deere doc page (checked 2026-08-13). It is
-# the most likely successor to the removed listUsers endpoint. It is NOT added
-# here, because adding a path needs its response shape captured, not just its
-# route confirmed. Restoring it correctly needs one authenticated call, the
-# response saved as a fixture, and an entry carrying that evidence.
+# GET /organizations/{orgId}/staff is NOT added here, but the reason is worth
+# stating precisely, because it is not the obvious one.
+#
+# Probed with a valid production token, org 7294700, 2026-08-13:
+#
+#   /platform/organizations/7294700/staff   403 Forbidden
+#   /platform/organizations/7294700/users   404 Not Found
+#
+# /users is gone. That conclusion is not scope-dependent: this gateway answers
+# 403 for a route it will not let you call, so a 404 is absence rather than a
+# masked authorization failure. Removing OrganizationsApi.listUsers in #46 was
+# right.
+#
+# /staff exists. The 403 says only that THIS application, with THESE scopes, on
+# THIS org, cannot call it. It does not establish that no consumer can: a
+# partner- or dealer-tier client may well get a 200. Do not read one app's 403
+# as a statement about everyone's.
+#
+# The blocker on adding it is therefore observability, not authorization. No
+# response body has been captured by anyone, so a schema could only be invented,
+# which is exactly the defect #46 removed. The bar to add it is a captured
+# response from a caller who can reach it, saved as a fixture, plus an entry
+# here citing it. If you have scopes that return 200, that is a contribution
+# worth making.
 
 version: 1
 

@@ -76,20 +76,45 @@ controls, same host, same fake orgId:
 Every sibling under the same prefix answers 401. Only `/users` answers 404. And
 `/organizations/{orgId}/staff` exists while appearing in no Deere spec and no doc page.
 
-**Most likely: the endpoint was real in January 2026 and Deere has since renamed it
-`/users` to `/staff`.**
+### Probed 2026-08-13 with a real token
 
-### Why it was removed rather than repointed
+The unauthenticated sweep above suggested a rename but could not prove one, because an
+unauthenticated 404 might mean "not authorized to know" rather than "absent". Both paths
+were then probed with a valid production token against org 7294700, via
+`probeOrganizationStaff` in field-mcp's `scripts/jd-probe-shapes.ts`:
 
-Repointing to `/staff` without seeing a real response would repeat the original mistake:
-shipping an unverified claim as a typed fact. The `OrganizationUser` response shape has
-never been captured, so a repointed method would carry types nobody has checked, just newer
-ones.
+```
+GET /platform/organizations/7294700/staff   403 Forbidden
+GET /platform/organizations/7294700/users   404 Not Found
+```
 
-Restoring it correctly needs one authenticated `GET /organizations/{orgId}/staff` against a
-real org, the response recorded as a fixture, and an entry in the routing-override registry
-(PR 2) carrying that evidence and its date. That is a small task for whoever has
-credentials, and this document is the pointer to it.
+**`/users` is gone, and that conclusion is not scope-dependent.** This gateway answers 403
+for a route it will not let you call, so it does not hide unauthorized routes behind a 404.
+A 404 here is absence. Removing `OrganizationsApi.listUsers` was correct.
+
+**`/staff` exists. What the 403 means is narrower than it looks.** It says this application,
+with these scopes, on this org, cannot call it. It does **not** establish that no consumer
+can. A partner-tier or dealer-tier client may well get a 200, and one app's 403 is not a
+statement about everyone's. The earlier draft of this section claimed "unreachable for
+third-party applications", which asserts more than one measurement supports.
+
+### Why it still is not added
+
+The blocker is **observability, not authorization**. No response body has been captured by
+anyone, so its schema could only be invented, which is exactly the defect `#46` removed. An
+SDK method whose types nobody has checked is the original problem wearing a newer date.
+
+This is worth separating from the authorization question, because a client library has no
+business deciding what its consumers are entitled to call. Shipping a method that returns
+403 to unauthorized callers would be perfectly normal; plenty of endpoints in this SDK
+require scopes not every application holds. Absence of a verified response shape is the
+actual reason, and it is a reason that someone else can remove.
+
+**The bar to add it** is a captured response from a caller who can reach it, saved as a
+fixture under `tests/fixtures/jd/`, plus a registry entry citing it and the date. That is a
+contribution anyone with the right scopes can make. It also cannot arrive through normal
+codegen, since no org-membership endpoint appears in any of Deere's 85 published APIs, so it
+would need a hand-maintained fragment with the ongoing cost that implies.
 
 ### Also in that PR
 
