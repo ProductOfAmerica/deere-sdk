@@ -125,10 +125,12 @@ jobs:
       # stage manufactured a base URL. Both need a human: re-measure, record the
       # evidence in scripts/routing-overrides.yaml, run
       # `pnpm generate-routing-snapshot`, and review the diff.
+      # Via a pnpm script, not a bare `cross-env ...`: GitHub Actions does not
+      # put node_modules/.bin on PATH for a plain `run:` step, so the binary
+      # would not resolve. Every other step here goes through pnpm for the same
+      # reason.
       - name: Routing guard
-        run: >
-          cross-env TSX_TSCONFIG_PATH=tsconfig.test.json
-          node --import tsx/esm --test tests/routing-guard.test.ts
+        run: pnpm test:routing-guard
 
       - name: Check for changes
         id: changes

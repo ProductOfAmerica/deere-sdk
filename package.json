@@ -66,6 +66,7 @@
     "test": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/*.test.ts",
     "test:coverage": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test --experimental-test-coverage tests/*.test.ts",
     "test:fuzz": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/fuzz.test.ts",
+    "test:routing-guard": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/routing-guard.test.ts",
     "typecheck:test": "tsc --project tsconfig.test.json"
   },
   "devDependencies": {
