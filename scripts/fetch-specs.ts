@@ -4,8 +4,9 @@
  *
  * Usage: pnpm fetch-specs
  *
- * The specs are fetched from:
- *   https://developer.deere.com/devDoc/apiDetails/{api-slug}
+ * Which specs to fetch, and the portal slug each is served under, come from
+ * scripts/spec-registry.yaml. The specs are fetched from:
+ *   https://developer.deere.com/devDoc/apiDetails/{slug}
  *
  * The portal returns one or more documents per slug. Every document is
  * validated (validateFetchedSpecDocs), parsed, and, when a slug returns more
@@ -14,61 +15,36 @@
  * reorder of `paths` or `components` produces a byte-identical raw file
  * instead of a misleading diff.
  *
+ * A spec that cannot be fetched or validated FAILS THE RUN unless the registry
+ * marks it frozen. Before that gate, a failure printed "Not found" and exited
+ * 0, so a spec could silently stop being refreshed while the nightly sync
+ * reported success; `notifications` did exactly that for three months.
+ *
  * Output:
- *   - specs/raw/*.yaml (one file per slug)
+ *   - specs/raw/*.yaml (one file per active spec)
  *   - specs/raw/summary.json (fetch metadata; write-only, no consumers)
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
-import {
-  resolvePortalSlug,
-  type ValidatedFetchedDoc,
-  validateFetchedSpecDocs,
-} from './lib/fetched-spec-utils.js';
+import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
 import { canonicalizeSpec, stringifySpec } from './lib/spec-canonicalize.js';
 import { type FetchedDoc, mergeSpecDocs } from './lib/spec-merge.js';
+import { loadSpecRegistry, type SpecRegistryEntry } from './lib/spec-registry.js';
 import { isRecord } from './lib/spec-utils.js';
 
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');
 
-// All John Deere APIs to include in the SDK
-const API_SLUGS = [
-  // Precision Tech / Operations Center (18)
-  'field-operations-api',
-  'fields',
-  'farms',
-  'clients',
-  'organizations',
-  'boundaries',
-  'equipment',
-  'crop-types',
-  'assets',
-  'users',
-  'operators',
-  'files',
-  'flags',
-  'guidance-lines',
-  'map-layers',
-  'products',
-  'webhook',
-  'connection-management',
-
-  // Precision Tech / Machine Data (10)
-  'notifications',
-  'machine-locations',
-  'machine-alerts',
-  'machine-device-state-reports',
-  'machine-engine-hours',
-  'machine-hours-of-operation',
-  'harvest-id',
-  'aemp',
-  'equipment-measurement',
-  'partnerships',
-];
-const API_SLUG_SET = new Set(API_SLUGS);
+/**
+ * Retry budget for a single slug. Covers a transient portal blip only: a 404
+ * is a real answer and is never retried. Kept small because the gate below
+ * fails the run on the first genuinely failed refresh, so the only job here is
+ * to tell "the portal is down" apart from "one packet dropped".
+ */
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY_MS = [500, 1500];
 
 /** A source-document reference as recorded in summary.json's per-spec `docs` list. */
 interface SourceDocRef {
@@ -83,19 +59,104 @@ interface ProcessedSpec {
   docs: SourceDocRef[];
 }
 
-async function fetchApiSpec(slug: string): Promise<ValidatedFetchedDoc[] | null> {
-  const url = `${BASE_URL}/${resolvePortalSlug(slug)}`;
+/**
+ * Why a slug did not yield usable documents. The old code collapsed all of
+ * these to `null` and printed the same "Not found" for every one, which is how
+ * a 404 (upstream rename) and a validation rejection (our own validator) were
+ * indistinguishable in the logs for three months.
+ */
+type FetchOutcome =
+  | { kind: 'ok'; docs: ValidatedFetchedDoc[]; apiIds: string[] }
+  | { kind: 'http'; status: number }
+  | { kind: 'rejected' }
+  | { kind: 'network'; message: string };
+
+/** Describes an outcome in one line, for both the progress log and the gate. */
+function describeOutcome(outcome: FetchOutcome): string {
+  switch (outcome.kind) {
+    case 'ok':
+      return 'ok';
+    case 'http':
+      return `HTTP ${outcome.status}`;
+    case 'rejected':
+      return 'portal returned documents, but none passed validateFetchedSpecDocs';
+    case 'network':
+      return `network error: ${outcome.message}`;
+  }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Transient enough to be worth another attempt. A 4xx is a real answer. */
+function isRetryable(outcome: FetchOutcome): boolean {
+  return outcome.kind === 'network' || (outcome.kind === 'http' && outcome.status >= 500);
+}
+
+async function attemptFetch(entry: SpecRegistryEntry): Promise<FetchOutcome> {
+  const url = `${BASE_URL}/${entry.slug}`;
+  let data: unknown;
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      return null;
+      return { kind: 'http', status: response.status };
     }
-    const data: unknown = await response.json();
-    return validateFetchedSpecDocs(slug, data, API_SLUG_SET);
+    data = await response.json();
   } catch (error) {
-    console.error(`Error fetching ${slug}:`, error);
+    return { kind: 'network', message: error instanceof Error ? error.message : String(error) };
+  }
+  // Outside the try: a throw from validateFetchedSpecDocs means an untrusted
+  // slug reached it, which is a config error, not a network condition, and
+  // must not be swallowed as a retryable blip.
+  const docs = validateFetchedSpecDocs(entry.name, data, new Set([entry.name]));
+  if (docs === null) {
+    return { kind: 'rejected' };
+  }
+  const apiIds = Array.isArray(data)
+    ? [...new Set(data.filter(isRecord).map((d) => d.api_id))].filter(
+        (id): id is string => typeof id === 'string'
+      )
+    : [];
+  return { kind: 'ok', docs, apiIds };
+}
+
+async function fetchApiSpec(entry: SpecRegistryEntry): Promise<FetchOutcome> {
+  let outcome = await attemptFetch(entry);
+  for (let attempt = 1; attempt < MAX_ATTEMPTS && isRetryable(outcome); attempt++) {
+    const wait = RETRY_DELAY_MS[attempt - 1] ?? RETRY_DELAY_MS[RETRY_DELAY_MS.length - 1];
+    console.log(
+      `\n  ${entry.name}: ${describeOutcome(outcome)}; retrying in ${wait}ms ` +
+        `(attempt ${attempt + 1}/${MAX_ATTEMPTS})`
+    );
+    await delay(wait);
+    outcome = await attemptFetch(entry);
+  }
+  return outcome;
+}
+
+/**
+ * The apiId guard. A mismatch proves the slug now serves a different API, so
+ * the raw file would be overwritten with another API's contract under our
+ * filename. A match proves nothing: the portal reuses one api_id across
+ * unrelated APIs (products and service-data-products share
+ * 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122). Absent api_id is not an error; it is
+ * only ever a guard, so losing it costs a warning, not the run.
+ */
+function checkApiId(entry: SpecRegistryEntry, apiIds: string[]): string | null {
+  if (apiIds.length === 0) {
+    console.log(`  ${entry.name}: portal returned no api_id; identity guard skipped`);
     return null;
   }
+  if (apiIds.includes(entry.apiId)) {
+    return null;
+  }
+  return (
+    `slug "${entry.slug}" now serves api_id ${apiIds.join(', ')}, but the registry records ` +
+    `${entry.apiId}. The slug has been repointed at a different API upstream. Confirm what ` +
+    `"${entry.slug}" now is before touching scripts/spec-registry.yaml: accepting this blindly ` +
+    `would overwrite specs/raw/${entry.name}.yaml with another API's contract.`
+  );
 }
 
 /**
@@ -104,10 +165,9 @@ async function fetchApiSpec(slug: string): Promise<ValidatedFetchedDoc[] | null>
  * confirmed each document parses and satisfies isOpenApiDocument. Wrapped
  * per-slug (not per-document) so a failure names both the slug and the
  * endpoint name of the document that failed, then returns null so the caller
- * can count the slug as failed and move on to the next one, mirroring the
- * existing not-found handling.
+ * can block that spec and move on to the next one.
  */
-function parseSlugDocs(slug: string, docs: ValidatedFetchedDoc[]): FetchedDoc[] | null {
+function parseSlugDocs(specName: string, docs: ValidatedFetchedDoc[]): FetchedDoc[] | null {
   let current: ValidatedFetchedDoc | undefined;
   try {
     return docs.map((doc) => {
@@ -115,7 +175,7 @@ function parseSlugDocs(slug: string, docs: ValidatedFetchedDoc[]): FetchedDoc[] 
       return { endPointName: doc.endPointName, id: doc.id, doc: yaml.parse(doc.ymlContent) };
     });
   } catch (error) {
-    const where = current ? `${slug} (${current.endPointName})` : slug;
+    const where = current ? `${specName} (${current.endPointName})` : specName;
     console.error(`  Failed to parse fetched YAML for ${where}: ${error}`);
     return null;
   }
@@ -128,21 +188,25 @@ function parseSlugDocs(slug: string, docs: ValidatedFetchedDoc[]): FetchedDoc[] 
  * private primary-selection table, so this stamped field is the only way to
  * learn which document mergeSpecDocs chose as primary.
  */
-function extractSourceDocuments(slug: string, merged: unknown): SourceDocRef[] {
+function extractSourceDocuments(specName: string, merged: unknown): SourceDocRef[] {
   const sourceDocuments = isRecord(merged) ? merged['x-source-documents'] : undefined;
   if (!Array.isArray(sourceDocuments)) {
     throw new Error(
-      `Internal error: mergeSpecDocs did not stamp x-source-documents for multi-document slug "${slug}".`
+      `Internal error: mergeSpecDocs did not stamp x-source-documents for multi-document spec "${specName}".`
     );
   }
   return sourceDocuments as SourceDocRef[];
 }
 
-function findDocById(slug: string, docs: ValidatedFetchedDoc[], id: number): ValidatedFetchedDoc {
+function findDocById(
+  specName: string,
+  docs: ValidatedFetchedDoc[],
+  id: number
+): ValidatedFetchedDoc {
   const found = docs.find((doc) => doc.id === id);
   if (!found) {
     throw new Error(
-      `Internal error: document id ${id} not found among fetched documents for slug "${slug}".`
+      `Internal error: document id ${id} not found among fetched documents for spec "${specName}".`
     );
   }
   return found;
@@ -151,33 +215,65 @@ function findDocById(slug: string, docs: ValidatedFetchedDoc[], id: number): Val
 async function main() {
   console.log('Fetching John Deere OpenAPI specifications...\n');
 
+  const registry = loadSpecRegistry();
+  const frozenCount = registry.entries.filter((e) => e.frozen).length;
+  console.log(
+    `Registry: ${registry.entries.length} specs (${registry.entries.length - frozenCount} active, ` +
+      `${frozenCount} frozen)\n`
+  );
+
   if (!existsSync(OUTPUT_DIR)) {
     mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
   const processed: ProcessedSpec[] = [];
-  const notFound: string[] = [];
-  let failedCount = 0;
+  const frozen: string[] = [];
+  /** Active specs that did not yield a usable document. Fails the run below. */
+  const blocked: { name: string; detail: string }[] = [];
 
-  for (const slug of API_SLUGS) {
-    process.stdout.write(`Fetching ${slug}...`);
-    const docs = await fetchApiSpec(slug);
-    if (!docs) {
-      notFound.push(slug);
-      console.log(' Not found');
+  for (const entry of registry.entries) {
+    const { name } = entry;
+    process.stdout.write(`Fetching ${name}...`);
+    const outcome = await fetchApiSpec(entry);
+
+    if (entry.frozen) {
+      // A frozen spec is still fetched, purely so the log can say whether the
+      // freeze could now be lifted. Its file is never written, and it can
+      // never fail the run.
+      frozen.push(name);
+      console.log(
+        outcome.kind === 'ok'
+          ? ` FROZEN (frozen since ${entry.frozen.since}, but the fetch now SUCCEEDS; ` +
+              `this freeze may be liftable, see scripts/spec-registry.yaml)`
+          : ` FROZEN (since ${entry.frozen.since}; ${describeOutcome(outcome)})`
+      );
       continue;
     }
 
-    const parsedDocs = parseSlugDocs(slug, docs);
+    if (outcome.kind !== 'ok') {
+      blocked.push({ name, detail: describeOutcome(outcome) });
+      console.log(` BLOCKED (${describeOutcome(outcome)})`);
+      continue;
+    }
+
+    const mismatch = checkApiId(entry, outcome.apiIds);
+    if (mismatch) {
+      blocked.push({ name, detail: mismatch });
+      console.log(' BLOCKED (api_id mismatch)');
+      continue;
+    }
+
+    const docs = outcome.docs;
+    const parsedDocs = parseSlugDocs(name, docs);
     if (!parsedDocs) {
-      failedCount += 1;
-      console.log(' FAILED');
+      blocked.push({ name, detail: 'fetched documents failed to parse as YAML' });
+      console.log(' BLOCKED (parse failed)');
       continue;
     }
 
     const merged =
       parsedDocs.length > 1
-        ? mergeSpecDocs(slug, parsedDocs, { onWarning: (message) => console.log(message) })
+        ? mergeSpecDocs(name, parsedDocs, { onWarning: (message) => console.log(message) })
         : parsedDocs[0].doc;
     const canonical = canonicalizeSpec(merged);
 
@@ -188,22 +284,23 @@ async function main() {
     // remains downstream as an idempotent safety net, not the primary
     // redaction path.
     const yamlText = stringifySpec(canonical);
-    // Materializes validated, merged, and canonicalized OpenAPI YAML from the
-    // trusted Deere API slug catalog (the filename comes from API_SLUGS, not
-    // portal data).
+    // Materializes validated, merged, and canonicalized OpenAPI YAML. The
+    // filename comes from the committed registry's spec name (validated
+    // against /^[a-z0-9]+(-[a-z0-9]+)*$/ by loadSpecRegistry), never from
+    // portal data.
     // codeql[js/http-to-file-access]
-    writeFileSync(join(OUTPUT_DIR, `${slug}.yaml`), yamlText);
+    writeFileSync(join(OUTPUT_DIR, `${name}.yaml`), yamlText);
 
     const sourceDocs =
       parsedDocs.length > 1
-        ? extractSourceDocuments(slug, merged)
+        ? extractSourceDocuments(name, merged)
         : [{ id: parsedDocs[0].id, endPointName: parsedDocs[0].endPointName }];
-    const primary = findDocById(slug, docs, sourceDocs[0].id);
+    const primary = findDocById(name, docs, sourceDocs[0].id);
 
     processed.push({
       id: primary.id,
       name: primary.name,
-      file: `${slug}.yaml`,
+      file: `${name}.yaml`,
       docs: sourceDocs,
     });
 
@@ -211,26 +308,43 @@ async function main() {
   }
 
   console.log(
-    `\nResults: ${processed.length} found, ${notFound.length} not found, ${failedCount} failed`
+    `\nResults: ${processed.length} written, ${frozen.length} frozen, ${blocked.length} blocked`
   );
 
   // Write-only metadata file: nothing in this repo or its CI workflows reads
   // it back (sync-api.yml explicitly excludes summary.json from change
-  // detection).
+  // detection). The registry, not this file, is what the pipeline gates on.
   const summary = {
     fetchedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
     specs: processed,
-    notFound,
+    frozen,
+    blocked: blocked.map((b) => b.name),
   };
 
   writeFileSync(join(OUTPUT_DIR, 'summary.json'), JSON.stringify(summary, null, 2));
 
-  if (failedCount > 0) {
+  // The gate. Reported after the whole loop so one run names every broken
+  // spec rather than surfacing them one failed build at a time.
+  if (blocked.length > 0) {
     console.error(
-      `fetch-specs: ${failedCount} slug(s) failed to parse; failing the run so CI cannot ship a corrupted raw spec.`
+      `\nfetch-specs: ${blocked.length} active spec(s) could not be refreshed. Failing the run: ` +
+        `continuing would regenerate the SDK from stale committed specs while reporting success, ` +
+        `which is how notifications went three months without anyone noticing.\n`
+    );
+    for (const { name, detail } of blocked) {
+      console.error(`  ${name}: ${detail}`);
+    }
+    console.error(
+      `\nRemediation, per spec:\n` +
+        `  - upstream renamed the slug: repoint "slug:" in scripts/spec-registry.yaml. The\n` +
+        `    internal spec name stays put; it is a public SpecName literal.\n` +
+        `  - the spec is genuinely gone or cannot be validated for now: add "status: frozen"\n` +
+        `    with a "reason:" and an evidence-derived "since:", which keeps the committed raw\n` +
+        `    spec and stops this failing, while staying visible in every run's output.\n`
     );
     process.exitCode = 1;
+    return;
   }
 
   console.log(`\nSpecs saved to: ${OUTPUT_DIR}`);
