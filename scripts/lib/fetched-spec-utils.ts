@@ -2,31 +2,6 @@ import * as yaml from 'yaml';
 import { redactSpecContent } from './spec-redactor.js';
 import { isRecord } from './spec-utils.js';
 
-/**
- * Portal path overrides for slugs John Deere has renamed upstream.
- *
- * A slug doubles as this repo's internal spec name: it names the raw file, the
- * fixed spec, the generated `*Api` class, and the public `SpecName` literal a
- * consumer passes to `client.get(...)`. Renaming it to track the portal would
- * be a breaking change to that public union, so the internal name is pinned
- * and only the fetch URL follows upstream.
- *
- * `field-operations-api` began returning 404 between the 2026-08-11 and
- * 2026-08-12 API health runs. `field-operations` serves the same API: same
- * document ids (27, 28), same `info.title`, same five operations.
- */
-const PORTAL_SLUG_OVERRIDES: Readonly<Record<string, string>> = {
-  'field-operations-api': 'field-operations',
-};
-
-/**
- * Map an internal spec name to the path segment the developer portal serves it
- * under. Identity for every slug the portal has not renamed.
- */
-export function resolvePortalSlug(slug: string): string {
-  return PORTAL_SLUG_OVERRIDES[slug] ?? slug;
-}
-
 export interface ValidatedFetchedDoc {
   slug: string;
   id: number;

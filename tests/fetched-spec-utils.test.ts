@@ -2,7 +2,6 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   normalizeSpecContent,
-  resolvePortalSlug,
   validateFetchedSpecDocs,
 } from '../scripts/lib/fetched-spec-utils.js';
 
@@ -13,16 +12,6 @@ describe('fetched spec utilities', () => {
         normalizeSpecContent('openapi: 3.0.0\r\npaths: {}\r\n'),
         'openapi: 3.0.0\npaths: {}\n'
       );
-    });
-  });
-
-  describe('resolvePortalSlug', () => {
-    it('sends a renamed slug to its current portal path', () => {
-      assert.strictEqual(resolvePortalSlug('field-operations-api'), 'field-operations');
-    });
-
-    it('leaves the internal spec name unchanged for slugs the portal has not renamed', () => {
-      assert.strictEqual(resolvePortalSlug('fields'), 'fields');
     });
   });
 
