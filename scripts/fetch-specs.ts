@@ -244,8 +244,9 @@ async function main() {
       frozen.push(name);
       console.log(
         outcome.kind === 'ok'
-          ? ` FROZEN (frozen since ${entry.frozen.since}, but the fetch now SUCCEEDS; ` +
-              `this freeze may be liftable, see scripts/spec-registry.yaml)`
+          ? ` FROZEN (since ${entry.frozen.since}; fetches cleanly today, which is a fact ` +
+              `about the fetch and not a reason to unfreeze: see its reason in ` +
+              `scripts/spec-registry.yaml)`
           : ` FROZEN (since ${entry.frozen.since}; ${describeOutcome(outcome)})`
       );
       continue;

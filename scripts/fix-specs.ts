@@ -642,9 +642,14 @@ function fixSpec(
     return redactedContent;
   }
 
-  // Fix incorrect swagger version (notifications.yaml has "swagger: '3.0.0'" instead of "openapi: '3.0.0'")
-  if (spec.swagger && !spec.openapi) {
-    console.log(`  Fixing incorrect swagger field: "${spec.swagger}" → openapi: "3.0.0"`);
+  // Fix a misnamed version key (notifications.yaml declares "swagger: '3.0.0'"
+  // where it means "openapi: '3.0.0'"). Guarded on the VALUE, not just the key:
+  // this repairs a mislabel, it is not a 2.0-to-3.0 migration. A genuine
+  // `swagger: "2.0"` document falls through to the check below and is rejected,
+  // because relabelling one as 3.0.0 would feed v2 shape (definitions, host,
+  // basePath, v2 parameters) to a pipeline that assumes v3.
+  if (typeof spec.swagger === 'string' && spec.swagger.startsWith('3.') && !spec.openapi) {
+    console.log(`  Fixing misnamed version key: swagger: "${spec.swagger}" → openapi: "3.0.0"`);
     // Reconstruct spec with openapi at the beginning (YAML preserves key order)
     const { swagger, ...rest } = spec;
     spec = { openapi: '3.0.0', ...rest };

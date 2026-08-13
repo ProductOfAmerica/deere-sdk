@@ -10,6 +10,31 @@ export interface ValidatedFetchedDoc {
   ymlContent: string;
 }
 
+/**
+ * The declared OpenAPI version, from whichever key carries it.
+ *
+ * John Deere ships at least one document (notifications) whose version key is
+ * misnamed `swagger` while the body is plain OpenAPI 3: `components` rather
+ * than `definitions`, parameters carrying `schema`, no `host`/`basePath`.
+ * scripts/fix-specs.ts has rewritten that key to `openapi` since long before
+ * this validator existed, with a comment naming that very file.
+ *
+ * Reading only `openapi` here therefore rejected a document the pipeline was
+ * already built to accept, and silently undid an accommodation still sitting
+ * one stage downstream. notifications stopped being refreshed the day after
+ * this check landed (#21, 2026-05-22) and nobody noticed for three months.
+ *
+ * The version VALUE is still authoritative. `swagger: "2.0"` is a real Swagger
+ * 2.0 document and stays rejected: the downstream pipeline assumes v3 shape,
+ * and fix-specs' rewrite does not inspect the value, so this is the only place
+ * that can refuse one.
+ */
+function declaredVersion(parsed: Record<string, unknown>): string | null {
+  if (typeof parsed.openapi === 'string') return parsed.openapi;
+  if (typeof parsed.swagger === 'string') return parsed.swagger;
+  return null;
+}
+
 function isOpenApiDocument(content: string): boolean {
   try {
     const document = yaml.parseDocument(content);
@@ -18,13 +43,14 @@ function isOpenApiDocument(content: string): boolean {
     }
 
     const parsed = document.toJSON();
-    return (
-      isRecord(parsed) &&
-      typeof parsed.openapi === 'string' &&
-      parsed.openapi.startsWith('3.') &&
-      isRecord(parsed.info) &&
-      isRecord(parsed.paths)
-    );
+    if (!isRecord(parsed)) {
+      return false;
+    }
+    const version = declaredVersion(parsed);
+    if (version === null || !version.startsWith('3.')) {
+      return false;
+    }
+    return isRecord(parsed.info) && isRecord(parsed.paths);
   } catch {
     return false;
   }

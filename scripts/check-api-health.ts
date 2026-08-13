@@ -56,10 +56,14 @@ interface ApiResult extends Probe {
   frozen?: {
     since: string;
     /**
-     * True when the probe now succeeds despite the freeze, i.e. the freeze may
-     * be liftable. Surfaced so a stale freeze cannot quietly become permanent.
+     * True when the probe succeeds despite the freeze. Deliberately a fact
+     * about the fetch, not a recommendation: a spec can fetch perfectly and
+     * still be frozen for an unrelated reason (notifications is frozen over a
+     * dropped operation, not over fetchability). Surfaced so a freeze whose
+     * cause has gone away cannot quietly become permanent, while leaving the
+     * registry's `reason` as the thing that decides.
      */
-    liftable: boolean;
+    fetchesCleanly: boolean;
   };
 }
 
@@ -112,7 +116,7 @@ async function checkApi(entry: SpecRegistryEntry): Promise<ApiResult> {
   return {
     slug: entry.name,
     ...probe,
-    frozen: { since: entry.frozen.since, liftable: probe.status === 'healthy' },
+    frozen: { since: entry.frozen.since, fetchesCleanly: probe.status === 'healthy' },
   };
 }
 
@@ -149,11 +153,13 @@ async function main(): Promise<void> {
       `Frozen (recorded in scripts/spec-registry.yaml, not a failure): ` +
         `${frozen.map((f) => `${f.slug} since ${f.frozen?.since}`).join(', ')}`
     );
-    const liftable = frozen.filter((f) => f.frozen?.liftable);
-    if (liftable.length > 0) {
+    const clean = frozen.filter((f) => f.frozen?.fetchesCleanly);
+    if (clean.length > 0) {
       console.error(
-        `  These frozen specs now fetch and validate cleanly, so their freeze may be ` +
-          `liftable: ${liftable.map((f) => f.slug).join(', ')}`
+        `  These frozen specs fetch and validate cleanly today: ` +
+          `${clean.map((f) => f.slug).join(', ')}. That is a fact about the fetch, not a ` +
+          `recommendation; read their "reason:" in scripts/spec-registry.yaml, since a spec ` +
+          `can fetch perfectly and still be frozen over something else.`
       );
     }
   }
