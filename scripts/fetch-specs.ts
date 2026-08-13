@@ -22,7 +22,11 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
-import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
+import {
+  resolvePortalSlug,
+  type ValidatedFetchedDoc,
+  validateFetchedSpecDocs,
+} from './lib/fetched-spec-utils.js';
 import { canonicalizeSpec, stringifySpec } from './lib/spec-canonicalize.js';
 import { type FetchedDoc, mergeSpecDocs } from './lib/spec-merge.js';
 import { isRecord } from './lib/spec-utils.js';
@@ -80,7 +84,7 @@ interface ProcessedSpec {
 }
 
 async function fetchApiSpec(slug: string): Promise<ValidatedFetchedDoc[] | null> {
-  const url = `${BASE_URL}/${slug}`;
+  const url = `${BASE_URL}/${resolvePortalSlug(slug)}`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
