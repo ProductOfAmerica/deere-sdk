@@ -31,26 +31,38 @@ jobs:
 
       - name: Check API availability
         id: check
+        # Deliberately does NOT fail here. The badge steps below have to run on
+        # an unhealthy result too: while this step failed the job outright, the
+        # red branch of the badge logic was unreachable, so a broken API left
+        # the badge silently displaying its last good value. The job is failed
+        # at the end of this job instead, after the badge is written.
         run: |
+          set +e
           npx tsx scripts/check-api-health.ts > health-report.json
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
           cat health-report.json
 
       - name: Update health badge
         run: |
           TOTAL=$(jq '.total' health-report.json)
           HEALTHY=$(jq '.healthy' health-report.json)
+          FROZEN=$(jq '.frozen' health-report.json)
 
-          if [ "$TOTAL" -eq "$HEALTHY" ]; then
-            echo "STATUS=passing" >> $GITHUB_ENV
+          # Green only when every spec is fresh. Yellow when the only shortfall
+          # is freezes recorded in scripts/spec-registry.yaml. Red when an
+          # active spec is one this pipeline cannot consume. The old threshold
+          # (green on all-healthy, yellow above an arbitrary 20, else red) had
+          # no relationship to whether the sync could actually run.
+          if [ "$HEALTHY" -eq "$TOTAL" ]; then
             echo "COLOR=brightgreen" >> $GITHUB_ENV
-          elif [ "$HEALTHY" -gt 20 ]; then
-            echo "STATUS=degraded" >> $GITHUB_ENV
+            echo "LABEL=$HEALTHY/$TOTAL APIs" >> $GITHUB_ENV
+          elif [ "$((HEALTHY + FROZEN))" -eq "$TOTAL" ]; then
             echo "COLOR=yellow" >> $GITHUB_ENV
+            echo "LABEL=$HEALTHY/$TOTAL APIs, $FROZEN frozen" >> $GITHUB_ENV
           else
-            echo "STATUS=failing" >> $GITHUB_ENV
             echo "COLOR=red" >> $GITHUB_ENV
+            echo "LABEL=$HEALTHY/$TOTAL APIs" >> $GITHUB_ENV
           fi
-          echo "LABEL=$HEALTHY/$TOTAL APIs" >> $GITHUB_ENV
 
       - name: Create health badge JSON
         run: |
@@ -71,8 +83,22 @@ jobs:
             health-report.json
           retention-days: 1
 
+      # Last in this job, so the badge and artifact above are already written
+      # and a genuine outage still turns the run red.
+      - name: Fail if an active spec is unusable
+        if: steps.check.outputs.exit_code != '0'
+        run: |
+          echo "::error::check-api-health exited ${{ steps.check.outputs.exit_code }}: an active" \
+               "spec could not be fetched or did not validate. Either repoint its slug in" \
+               "scripts/spec-registry.yaml, or freeze it there with a reason. Registry-frozen" \
+               "specs are reported but never fail this check."
+          exit 1
+
   commit-health-status:
     needs: check-apis
+    # Runs even when check-apis failed, so an unhealthy result reaches the
+    # badge instead of leaving the last healthy one on display.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
