@@ -167,23 +167,28 @@ specs:
     status: frozen
     since: 2026-05-23
     reason: >-
-      Self-inflicted, not an upstream outage. The portal serves this document
-      with a top-level `swagger: 3.0.0` key where isOpenApiDocument
-      (scripts/lib/fetched-spec-utils.ts) requires `openapi`. The body is
-      genuine OpenAPI 3 (components, not definitions; parameters carry schema),
-      and scripts/fix-specs.ts already rewrites that exact key one stage later.
-      The validator landed 2026-05-22 in #21 and the next sync began rejecting
-      this spec; specs/raw/summary.json history shows notFound going from []
-      on 2026-05-22 to ["notifications"] on 2026-05-23.
+      HELD OVER A DROPPED OPERATION, NOT OVER FETCHABILITY. This document
+      fetches and validates cleanly today, so the health report will say so
+      every run; that is a fact about the fetch, not a reason to unfreeze.
 
-      The freeze outlives that fix. Deere edited this document on 2026-07-14
-      and it no longer declares DELETE /notificationEvents/{sourceEvent}, which
-      scripts/api-surface.yaml still pins to NotificationsApi.delete. Accepting
-      the current document would classify the run breaking and drop a published
-      method. Deere announced no retirement and the API is still marked active,
-      so the endpoint is believed live and the doc merely tidied. Lifting this
-      freeze needs that question answered with Deere support, and dropping the
-      method is a major-version decision.
+      Deere edited this document on 2026-07-14 and it no longer declares
+      DELETE /notificationEvents/{sourceEvent}, which scripts/api-surface.yaml
+      still pins to NotificationsApi.delete. Unfreezing pulls in the current
+      3-operation document, classifies the run breaking, and drops a published
+      method. Deere announced no retirement, their practice is an ACTION
+      REQUIRED notice with six to eight months of warning, and the API is still
+      marked active, so the endpoint is believed live and the doc merely tidied.
+      Lifting this freeze needs that confirmed with Deere support first;
+      dropping the method is a major-version decision.
+
+      The ORIGINAL cause, now fixed, is why `since` is 2026-05-23 rather than
+      the date of Deere's edit: the portal serves a top-level `swagger: 3.0.0`
+      key where isOpenApiDocument required `openapi`, even though
+      scripts/fix-specs.ts had rewritten that exact key one stage later for
+      years. That validator landed 2026-05-22 in #21 and the next sync began
+      rejecting this spec (specs/raw/summary.json history shows notFound going
+      from [] on 2026-05-22 to ["notifications"] on 2026-05-23). Self-inflicted,
+      and unnoticed for three months.
 
   operators:
     slug: operators

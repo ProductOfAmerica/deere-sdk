@@ -6,14 +6,20 @@
  *
  *   specs/fixed/*.yaml  →  src/api-servers.generated.ts  →  DeereClient
  *
- * Classifies each spec into one of four shapes:
+ * Classifies each spec into one of three shapes. Current output, measured
+ * 2026-08-13: 25 templated, 3 static, 0 unavailable.
  *
  *   1. templated   — servers[0].url contains `{environment}` + enum
  *                    (most specs, after fix-specs normalization)
  *   2. static      — multiple static URLs (equipment-measurement) or a
- *                    single static URL (equipment). Per-env partial map.
- *   3. unavailable — no servers block (notifications) or malformed URL (aemp).
- *                    Runtime throws NoServerConfigError.
+ *                    single static URL (equipment, aemp). Per-env partial map.
+ *   3. unavailable — no parseable servers block, or one whose URL is malformed
+ *                    or points off the deere.com families. Runtime throws
+ *                    NoServerConfigError. No spec lands here today: this is the
+ *                    refusal-to-guess path, not a state any current spec is in.
+ *                    (notifications declares no servers block upstream, but
+ *                    fix-specs injects the templated platform default, so it
+ *                    classifies as templated.)
  *
  * Applies a conservative env-to-tier classifier for static specs: envs we
  * can't confidently map are OMITTED from the partial map, not defaulted.

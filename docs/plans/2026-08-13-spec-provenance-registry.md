@@ -1,6 +1,6 @@
 # Spec provenance registry: make staleness a tracked state
 
-Status: phases 1 to 3 implemented. Phase 4 pending.
+Status: all four phases implemented. One open question, see below.
 
 ## Why
 
@@ -168,7 +168,7 @@ a one-line registry edit on day one:
     - similarly named published slugs: field-operations
 ```
 
-## Phase 4: validator parity
+## Phase 4: validator parity (done)
 
 `isOpenApiDocument` rejects any document whose version key is not `openapi`.
 `fix-specs.ts:645-650` already rewrites `swagger` to `openapi`, with a comment naming
@@ -184,8 +184,29 @@ parameters use `schema:`. Downstream is already prepared, including
 Also correct `generate-api-servers.ts:15`, which still documents `notifications` as the
 example of `kind: 'unavailable'` while the generated output says `templated`.
 
-## Optional hardening, not scheduled
+## Hardening (done, with phase 4)
 
-`sync-api.yml` bumps `breaking` as a patch, identically to `benign`, and no step gates
-commit, push, or tag on the classification. The block today comes entirely from
-`generate-sdk.ts` calling `process.exit(1)`. That works, but it is single-point.
+`sync-api.yml` bumped `breaking` as a patch, identically to `benign`, and no step gated
+commit, push, or tag on the classification. The only thing between a breaking upstream
+change and an unsupervised npm publish was `generate-sdk.ts` calling `process.exit(1)`.
+Single point of failure on the one path where being wrong is most expensive.
+
+A "Refuse to release a breaking run" step now sits immediately after classification. In
+practice it is unreachable, which is the point: it costs nothing and removes the single
+point of failure.
+
+## The open question
+
+Is `DELETE /notificationEvents/{sourceEvent}` still live? Deere edited the document on
+2026-07-14, announced nothing, and still marks the API active. Their practice is an ACTION
+REQUIRED notice with six to eight months of warning, so the endpoint is believed live and
+the doc merely tidied. Confirming that needs a Deere support ticket.
+
+This is the class of change no machinery resolves. A dropped operation is either a
+retirement (breaking, major) or a doc defect (noise), and the deciding fact is not in the
+document. Automate what the document can answer; halt and escalate what it cannot.
+
+Until it is answered, `notifications` ships a `delete` method for an operation its own spec
+no longer declares. That is the right call under ambiguity, and it is still an accuracy
+debt. A freeze with no expiry becomes permanent by neglect; `since` and the per-run
+"fetches cleanly today" line keep it visible, but neither forces the decision.

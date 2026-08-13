@@ -85,6 +85,22 @@ jobs:
           echo "classification=$CLASSIFICATION" >> $GITHUB_OUTPUT
           echo "added_count=$ADDED_COUNT" >> $GITHUB_OUTPUT
 
+      # Defence in depth. generate-sdk already exits 1 on a breaking run, so in
+      # practice this step is unreachable. That is exactly why it exists: until
+      # now a single exit code was all that stood between a breaking upstream
+      # change and an unsupervised npm publish, and the bump logic below treats
+      # `breaking` identically to `benign` (patch), so anything that swallowed
+      # that exit code would have shipped a dropped method as a patch release.
+      - name: Refuse to release a breaking run
+        if: steps.classify.outputs.classification == 'breaking'
+        run: |
+          echo "::error::Classification is breaking, so a manifest entry lost its operation" \
+               "upstream. generate-sdk should already have failed this job; reaching this step" \
+               "means that guard was bypassed. Reconcile scripts/api-surface.yaml by hand:" \
+               "repoint the entry's op: for a rename, or delete it to drop the public method," \
+               "which is a major-version decision."
+          exit 1
+
           # Neutralize embedded CR/LF in portal-derived fields (spec, path, name)
           # so a newline inside an operation string cannot inject a spurious
           # heredoc terminator or a new key=value line into $GITHUB_OUTPUT.
@@ -142,6 +158,10 @@ jobs:
 
           # Additive changes bump minor and reset patch to 0; everything else
           # (benign spec churn, forced release) keeps the patch-only bump.
+          # `breaking` cannot reach here: generate-sdk exits 1 on it, and the
+          # "Refuse to release a breaking run" step above fails the job if that
+          # is ever bypassed. Without those two, this else-branch would ship a
+          # dropped public method as a patch.
           # Guarded strictly on the classification value, never on whether
           # scripts/api-surface.yaml itself shows a diff. CLASSIFICATION travels
           # through step env rather than direct expression interpolation.
