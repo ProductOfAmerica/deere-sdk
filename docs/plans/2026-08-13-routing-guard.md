@@ -76,9 +76,9 @@ controls, same host, same fake orgId:
 Every sibling under the same prefix answers 401. Only `/users` answers 404. And
 `/organizations/{orgId}/staff` exists while appearing in no Deere spec and no doc page.
 
-### Settled 2026-08-13 with a real token: do not restore this endpoint
+### Probed 2026-08-13 with a real token
 
-The unauthenticated probe above suggested a rename but could not prove one, because an
+The unauthenticated sweep above suggested a rename but could not prove one, because an
 unauthenticated 404 might mean "not authorized to know" rather than "absent". Both paths
 were then probed with a valid production token against org 7294700, via
 `probeOrganizationStaff` in field-mcp's `scripts/jd-probe-shapes.ts`:
@@ -88,24 +88,33 @@ GET /platform/organizations/7294700/staff   403 Forbidden
 GET /platform/organizations/7294700/users   404 Not Found
 ```
 
-That answers both open questions at once.
+**`/users` is gone, and that conclusion is not scope-dependent.** This gateway answers 403
+for a route it will not let you call, so it does not hide unauthorized routes behind a 404.
+A 404 here is absence. Removing `OrganizationsApi.listUsers` was correct.
 
-**`/users` is genuinely gone.** A 404 with a valid token, where sibling paths on the same
-host answer 401 and 403, is absence rather than authorization. Removing
-`OrganizationsApi.listUsers` was correct.
+**`/staff` exists. What the 403 means is narrower than it looks.** It says this application,
+with these scopes, on this org, cannot call it. It does **not** establish that no consumer
+can. A partner-tier or dealer-tier client may well get a 200, and one app's 403 is not a
+statement about everyone's. The earlier draft of this section claimed "unreachable for
+third-party applications", which asserts more than one measurement supports.
 
-**`/staff` exists but is unreachable for third-party applications.** 403 with a valid token
-and full scopes means the route is real and this application cannot call it. A method built
-on it would return 403 for every consumer holding comparable scopes, so restoring the
-capability by repointing is not available. That also fits the catalog search: no
-org-membership endpoint appears in any of Deere's 85 published APIs, which is what an
-internal-only surface looks like rather than a withdrawn public one.
+### Why it still is not added
 
-**Nothing further to investigate.** Earlier drafts of this document called a credentialed
-call "a small task for whoever has credentials". It has been done, and the answer is that
-there is no endpoint here to ship. Reopen only if Deere publishes an org-membership API or
-grants the scope, both of which would be visible as a new catalog entry rather than
-something to rediscover by probing.
+The blocker is **observability, not authorization**. No response body has been captured by
+anyone, so its schema could only be invented, which is exactly the defect `#46` removed. An
+SDK method whose types nobody has checked is the original problem wearing a newer date.
+
+This is worth separating from the authorization question, because a client library has no
+business deciding what its consumers are entitled to call. Shipping a method that returns
+403 to unauthorized callers would be perfectly normal; plenty of endpoints in this SDK
+require scopes not every application holds. Absence of a verified response shape is the
+actual reason, and it is a reason that someone else can remove.
+
+**The bar to add it** is a captured response from a caller who can reach it, saved as a
+fixture under `tests/fixtures/jd/`, plus a registry entry citing it and the date. That is a
+contribution anyone with the right scopes can make. It also cannot arrive through normal
+codegen, since no org-membership endpoint appears in any of Deere's 85 published APIs, so it
+would need a hand-maintained fragment with the ongoing cost that implies.
 
 ### Also in that PR
 

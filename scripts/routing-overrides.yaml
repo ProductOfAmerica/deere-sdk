@@ -48,25 +48,33 @@
 #   403  no such base path (nginx, not the API gateway)
 #
 # ---------------------------------------------------------------------------
-# Closed question, recorded so it is not reopened by probing
+# What is known about org membership, and what it would take to add it
 # ---------------------------------------------------------------------------
 #
-# GET /organizations/{orgId}/staff is NOT added here, and should not be.
+# GET /organizations/{orgId}/staff is NOT added here, but the reason is worth
+# stating precisely, because it is not the obvious one.
 #
-# Probed with a valid production token against org 7294700 on 2026-08-13:
+# Probed with a valid production token, org 7294700, 2026-08-13:
 #
 #   /platform/organizations/7294700/staff   403 Forbidden
 #   /platform/organizations/7294700/users   404 Not Found
 #
-# /users is genuinely gone, which confirms removing OrganizationsApi.listUsers
-# in #46 was right. /staff exists but returns 403 to an application holding full
-# scopes, so any method built on it would 403 for every consumer. It appears in
-# none of the 85 APIs in Deere's published catalog, which is what an
-# internal-only surface looks like rather than a withdrawn public one.
+# /users is gone. That conclusion is not scope-dependent: this gateway answers
+# 403 for a route it will not let you call, so a 404 is absence rather than a
+# masked authorization failure. Removing OrganizationsApi.listUsers in #46 was
+# right.
 #
-# A routing override cannot fix a permissions boundary. Reopen only if Deere
-# publishes an org-membership API or grants the scope; either would show up as a
-# new catalog entry rather than as something to rediscover by probing.
+# /staff exists. The 403 says only that THIS application, with THESE scopes, on
+# THIS org, cannot call it. It does not establish that no consumer can: a
+# partner- or dealer-tier client may well get a 200. Do not read one app's 403
+# as a statement about everyone's.
+#
+# The blocker on adding it is therefore observability, not authorization. No
+# response body has been captured by anyone, so a schema could only be invented,
+# which is exactly the defect #46 removed. The bar to add it is a captured
+# response from a caller who can reach it, saved as a fixture, plus an entry
+# here citing it. If you have scopes that return 200, that is a contribution
+# worth making.
 
 version: 1
 
