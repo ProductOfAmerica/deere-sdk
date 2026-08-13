@@ -4,6 +4,8 @@
  * Used by GitHub Actions to track API health.
  */
 
+import { resolvePortalSlug } from './lib/fetched-spec-utils.js';
+
 const API_SLUGS = [
   // Operations Center (18)
   'assets',
@@ -81,7 +83,7 @@ const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 
 async function checkApi(slug: ApiSlug): Promise<ApiResult> {
   try {
-    const response = await fetch(`${BASE_URL}/${slug}`);
+    const response = await fetch(`${BASE_URL}/${resolvePortalSlug(slug)}`);
     if (!response.ok) {
       return { slug, status: 'error', code: response.status };
     }
