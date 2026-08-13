@@ -119,6 +119,17 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      # Blocks the sync before it commits, rather than letting a routing change
+      # land on main and turn CI red afterwards. A failure here means an
+      # upstream change moved a published method to a different host, or a
+      # stage manufactured a base URL. Both need a human: re-measure, record the
+      # evidence in scripts/routing-overrides.yaml, run
+      # `pnpm generate-routing-snapshot`, and review the diff.
+      - name: Routing guard
+        run: >
+          cross-env TSX_TSCONFIG_PATH=tsconfig.test.json
+          node --import tsx/esm --test tests/routing-guard.test.ts
+
       - name: Check for changes
         id: changes
         run: |
