@@ -553,78 +553,6 @@ function fixExternalRefs(obj: unknown, addedSchemas: Set<string>): unknown {
   return obj;
 }
 
-function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: string): void {
-  const paths = spec.paths as Record<string, unknown> | undefined;
-  if (!paths) return;
-
-  // Inject GET /organizations/{orgId}/users into organizations spec
-  if (filename === 'organizations.yaml') {
-    if (!paths['/organizations/{orgId}/users']) {
-      console.log('  Injecting undocumented endpoint: GET /organizations/{orgId}/users');
-      paths['/organizations/{orgId}/users'] = {
-        get: {
-          summary: 'List Organization Users',
-          description: 'Returns a list of users belonging to the specified organization.',
-          parameters: [{ $ref: '#/components/parameters/OrgIdGet' }],
-          responses: {
-            '200': {
-              description: 'Organization Users List',
-              content: {
-                'application/vnd.deere.axiom.v3+json': {
-                  schema: {
-                    properties: {
-                      links: {
-                        items: { $ref: '#/components/schemas/OrganizationLink' },
-                      },
-                      values: {
-                        items: { $ref: '#/components/schemas/OrganizationUser' },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            '403': { description: 'Not authorized' },
-            '404': { description: 'Not found' },
-          },
-        },
-      };
-
-      // Add OrganizationUser schema if not present
-      const components = spec.components as Record<string, unknown> | undefined;
-      if (components) {
-        const schemas = components.schemas as Record<string, unknown> | undefined;
-        if (schemas && !schemas.OrganizationUser) {
-          schemas.OrganizationUser = {
-            properties: {
-              accountName: {
-                type: 'string',
-                description: "User's account name.",
-                example: 'JohnDoe',
-              },
-              givenName: {
-                type: 'string',
-                description: "User's first name.",
-                example: 'John',
-              },
-              familyName: {
-                type: 'string',
-                description: "User's last name.",
-                example: 'Doe',
-              },
-              userType: {
-                type: 'string',
-                description: "User's type. Examples are customer, dealer, internal.",
-                example: 'Customer',
-              },
-            },
-          };
-        }
-      }
-    }
-  }
-}
-
 function fixSpec(
   content: string,
   filename: string,
@@ -716,13 +644,12 @@ function fixSpec(
   }
 
   addMissingSchemas(spec, missingRefs);
-  injectUndocumentedEndpoints(spec, filename);
 
   // Apply embed contracts from scripts/embed-contracts.yaml. Runs AFTER
-  // injectUndocumentedEndpoints (the last transform that touches
-  // components.schemas) and BEFORE the server-level transforms below (which
-  // only touch `servers`). If a future transform starts mutating
-  // components.schemas above this point, re-check the ordering.
+  // addMissingSchemas (the last transform that touches components.schemas) and
+  // BEFORE the server-level transforms below (which only touch `servers`). If a
+  // future transform starts mutating components.schemas above this point,
+  // re-check the ordering.
   const specName = filename.replace(/\.yaml$/, '');
   const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
   if (embedPatchCount > 0) {
