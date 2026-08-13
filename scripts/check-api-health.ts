@@ -2,45 +2,19 @@
 /**
  * Checks if John Deere API specs are still available.
  * Used by GitHub Actions to track API health.
+ *
+ * Which specs to check, and the portal slug each is served under, come from
+ * scripts/spec-registry.yaml, the same source scripts/fetch-specs.ts uses.
+ * This file previously carried its own copy of the list, which is how it kept
+ * probing `field-operations-api` after the portal had renamed it.
  */
 
-import { resolvePortalSlug } from './lib/fetched-spec-utils.js';
+import { loadSpecRegistry, type SpecRegistryEntry } from './lib/spec-registry.js';
 
-const API_SLUGS = [
-  // Operations Center (18)
-  'assets',
-  'boundaries',
-  'clients',
-  'connection-management',
-  'crop-types',
-  'equipment',
-  'farms',
-  'field-operations-api',
-  'fields',
-  'files',
-  'flags',
-  'guidance-lines',
-  'map-layers',
-  'operators',
-  'organizations',
-  'products',
-  'users',
-  'webhook',
+const REGISTRY_ENTRIES: SpecRegistryEntry[] = loadSpecRegistry().entries;
 
-  // Machine Data (10)
-  'aemp',
-  'equipment-measurement',
-  'harvest-id',
-  'machine-alerts',
-  'machine-device-state-reports',
-  'machine-engine-hours',
-  'machine-hours-of-operation',
-  'machine-locations',
-  'notifications',
-  'partnerships',
-] as const;
-
-type ApiSlug = (typeof API_SLUGS)[number];
+/** An internal spec name, as declared in the registry. */
+type ApiSlug = string;
 
 interface ApiHealthyResult {
   slug: ApiSlug;
@@ -81,9 +55,10 @@ interface HealthReport {
 
 const BASE_URL = 'https://developer.deere.com/devDoc/apiDetails';
 
-async function checkApi(slug: ApiSlug): Promise<ApiResult> {
+async function checkApi(entry: SpecRegistryEntry): Promise<ApiResult> {
+  const slug = entry.name;
   try {
-    const response = await fetch(`${BASE_URL}/${resolvePortalSlug(slug)}`);
+    const response = await fetch(`${BASE_URL}/${entry.slug}`);
     if (!response.ok) {
       return { slug, status: 'error', code: response.status };
     }
@@ -106,7 +81,7 @@ async function checkApi(slug: ApiSlug): Promise<ApiResult> {
 async function main(): Promise<void> {
   console.error('Checking John Deere API availability...\n');
 
-  const results = await Promise.all(API_SLUGS.map(checkApi));
+  const results = await Promise.all(REGISTRY_ENTRIES.map(checkApi));
 
   const healthy = results.filter((r): r is ApiHealthyResult => r.status === 'healthy');
   const empty = results.filter((r): r is ApiEmptyResult => r.status === 'empty');
@@ -114,7 +89,7 @@ async function main(): Promise<void> {
 
   const report: HealthReport = {
     timestamp: new Date().toISOString(),
-    total: API_SLUGS.length,
+    total: REGISTRY_ENTRIES.length,
     healthy: healthy.length,
     empty: empty.length,
     errors: errors.length,
@@ -122,7 +97,7 @@ async function main(): Promise<void> {
   };
 
   // Print summary to stderr (for logs)
-  console.error(`Results: ${healthy.length}/${API_SLUGS.length} healthy`);
+  console.error(`Results: ${healthy.length}/${REGISTRY_ENTRIES.length} healthy`);
   if (empty.length > 0) {
     console.error(`Empty specs: ${empty.map((e) => e.slug).join(', ')}`);
   }

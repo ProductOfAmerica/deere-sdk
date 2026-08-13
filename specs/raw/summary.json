@@ -1,10 +1,109 @@
 {
-  "fetchedAt": "2026-07-02T10:19:49.876Z",
+  "fetchedAt": "2026-08-13T10:39:18.743Z",
   "baseUrl": "https://developer.deere.com/devDoc/apiDetails",
   "specs": [
     {
+      "id": 72,
+      "name": "aemp",
+      "file": "aemp.yaml",
+      "docs": [
+        {
+          "id": 72,
+          "endPointName": "aemp"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "assets",
+      "file": "assets.yaml",
+      "docs": [
+        {
+          "id": 4,
+          "endPointName": "assets"
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "name": "boundaries",
+      "file": "boundaries.yaml",
+      "docs": [
+        {
+          "id": 74,
+          "endPointName": "boundaries"
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "name": "clients",
+      "file": "clients.yaml",
+      "docs": [
+        {
+          "id": 84,
+          "endPointName": "clients"
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "name": "connection-management",
+      "file": "connection-management.yaml",
+      "docs": [
+        {
+          "id": 75,
+          "endPointName": "connection-management"
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "name": "crop-types",
+      "file": "crop-types.yaml",
+      "docs": [
+        {
+          "id": 68,
+          "endPointName": "crop-types"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "equipment",
+      "file": "equipment.yaml",
+      "docs": [
+        {
+          "id": 8,
+          "endPointName": "equipment"
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "name": "equipment-measurement",
+      "file": "equipment-measurement.yaml",
+      "docs": [
+        {
+          "id": 73,
+          "endPointName": "equipment-measurement"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "farms",
+      "file": "farms.yaml",
+      "docs": [
+        {
+          "id": 22,
+          "endPointName": "farms"
+        }
+      ]
+    },
+    {
       "id": 27,
-      "name": "field-operations-api",
+      "name": "field-operations",
       "file": "field-operations-api.yaml",
       "docs": [
         {
@@ -25,105 +124,6 @@
         {
           "id": 5,
           "endPointName": "fields"
-        }
-      ]
-    },
-    {
-      "id": 22,
-      "name": "farms",
-      "file": "farms.yaml",
-      "docs": [
-        {
-          "id": 22,
-          "endPointName": "farms"
-        }
-      ]
-    },
-    {
-      "id": 84,
-      "name": "clients",
-      "file": "clients.yaml",
-      "docs": [
-        {
-          "id": 84,
-          "endPointName": "clients"
-        }
-      ]
-    },
-    {
-      "id": 106,
-      "name": "organizations",
-      "file": "organizations.yaml",
-      "docs": [
-        {
-          "id": 106,
-          "endPointName": "organizations"
-        }
-      ]
-    },
-    {
-      "id": 74,
-      "name": "boundaries",
-      "file": "boundaries.yaml",
-      "docs": [
-        {
-          "id": 74,
-          "endPointName": "boundaries"
-        }
-      ]
-    },
-    {
-      "id": 8,
-      "name": "equipment",
-      "file": "equipment.yaml",
-      "docs": [
-        {
-          "id": 8,
-          "endPointName": "equipment"
-        }
-      ]
-    },
-    {
-      "id": 68,
-      "name": "crop-types",
-      "file": "crop-types.yaml",
-      "docs": [
-        {
-          "id": 68,
-          "endPointName": "crop-types"
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "name": "assets",
-      "file": "assets.yaml",
-      "docs": [
-        {
-          "id": 4,
-          "endPointName": "assets"
-        }
-      ]
-    },
-    {
-      "id": 100,
-      "name": "users",
-      "file": "users.yaml",
-      "docs": [
-        {
-          "id": 100,
-          "endPointName": "users"
-        }
-      ]
-    },
-    {
-      "id": 101,
-      "name": "operators",
-      "file": "operators.yaml",
-      "docs": [
-        {
-          "id": 101,
-          "endPointName": "operators"
         }
       ]
     },
@@ -173,101 +173,13 @@
       ]
     },
     {
-      "id": 96,
-      "name": "map-layers",
-      "file": "map-layers.yaml",
+      "id": 66,
+      "name": "harvest-id",
+      "file": "harvest-id.yaml",
       "docs": [
         {
-          "endPointName": "map-layer-summaries",
-          "id": 96
-        },
-        {
-          "endPointName": "file-resources",
-          "id": 98
-        },
-        {
-          "endPointName": "map-layers",
-          "id": 97
-        }
-      ]
-    },
-    {
-      "id": 9,
-      "name": "products",
-      "file": "products.yaml",
-      "docs": [
-        {
-          "endPointName": "varieties",
-          "id": 9
-        },
-        {
-          "endPointName": "active-ingredients",
-          "id": 15
-        },
-        {
-          "endPointName": "chemicals",
-          "id": 10
-        },
-        {
-          "endPointName": "companies",
-          "id": 14
-        },
-        {
-          "endPointName": "documents",
-          "id": 16
-        },
-        {
-          "endPointName": "dry-blends",
-          "id": 13
-        },
-        {
-          "endPointName": "fertilizers",
-          "id": 11
-        },
-        {
-          "endPointName": "tank-mix",
-          "id": 12
-        }
-      ]
-    },
-    {
-      "id": 103,
-      "name": "webhook",
-      "file": "webhook.yaml",
-      "docs": [
-        {
-          "endPointName": "event-subscription",
-          "id": 103
-        },
-        {
-          "endPointName": "event-subscription-delivery",
-          "id": 104
-        }
-      ]
-    },
-    {
-      "id": 75,
-      "name": "connection-management",
-      "file": "connection-management.yaml",
-      "docs": [
-        {
-          "id": 75,
-          "endPointName": "connection-management"
-        }
-      ]
-    },
-    {
-      "id": 23,
-      "name": "machine-locations",
-      "file": "machine-locations.yaml",
-      "docs": [
-        {
-          "endPointName": "location-history",
-          "id": 23
-        },
-        {
-          "endPointName": "breadcrumbs",
-          "id": 24
+          "id": 66,
+          "endPointName": "harvest-id"
         }
       ]
     },
@@ -316,35 +228,58 @@
       ]
     },
     {
-      "id": 66,
-      "name": "harvest-id",
-      "file": "harvest-id.yaml",
+      "id": 23,
+      "name": "machine-locations",
+      "file": "machine-locations.yaml",
       "docs": [
         {
-          "id": 66,
-          "endPointName": "harvest-id"
+          "endPointName": "location-history",
+          "id": 23
+        },
+        {
+          "endPointName": "breadcrumbs",
+          "id": 24
         }
       ]
     },
     {
-      "id": 72,
-      "name": "aemp",
-      "file": "aemp.yaml",
+      "id": 96,
+      "name": "map-layers",
+      "file": "map-layers.yaml",
       "docs": [
         {
-          "id": 72,
-          "endPointName": "aemp"
+          "endPointName": "map-layer-summaries",
+          "id": 96
+        },
+        {
+          "endPointName": "file-resources",
+          "id": 98
+        },
+        {
+          "endPointName": "map-layers",
+          "id": 97
         }
       ]
     },
     {
-      "id": 73,
-      "name": "equipment-measurement",
-      "file": "equipment-measurement.yaml",
+      "id": 101,
+      "name": "operators",
+      "file": "operators.yaml",
       "docs": [
         {
-          "id": 73,
-          "endPointName": "equipment-measurement"
+          "id": 101,
+          "endPointName": "operators"
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "name": "organizations",
+      "file": "organizations.yaml",
+      "docs": [
+        {
+          "id": 106,
+          "endPointName": "organizations"
         }
       ]
     },
@@ -358,9 +293,75 @@
           "endPointName": "partnerships"
         }
       ]
+    },
+    {
+      "id": 9,
+      "name": "products",
+      "file": "products.yaml",
+      "docs": [
+        {
+          "endPointName": "varieties",
+          "id": 9
+        },
+        {
+          "endPointName": "active-ingredients",
+          "id": 15
+        },
+        {
+          "endPointName": "chemicals",
+          "id": 10
+        },
+        {
+          "endPointName": "companies",
+          "id": 14
+        },
+        {
+          "endPointName": "documents",
+          "id": 16
+        },
+        {
+          "endPointName": "dry-blends",
+          "id": 13
+        },
+        {
+          "endPointName": "fertilizers",
+          "id": 11
+        },
+        {
+          "endPointName": "tank-mix",
+          "id": 12
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "name": "users",
+      "file": "users.yaml",
+      "docs": [
+        {
+          "id": 100,
+          "endPointName": "users"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "name": "webhook",
+      "file": "webhook.yaml",
+      "docs": [
+        {
+          "endPointName": "event-subscription",
+          "id": 103
+        },
+        {
+          "endPointName": "event-subscription-delivery",
+          "id": 104
+        }
+      ]
     }
   ],
-  "notFound": [
+  "frozen": [
     "notifications"
-  ]
+  ],
+  "blocked": []
 }
