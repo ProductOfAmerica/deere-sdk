@@ -1,6 +1,6 @@
 # Spec provenance registry: make staleness a tracked state
 
-Status: phase 1 implemented. Phases 2 to 4 pending.
+Status: phases 1 to 3 implemented. Phase 4 pending.
 
 ## Why
 
@@ -113,27 +113,60 @@ months of warning, and the API is still marked active, so the endpoint is believ
 the doc merely tidied. Lifting the freeze needs that confirmed with Deere support; dropping
 the method is a major-version decision.
 
-## Phase 2: health check parity
+## Phase 2: health check parity (done)
 
-`check-api-health.ts` still decides "healthy" with its own heuristic (does every document
-carry more than 10 characters). Replace it with `validateFetchedSpecDocs`, so the badge and
-the pipeline cannot disagree about the same spec, and report frozen specs as a distinct
-state rather than rounding them up to healthy. `api-health.yml` reads only `.total` and
-`.healthy`, so the badge thresholds need a look once the counts mean something different.
+`check-api-health.ts` decided "healthy" with its own heuristic (does every document carry
+more than 10 characters). That is a second opinion, and it disagreed with the pipeline: it
+reported `notifications` healthy for three months while `fetch-specs` could not consume that
+document at all. A badge grading on an easier curve than the build is worse than no badge.
 
-## Phase 3: portal catalog as a diagnostic
+It now calls `validateFetchedSpecDocs`, so health means what the sync means by it. Frozen
+specs are reported as their own state, carry a `liftable` flag so a freeze whose cause has
+gone away surfaces instead of becoming permanent, and never fail the check.
+
+Badge thresholds now track whether the sync can run: green when every spec is fresh, yellow
+when the only shortfall is recorded freezes, red when an active spec is unusable. The old
+rule (green on all-healthy, yellow above an arbitrary 20, else red) had no such relationship.
+
+One structural defect fixed alongside: the red branch was unreachable. The check step failed
+the job before the badge steps ran, and `commit-health-status` needed that job, so a genuine
+outage failed the run and left the badge displaying its last healthy value. The check now
+records its exit code without failing, the badge and artifact are written,
+`commit-health-status` runs with `if: !cancelled()`, and a final step fails the job.
+
+## Phase 3: portal catalog as a diagnostic (done)
 
 `https://developer.deere.com/dev-doc-landing` embeds the full catalog in its `__NEXT_DATA__`
 island: `devDocRoutes`, apiId to `/dev-docs/{slug}`, 85 APIs. Free to fetch, no browser.
 
-**Not** a slug resolver, for the apiId reason above. Instead, when a fetch fails, check
-whether the registry's slug still appears in the catalog and name the likely replacement in
-the error. The `field-operations-api` outage would then have printed "slug no longer in the
-portal catalog" on day one, turning a two-day silent failure into a one-line registry edit,
-with a human still confirming the rename.
+**Not** a slug resolver, for two independent reasons. The apiId collision above is the
+first. The second was found while implementing: the catalog is not a complete list of
+fetchable slugs. `products` has no `/dev-docs/products` route at all, yet
+`/devDoc/apiDetails/products` serves 8 valid documents. So absence from the catalog does not
+prove a slug is dead. 27 of our 28 slugs appear; `products` is the exception.
 
-This keeps the undocumented Next.js internal off the critical path: if it breaks, the cost
-is a missing hint in an error message.
+Instead `scripts/lib/portal-catalog.ts` explains an already-failed fetch: whether the slug
+is still published, what the recorded apiId now maps to (flagged as a lead, not an answer),
+and similarly named published slugs. Both caveats are survivable precisely because this only
+runs on a spec that has already failed, so a live-but-unlisted slug like `products` never
+reaches it, and the worst case is a misleading hint beside a real error.
+
+Consulted lazily, only when something is blocked, so a healthy sync never pays for it. Every
+failure path returns null and the run carries on without the hint, which keeps the
+undocumented Next.js internal off the critical path.
+
+Replaying the original outage against this shows the two-day silent failure would have been
+a one-line registry edit on day one:
+
+```
+  field-operations-api: HTTP 404
+    - "field-operations-api" is not in the portal catalog (85 published APIs), which is
+      consistent with an upstream rename. Not proof: some live slugs are unlisted.
+    - the recorded apiId now maps to "field-operations" in the catalog. Treat as a lead,
+      not an answer: the portal reuses one apiId across unrelated APIs, so confirm the API
+      is the same one before repointing the slug.
+    - similarly named published slugs: field-operations
+```
 
 ## Phase 4: validator parity
 

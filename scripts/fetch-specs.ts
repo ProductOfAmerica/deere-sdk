@@ -29,6 +29,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
+import { explainSlug, fetchPortalCatalog } from './lib/portal-catalog.js';
 import { canonicalizeSpec, stringifySpec } from './lib/spec-canonicalize.js';
 import { type FetchedDoc, mergeSpecDocs } from './lib/spec-merge.js';
 import { loadSpecRegistry, type SpecRegistryEntry } from './lib/spec-registry.js';
@@ -229,7 +230,7 @@ async function main() {
   const processed: ProcessedSpec[] = [];
   const frozen: string[] = [];
   /** Active specs that did not yield a usable document. Fails the run below. */
-  const blocked: { name: string; detail: string }[] = [];
+  const blocked: { entry: SpecRegistryEntry; detail: string }[] = [];
 
   for (const entry of registry.entries) {
     const { name } = entry;
@@ -251,14 +252,14 @@ async function main() {
     }
 
     if (outcome.kind !== 'ok') {
-      blocked.push({ name, detail: describeOutcome(outcome) });
+      blocked.push({ entry, detail: describeOutcome(outcome) });
       console.log(` BLOCKED (${describeOutcome(outcome)})`);
       continue;
     }
 
     const mismatch = checkApiId(entry, outcome.apiIds);
     if (mismatch) {
-      blocked.push({ name, detail: mismatch });
+      blocked.push({ entry, detail: mismatch });
       console.log(' BLOCKED (api_id mismatch)');
       continue;
     }
@@ -266,7 +267,7 @@ async function main() {
     const docs = outcome.docs;
     const parsedDocs = parseSlugDocs(name, docs);
     if (!parsedDocs) {
-      blocked.push({ name, detail: 'fetched documents failed to parse as YAML' });
+      blocked.push({ entry, detail: 'fetched documents failed to parse as YAML' });
       console.log(' BLOCKED (parse failed)');
       continue;
     }
@@ -319,7 +320,7 @@ async function main() {
     baseUrl: BASE_URL,
     specs: processed,
     frozen,
-    blocked: blocked.map((b) => b.name),
+    blocked: blocked.map((b) => b.entry.name),
   };
 
   writeFileSync(join(OUTPUT_DIR, 'summary.json'), JSON.stringify(summary, null, 2));
@@ -332,8 +333,21 @@ async function main() {
         `continuing would regenerate the SDK from stale committed specs while reporting success, ` +
         `which is how notifications went three months without anyone noticing.\n`
     );
-    for (const { name, detail } of blocked) {
-      console.error(`  ${name}: ${detail}`);
+    // Consulted only now, on an already-failed run, so a healthy sync never
+    // pays for it and a portal redesign can only cost us a hint. Null when the
+    // landing page is unreachable or its shape has moved.
+    const catalog = await fetchPortalCatalog();
+    if (!catalog) {
+      console.error(`  (the portal catalog could not be read, so no rename hints below)\n`);
+    }
+
+    for (const { entry, detail } of blocked) {
+      console.error(`  ${entry.name}: ${detail}`);
+      if (catalog) {
+        for (const line of explainSlug(catalog, entry.slug, entry.apiId)) {
+          console.error(`    - ${line}`);
+        }
+      }
     }
     console.error(
       `\nRemediation, per spec:\n` +
