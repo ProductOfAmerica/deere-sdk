@@ -31,12 +31,12 @@
 
 ## Highlights
 
-- **28 APIs** with **146 operations** — Full coverage of John Deere agricultural APIs
+- **28 APIs** with **201 methods** — Full coverage of John Deere agricultural APIs
 - **Fully typed** — Auto-generated TypeScript types from OpenAPI specs
 - **Auto-pagination** — `listAll()` methods handle pagination automatically
 - **HAL support** — Built-in link following for John Deere's HAL-style responses
 - **Automatic retries** — Exponential backoff with jitter for transient failures
-- **Daily health checks** — Automated monitoring of API availability
+- **Daily health checks** — Automated monitoring of spec availability and live route reachability
 
 ---
 
@@ -117,7 +117,7 @@ Authoritative list of scopes supported by the authorization server: [`https://si
 <details>
 <summary><strong>Environments</strong></summary>
 
-v2.0.0 uses raw John Deere subdomain names as environment values. Pass the subdomain (without `.deere.com`) as `environment`. Default: `sandboxapi`.
+The SDK uses raw John Deere subdomain names as environment values. Pass the subdomain (without `.deere.com`) as `environment`. Default: `sandboxapi`.
 
 | Environment      | URL                        | Use Case                         |
 |------------------|----------------------------|----------------------------------|
@@ -162,6 +162,23 @@ The SDK now uses separate host subdomains per spec family (e.g., `equipmentapi.d
 
 </details>
 
+<details>
+<summary><strong>Migrating from v2</strong></summary>
+
+One method was removed. Everything else is source-compatible.
+
+| Removed                        | Replacement |
+|--------------------------------|-------------|
+| `deere.organizations.listUsers` | None        |
+
+`GET /organizations/{orgId}/users` returns 404 in every environment and appears in none of the 85 APIs John Deere publishes. It had reached the SDK through a hand-written spec injection rather than from a published spec, so it shipped as a typed method that could never succeed. Any call to it was already failing.
+
+There is no replacement. `GET /organizations/{orgId}/staff` exists but returned 403 to an application holding full scopes, and no response body has been captured, so shipping a method for it would mean inventing its types. See `CHANGELOG.md` for the measurements.
+
+Two methods that previously returned 404 now work, with no signature change: `deere.notifications.get` and `deere.products.listActiveIngredients`. Both were building `/platform` URLs for routes John Deere serves from `/isg`.
+
+</details>
+
 ---
 
 ## API Reference
@@ -170,30 +187,30 @@ The SDK now uses separate host subdomains per spec family (e.g., `equipmentapi.d
 
 | API                                                                       | Property                     | Methods | Description                       |
 |---------------------------------------------------------------------------|------------------------------|---------|-----------------------------------|
-| [Organizations](https://developer.deere.com/dev-docs/organizations)       | `deere.organizations`        | 5       | Organization management           |
+| [Organizations](https://developer.deere.com/dev-docs/organizations)       | `deere.organizations`        | 4       | Organization management           |
 | [Fields](https://developer.deere.com/dev-docs/fields)                     | `deere.fields`               | 8       | Field CRUD and boundaries         |
 | [Farms](https://developer.deere.com/dev-docs/farms)                       | `deere.farms`                | 8       | Farm management                   |
 | [Boundaries](https://developer.deere.com/dev-docs/boundaries)             | `deere.boundaries`           | 8       | Field boundary management         |
 | [Clients](https://developer.deere.com/dev-docs/clients)                   | `deere.clients`              | 8       | Customer management               |
 | [Equipment](https://developer.deere.com/dev-docs/equipment)               | `deere.equipment`            | 16      | Machines and implements           |
-| [Field Operations](https://developer.deere.com/dev-docs/field-operations) | `deere.fieldOperations`      | 4       | Harvests, plantings, applications |
+| [Field Operations](https://developer.deere.com/dev-docs/field-operations) | `deere.fieldOperations`      | 6       | Harvests, plantings, applications |
 | [Crop Types](https://developer.deere.com/dev-docs/crop-types)             | `deere.cropTypes`            | 5       | Crop type catalog                 |
-| [Products](https://developer.deere.com/dev-docs/products)                 | `deere.products`             | 10      | Seeds and chemicals catalog       |
-| [Map Layers](https://developer.deere.com/dev-docs/map-layers)             | `deere.mapLayers`            | 5       | Map layer management              |
-| [Files](https://developer.deere.com/dev-docs/files)                       | `deere.files`                | 6       | File management                   |
-| [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 7       | Field flags/markers               |
+| [Products](https://developer.deere.com/dev-docs/products)                 | `deere.products`             | 39      | Seeds and chemicals catalog       |
+| [Map Layers](https://developer.deere.com/dev-docs/map-layers)             | `deere.mapLayers`            | 15      | Map layer management              |
+| [Files](https://developer.deere.com/dev-docs/files)                       | `deere.files`                | 10      | File management                   |
+| [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 15      | Field flags/markers               |
 | [Guidance Lines](https://developer.deere.com/dev-docs/guidance-lines)     | `deere.guidanceLines`        | 5       | GPS guidance lines                |
 | [Operators](https://developer.deere.com/dev-docs/operators)               | `deere.operators`            | 7       | Machine operator management       |
 | [Users](https://developer.deere.com/dev-docs/users)                       | `deere.users`                | 1       | User information                  |
 | [Assets](https://developer.deere.com/dev-docs/assets)                     | `deere.assets`               | 9       | Asset tracking                    |
-| [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 5       | Event subscriptions               |
+| [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 7       | Event subscriptions               |
 | [Connections](https://developer.deere.com/dev-docs/connection-management) | `deere.connectionManagement` | 4       | OAuth connections                 |
 
 ### Machine Data APIs
 
 | API                                                                                   | Property                          | Methods | Description               |
 |---------------------------------------------------------------------------------------|-----------------------------------|---------|---------------------------|
-| [Machine Locations](https://developer.deere.com/dev-docs/machine-locations)           | `deere.machineLocations`          | 1       | GPS location history      |
+| [Machine Locations](https://developer.deere.com/dev-docs/machine-locations)           | `deere.machineLocations`          | 2       | GPS location history      |
 | [Machine Alerts](https://developer.deere.com/dev-docs/machine-alerts)                 | `deere.machineAlerts`             | 2       | DTC alerts                |
 | [Engine Hours](https://developer.deere.com/dev-docs/machine-engine-hours)             | `deere.machineEngineHours`        | 2       | Engine hours tracking     |
 | [Hours of Operation](https://developer.deere.com/dev-docs/machine-hours-of-operation) | `deere.machineHoursOfOperation`   | 2       | On/off duration           |
@@ -531,18 +548,24 @@ const client = new DeereClient({
     maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
 
-// Raw requests
-const response = await client.get<CustomType>('/some/endpoint');
-const created = await client.post('/some/endpoint', {data: 'value'});
+// Raw requests. The first argument is the spec name; it selects the host,
+// since different John Deere APIs live on different subdomains and paths.
+const response = await client.get<CustomType>('organizations', '/organizations');
+const created = await client.post('fields', '/organizations/123/fields', {name: 'North'});
 
 // Follow HAL links
 const nextPage = await client.followLink(response.links[0]);
 
 // Automatic pagination
-for await (const items of client.paginate('/large/collection')) {
+for await (const items of client.paginate('fields', '/organizations/123/fields')) {
     console.log(items);
 }
+
+// Or collect every page at once
+const all = await client.getAll('fields', '/organizations/123/fields');
 ```
+
+There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. Passing a spec name that does not ship your chosen environment throws `UnsupportedEnvironmentError` before any request goes out.
 
 ### fetchUrl — Bearer token hostname guard
 
@@ -598,7 +621,7 @@ const deere = new Deere({
 });
 
 // 2. Warm the cache (optional — reduces cold-start latency)
-await deere.client.warmLinkCache(['/organizations']);
+await deere.client.warmLinkCache('organizations', ['/organizations']);
 
 // 3. Use the SDK normally — HATEOAS happens transparently
 const orgs = await deere.organizations.listAll();
@@ -723,13 +746,15 @@ type Equipment = Types.Equipment.components['schemas']['equipment-model'];
 
 ## API Status
 
-This SDK includes automated daily health checks to monitor John Deere API availability.
+This SDK includes automated daily checks against John Deere's live infrastructure. One asks whether every spec is still published and consumable; the other asks whether every URL the SDK builds still corresponds to a route that exists.
 
-| Status                                                                                      | Meaning                                        |
-|---------------------------------------------------------------------------------------------|------------------------------------------------|
-| ![passing](https://img.shields.io/badge/API%20Health-28%2F28-brightgreen?style=flat-square) | All APIs responding with valid specs           |
-| ![degraded](https://img.shields.io/badge/API%20Health-25%2F28-yellow?style=flat-square)     | Some APIs unavailable or returning empty specs |
-| ![failing](https://img.shields.io/badge/API%20Health-10%2F28-red?style=flat-square)         | Major API outage detected                      |
+| Status                                                                                                | Meaning                                                                        |
+|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| ![passing](https://img.shields.io/badge/API%20Health-28%2F28-brightgreen?style=flat-square)           | Every spec is fresh from John Deere's portal and validates                      |
+| ![degraded](https://img.shields.io/badge/API%20Health-27%2F28,%201%20frozen-yellow?style=flat-square) | The only shortfall is specs deliberately frozen with a recorded reason and date |
+| ![failing](https://img.shields.io/badge/API%20Health-25%2F28-red?style=flat-square)                   | An active spec cannot be fetched or validated, so the pipeline is blind to it   |
+
+Yellow is not a partial outage. A frozen spec is one this repo deliberately pins to a committed copy rather than the portal's current document, usually because adopting the current one would drop a method that still works. `scripts/spec-registry.yaml` records which specs are frozen, why, and since when. Green means nothing is pinned.
 
 <details>
 <summary><strong>APIs Without Public Specs</strong></summary>
