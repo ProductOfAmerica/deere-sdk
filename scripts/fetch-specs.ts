@@ -25,9 +25,10 @@
  *   - specs/raw/summary.json (fetch metadata; write-only, no consumers)
  */
 
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as yaml from 'yaml';
+import { assessContractContinuity, isDiscontinuous } from './lib/contract-continuity.js';
 import { type ValidatedFetchedDoc, validateFetchedSpecDocs } from './lib/fetched-spec-utils.js';
 import { explainSlug, fetchPortalCatalog } from './lib/portal-catalog.js';
 import { findSpecOverride, loadRoutingOverrides } from './lib/routing-overrides.js';
@@ -47,6 +48,9 @@ const OUTPUT_DIR = join(process.cwd(), 'specs', 'raw');
  */
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = [500, 1500];
+
+/** How many missing operations the block detail lists before summarizing. */
+const MAX_MISSING_SHOWN = 10;
 
 /** A source-document reference as recorded in summary.json's per-spec `docs` list. */
 interface SourceDocRef {
@@ -68,7 +72,7 @@ interface ProcessedSpec {
  * indistinguishable in the logs for three months.
  */
 type FetchOutcome =
-  | { kind: 'ok'; docs: ValidatedFetchedDoc[]; apiIds: string[] }
+  | { kind: 'ok'; docs: ValidatedFetchedDoc[] }
   | { kind: 'http'; status: number }
   | { kind: 'rejected' }
   | { kind: 'network'; message: string };
@@ -115,12 +119,7 @@ async function attemptFetch(entry: SpecRegistryEntry): Promise<FetchOutcome> {
   if (docs === null) {
     return { kind: 'rejected' };
   }
-  const apiIds = Array.isArray(data)
-    ? [...new Set(data.filter(isRecord).map((d) => d.api_id))].filter(
-        (id): id is string => typeof id === 'string'
-      )
-    : [];
-  return { kind: 'ok', docs, apiIds };
+  return { kind: 'ok', docs };
 }
 
 async function fetchApiSpec(entry: SpecRegistryEntry): Promise<FetchOutcome> {
@@ -138,26 +137,67 @@ async function fetchApiSpec(entry: SpecRegistryEntry): Promise<FetchOutcome> {
 }
 
 /**
- * The apiId guard. A mismatch proves the slug now serves a different API, so
- * the raw file would be overwritten with another API's contract under our
- * filename. A match proves nothing: the portal reuses one api_id across
- * unrelated APIs (products and service-data-products share
- * 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122). Absent api_id is not an error; it is
- * only ever a guard, so losing it costs a warning, not the run.
+ * The identity guard, run on the merged document just before it would
+ * overwrite specs/raw/<name>.yaml. It measures one thing: how much of the
+ * contract we committed under this name the slug still serves. A slug
+ * repointed at a different API keeps essentially none of it, so the raw file
+ * would be overwritten with another API's contract under our filename.
+ *
+ * Deliberately not an upstream id comparison; see the tombstone in
+ * scripts/spec-registry.yaml for what api_id was measured to be. Counting and
+ * the block decision (MIN_SURVIVAL, and the baseline floor under it) both live
+ * in lib/contract-continuity.ts; this function only reads the baseline off
+ * disk and reports. Returns a block detail, or null to proceed.
  */
-function checkApiId(entry: SpecRegistryEntry, apiIds: string[]): string | null {
-  if (apiIds.length === 0) {
-    console.log(`  ${entry.name}: portal returned no api_id; identity guard skipped`);
+function checkContractContinuity(entry: SpecRegistryEntry, merged: unknown): string | null {
+  const rawFile = join(OUTPUT_DIR, `${entry.name}.yaml`);
+  if (!existsSync(rawFile)) {
+    console.log(
+      `\n  ${entry.name}: no committed specs/raw/${entry.name}.yaml, so this spec is new and ` +
+        `has no continuity baseline; check skipped`
+    );
     return null;
   }
-  if (apiIds.includes(entry.apiId)) {
+  let committed: unknown;
+  try {
+    committed = yaml.parse(readFileSync(rawFile, 'utf-8'));
+  } catch (error) {
+    // Only identity is in scope here. fix-specs and generate-types are what
+    // validate that the committed file is a usable document.
+    console.log(
+      `\n  ${entry.name}: committed specs/raw/${entry.name}.yaml does not parse as YAML ` +
+        `(${error instanceof Error ? error.message : String(error)}), so there is no ` +
+        `continuity baseline; check skipped`
+    );
     return null;
   }
+
+  const result = assessContractContinuity(committed, merged);
+  const { committedCount, survivingCount, missing } = result;
+  if (committedCount === 0) {
+    console.log(
+      `\n  ${entry.name}: committed specs/raw/${entry.name}.yaml has no recognizable operations, ` +
+        `so there is no continuity baseline; check skipped`
+    );
+    return null;
+  }
+  if (!isDiscontinuous(result)) {
+    return null;
+  }
+
+  const shown = missing.slice(0, MAX_MISSING_SHOWN);
+  const rest = missing.length - shown.length;
   return (
-    `slug "${entry.slug}" now serves api_id ${apiIds.join(', ')}, but the registry records ` +
-    `${entry.apiId}. The slug has been repointed at a different API upstream. Confirm what ` +
-    `"${entry.slug}" now is before touching scripts/spec-registry.yaml: accepting this blindly ` +
-    `would overwrite specs/raw/${entry.name}.yaml with another API's contract.`
+    `${missing.length} of ${committedCount} committed operations in specs/raw/${entry.name}.yaml ` +
+    `no longer appear in what slug "${entry.slug}" now serves (${survivingCount} still appear). ` +
+    `Missing: ${shown.join(', ')}${rest > 0 ? `, and ${rest} more` : ''}. A loss this size is ` +
+    `consistent with the slug having been repointed at a different API upstream. This check ` +
+    `cannot tell that apart from a heavy rewrite of the same API, so both remediations stand: ` +
+    `if the slug really was repointed, what "${entry.slug}" now is, and what specs/raw/` +
+    `${entry.name}.yaml should therefore be, is a human decision; if upstream genuinely rewrote ` +
+    `the API this heavily, delete specs/raw/${entry.name}.yaml to drop the old baseline and ` +
+    `rerun, after which the manifest classification in scripts/api-surface.yaml still accounts ` +
+    `for every removed method as breaking.`
   );
 }
 
@@ -235,8 +275,14 @@ async function main() {
 
   const processed: ProcessedSpec[] = [];
   const frozen: string[] = [];
-  /** Active specs that did not yield a usable document. Fails the run below. */
-  const blocked: { entry: SpecRegistryEntry; detail: string }[] = [];
+  /**
+   * Active specs that did not yield a usable document. Fails the run below.
+   * `kind` separates "the slug did not give us a document" from "it gave us a
+   * different API's document": only the former can be explained by the portal
+   * catalog, since a continuity block means the fetch itself succeeded and the
+   * catalog therefore still lists the slug.
+   */
+  const blocked: { entry: SpecRegistryEntry; kind: 'fetch' | 'continuity'; detail: string }[] = [];
 
   for (const entry of registry.entries) {
     const { name } = entry;
@@ -259,22 +305,15 @@ async function main() {
     }
 
     if (outcome.kind !== 'ok') {
-      blocked.push({ entry, detail: describeOutcome(outcome) });
+      blocked.push({ entry, kind: 'fetch', detail: describeOutcome(outcome) });
       console.log(` BLOCKED (${describeOutcome(outcome)})`);
-      continue;
-    }
-
-    const mismatch = checkApiId(entry, outcome.apiIds);
-    if (mismatch) {
-      blocked.push({ entry, detail: mismatch });
-      console.log(' BLOCKED (api_id mismatch)');
       continue;
     }
 
     const docs = outcome.docs;
     const parsedDocs = parseSlugDocs(name, docs);
     if (!parsedDocs) {
-      blocked.push({ entry, detail: 'fetched documents failed to parse as YAML' });
+      blocked.push({ entry, kind: 'fetch', detail: 'fetched documents failed to parse as YAML' });
       console.log(' BLOCKED (parse failed)');
       continue;
     }
@@ -290,6 +329,17 @@ async function main() {
               findSpecOverride(routingOverrides, name)?.acknowledgedDivergentServers ?? false,
           })
         : parsedDocs[0].doc;
+
+    // Identity is checked here, against the merged document and before the
+    // write below, because the merged document is the first point at which
+    // what the slug serves is comparable to what we committed.
+    const discontinuity = checkContractContinuity(entry, merged);
+    if (discontinuity) {
+      blocked.push({ entry, kind: 'continuity', detail: discontinuity });
+      console.log(' BLOCKED (contract discontinuity)');
+      continue;
+    }
+
     const canonical = canonicalizeSpec(merged);
 
     // Raw files are now re-serialized canonical YAML rather than
@@ -347,18 +397,21 @@ async function main() {
         `continuing would regenerate the SDK from stale committed specs while reporting success, ` +
         `which is how notifications went three months without anyone noticing.\n`
     );
-    // Consulted only now, on an already-failed run, so a healthy sync never
-    // pays for it and a portal redesign can only cost us a hint. Null when the
-    // landing page is unreachable or its shape has moved.
-    const catalog = await fetchPortalCatalog();
-    if (!catalog) {
+    // Consulted only now, on an already-failed run, and only when a block the
+    // catalog can actually explain is present, so a healthy sync never pays for
+    // it and neither does a run whose blocks are all continuity (there the
+    // fetch succeeded, so the catalog lists the slug and its hint would be
+    // false). Null when the landing page is unreachable or its shape has moved.
+    const anyFetchBlock = blocked.some((b) => b.kind === 'fetch');
+    const catalog = anyFetchBlock ? await fetchPortalCatalog() : null;
+    if (anyFetchBlock && !catalog) {
       console.error(`  (the portal catalog could not be read, so no rename hints below)\n`);
     }
 
-    for (const { entry, detail } of blocked) {
+    for (const { entry, kind, detail } of blocked) {
       console.error(`  ${entry.name}: ${detail}`);
-      if (catalog) {
-        for (const line of explainSlug(catalog, entry.slug, entry.apiId)) {
+      if (kind === 'fetch' && catalog) {
+        for (const line of explainSlug(catalog, entry.slug)) {
           console.error(`    - ${line}`);
         }
       }

@@ -1,4 +1,4 @@
-# Spec registry — scripts/spec-registry.yaml
+# Spec registry: scripts/spec-registry.yaml
 #
 # The source of truth for WHICH specs the pipeline fetches, WHERE the portal
 # currently serves them, and WHICH of them are knowingly not being refreshed.
@@ -26,11 +26,6 @@
 #                           fails loudly and a human repoints this value. The
 #                           internal name above stays put.
 #
-#     apiId:                A GUARD, NOT AN IDENTITY KEY. See the warning below
-#                           before using this for anything. Recorded so a fetch
-#                           can detect that a slug has started serving a
-#                           different API.
-#
 #     status: frozen        Optional. Omit it and the spec is active: it must
 #                           fetch and validate, and a failure fails the run.
 #                           `frozen` means the committed specs/raw/<name>.yaml
@@ -49,43 +44,24 @@
 #                           from when the freeze was written down.
 #
 # ---------------------------------------------------------------------------
-# WARNING: apiId is neither unique per API nor stable over time.
-#          Do not resolve slugs with it.
+# TOMBSTONE: apiId. Pinned per spec 2026-08-13, removed 2026-08-18.
 # ---------------------------------------------------------------------------
 #
-# Every document the portal returns carries an `api_id`, and it is tempting to
-# treat it as a stable identity that survives slug renames. It is not one, and
-# both halves of that have now been observed upstream.
+# An `apiId:` field recorded the api_id the portal returned for each slug, and
+# fetch-specs blocked a spec on a mismatch. Two measurements retired it:
 #
-# NOT UNIQUE. Measured 2026-08-13:
+#   NOT UNIQUE (2026-08-13). products and service-data-products both reported
+#   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122. Two unrelated APIs, one id.
 #
-#   /devDoc/apiDetails/products                api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
-#                                              "Operations Center - Products", 8 documents
-#   /devDoc/apiDetails/service-data-products   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
-#                                              "Service Data Product - POPS", 1 document
+#   NOT STABLE (2026-08-18). Deere reissued products as
+#   8c97edbb-506b-4a2b-aef8-34f114ed0ea8 between the 08-17 and 08-18 syncs over
+#   a contract that did not change (same 8 documents, same 38 operations, no
+#   difference in either direction). The guard false-positived the daily sync.
 #
-# Two unrelated APIs, one id. The portal's own catalog mapped that id to
-# service-data-products, so resolving `products` by api_id would have silently
-# overwritten specs/raw/products.yaml with a different API's contract under the
-# same filename: right name, wrong content, no error.
-#
-# NOT STABLE. Measured 2026-08-18, between the 08-17 and 08-18 syncs:
-#
-#   /devDoc/apiDetails/products                api_id 8c97edbb-506b-4a2b-aef8-34f114ed0ea8
-#                                              "Operations Center - Products", 8 documents
-#   /devDoc/apiDetails/service-data-products   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
-#                                              unchanged
-#
-# Deere gave products its own id and the collision above is gone. Same API
-# either way: the 8 documents carry the same end_point_name values, and the
-# live spec and the committed one both declare exactly 38 operations with no
-# difference in either direction. The id moved under a contract that did not.
-#
-# So: the slug is the identity, and a rename is a human decision. apiId is only
-# ever compared against what a fetch returns. A mismatch proves the slug is
-# serving something the registry has not seen before, which may be a different
-# API or the same one reissued; it does not say which, so it stops the run and
-# asks. A match proves nothing.
+# Deere publishes no stable per-API identity, so identity is now measured
+# directly: how much of the contract committed under a name the slug still
+# serves (scripts/lib/contract-continuity.ts, run per spec in fetch-specs).
+# Do not reintroduce an upstream id as identity here.
 #
 # ---------------------------------------------------------------------------
 
@@ -94,93 +70,71 @@ version: 1
 specs:
   aemp:
     slug: aemp
-    apiId: d3187b0c-497e-4997-8aee-e5ddb3e5e24c
 
   assets:
     slug: assets
-    apiId: 4518e618-ec2d-4191-a0d5-0c9d62576794
 
   boundaries:
     slug: boundaries
-    apiId: e40534b3-e6c8-4762-83ae-c397f0b4ba8e
 
   clients:
     slug: clients
-    apiId: 03f35e98-6646-408a-b63a-5e80a0bcd215
 
   connection-management:
     slug: connection-management
-    apiId: ac2dce68-163b-4ad3-8408-2394b29a8ba0
 
   crop-types:
     slug: crop-types
-    apiId: e4359d62-0024-43d8-8aea-c5b7d8e9e539
 
   equipment:
     slug: equipment
-    apiId: fc9bbe92-33c7-4fa0-9ff7-9ed29994713b
 
   equipment-measurement:
     slug: equipment-measurement
-    apiId: 51e34f65-9986-46b8-b104-fb0df514503c
 
   farms:
     slug: farms
-    apiId: b33df50f-098b-49d5-b44b-811953e96010
 
   # Internal name keeps the -api suffix; the portal dropped it between the
   # 2026-08-11 and 2026-08-12 health runs (PR #40).
   field-operations-api:
     slug: field-operations
-    apiId: 7adff934-dcf4-46b9-9d20-609532ea612a
 
   fields:
     slug: fields
-    apiId: 51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9
 
   files:
     slug: files
-    apiId: 72bcd744-87a5-44b9-8c79-824f52ce6c7a
 
   flags:
     slug: flags
-    apiId: f89b4a69-97c1-4bcd-8973-53e20b40a3f5
 
   guidance-lines:
     slug: guidance-lines
-    apiId: 308645ec-d46a-47f5-bffa-0c15d2985c13
 
   harvest-id:
     slug: harvest-id
-    apiId: 1c3cf4a2-7d41-44d1-88ff-0392fe47174e
 
   machine-alerts:
     slug: machine-alerts
-    apiId: ae4a1f69-1730-4303-b0f6-de8a63d31ae5
 
   machine-device-state-reports:
     slug: machine-device-state-reports
-    apiId: 4ab2399a-0941-48fc-adf6-2e39a459c121
 
   machine-engine-hours:
     slug: machine-engine-hours
-    apiId: 7b30aa03-b963-4f21-a9ef-54ae9ad1fc3a
 
   machine-hours-of-operation:
     slug: machine-hours-of-operation
-    apiId: 69f11f32-983c-49f4-828a-4e5233d6a955
 
   machine-locations:
     slug: machine-locations
-    apiId: 0dbd2e22-e517-4a12-96b8-721b0a319b83
 
   map-layers:
     slug: map-layers
-    apiId: 8ec6e41c-34e0-4d00-86f0-1d0c4b4ff5bc
 
   notifications:
     slug: notifications
-    apiId: 7ba52638-ac07-4037-ab4c-80ba140942b5
     status: frozen
     since: 2026-05-23
     reason: >-
@@ -209,27 +163,18 @@ specs:
 
   operators:
     slug: operators
-    apiId: a68ac804-e78d-4333-9b89-dc827050bee0
 
   organizations:
     slug: organizations
-    apiId: c5693ed4-8828-4cb4-b228-4a5563d7d782
 
   partnerships:
     slug: partnerships
-    apiId: eeef72ff-6570-4127-9b73-6122c221087f
 
   products:
     slug: products
-    # Was 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122, the id this slug shared with
-    # service-data-products. Deere issued this distinct id between the 2026-08-17
-    # and 2026-08-18 syncs; the contract did not change. See the warning above.
-    apiId: 8c97edbb-506b-4a2b-aef8-34f114ed0ea8
 
   users:
     slug: users
-    apiId: 56d19102-f9a9-4fb3-8456-fda0918e2bd2
 
   webhook:
     slug: webhook
-    apiId: 2053fbbb-4637-446b-81b9-e0f9e628a69e

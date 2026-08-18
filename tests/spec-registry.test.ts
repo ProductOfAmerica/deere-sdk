@@ -27,7 +27,7 @@ import { loadSpecRegistry, validateRegistry } from '../scripts/lib/spec-registry
 const FILE = 'test-registry.yaml';
 
 function entry(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return { slug: 'fields', apiId: '51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9', ...overrides };
+  return { slug: 'fields', ...overrides };
 }
 
 function registry(specs: Record<string, unknown>): Record<string, unknown> {
@@ -47,14 +47,7 @@ describe('spec registry validation', () => {
   it('accepts a minimal active entry and defaults it to not frozen', () => {
     const result = validateRegistry(registry({ fields: entry() }), FILE);
     assert.strictEqual(result.version, 1);
-    assert.deepStrictEqual(result.entries, [
-      {
-        name: 'fields',
-        slug: 'fields',
-        apiId: '51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9',
-        frozen: null,
-      },
-    ]);
+    assert.deepStrictEqual(result.entries, [{ name: 'fields', slug: 'fields', frozen: null }]);
   });
 
   it('keeps the internal spec name distinct from the portal slug', () => {
@@ -123,11 +116,17 @@ describe('spec registry validation', () => {
     );
   });
 
-  it('rejects a malformed apiId', () => {
+  // Unknown keys are otherwise ignored, so this one is rejected by name: a
+  // leftover apiId would read as a live identity guard while guarding nothing.
+  it('rejects a leftover apiId rather than ignoring it as an unknown key', () => {
     assert.throws(
-      () => validateRegistry(registry({ fields: entry({ apiId: 'not-a-uuid' }) }), FILE),
+      () =>
+        validateRegistry(
+          registry({ fields: entry({ apiId: '51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9' }) }),
+          FILE
+        ),
       (error: unknown) =>
-        error instanceof Error && /"apiId" must be a lowercase UUID/.test(error.message)
+        error instanceof Error && /"apiId" is no longer a registry field/.test(error.message)
     );
   });
 
@@ -184,11 +183,7 @@ describe('spec registry loading', () => {
   it('reads and validates a registry from disk', () => {
     withTempDir((dir) => {
       const path = join(dir, 'spec-registry.yaml');
-      writeFileSync(
-        path,
-        'version: 1\nspecs:\n  fields:\n    slug: fields\n' +
-          '    apiId: 51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9\n'
-      );
+      writeFileSync(path, 'version: 1\nspecs:\n  fields:\n    slug: fields\n');
       const result = loadSpecRegistry(path);
       assert.strictEqual(result.entries.length, 1);
       assert.strictEqual(result.entries[0].slug, 'fields');

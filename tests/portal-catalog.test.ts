@@ -31,15 +31,11 @@ const ROUTES = {
 };
 
 describe('parsePortalCatalog', () => {
-  it('extracts slugs and the apiId mapping from a landing page', () => {
+  it('extracts the published slugs from a landing page', () => {
     const catalog = parsePortalCatalog(page(ROUTES));
     assert.ok(catalog);
     assert.strictEqual(catalog.slugs.size, 5);
     assert.ok(catalog.slugs.has('field-operations'));
-    assert.strictEqual(
-      catalog.byApiId.get('7adff934-dcf4-46b9-9d20-609532ea612a'),
-      'field-operations'
-    );
   });
 
   it('finds devDocRoutes at any depth, so a Next.js reshuffle does not break it', () => {
@@ -81,11 +77,7 @@ describe('explainSlug', () => {
 
   it('names the rename candidate when a slug gained or lost a suffix', () => {
     assert.ok(catalog);
-    const lines = explainSlug(
-      catalog,
-      'field-operations-api',
-      '7adff934-dcf4-46b9-9d20-609532ea612a'
-    );
+    const lines = explainSlug(catalog, 'field-operations-api');
     assert.match(lines[0], /not in the portal catalog/);
     assert.ok(
       lines.some((l) => /similarly named published slugs: field-operations/.test(l)),
@@ -93,21 +85,9 @@ describe('explainSlug', () => {
     );
   });
 
-  it('offers the apiId mapping as a lead, explicitly not as an answer', () => {
-    assert.ok(catalog);
-    const lines = explainSlug(catalog, 'products', '5cedab22-e2f6-4d23-b5c5-9cc8b6b86122');
-    const lead = lines.find((l) => /service-data-products/.test(l));
-    assert.ok(lead, `expected the apiId lead, got: ${JSON.stringify(lines)}`);
-    assert.match(
-      lead,
-      /lead, not an answer/,
-      'the apiId lead must carry its caveat: the portal reuses one apiId across unrelated APIs'
-    );
-  });
-
   it('does not claim a rename when the slug is still published', () => {
     assert.ok(catalog);
-    const lines = explainSlug(catalog, 'fields', '51ba3f52-593e-42a2-bdb3-4d7c44bd0bf9');
+    const lines = explainSlug(catalog, 'fields');
     assert.strictEqual(lines.length, 1);
     assert.match(lines[0], /still publishes/);
     assert.match(lines[0], /not a rename/);
@@ -120,11 +100,7 @@ describe('explainSlug', () => {
 
   it('falls back to the naming family when nothing contains the slug', () => {
     assert.ok(catalog);
-    const lines = explainSlug(
-      catalog,
-      'machine-engine-hours',
-      'ae4a1f69-0000-0000-0000-000000000000'
-    );
+    const lines = explainSlug(catalog, 'machine-engine-hours');
     assert.ok(
       lines.some((l) => /machine-alerts/.test(l) && /machine-locations/.test(l)),
       `expected the machine-* family, got: ${JSON.stringify(lines)}`
@@ -133,7 +109,7 @@ describe('explainSlug', () => {
 
   it('offers no candidates when the slug resembles nothing published', () => {
     assert.ok(catalog);
-    const lines = explainSlug(catalog, 'zzz', '00000000-0000-4000-8000-000000000000');
+    const lines = explainSlug(catalog, 'zzz');
     assert.strictEqual(lines.length, 1);
     assert.match(lines[0], /not in the portal catalog/);
   });

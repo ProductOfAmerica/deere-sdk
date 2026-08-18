@@ -3,27 +3,24 @@
  * page, and uses it to explain a failed fetch.
  *
  * https://developer.deere.com/dev-doc-landing embeds the whole catalog in its
- * Next.js `__NEXT_DATA__` island as `devDocRoutes`, an apiId to
+ * Next.js `__NEXT_DATA__` island as `devDocRoutes`, an api_id to
  * `/dev-docs/{slug}` mapping covering every API the portal publishes. Free to
- * fetch, no browser needed.
+ * fetch, no browser needed. Only the slugs are kept: the keys are Deere
+ * api_ids, which are neither unique per API nor stable over time, so indexing
+ * by them would only offer a lead that cannot be checked (see the tombstone in
+ * scripts/spec-registry.yaml).
  *
  * ---------------------------------------------------------------------------
- * This is a DIAGNOSTIC, not a resolver. Two independent reasons.
+ * This is a DIAGNOSTIC, not a resolver.
  * ---------------------------------------------------------------------------
  *
- * 1. apiId is not unique. `products` and `service-data-products` both report
- *    api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122, and the catalog maps that id
- *    to service-data-products. Auto-resolving `products` by api_id would
- *    overwrite specs/raw/products.yaml with a different API's contract under
- *    the same filename: right name, wrong content, no error.
+ * The catalog is not a complete list of fetchable slugs. `products` has no
+ * /dev-docs/products route at all, yet /devDoc/apiDetails/products serves 8
+ * valid documents today. So absence from the catalog does NOT prove a slug is
+ * dead (measured 2026-08-13: 27 of our 28 slugs appear; products is the
+ * exception).
  *
- * 2. The catalog is not a complete list of fetchable slugs. `products` has no
- *    /dev-docs/products route at all, yet /devDoc/apiDetails/products serves 8
- *    valid documents today. So absence from the catalog does NOT prove a slug
- *    is dead (measured 2026-08-13: 27 of our 28 slugs appear; products is the
- *    exception).
- *
- * Both are survivable because this only ever runs on a fetch that has ALREADY
+ * That is survivable because this only ever runs on a fetch that has ALREADY
  * failed. At that point "your slug is not in the catalog, but these similar
  * ones are" is a useful lead for a human, and a live-but-unlisted slug like
  * products never reaches it. Nothing here changes what gets fetched or
@@ -43,8 +40,6 @@ const MAX_SUGGESTIONS = 5;
 export interface PortalCatalog {
   /** Every slug the portal publishes a doc route for. */
   slugs: Set<string>;
-  /** apiId to slug. Lossy by construction: see the header, apiId is not unique. */
-  byApiId: Map<string, string>;
 }
 
 /**
@@ -84,18 +79,16 @@ export function parsePortalCatalog(html: string): PortalCatalog | null {
   if (routeMaps.length === 0) return null;
 
   const slugs = new Set<string>();
-  const byApiId = new Map<string, string>();
   for (const routes of routeMaps) {
-    for (const [apiId, route] of Object.entries(routes)) {
+    for (const route of Object.values(routes)) {
       if (typeof route !== 'string' || !route.startsWith(DEV_DOCS_PREFIX)) continue;
       const slug = route.slice(DEV_DOCS_PREFIX.length);
       if (slug.length === 0) continue;
       slugs.add(slug);
-      byApiId.set(apiId, slug);
     }
   }
 
-  return slugs.size === 0 ? null : { slugs, byApiId };
+  return slugs.size === 0 ? null : { slugs };
 }
 
 /** Fetch and parse the catalog. Null on any failure; never throws. */
@@ -113,7 +106,7 @@ export async function fetchPortalCatalog(): Promise<PortalCatalog | null> {
  * Explain a failed slug against the catalog, as plain lines for the operator.
  * Empty when the catalog has nothing useful to add.
  */
-export function explainSlug(catalog: PortalCatalog, slug: string, apiId: string): string[] {
+export function explainSlug(catalog: PortalCatalog, slug: string): string[] {
   if (catalog.slugs.has(slug)) {
     return [
       `the portal still publishes "${slug}", so this is not a rename; the slug is listed ` +
@@ -125,15 +118,6 @@ export function explainSlug(catalog: PortalCatalog, slug: string, apiId: string)
     `"${slug}" is not in the portal catalog (${catalog.slugs.size} published APIs), which ` +
       `is consistent with an upstream rename. Not proof: some live slugs are unlisted.`,
   ];
-
-  const byId = catalog.byApiId.get(apiId);
-  if (byId !== undefined && byId !== slug) {
-    lines.push(
-      `the recorded apiId now maps to "${byId}" in the catalog. Treat as a lead, not an ` +
-        `answer: the portal reuses one apiId across unrelated APIs, so confirm the API is ` +
-        `the same one before repointing the slug.`
-    );
-  }
 
   const candidates = similarSlugs(catalog.slugs, slug);
   if (candidates.length > 0) {

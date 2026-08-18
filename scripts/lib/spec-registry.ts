@@ -39,14 +39,6 @@ export interface SpecRegistryEntry {
   name: string;
   /** Path segment the portal currently serves this spec under. */
   slug: string;
-  /**
-   * Recorded api_id. A GUARD, never an identity key: the portal reuses one
-   * api_id across unrelated APIs (products and service-data-products both
-   * report 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122, measured 2026-08-13). A
-   * mismatch proves a slug now serves something else; a match proves nothing.
-   * See the warning block in scripts/spec-registry.yaml.
-   */
-  apiId: string;
   /** Null when the spec is active, i.e. it must fetch and validate. */
   frozen: FrozenState | null;
 }
@@ -70,7 +62,6 @@ const DEFAULT_REGISTRY_PATH = join(process.cwd(), 'scripts', 'spec-registry.yaml
  * anything needing escaping.
  */
 const KEBAB_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function fail(detail: string): never {
@@ -92,7 +83,7 @@ function describeType(value: unknown): string {
  *
  * Throws with a remediation-bearing message on: missing file, unreadable file,
  * unparseable YAML, `version !== 1`, non-mapping or empty `specs`, a spec name
- * or slug outside /^[a-z0-9]+(-[a-z0-9]+)*$/, a missing or malformed `apiId`,
+ * or slug outside /^[a-z0-9]+(-[a-z0-9]+)*$/, a leftover `apiId`,
  * a `status` other than "frozen", a frozen entry missing `reason` or `since`,
  * a `since` that is not a real YYYY-MM-DD date, a non-frozen entry carrying
  * `reason` or `since`, or two specs claiming the same slug.
@@ -181,10 +172,10 @@ function validateEntry(name: string, value: unknown): SpecRegistryEntry {
     );
   }
   if (!isRecord(value)) {
-    fail(`${where} must be a mapping with "slug" and "apiId", got ${describeType(value)}`);
+    fail(`${where} must be a mapping with "slug", got ${describeType(value)}`);
   }
 
-  const { slug, apiId, status, reason, since } = value;
+  const { slug, status, reason, since } = value;
 
   if (typeof slug !== 'string' || !KEBAB_PATTERN.test(slug)) {
     fail(
@@ -192,11 +183,18 @@ function validateEntry(name: string, value: unknown): SpecRegistryEntry {
         `${JSON.stringify(slug)}. It is interpolated into the portal fetch URL.`
     );
   }
-  if (typeof apiId !== 'string' || !UUID_PATTERN.test(apiId)) {
+  // Named rejection rather than silent tolerance: every other unknown key is
+  // ignored here, so a leftover apiId would read as a live guard while
+  // guarding nothing. Deere's api_id was measured to be neither unique per API
+  // nor stable over time; identity is now checked by contract continuity
+  // against the committed raw spec.
+  if ('apiId' in value) {
     fail(
-      `${where}: "apiId" must be a lowercase UUID, got ${JSON.stringify(apiId)}. Record the ` +
-        `api_id the portal returns for this slug; it is compared against future fetches to ` +
-        `detect a slug that has started serving a different API.`
+      `${where}: "apiId" is no longer a registry field; delete the line. It was pinned as an ` +
+        `identity guard and removed once measured to be neither unique per API nor stable ` +
+        `over time. Identity is now checked by contract continuity against the committed raw ` +
+        `spec (scripts/lib/contract-continuity.ts). See the tombstone comment in ` +
+        `scripts/spec-registry.yaml.`
     );
   }
 
@@ -208,7 +206,7 @@ function validateEntry(name: string, value: unknown): SpecRegistryEntry {
           `fail on the very condition the reason documents.`
       );
     }
-    return { name, slug, apiId, frozen: null };
+    return { name, slug, frozen: null };
   }
 
   if (status !== 'frozen') {
@@ -231,7 +229,7 @@ function validateEntry(name: string, value: unknown): SpecRegistryEntry {
     );
   }
 
-  return { name, slug, apiId, frozen: { reason, since } };
+  return { name, slug, frozen: { reason, since } };
 }
 
 /** True for a YYYY-MM-DD string that names a date that actually exists. */
