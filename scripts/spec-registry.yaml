@@ -49,26 +49,43 @@
 #                           from when the freeze was written down.
 #
 # ---------------------------------------------------------------------------
-# WARNING: apiId is not unique per API. Do not resolve slugs with it.
+# WARNING: apiId is neither unique per API nor stable over time.
+#          Do not resolve slugs with it.
 # ---------------------------------------------------------------------------
 #
 # Every document the portal returns carries an `api_id`, and it is tempting to
-# treat it as a stable identity that survives slug renames. It is not one.
-# Measured 2026-08-13:
+# treat it as a stable identity that survives slug renames. It is not one, and
+# both halves of that have now been observed upstream.
+#
+# NOT UNIQUE. Measured 2026-08-13:
 #
 #   /devDoc/apiDetails/products                api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
 #                                              "Operations Center - Products", 8 documents
 #   /devDoc/apiDetails/service-data-products   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
 #                                              "Service Data Product - POPS", 1 document
 #
-# Two unrelated APIs, one id. The portal's own catalog maps that id to
-# service-data-products, so resolving `products` by api_id would silently
-# overwrite specs/raw/products.yaml with a different API's contract under the
+# Two unrelated APIs, one id. The portal's own catalog mapped that id to
+# service-data-products, so resolving `products` by api_id would have silently
+# overwritten specs/raw/products.yaml with a different API's contract under the
 # same filename: right name, wrong content, no error.
 #
+# NOT STABLE. Measured 2026-08-18, between the 08-17 and 08-18 syncs:
+#
+#   /devDoc/apiDetails/products                api_id 8c97edbb-506b-4a2b-aef8-34f114ed0ea8
+#                                              "Operations Center - Products", 8 documents
+#   /devDoc/apiDetails/service-data-products   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
+#                                              unchanged
+#
+# Deere gave products its own id and the collision above is gone. Same API
+# either way: the 8 documents carry the same end_point_name values, and the
+# live spec and the committed one both declare exactly 38 operations with no
+# difference in either direction. The id moved under a contract that did not.
+#
 # So: the slug is the identity, and a rename is a human decision. apiId is only
-# ever compared against what a fetch returns. A mismatch proves the slug now
-# serves something else; a match proves nothing.
+# ever compared against what a fetch returns. A mismatch proves the slug is
+# serving something the registry has not seen before, which may be a different
+# API or the same one reissued; it does not say which, so it stops the run and
+# asks. A match proves nothing.
 #
 # ---------------------------------------------------------------------------
 
@@ -204,7 +221,10 @@ specs:
 
   products:
     slug: products
-    apiId: 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122
+    # Was 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122, the id this slug shared with
+    # service-data-products. Deere issued this distinct id between the 2026-08-17
+    # and 2026-08-18 syncs; the contract did not change. See the warning above.
+    apiId: 8c97edbb-506b-4a2b-aef8-34f114ed0ea8
 
   users:
     slug: users
