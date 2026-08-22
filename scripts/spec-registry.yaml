@@ -169,6 +169,32 @@ specs:
 
   partnerships:
     slug: partnerships
+    status: frozen
+    since: 2026-08-22
+    reason: >-
+      HELD OVER A DROPPED OPERATION, NOT OVER FETCHABILITY. Same shape as the
+      notifications freeze: the document fetches cleanly, but adopting it would
+      drop a published method whose route still works.
+
+      Between the 2026-08-21 and 2026-08-22 syncs Deere's document stopped
+      declaring POST /partnerships/{token}/permissions, which
+      scripts/api-surface.yaml pins to PartnershipsApi.createPermissions, and
+      gained PUT /organizations/{orgId}/partnerPermissions. Measured 2026-08-22
+      with controls validating the 401/404 discriminator in the same runs: the
+      dropped route still answers 401 (exists) on /platform in api and
+      sandboxapi, and the new route is not a rename of it: different verb,
+      keyed by orgId instead of partnership token, different body, and it
+      answers 401 on /isg in all four environments while returning 404 on
+      /platform, the base its own document declares. Their migration is
+      half-done: the doc describes the destination, the gateway is in between.
+
+      Lifting this freeze is triggered by probe-routes going red on the old
+      route (it fails the run on a deterministic 404 with valid controls), or
+      by a Deere retirement notice. Either way the lift is one deliberate
+      change: adopt the current document, delete the createPermissions manifest
+      entry (major version), add a routing-overrides path entry putting
+      /organizations/{orgId}/partnerPermissions on /isg with the measurement
+      above as evidence, and ship the successor method.
 
   products:
     slug: products

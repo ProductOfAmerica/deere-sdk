@@ -2,10 +2,18 @@ name: Route Probe
 
 # Asks Deere's gateway whether every route the SDK ships actually exists.
 #
-# Deliberately separate from ci.yml and never blocking. This tests THEIR
-# infrastructure, not this repo: a Deere outage, a gateway change, or a rate
-# limit must not turn the build red, because an alarm that fires for things you
-# cannot fix is one people learn to ignore.
+# Deliberately separate from ci.yml. This tests THEIR infrastructure, not this
+# repo: a Deere outage, a gateway change, or a rate limit must not turn the
+# build red, because an alarm that fires for things you cannot fix is one
+# people learn to ignore. Outages, timeouts and unclassified responses are
+# report-only.
+#
+# The one exception, since 2026-08-22: a shipped route answering a
+# deterministic 404 while the probe's controls validate fails this run. That
+# is Deere stating the route is gone, and it is actionable every time (lift a
+# freeze and cut the major, add a routing override, or drop the method). The
+# failure notification is the tripwire that says a frozen spec's held route
+# has died; without it the signal sat in a green run's log nobody opened.
 #
 # The hermetic half of the guard lives in tests/routing-guard.test.ts and does
 # block. This catches the other case: Deere moving a route out from under a URL
@@ -44,8 +52,10 @@ jobs:
 
       - name: Probe every shipped route
         id: probe
-        # Never fails the job. The script exits non-zero only when its own
-        # controls stop separating, which is reported below rather than thrown.
+        # Does not fail here so the summary and artifact below always get
+        # written; the job is failed at the end from the recorded exit code.
+        # Script exits: 1 = controls stopped separating (no verdict possible),
+        # 2 = a shipped route deterministically does not exist.
         run: |
           set +e
           pnpm probe-routes 2>&1 | tee probe-output.txt
@@ -56,17 +66,23 @@ jobs:
           {
             echo "## Route probe"
             echo
-            if [ "${{ steps.probe.outputs.exit_code }}" != "0" ]; then
+            if [ "${{ steps.probe.outputs.exit_code }}" == "1" ]; then
               echo "The probe refused to report: its control probes no longer separate a"
               echo "missing route from one that needs auth. No routing verdict from this run"
               echo "would mean anything. Re-establish what Deere's gateway responses mean"
               echo "before trusting the script again."
+            elif [ "${{ steps.probe.outputs.exit_code }}" == "2" ]; then
+              echo "**A shipped route deterministically does not exist.** The controls"
+              echo "validated, so this is Deere's gateway stating the route is gone, not an"
+              echo "outage. Each finding is one of: Deere moved the route (repoint it in"
+              echo "scripts/routing-overrides.yaml), Deere retired it (drop the operation, or"
+              echo "lift the freeze that was holding it and cut the major), or this pipeline"
+              echo "built the wrong URL."
             elif grep -q "Every route the SDK ships exists upstream" probe-output.txt; then
               echo "Every route the SDK ships exists upstream."
             else
-              echo "**Routes resolving to a URL that does not exist.** For triage, not a build"
-              echo "failure. Each is one of: Deere moved the route, Deere retired it, or this"
-              echo "pipeline built the wrong URL."
+              echo "Unclassified responses only (outage, rate limit, or gateway change);"
+              echo "nothing deterministic. Report-only, see the output below."
             fi
             echo
             echo '```'
@@ -80,3 +96,10 @@ jobs:
           name: probe-output
           path: probe-output.txt
           retention-days: 14
+
+      # Last, so the summary and artifact above exist even on a red run.
+      - name: Fail on a deterministic finding
+        if: steps.probe.outputs.exit_code != '0'
+        run: |
+          echo "::error::probe-routes exited ${{ steps.probe.outputs.exit_code }}: see the run summary."
+          exit 1

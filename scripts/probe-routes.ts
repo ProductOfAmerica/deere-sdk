@@ -5,9 +5,18 @@
  * Usage: pnpm probe-routes
  *
  * This is the layer of the routing guard that tests THEIR system, not ours, so
- * it is deliberately not part of any build. A Deere outage must not turn this
- * repo red; that is how an alarm gets trained into noise. It reports, and the
- * workflow that runs it treats a finding as something to triage.
+ * it is deliberately not part of any build, and a Deere outage must not turn
+ * this repo red; that is how an alarm gets trained into noise. Outages,
+ * timeouts and unclassified responses therefore stay report-only.
+ *
+ * One finding does fail the run: a shipped route answering a deterministic
+ * 404/403 while the controls validate. That is not an outage, it is Deere's
+ * gateway stating the route is gone, and it is actionable here every time:
+ * lift a freeze and cut the major, add a routing override, or drop the
+ * method. Before 2026-08-22 that signal landed in a green run's log that
+ * nobody opened; the partnerships migration made it the one event this repo
+ * has to hear about (a frozen spec's held method keeps shipping only while
+ * its route stays alive, and this exit is the tripwire that says it died).
  *
  * The hermetic guards (tests/routing-guard.test.ts) catch us manufacturing or
  * losing routing data. Only this catches Deere moving a route out from under a
@@ -202,13 +211,19 @@ async function main(): Promise<void> {
     }
   }
 
-  // Deliberately exits 0 even with findings. This reports on Deere's gateway,
-  // not on this repo, and a third party's changes must not fail our builds.
-  console.log(
-    missing.length === 0
-      ? '\nEvery route the SDK ships exists upstream.'
-      : '\nFindings above are for triage, not a build failure.'
-  );
+  // Deterministic absence fails the run: the controls validated this run, so
+  // a 404/403 is Deere's gateway stating the route is gone, not an outage.
+  // Everything else (5xx, timeouts, unclassified) stays report-only; a third
+  // party's incident must not fail our builds.
+  if (missing.length > 0) {
+    console.log(
+      '\nFailing the run: a shipped route that deterministically does not exist is ' +
+        'actionable every time, and a green run buries it.'
+    );
+    process.exitCode = 2;
+    return;
+  }
+  console.log('\nEvery route the SDK ships exists upstream.');
 }
 
 main().catch((error) => {
