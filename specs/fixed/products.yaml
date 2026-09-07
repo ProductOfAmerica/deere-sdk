@@ -2455,6 +2455,7 @@ paths:
       security:
         - OAuth2:
             - "eq2"
+            - "ag2"
       responses:
         "201":
           description: "Create Tank mix"

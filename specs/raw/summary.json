@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-08-18T18:58:04.761Z",
+  "fetchedAt": "2026-09-07T11:54:26.229Z",
   "baseUrl": "https://developer.deere.com/devDoc/apiDetails",
   "specs": [
     {
@@ -284,17 +284,6 @@
       ]
     },
     {
-      "id": 85,
-      "name": "partnerships",
-      "file": "partnerships.yaml",
-      "docs": [
-        {
-          "id": 85,
-          "endPointName": "partnerships"
-        }
-      ]
-    },
-    {
       "id": 9,
       "name": "products",
       "file": "products.yaml",
@@ -361,7 +350,8 @@
     }
   ],
   "frozen": [
-    "notifications"
+    "notifications",
+    "partnerships"
   ],
   "blocked": []
 }
