@@ -1,6 +1,6 @@
 {
   "name": "deere-sdk",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Unofficial TypeScript SDK for John Deere Operations Center API",
   "author": "ProductOfAmerica",
   "license": "MIT",
