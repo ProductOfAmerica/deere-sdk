@@ -926,6 +926,9 @@ paths:
                             fileName: "mpC7J004.pdf"
                             docType: "SDS"
                             description: "10/29/2024"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         childProducts:
                           - "@type": "Chemical"
                             links:
@@ -949,6 +952,9 @@ paths:
                             activeIngredients: []
                             availableRegistrations: []
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                       - "@type": "Chemical"
                         links:
                           - "@type": "Link"
@@ -966,6 +972,9 @@ paths:
                         activeIngredients: []
                         availableRegistrations: []
                         documentsList: []
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
         "403":
           description: "The user has not been provided access to the products for this org"
         "404":
@@ -1117,6 +1126,9 @@ paths:
                         fileName: "mpC7J004.pdf"
                         docType: "SDS"
                         description: "10/29/2024"
+                    seasonalParameters:
+                      - "@type": "SeasonalParameter"
+                        year: 2026
                     childProducts:
                       - "@type": "Chemical"
                         links:
@@ -1140,6 +1152,9 @@ paths:
                         activeIngredients: []
                         availableRegistrations: []
                         documentsList: []
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
         "403":
           description: "The user does not have sufficient privileges to access products in this org"
         "404":
@@ -1437,6 +1452,9 @@ paths:
                         targetCrops:
                           - "ALFALFA"
                           - "ALMONDS"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                       - "@type": "DryBlend"
                         links:
                           - "@type": "Link"
@@ -1533,6 +1551,9 @@ paths:
                                 uri: "https://sandboxapi.deere.com/platform/organizations/350519/chemicals/efe46183-f5e6-43a5-9ceb-3611adc03cc3"
                         targetCrops:
                           - "ALMONDS"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
         "403":
           description: "The user has not been provided access to the products for this org."
         "404":
@@ -1658,6 +1679,9 @@ paths:
                             uri: "https://sandboxapi.deere.com/platform/organizations/350519/chemicals/dfbe700e-87cb-4362-a23b-ff5afd1ccd4a"
                     targetCrops:
                       - "ALFALFA"
+                    seasonalParameters:
+                      - "@type": "SeasonalParameter"
+                        year: 2026
         "403":
           description: "The user has not been provided access to the products for this org."
         "404":
@@ -1799,6 +1823,9 @@ paths:
                         activeIngredients: []
                         availableRegistrations: []
                         documentsList: []
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         childProducts:
                           - "@type": "Fertilizer"
                             links:
@@ -1822,6 +1849,9 @@ paths:
                             activeIngredients: []
                             availableRegistrations: []
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                             childProducts: []
                       - "@type": "Fertilizer"
                         links:
@@ -1870,6 +1900,9 @@ paths:
                             description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                             fileName: "ld7OD026.pdf"
                             expirationDate: "2017-03-22"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                       - "@type": "Fertilizer"
                         links:
                           - "@type": "Link"
@@ -1915,6 +1948,9 @@ paths:
                             description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                             fileName: "ld7OD026.pdf"
                             expirationDate: "2017-03-22"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
         "403":
           description: "The user has not been provided access to the products for this org"
         "404":
@@ -2053,6 +2089,9 @@ paths:
                           description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                           fileName: "ld7OD026.pdf"
                           expirationDate: "2017-03-22"
+                      seasonalParameters:
+                        - "@type": "SeasonalParameter"
+                          year: 2026
                       childProducts:
                         - "@type": "Fertilizer"
                           links:
@@ -2076,6 +2115,9 @@ paths:
                           activeIngredients: []
                           availableRegistrations: []
                           documentsList: []
+                          seasonalParameters:
+                            - "@type": "SeasonalParameter"
+                              year: 2026
                           childProducts: []
         "403":
           description: "The user does not have sufficient privileges to access products in this org"
@@ -2346,6 +2388,9 @@ paths:
                         targetCrops:
                           - "ALFALFA"
                           - "CORN_WET"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         links:
                           - "@type": "Link"
                             rel: "self"
@@ -2452,6 +2497,9 @@ paths:
                         materialClassification: "LIQUID"
                         targetCrops:
                           - "ALMONDS"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         links:
                           - "@type": "Link"
                             rel: "self"
@@ -2703,6 +2751,9 @@ paths:
                       targetCrops:
                         - "ALFALFA"
                         - "CORN_WET"
+                      seasonalParameters:
+                        - "@type": "SeasonalParameter"
+                          year: 2026
                       links:
                         - "@type": "Link"
                           rel: "self"
@@ -2869,6 +2920,9 @@ paths:
                             description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                             fileName: "ld7OD026.pdf"
                             expirationDate: "2017-03-22"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         childProducts:
                           - "@type": "Variety"
                             id: "18b7bad8-2f0a-4036-b3f6-5abbe6b2f5dc"
@@ -2884,6 +2938,9 @@ paths:
                             parentErid: "b0241592-c95a-4a8b-a2f9-3e58168ac291"
                             cleanupActionDate: "2025-09-22T11:24:43.855Z"
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                             childProducts: []
                         links:
                           - "@type": "Link"
@@ -2908,6 +2965,9 @@ paths:
                             description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                             fileName: "ld7OD026.pdf"
                             expirationDate: "2017-03-22"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         links:
                           - "@type": "Link"
                             rel: "self"
@@ -2931,6 +2991,9 @@ paths:
                             description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                             fileName: "ld7OD026.pdf"
                             expirationDate: "2017-03-22"
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         links:
                           - "@type": "Link"
                             rel: "self"
@@ -3035,6 +3098,9 @@ paths:
                         description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
                         fileName: "ld7OD026.pdf"
                         expirationDate: "2017-03-22"
+                    seasonalParameters:
+                      - "@type": "SeasonalParameter"
+                        year: 2026
                     childProducts:
                       - "@type": "Variety"
                         id: "18b7bad8-2f0a-4036-b3f6-5abbe6b2f5dc"
@@ -3050,6 +3116,9 @@ paths:
                         parentErid: "b0241592-c95a-4a8b-a2f9-3e58168ac291"
                         cleanupActionDate: "2025-09-22T11:24:43.855Z"
                         documentsList: []
+                        seasonalParameters:
+                          - "@type": "SeasonalParameter"
+                            year: 2026
                         childProducts: []
                     links:
                       - "@type": "Link"
@@ -5152,6 +5221,20 @@ components:
             - "CORN_WET"
             - "ALFALFA"
           description: "The name of the crop that this variety is associated with."
+        seasonalParameters:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              "@type":
+                type: "string"
+                example: "SeasonalParameter"
+                description: "The type of the tank mix SeasonalParameters."
+              year:
+                type: "integer"
+                example: 2026
+                format: "int32"
+                description: "The year in which the tank mix was in use."
     DryBlendCollection:
       type: "object"
       allOf:
@@ -5600,6 +5683,7 @@ components:
       type: "object"
       properties:
         key:
+          required: true
           nullable: false
           type: "string"
           description: "Key for override parameter when setting overrides for a reference product"
@@ -5607,13 +5691,11 @@ components:
           enum:
             - "archived"
         value:
+          required: true
           nullable: false
           type: "object"
           description: "Value for override parameter, can be string, number or boolean"
           example: true
-      required:
-        - "key"
-        - "value"
     PostChemical:
       type: "object"
       allOf:
@@ -5809,6 +5891,20 @@ components:
                 - "CORN_WET"
                 - "ALFALFA"
               description: "The name of the crop that this variety is associated with."
+            seasonalParameters:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  "@type":
+                    type: "string"
+                    example: "SeasonalParameter"
+                    description: "The type of the tank mix SeasonalParameters."
+                  year:
+                    type: "integer"
+                    example: 2026
+                    format: "int32"
+                    description: "The year in which the tank mix was in use."
     PostFertilizer:
       type: "object"
       allOf:
@@ -5975,10 +6071,6 @@ components:
         - "companyName"
     PutChemical:
       type: "object"
-      required:
-        - "name"
-        - "companyName"
-        - "type"
       allOf:
         - properties:
             "@type":
@@ -6190,10 +6282,6 @@ components:
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "product modified time"
-      required:
-        - "name"
-        - "cropName"
-        - "companyName"
     RecordMetadata:
       type: "object"
       description: "Data structure for record metadata capturing information about the creation and last update of an entity.
@@ -6750,6 +6838,20 @@ components:
             - "CORN_WET"
             - "ALFALFA"
           description: "The name of the crop that this variety is associated with."
+        seasonalParameters:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              "@type":
+                type: "string"
+                example: "SeasonalParameter"
+                description: "The type of the tank mix SeasonalParameters."
+              year:
+                type: "integer"
+                example: 2026
+                format: "int32"
+                description: "The year in which the tank mix was in use."
     TankMixCollection:
       properties:
         x-deere-signature:
@@ -7160,6 +7262,21 @@ components:
             - "CORN_WET"
             - "ALFALFA"
           description: "The name of the crop that this variety is associated with."
+        seasonalParameters:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              "@type":
+                type: "string"
+                example: "SeasonalParameter"
+                description: "The type of the tank mix SeasonalParameters."
+              year:
+                type: "integer"
+                example: 2026
+                format: "int32"
+                description: "The year in which the tank mix was in use."
+          description: "The name of the season that the tank is present in."
         links:
           type: "array"
           items:

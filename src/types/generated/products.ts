@@ -3708,6 +3708,19 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
+      seasonalParameters?: {
+        /**
+         * @description The type of the tank mix SeasonalParameters.
+         * @example SeasonalParameter
+         */
+        '@type'?: string;
+        /**
+         * Format: int32
+         * @description The year in which the tank mix was in use.
+         * @example 2026
+         */
+        year?: number;
+      }[];
     };
     DryBlendCollection: components['schemas']['CollectionBase_DryBlends'] & {
       values?: components['schemas']['DryBlend'][];
@@ -4111,12 +4124,12 @@ export interface components {
        * @example archived
        * @enum {string}
        */
-      key: 'archived';
+      key?: 'archived';
       /**
        * @description Value for override parameter, can be string, number or boolean
        * @example true
        */
-      value: Record<string, never>;
+      value?: Record<string, never>;
     };
     PostChemical: {
       /** @example Chemical */
@@ -4301,6 +4314,19 @@ export interface components {
          *     ]
          */
         targetCrops?: Record<string, never>;
+        seasonalParameters?: {
+          /**
+           * @description The type of the tank mix SeasonalParameters.
+           * @example SeasonalParameter
+           */
+          '@type'?: string;
+          /**
+           * Format: int32
+           * @description The year in which the tank mix was in use.
+           * @example 2026
+           */
+          year?: number;
+        }[];
       };
     };
     PostFertilizer: {
@@ -4454,7 +4480,7 @@ export interface components {
        * @description The common name of the chemical.
        * @example Round Up
        */
-      name: string;
+      name?: string;
       /**
        * @description Registration id used for regulatory purposes.
        * @example a12e9i84
@@ -4464,7 +4490,7 @@ export interface components {
        * @description The brand of the chemical.
        * @example Monsanto
        */
-      companyName: string;
+      companyName?: string;
       /**
        * @example LIQUID
        * @enum {string}
@@ -4480,7 +4506,7 @@ export interface components {
        * @example HERBICIDE
        * @enum {string}
        */
-      type:
+      type?:
         | 'ADDITIVE'
         | 'ADJUVANT'
         | 'DEFOLIANT'
@@ -4622,17 +4648,17 @@ export interface components {
        * @description The common name of the variety.
        * @example S73-Z5 - 50lb bag
        */
-      name: string;
+      name?: string;
       /**
        * @description The identifier of the crop type that this variety is associated with (see the Crop Types API). **NOTE:** See /cropTypes for the list of available crop types that are supported.
        * @example SOYBEANS
        */
-      cropName: string;
+      cropName?: string;
       /**
        * @description The brand of the variety.
        * @example NK
        */
-      companyName: string;
+      companyName?: string;
       /**
        * @example VARIETY
        * @enum {string}
@@ -5162,6 +5188,19 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
+      seasonalParameters?: {
+        /**
+         * @description The type of the tank mix SeasonalParameters.
+         * @example SeasonalParameter
+         */
+        '@type'?: string;
+        /**
+         * Format: int32
+         * @description The year in which the tank mix was in use.
+         * @example 2026
+         */
+        year?: number;
+      }[];
     };
     TankMixCollection: {
       /**
@@ -5605,6 +5644,20 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
+      /** @description The name of the season that the tank is present in. */
+      seasonalParameters?: {
+        /**
+         * @description The type of the tank mix SeasonalParameters.
+         * @example SeasonalParameter
+         */
+        '@type'?: string;
+        /**
+         * Format: int32
+         * @description The year in which the tank mix was in use.
+         * @example 2026
+         */
+        year?: number;
+      }[];
       links?: {
         /**
          * @description The type of the link.
