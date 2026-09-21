@@ -2727,6 +2727,8 @@ export interface components {
       availableRegistrations?: string[];
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
       documentsList?: components['schemas']['Document_Chemicals'][];
+      /** @description List of seasons in which the chemical is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
       /**
        * @description Registration id used for regulatory purposes.
        * @example a12e9i84
@@ -2911,6 +2913,8 @@ export interface components {
       availableRegistrations?: string[];
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
       documentsList?: components['schemas']['Document_Chemicals'][];
+      /** @description List of seasons in which the variety is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
       /**
        * @description Registration id used for regulatory purposes.
        * @example a12e9i84
@@ -3019,6 +3023,8 @@ export interface components {
       availableRegistrations?: string[];
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
       documentsList?: components['schemas']['Document'][];
+      /** @description List of seasons in which the variety is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
       /**
        * @description Parent id of the child in which the product is merged
        * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
@@ -3127,6 +3133,8 @@ export interface components {
       cleanupActionDate?: string;
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. */
       documentsList?: components['schemas']['Document'][];
+      /** @description List of seasons in which the variety is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
     };
     CollectionBase: {
       /** @description Provides a reference to an associated object or list. */
@@ -3698,6 +3706,17 @@ export interface components {
              */
             registrationId?: string;
           }[];
+          /** @description List of seasons in which the product is present. */
+          seasonalParameters?: {
+            /** @example SeasonalParameter */
+            '@type'?: string;
+            /**
+             * Format: int32
+             * @description The year in which the product is present.
+             * @example 2026
+             */
+            year?: number;
+          }[];
         };
       }[];
       /**
@@ -3708,15 +3727,13 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
+      /** @description List of seasons in which the dry blend is present. */
       seasonalParameters?: {
-        /**
-         * @description The type of the tank mix SeasonalParameters.
-         * @example SeasonalParameter
-         */
+        /** @example SeasonalParameter */
         '@type'?: string;
         /**
          * Format: int32
-         * @description The year in which the tank mix was in use.
+         * @description The year in which the dry blend is present.
          * @example 2026
          */
         year?: number;
@@ -3948,6 +3965,8 @@ export interface components {
       availableRegistrations?: string[];
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
       documentsList?: components['schemas']['Document'][];
+      /** @description List of seasons in which the variety is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
       /**
        * @description Parent id of the child in which the product is merged
        * @example b0241592-c95a-4a8b-a2f9-3e58168ac291
@@ -5014,6 +5033,33 @@ export interface components {
     ReferenceVarietyCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['ReferenceVariety'][];
     };
+    SeasonalParameters: {
+      /** @example SeasonalParameter */
+      '@type'?: unknown;
+      /**
+       * @description Year in which the variety is present
+       * @example 2026
+       */
+      year?: number;
+    };
+    SeasonalParameters_DryBlends: {
+      /** @example SeasonalParameter */
+      '@type'?: unknown;
+      /**
+       * @description Year in which the dry blend is present
+       * @example 2026
+       */
+      year?: number;
+    };
+    SeasonalParameters_TankMix: {
+      /** @example SeasonalParameter */
+      '@type'?: unknown;
+      /**
+       * @description Year in which the tank mix is present.
+       * @example 2026
+       */
+      year?: number;
+    };
     TankMix: {
       /**
        * @description The type of the tank mix.
@@ -5189,14 +5235,11 @@ export interface components {
        */
       targetCrops?: Record<string, never>;
       seasonalParameters?: {
-        /**
-         * @description The type of the tank mix SeasonalParameters.
-         * @example SeasonalParameter
-         */
+        /** @example SeasonalParameter */
         '@type'?: string;
         /**
          * Format: int32
-         * @description The year in which the tank mix was in use.
+         * @description The year in which the tank mix is present.
          * @example 2026
          */
         year?: number;
@@ -5431,6 +5474,17 @@ export interface components {
              */
             registrationId?: string;
           }[];
+          /** @description List of seasons in which the product is present. */
+          seasonalParameters?: {
+            /** @example SeasonalParameter */
+            '@type'?: string;
+            /**
+             * Format: int32
+             * @description The year in which the product is present.
+             * @example 2026
+             */
+            year?: number;
+          }[];
         };
         links?: {
           /**
@@ -5607,6 +5661,17 @@ export interface components {
              */
             registrationId?: string;
           }[];
+          /** @description List of seasons in which the product is present. */
+          seasonalParameters?: {
+            /** @example SeasonalParameter */
+            '@type'?: string;
+            /**
+             * Format: int32
+             * @description The year in which the product is present.
+             * @example 2026
+             */
+            year?: number;
+          }[];
         };
       }[];
       /**
@@ -5644,16 +5709,13 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
-      /** @description The name of the season that the tank is present in. */
+      /** @description List of seasons in which the tank mix is present. */
       seasonalParameters?: {
-        /**
-         * @description The type of the tank mix SeasonalParameters.
-         * @example SeasonalParameter
-         */
+        /** @example SeasonalParameter */
         '@type'?: string;
         /**
          * Format: int32
-         * @description The year in which the tank mix was in use.
+         * @description The year in which the tank mix is present.
          * @example 2026
          */
         year?: number;
@@ -5831,6 +5893,8 @@ export interface components {
       cleanupActionDate?: string;
       /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. */
       documentsList?: components['schemas']['Document'][];
+      /** @description List of seasons in which the variety is present. */
+      seasonalParameters?: components['schemas']['SeasonalParameters'][];
       /** @description List of child products. */
       childProducts?: components['schemas']['ChildVariety'][];
     };

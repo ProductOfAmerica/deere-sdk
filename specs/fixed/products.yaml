@@ -1338,6 +1338,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -1377,6 +1380,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -1438,6 +1444,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -1477,6 +1486,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -1566,6 +1578,9 @@ paths:
                           activeIngredients: []
                           availableRegistrations: []
                           documentsList: []
+                          seasonalParameters:
+                            - "@type": "SeasonalParameter"
+                              year: 2026
                         links:
                           - "@type": "Link"
                             rel: "chemical"
@@ -1605,6 +1620,9 @@ paths:
                           activeIngredients: []
                           availableRegistrations: []
                           documentsList: []
+                          seasonalParameters:
+                            - "@type": "SeasonalParameter"
+                              year: 2026
                         links:
                           - "@type": "Link"
                             rel: "chemical"
@@ -2245,6 +2263,9 @@ paths:
                             activeIngredients: []
                             availableRegistrations: []
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                           links:
                             - "@type": "Link"
                               rel: "fertilizer"
@@ -2287,6 +2308,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -2358,6 +2382,9 @@ paths:
                             activeIngredients: []
                             availableRegistrations: []
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                           links:
                             - "@type": "Link"
                               rel: "fertilizer"
@@ -2398,6 +2425,9 @@ paths:
                               activeIngredients: []
                               availableRegistrations: []
                               documentsList: []
+                              seasonalParameters:
+                                - "@type": "SeasonalParameter"
+                                  year: 2026
                             links:
                               - "@type": "Link"
                                 rel: "chemical"
@@ -2601,6 +2631,9 @@ paths:
                           activeIngredients: []
                           availableRegistrations: []
                           documentsList: []
+                          seasonalParameters:
+                            - "@type": "SeasonalParameter"
+                              year: 2026
                         links:
                           - "@type": "Link"
                             rel: "fertilizer"
@@ -2643,6 +2676,9 @@ paths:
                             activeIngredients: []
                             availableRegistrations: []
                             documentsList: []
+                            seasonalParameters:
+                              - "@type": "SeasonalParameter"
+                                year: 2026
                           links:
                             - "@type": "Link"
                               rel: "chemical"
@@ -4006,6 +4042,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document_Chemicals"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the chemical is present."
             epaRegistration:
               type: "string"
               example: "a12e9i84"
@@ -4223,6 +4264,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document_Chemicals"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the variety is present."
             epaRegistration:
               type: "string"
               example: "a12e9i84"
@@ -4343,6 +4389,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the variety is present."
             parentErid:
               type: "string"
               example: "b0241592-c95a-4a8b-a2f9-3e58168ac291"
@@ -4448,6 +4499,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the variety is present."
     CollectionBase:
       type: "object"
       properties:
@@ -5080,6 +5136,20 @@ components:
                           type: "string"
                           example: "EXEMPT"
                           description: "The registration ID of the agency registration."
+                  seasonalParameters:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        "@type":
+                          type: "string"
+                          example: "SeasonalParameter"
+                        year:
+                          type: "integer"
+                          example: 2026
+                          format: "int32"
+                          description: "The year in which the product is present."
+                    description: "List of seasons in which the product is present."
         targetCrops:
           type: "Array of string"
           example:
@@ -5094,12 +5164,12 @@ components:
               "@type":
                 type: "string"
                 example: "SeasonalParameter"
-                description: "The type of the tank mix SeasonalParameters."
               year:
                 type: "integer"
                 example: 2026
                 format: "int32"
-                description: "The year in which the tank mix was in use."
+                description: "The year in which the dry blend is present."
+          description: "List of seasons in which the dry blend is present."
     DryBlendCollection:
       type: "object"
       allOf:
@@ -5375,6 +5445,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the variety is present."
             parentErid:
               type: "string"
               example: "b0241592-c95a-4a8b-a2f9-3e58168ac291"
@@ -6511,6 +6586,39 @@ components:
               type: "array"
               items:
                 $ref: "#/components/schemas/ReferenceVariety"
+    SeasonalParameters:
+      type: "object"
+      properties:
+        "@type":
+          example: "SeasonalParameter"
+          x-required-boolean: true
+        year:
+          type: "number"
+          description: "Year in which the variety is present"
+          example: 2026
+          x-required-boolean: true
+    SeasonalParameters_DryBlends:
+      type: "object"
+      properties:
+        "@type":
+          example: "SeasonalParameter"
+          x-required-boolean: true
+        year:
+          type: "number"
+          description: "Year in which the dry blend is present"
+          example: 2026
+          x-required-boolean: true
+    SeasonalParameters_TankMix:
+      type: "object"
+      properties:
+        "@type":
+          example: "SeasonalParameter"
+          x-required-boolean: true
+        year:
+          type: "number"
+          description: "Year in which the tank mix is present."
+          example: 2026
+          x-required-boolean: true
     TankMix:
       properties:
         "@type":
@@ -6703,12 +6811,11 @@ components:
               "@type":
                 type: "string"
                 example: "SeasonalParameter"
-                description: "The type of the tank mix SeasonalParameters."
               year:
-                type: "integer"
+                type: "number"
                 example: 2026
                 format: "int32"
-                description: "The year in which the tank mix was in use."
+                description: "The year in which the tank mix is present."
     TankMixCollection:
       properties:
         x-deere-signature:
@@ -6913,6 +7020,20 @@ components:
                         type: "string"
                         example: "EXEMPT"
                         description: "The registration ID."
+                seasonalParameters:
+                  type: "array"
+                  items:
+                    type: "object"
+                    properties:
+                      "@type":
+                        type: "string"
+                        example: "SeasonalParameter"
+                      year:
+                        type: "number"
+                        example: 2026
+                        format: "int32"
+                        description: "The year in which the product is present."
+                  description: "List of seasons in which the product is present."
             links:
               type: "array"
               items:
@@ -7074,6 +7195,20 @@ components:
                           type: "string"
                           example: "EXEMPT"
                           description: "The registration ID."
+                  seasonalParameters:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        "@type":
+                          type: "string"
+                          example: "SeasonalParameter"
+                        year:
+                          type: "number"
+                          example: 2026
+                          format: "int32"
+                          description: "The year in which the product is present."
+                    description: "List of seasons in which the product is present."
                 links:
                   type: "array"
                   items:
@@ -7127,13 +7262,12 @@ components:
               "@type":
                 type: "string"
                 example: "SeasonalParameter"
-                description: "The type of the tank mix SeasonalParameters."
               year:
-                type: "integer"
+                type: "number"
                 example: 2026
                 format: "int32"
-                description: "The year in which the tank mix was in use."
-          description: "The name of the season that the tank is present in."
+                description: "The year in which the tank mix is present."
+          description: "List of seasons in which the tank mix is present."
         links:
           type: "array"
           items:
@@ -7295,6 +7429,11 @@ components:
               items:
                 $ref: "#/components/schemas/Document"
               description: "List of documents for the variety. For example, Tech Sheet, SDS Label."
+            seasonalParameters:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/SeasonalParameters"
+              description: "List of seasons in which the variety is present."
             childProducts:
               type: "array"
               items:
