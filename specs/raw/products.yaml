@@ -5280,7 +5280,7 @@ components:
                           type: "string"
                           example: "SeasonalParameter"
                         year:
-                          type: "integer"
+                          type: "number"
                           example: 2026
                           format: "int32"
                           description: "The year in which the product is present."
@@ -5300,7 +5300,7 @@ components:
                 type: "string"
                 example: "SeasonalParameter"
               year:
-                type: "integer"
+                type: "number"
                 example: 2026
                 format: "int32"
                 description: "The year in which the dry blend is present."
@@ -5966,20 +5966,6 @@ components:
                 - "CORN_WET"
                 - "ALFALFA"
               description: "The name of the crop that this variety is associated with."
-            seasonalParameters:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  "@type":
-                    type: "string"
-                    example: "SeasonalParameter"
-                    description: "The type of the tank mix SeasonalParameters."
-                  year:
-                    type: "integer"
-                    example: 2026
-                    format: "int32"
-                    description: "The year in which the tank mix was in use."
     PostFertilizer:
       type: "object"
       allOf:
@@ -6946,19 +6932,6 @@ components:
             - "CORN_WET"
             - "ALFALFA"
           description: "The name of the crop that this variety is associated with."
-        seasonalParameters:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              "@type":
-                type: "string"
-                example: "SeasonalParameter"
-              year:
-                type: "number"
-                example: 2026
-                format: "int32"
-                description: "The year in which the tank mix is present."
     TankMixCollection:
       properties:
         x-deere-signature:

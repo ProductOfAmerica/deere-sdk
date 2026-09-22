@@ -4333,19 +4333,6 @@ export interface components {
          *     ]
          */
         targetCrops?: Record<string, never>;
-        seasonalParameters?: {
-          /**
-           * @description The type of the tank mix SeasonalParameters.
-           * @example SeasonalParameter
-           */
-          '@type'?: string;
-          /**
-           * Format: int32
-           * @description The year in which the tank mix was in use.
-           * @example 2026
-           */
-          year?: number;
-        }[];
       };
     };
     PostFertilizer: {
@@ -5234,16 +5221,6 @@ export interface components {
        *     ]
        */
       targetCrops?: Record<string, never>;
-      seasonalParameters?: {
-        /** @example SeasonalParameter */
-        '@type'?: string;
-        /**
-         * Format: int32
-         * @description The year in which the tank mix is present.
-         * @example 2026
-         */
-        year?: number;
-      }[];
     };
     TankMixCollection: {
       /**
