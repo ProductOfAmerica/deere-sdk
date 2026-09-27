@@ -20,6 +20,9 @@ paths:
       description: "Retrieve all of the connections for a CSC based on the client in the token"
       parameters:
         - $ref: "#/components/parameters/CreatedAfter"
+      security:
+        - OAuth2:
+            - "connections"
       responses:
         "200":
           description: "List of Connections that can be removed"
@@ -33,6 +36,9 @@ paths:
       description: "Remove specific connection by ID"
       parameters:
         - $ref: "#/components/parameters/ConnectionId"
+      security:
+        - OAuth2:
+            - "connections"
       responses:
         "204":
           $ref: "#/components/responses/Deleted"
@@ -44,6 +50,9 @@ paths:
       description: "Remove all connections between the calling application and the org. This includes all partner connections."
       parameters:
         - $ref: "#/components/parameters/OrgId"
+      security:
+        - OAuth2:
+            - "connections"
       responses:
         "204":
           $ref: "#/components/responses/Deleted"

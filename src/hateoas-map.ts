@@ -235,11 +235,6 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
     rel: 'operators',
     parentSpec: 'organizations',
   },
-  '/organizations/{orgId}/users': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'users',
-    parentSpec: 'organizations',
-  },
   '/partnerships/{token}/permissions': {
     parentPath: '/partnerships/{token}',
     rel: 'permissions',

@@ -250,7 +250,7 @@ paths:
       description: "This endpoint will retrieve all assets for an organization."
       security:
         - OAuth2:
-            - "eq1"
+            - "eq2"
       parameters:
         - $ref: "#/components/parameters/OrgId"
         - $ref: "#/components/parameters/Embed"

@@ -2,7 +2,6 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   normalizeSpecContent,
-  resolvePortalSlug,
   validateFetchedSpecDocs,
 } from '../scripts/lib/fetched-spec-utils.js';
 
@@ -13,16 +12,6 @@ describe('fetched spec utilities', () => {
         normalizeSpecContent('openapi: 3.0.0\r\npaths: {}\r\n'),
         'openapi: 3.0.0\npaths: {}\n'
       );
-    });
-  });
-
-  describe('resolvePortalSlug', () => {
-    it('sends a renamed slug to its current portal path', () => {
-      assert.strictEqual(resolvePortalSlug('field-operations-api'), 'field-operations');
-    });
-
-    it('leaves the internal spec name unchanged for slugs the portal has not renamed', () => {
-      assert.strictEqual(resolvePortalSlug('fields'), 'fields');
     });
   });
 
@@ -39,6 +28,54 @@ describe('fetched spec utilities', () => {
     ): Record<string, unknown> {
       return { id, name: 'products', end_point_name, yml_content };
     }
+
+    // The version key. John Deere ships notifications with a misnamed
+    // `swagger` key over an OpenAPI 3 body, and scripts/fix-specs.ts has
+    // rewritten that key for years. Rejecting it here silently undid that
+    // accommodation and froze the spec for three months.
+    it('accepts an OpenAPI 3 document whose version key is misnamed "swagger"', () => {
+      const body = [
+        element(1, 'varieties', "swagger: '3.0.0'\ninfo:\n  title: Varieties\npaths: {}\n"),
+      ];
+      const result = validateFetchedSpecDocs('products', body, multiAllowed);
+      assert.ok(result, 'a misnamed version key must not reject an otherwise valid v3 document');
+      assert.strictEqual(result.length, 1);
+    });
+
+    it('still rejects a genuine Swagger 2.0 document', () => {
+      const body = [
+        element(
+          1,
+          'varieties',
+          "swagger: '2.0'\ninfo:\n  title: Varieties\npaths: {}\ndefinitions: {}\n"
+        ),
+      ];
+      assert.strictEqual(
+        validateFetchedSpecDocs('products', body, multiAllowed),
+        null,
+        'the version VALUE stays authoritative: fix-specs rewrites the key without inspecting ' +
+          'it, so this is the only place that can refuse a v2 document'
+      );
+    });
+
+    it('rejects a document declaring no version at all under either key', () => {
+      const body = [element(1, 'varieties', 'info:\n  title: Varieties\npaths: {}\n')];
+      assert.strictEqual(validateFetchedSpecDocs('products', body, multiAllowed), null);
+    });
+
+    it('prefers openapi over swagger when a document carries both', () => {
+      const body = [
+        element(
+          1,
+          'varieties',
+          "openapi: '3.0.0'\nswagger: '2.0'\ninfo:\n  title: Varieties\npaths: {}\n"
+        ),
+      ];
+      assert.ok(
+        validateFetchedSpecDocs('products', body, multiAllowed),
+        'fix-specs only rewrites swagger when openapi is absent, so openapi wins here too'
+      );
+    });
 
     it('validates a single-document response the same way multi-document slugs are validated', () => {
       const body = [element(1, 'varieties', varietiesYml)];

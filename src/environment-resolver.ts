@@ -10,8 +10,14 @@
  * trust boundary — falling back silently could delete customer data.
  */
 
-import { API_SERVERS, type Environment, type SpecName } from './api-servers.generated.js';
+import {
+  API_SERVERS,
+  type Environment,
+  type PathServerOverride,
+  type SpecName,
+} from './api-servers.generated.js';
 import { CLIENT_ERROR_STATUS, DeereError } from './errors.js';
+import { matchesPathPattern } from './path-pattern.js';
 
 /**
  * Thrown when a spec has no server configuration (missing/malformed
@@ -54,6 +60,31 @@ export class UnsupportedEnvironmentError extends DeereError {
 }
 
 /**
+ * Find the override, if any, whose pattern this concrete path matches.
+ *
+ * Absent for 26 of 27 specs, so this returns undefined immediately in the
+ * common case. Query strings are stripped before matching, because the
+ * pattern describes the path only.
+ *
+ * Note on `supportedEnvironments`: it is recorded on each override but not
+ * enforced here, deliberately mirroring the templated config above, which also
+ * substitutes without checking. The `Environment` type is the compile-time
+ * guard for both. Enforcing it on overrides alone would make a path throw
+ * where the rest of its own spec resolves fine.
+ */
+function findPathOverride(
+  overrides: readonly PathServerOverride[] | undefined,
+  path: string
+): PathServerOverride | undefined {
+  if (!overrides || overrides.length === 0) return undefined;
+
+  const basePath = path.split('?', 1)[0];
+  if (!basePath) return undefined;
+
+  return overrides.find((override) => matchesPathPattern(basePath, override.pattern));
+}
+
+/**
  * Resolves a request URL for the given spec and environment.
  *
  * @param specName  Name of the OpenAPI spec (e.g. 'equipment', 'organizations').
@@ -89,7 +120,9 @@ export function resolveRequestUrl(
   }
 
   if (config.kind === 'templated') {
-    const baseUrl = config.urlTemplate.replace('{environment}', environment);
+    const override = findPathOverride(config.pathOverrides, path);
+    const template = override ? override.urlTemplate : config.urlTemplate;
+    const baseUrl = template.replace('{environment}', environment);
     return `${baseUrl}${path}`;
   }
 

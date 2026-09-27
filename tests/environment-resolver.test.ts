@@ -202,9 +202,77 @@ describe('resolveRequestUrl', () => {
       );
     });
 
-    it('notifications (injected default servers) resolves as templated', () => {
-      const url = resolveRequestUrl('notifications', '/notifications/abc', 'sandboxapi');
-      assert.strictEqual(url, 'https://sandboxapi.deere.com/platform/notifications/abc');
+    it('notifications resolves its non-overridden paths from the spec-level template', () => {
+      // Three of notifications' four paths are on /platform; measured 2026-08-13
+      // (405, 401, 401). Only the fourth differs, below.
+      const url = resolveRequestUrl('notifications', '/notificationEvents', 'sandboxapi');
+      assert.strictEqual(url, 'https://sandboxapi.deere.com/platform/notificationEvents');
+    });
+  });
+
+  describe('per-path server overrides', () => {
+    // This block previously asserted that GET /notifications/{sourceEvent}
+    // resolved to /platform. That URL returns 404 on every environment: the
+    // path is served from /isg, which the spec never said. The old assertion
+    // pinned the bug, so it is inverted here rather than deleted.
+    it('routes an overridden path to its own base, not the spec template', () => {
+      assert.strictEqual(
+        resolveRequestUrl('notifications', '/notifications/abc', 'sandboxapi'),
+        'https://sandboxapi.deere.com/isg/notifications/abc'
+      );
+    });
+
+    it('applies the override in every environment', () => {
+      assert.strictEqual(
+        resolveRequestUrl('notifications', '/notifications/abc', 'api'),
+        'https://api.deere.com/isg/notifications/abc'
+      );
+      assert.strictEqual(
+        resolveRequestUrl('notifications', '/notifications/abc', 'partnerapi'),
+        'https://partnerapi.deere.com/isg/notifications/abc'
+      );
+    });
+
+    it('matches a pattern regardless of the interpolated parameter value', () => {
+      const url = resolveRequestUrl(
+        'notifications',
+        '/notifications/b22956b7-0b43-40ea-a396-1fdc816ebb58',
+        'api'
+      );
+      assert.strictEqual(
+        url,
+        'https://api.deere.com/isg/notifications/b22956b7-0b43-40ea-a396-1fdc816ebb58'
+      );
+    });
+
+    it('ignores a query string when matching', () => {
+      const url = resolveRequestUrl('notifications', '/notifications/abc?itemLimit=10', 'api');
+      assert.strictEqual(url, 'https://api.deere.com/isg/notifications/abc?itemLimit=10');
+    });
+
+    it('does not let an override bleed onto a same-prefix sibling path', () => {
+      // /notificationEvents/{sourceEvent} has the same segment count as the
+      // overridden /notifications/{sourceEvent} but a different literal head.
+      const url = resolveRequestUrl('notifications', '/notificationEvents/abc', 'api');
+      assert.strictEqual(url, 'https://api.deere.com/platform/notificationEvents/abc');
+    });
+
+    it('routes products /activeIngredients to /isg while its siblings stay on /platform', () => {
+      assert.strictEqual(
+        resolveRequestUrl('products', '/activeIngredients', 'api'),
+        'https://api.deere.com/isg/activeIngredients'
+      );
+      assert.strictEqual(
+        resolveRequestUrl('products', '/varieties', 'api'),
+        'https://api.deere.com/platform/varieties'
+      );
+    });
+
+    it('leaves a spec with no overrides completely unaffected', () => {
+      assert.strictEqual(
+        resolveRequestUrl('fields', '/organizations/1/fields', 'api'),
+        'https://api.deere.com/platform/organizations/1/fields'
+      );
     });
   });
 

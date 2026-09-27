@@ -89,24 +89,6 @@ export class OrganizationsApi {
       options
     );
   }
-
-  /**
-   * List Organization Users
-   * @description Returns a list of users belonging to the specified
-   * organization.
-   * @generated from GET /organizations/{orgId}/users
-   */
-  async listUsers(
-    orgId: string,
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['OrganizationUser']>> {
-    const path = `/organizations/${orgId}/users`;
-    return this.client.get<PaginatedResponse<components['schemas']['OrganizationUser']>>(
-      this.spec,
-      path,
-      options
-    );
-  }
 }
 
 // Re-export types for convenience

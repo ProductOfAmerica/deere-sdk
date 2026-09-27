@@ -67,6 +67,21 @@ export interface MergeOptions {
    * do not assert on it leave it unset.
    */
   onWarning?: (message: string) => void;
+  /**
+   * Permit a merge whose documents declare genuinely different server families.
+   *
+   * Default false: divergence throws and demands a human, because collapsing it
+   * silently is how `products` shipped a 404. Eight of its documents declare
+   * `/platform` and `active-ingredients` declares a bare host, and the merge
+   * quietly kept the primary's block.
+   *
+   * fetch-specs sets this from `acknowledgedDivergentServers` in
+   * scripts/routing-overrides.yaml, where the acknowledgement sits next to the
+   * measured evidence and the per-path overrides that state where each path is
+   * really served. Acknowledging still warns; it never makes the divergence
+   * invisible.
+   */
+  acknowledgedDivergentServers?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -467,16 +482,24 @@ function isDeereHttpsUrl(url: string): boolean {
 }
 
 /**
- * A deere.com https URL on the shared platform family: path `/platform` or a
- * bare host (`/` or empty). Node's URL parser accepts the templated
+ * A deere.com https URL on the shared platform family: path exactly
+ * `/platform`. Node's URL parser accepts the templated
  * `https://{environment}.deere.com/platform` form, reporting host
  * `{environment}.deere.com` and path `/platform`, so the templated and static
  * platform shapes classify identically here.
+ *
+ * A bare host (`/` or empty) used to count as platform-family, on the theory
+ * that "no path stated" was a doc defect meaning `/platform`. It is not.
+ * Measured 2026-08-13, `/` and `/platform` are different routing prefixes on
+ * the same host: `https://api.deere.com/activeIngredients` returns 403 (no such
+ * base path) while `/platform/activeIngredients` returns 404 and
+ * `/isg/activeIngredients` returns 401. Treating them as one family let
+ * `products` merge eight documents down to the primary's servers block and ship
+ * a 404 for `GET /activeIngredients`.
  */
 function isPlatformFamilyUrl(url: string): boolean {
   if (!isDeereHttpsUrl(url)) return false;
-  const path = new URL(url).pathname.replace(/\/$/, '');
-  return path === '' || path === '/platform';
+  return new URL(url).pathname.replace(/\/$/, '') === '/platform';
 }
 
 interface ServerClassification {
@@ -537,7 +560,8 @@ function applyServers(
   slug: string,
   merged: Record<string, unknown>,
   docs: readonly OrderedDoc[],
-  onWarning?: (message: string) => void
+  onWarning?: (message: string) => void,
+  acknowledgedDivergentServers = false
 ): void {
   const rawDeclared = docs
     .map((entry) => ({ endPointName: entry.endPointName, servers: asObject(entry.doc)?.servers }))
@@ -581,10 +605,22 @@ function applyServers(
     .find((other) => !deepEqualUnordered(other.servers, reference.servers));
 
   if (divergent && declared.some((entry) => entry.family === 'other')) {
-    throw new Error(
+    if (!acknowledgedDivergentServers) {
+      throw new Error(
+        `mergeSpecDocs: slug "${slug}": documents "${reference.endPointName}" and ` +
+          `"${divergent.endPointName}" declare different servers blocks. All declaring ` +
+          `documents must agree; a human must reconcile them. If the divergence is real and ` +
+          `understood, record it in scripts/routing-overrides.yaml with measured evidence: ` +
+          `set acknowledgedDivergentServers on "${slug}" and add a path-level override for ` +
+          `each path the primary's block does not serve. Merging divergent servers without ` +
+          `that is how GET /activeIngredients shipped resolving to a 404.`
+      );
+    }
+    onWarning?.(
       `mergeSpecDocs: slug "${slug}": documents "${reference.endPointName}" and ` +
-        `"${divergent.endPointName}" declare different servers blocks. All declaring ` +
-        `documents must agree; a human must reconcile them.`
+        `"${divergent.endPointName}" declare different servers blocks. Proceeding on the ` +
+        `acknowledgement recorded in scripts/routing-overrides.yaml; the primary's block ` +
+        `wins and per-path overrides carry the rest.`
     );
   }
 
@@ -675,7 +711,13 @@ export function mergeSpecDocs(
     foldTopLevelExtras(merged, entry);
   }
 
-  applyServers(slug, merged, ordered, options.onWarning);
+  applyServers(
+    slug,
+    merged,
+    ordered,
+    options.onWarning,
+    options.acknowledgedDivergentServers ?? false
+  );
   applyTags(merged, ordered);
 
   merged['x-source-documents'] = ordered.map((entry) => ({

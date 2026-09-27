@@ -1,0 +1,105 @@
+name: Route Probe
+
+# Asks Deere's gateway whether every route the SDK ships actually exists.
+#
+# Deliberately separate from ci.yml. This tests THEIR infrastructure, not this
+# repo: a Deere outage, a gateway change, or a rate limit must not turn the
+# build red, because an alarm that fires for things you cannot fix is one
+# people learn to ignore. Outages, timeouts and unclassified responses are
+# report-only.
+#
+# The one exception, since 2026-08-22: a shipped route answering a
+# deterministic 404 while the probe's controls validate fails this run. That
+# is Deere stating the route is gone, and it is actionable every time (lift a
+# freeze and cut the major, add a routing override, or drop the method). The
+# failure notification is the tripwire that says a frozen spec's held route
+# has died; without it the signal sat in a green run's log nobody opened.
+#
+# The hermetic half of the guard lives in tests/routing-guard.test.ts and does
+# block. This catches the other case: Deere moving a route out from under a URL
+# this pipeline derived correctly, which is what happened to
+# GET /organizations/{orgId}/users and went unnoticed for months.
+
+on:
+  schedule:
+    # 05:30 UTC, between the health check (05:00) and the sync (06:00), so a
+    # routing finding is already in the log if someone investigates a sync.
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Probe every shipped route
+        id: probe
+        # Does not fail here so the summary and artifact below always get
+        # written; the job is failed at the end from the recorded exit code.
+        # Script exits: 1 = controls stopped separating (no verdict possible),
+        # 2 = a shipped route deterministically does not exist.
+        run: |
+          set +e
+          pnpm probe-routes 2>&1 | tee probe-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Summarize
+        run: |
+          {
+            echo "## Route probe"
+            echo
+            if [ "${{ steps.probe.outputs.exit_code }}" == "1" ]; then
+              echo "The probe refused to report: its control probes no longer separate a"
+              echo "missing route from one that needs auth. No routing verdict from this run"
+              echo "would mean anything. Re-establish what Deere's gateway responses mean"
+              echo "before trusting the script again."
+            elif [ "${{ steps.probe.outputs.exit_code }}" == "2" ]; then
+              echo "**A shipped route deterministically does not exist.** The controls"
+              echo "validated, so this is Deere's gateway stating the route is gone, not an"
+              echo "outage. Each finding is one of: Deere moved the route (repoint it in"
+              echo "scripts/routing-overrides.yaml), Deere retired it (drop the operation, or"
+              echo "lift the freeze that was holding it and cut the major), or this pipeline"
+              echo "built the wrong URL."
+            elif grep -q "Every route the SDK ships exists upstream" probe-output.txt; then
+              echo "Every route the SDK ships exists upstream."
+            else
+              echo "Unclassified responses only (outage, rate limit, or gateway change);"
+              echo "nothing deterministic. Report-only, see the output below."
+            fi
+            echo
+            echo '```'
+            tail -60 probe-output.txt
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload probe output
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: probe-output
+          path: probe-output.txt
+          retention-days: 14
+
+      # Last, so the summary and artifact above exist even on a red run.
+      - name: Fail on a deterministic finding
+        if: steps.probe.outputs.exit_code != '0'
+        run: |
+          echo "::error::probe-routes exited ${{ steps.probe.outputs.exit_code }}: see the run summary."
+          exit 1

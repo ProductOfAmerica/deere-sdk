@@ -1,6 +1,6 @@
 {
   "name": "deere-sdk",
-  "version": "2.4.0",
+  "version": "3.0.5",
   "description": "Unofficial TypeScript SDK for John Deere Operations Center API",
   "author": "ProductOfAmerica",
   "license": "MIT",
@@ -57,6 +57,8 @@
     "generate-api-servers": "tsx scripts/generate-api-servers.ts",
     "generate-types": "tsx scripts/generate-types.ts",
     "generate-sdk": "tsx scripts/generate-sdk.ts",
+    "generate-routing-snapshot": "tsx scripts/generate-routing-snapshot.ts",
+    "probe-routes": "tsx scripts/probe-routes.ts",
     "generate": "pnpm fetch-specs && pnpm redact-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
@@ -64,6 +66,7 @@
     "test": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/*.test.ts",
     "test:coverage": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test --experimental-test-coverage tests/*.test.ts",
     "test:fuzz": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/fuzz.test.ts",
+    "test:routing-guard": "cross-env TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx/esm --test tests/routing-guard.test.ts",
     "typecheck:test": "tsc --project tsconfig.test.json"
   },
   "devDependencies": {

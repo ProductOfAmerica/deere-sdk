@@ -1,0 +1,206 @@
+# Spec registry: scripts/spec-registry.yaml
+#
+# The source of truth for WHICH specs the pipeline fetches, WHERE the portal
+# currently serves them, and WHICH of them are knowingly not being refreshed.
+# Consumed by scripts/lib/spec-registry.ts (loader + validation), and read by
+# scripts/fetch-specs.ts and scripts/check-api-health.ts.
+#
+# Committed and hand-edited. Unlike scripts/api-surface.yaml, no generator
+# rewrites this file, so comments here survive.
+#
+# ---------------------------------------------------------------------------
+# Per-entry fields
+# ---------------------------------------------------------------------------
+#
+#   <spec name>:            The INTERNAL name. Names specs/raw/<name>.yaml,
+#                           specs/fixed/<name>.yaml, the generated *Api class,
+#                           and the public `SpecName` literal a consumer passes
+#                           to client.get(). Renaming one is a breaking change
+#                           to the published type union, so it never tracks an
+#                           upstream rename.
+#
+#     slug:                 The path segment the developer portal serves this
+#                           spec under, i.e. the {slug} in
+#                           https://developer.deere.com/devDoc/apiDetails/{slug}
+#                           Deere renames these; when that happens the fetch
+#                           fails loudly and a human repoints this value. The
+#                           internal name above stays put.
+#
+#     status: frozen        Optional. Omit it and the spec is active: it must
+#                           fetch and validate, and a failure fails the run.
+#                           `frozen` means the committed specs/raw/<name>.yaml
+#                           is deliberately being kept and not refreshed. A
+#                           frozen spec is still fetched every run so the log
+#                           can report whether the freeze could now be lifted,
+#                           but its file is never written and it never fails
+#                           the run.
+#
+#     reason:               Required when frozen. Why, in enough detail that
+#                           someone can decide whether to lift it.
+#
+#     since:                Required when frozen. The date the spec stopped
+#                           being refreshed, derived from evidence (git history
+#                           of specs/raw/summary.json, a portal change), not
+#                           from when the freeze was written down.
+#
+# ---------------------------------------------------------------------------
+# TOMBSTONE: apiId. Pinned per spec 2026-08-13, removed 2026-08-18.
+# ---------------------------------------------------------------------------
+#
+# An `apiId:` field recorded the api_id the portal returned for each slug, and
+# fetch-specs blocked a spec on a mismatch. Two measurements retired it:
+#
+#   NOT UNIQUE (2026-08-13). products and service-data-products both reported
+#   api_id 5cedab22-e2f6-4d23-b5c5-9cc8b6b86122. Two unrelated APIs, one id.
+#
+#   NOT STABLE (2026-08-18). Deere reissued products as
+#   8c97edbb-506b-4a2b-aef8-34f114ed0ea8 between the 08-17 and 08-18 syncs over
+#   a contract that did not change (same 8 documents, same 38 operations, no
+#   difference in either direction). The guard false-positived the daily sync.
+#
+# Deere publishes no stable per-API identity, so identity is now measured
+# directly: how much of the contract committed under a name the slug still
+# serves (scripts/lib/contract-continuity.ts, run per spec in fetch-specs).
+# Do not reintroduce an upstream id as identity here.
+#
+# ---------------------------------------------------------------------------
+
+version: 1
+
+specs:
+  aemp:
+    slug: aemp
+
+  assets:
+    slug: assets
+
+  boundaries:
+    slug: boundaries
+
+  clients:
+    slug: clients
+
+  connection-management:
+    slug: connection-management
+
+  crop-types:
+    slug: crop-types
+
+  equipment:
+    slug: equipment
+
+  equipment-measurement:
+    slug: equipment-measurement
+
+  farms:
+    slug: farms
+
+  # Internal name keeps the -api suffix; the portal dropped it between the
+  # 2026-08-11 and 2026-08-12 health runs (PR #40).
+  field-operations-api:
+    slug: field-operations
+
+  fields:
+    slug: fields
+
+  files:
+    slug: files
+
+  flags:
+    slug: flags
+
+  guidance-lines:
+    slug: guidance-lines
+
+  harvest-id:
+    slug: harvest-id
+
+  machine-alerts:
+    slug: machine-alerts
+
+  machine-device-state-reports:
+    slug: machine-device-state-reports
+
+  machine-engine-hours:
+    slug: machine-engine-hours
+
+  machine-hours-of-operation:
+    slug: machine-hours-of-operation
+
+  machine-locations:
+    slug: machine-locations
+
+  map-layers:
+    slug: map-layers
+
+  notifications:
+    slug: notifications
+    status: frozen
+    since: 2026-05-23
+    reason: >-
+      HELD OVER A DROPPED OPERATION, NOT OVER FETCHABILITY. This document
+      fetches and validates cleanly today, so the health report will say so
+      every run; that is a fact about the fetch, not a reason to unfreeze.
+
+      Deere edited this document on 2026-07-14 and it no longer declares
+      DELETE /notificationEvents/{sourceEvent}, which scripts/api-surface.yaml
+      still pins to NotificationsApi.delete. Unfreezing pulls in the current
+      3-operation document, classifies the run breaking, and drops a published
+      method. Deere announced no retirement, their practice is an ACTION
+      REQUIRED notice with six to eight months of warning, and the API is still
+      marked active, so the endpoint is believed live and the doc merely tidied.
+      Lifting this freeze needs that confirmed with Deere support first;
+      dropping the method is a major-version decision.
+
+      The ORIGINAL cause, now fixed, is why `since` is 2026-05-23 rather than
+      the date of Deere's edit: the portal serves a top-level `swagger: 3.0.0`
+      key where isOpenApiDocument required `openapi`, even though
+      scripts/fix-specs.ts had rewritten that exact key one stage later for
+      years. That validator landed 2026-05-22 in #21 and the next sync began
+      rejecting this spec (specs/raw/summary.json history shows notFound going
+      from [] on 2026-05-22 to ["notifications"] on 2026-05-23). Self-inflicted,
+      and unnoticed for three months.
+
+  operators:
+    slug: operators
+
+  organizations:
+    slug: organizations
+
+  partnerships:
+    slug: partnerships
+    status: frozen
+    since: 2026-08-22
+    reason: >-
+      HELD OVER A DROPPED OPERATION, NOT OVER FETCHABILITY. Same shape as the
+      notifications freeze: the document fetches cleanly, but adopting it would
+      drop a published method whose route still works.
+
+      Between the 2026-08-21 and 2026-08-22 syncs Deere's document stopped
+      declaring POST /partnerships/{token}/permissions, which
+      scripts/api-surface.yaml pins to PartnershipsApi.createPermissions, and
+      gained PUT /organizations/{orgId}/partnerPermissions. Measured 2026-08-22
+      with controls validating the 401/404 discriminator in the same runs: the
+      dropped route still answers 401 (exists) on /platform in api and
+      sandboxapi, and the new route is not a rename of it: different verb,
+      keyed by orgId instead of partnership token, different body, and it
+      answers 401 on /isg in all four environments while returning 404 on
+      /platform, the base its own document declares. Their migration is
+      half-done: the doc describes the destination, the gateway is in between.
+
+      Lifting this freeze is triggered by probe-routes going red on the old
+      route (it fails the run on a deterministic 404 with valid controls), or
+      by a Deere retirement notice. Either way the lift is one deliberate
+      change: adopt the current document, delete the createPermissions manifest
+      entry (major version), add a routing-overrides path entry putting
+      /organizations/{orgId}/partnerPermissions on /isg with the measurement
+      above as evidence, and ship the successor method.
+
+  products:
+    slug: products
+
+  users:
+    slug: users
+
+  webhook:
+    slug: webhook

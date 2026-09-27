@@ -15,9 +15,15 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from 'node:path';
 import * as yaml from 'yaml';
 import { applyEmbedContracts, type EmbedContract, loadEmbedContracts } from './embed-contracts.js';
+import {
+  findSpecOverride,
+  loadRoutingOverrides,
+  type RoutingOverrides,
+} from './lib/routing-overrides.js';
 import { redactSpecContent } from './lib/spec-redactor.js';
 import {
   isDocumentationKey,
+  isRecord,
   refName,
   restoreEquipmentItemRefs,
   sanitizePropertyKey,
@@ -355,31 +361,77 @@ function normalizePlatformDisguise(
 }
 
 /**
- * Inject a default templated platform servers block into a spec that has
- * NO servers block at all (or has an empty/invalid one). Returns true if
- * the spec was modified, false if it already had a valid servers block.
+ * Apply scripts/routing-overrides.yaml to one spec.
  *
- * This handles notifications.yaml, which doesn't declare any servers block
- * upstream. Without this fix, generate-api-servers classifies it as
- * `kind: 'unavailable'` and every API call throws NoServerConfigError.
+ * Replaces the previous `injectDefaultServers`, which assumed
+ * `https://{environment}.deere.com/platform` for any spec declaring no servers
+ * block and stamped nothing to say the value was manufactured. That guess was
+ * right for three of notifications' four paths and wrong for the fourth, and
+ * nothing downstream could tell it apart from a block Deere had published.
  *
- * We assume specs without a servers block are platform-style — their paths
- * look like `/notifications/*` or `/organizations/{orgId}/*`, which are
- * normal JD platform API patterns. If an upstream spec adds new non-platform
- * shapes, this pass may need a more conservative check.
+ * Two kinds of override, both requiring recorded evidence in the registry:
+ *
+ *   - a spec-level `servers`, for a spec that declares none upstream. Applied
+ *     only when the spec really has none; if Deere starts publishing one, this
+ *     throws rather than silently overriding it, because the registry entry has
+ *     become a claim about something that is no longer true.
+ *   - a path-level `servers`, written as OpenAPI's own path-item `servers` so
+ *     the fixed spec states the truth in standard vocabulary rather than in a
+ *     side channel. A pattern matching no path throws, for the same reason.
+ *
+ * Returns a list of human-readable descriptions of what was applied.
  */
-function injectDefaultServers(spec: Record<string, unknown>, globalEnumUnion: string[]): boolean {
-  const existing = spec.servers as unknown;
-  if (Array.isArray(existing) && existing.length > 0) return false;
+function applyRoutingOverrides(
+  spec: Record<string, unknown>,
+  specName: string,
+  overrides: RoutingOverrides,
+  globalEnumUnion: string[]
+): string[] {
+  const entry = findSpecOverride(overrides, specName);
+  if (!entry) return [];
 
-  spec.servers = buildTemplatedPlatformServers(globalEnumUnion);
-  return true;
+  const applied: string[] = [];
+
+  if (entry.urlTemplate !== null) {
+    const existing = spec.servers as unknown;
+    if (Array.isArray(existing) && existing.length > 0) {
+      throw new Error(
+        `fix-specs: ${specName} declares a servers block upstream, but ` +
+          `scripts/routing-overrides.yaml still carries a spec-level "servers" override for ` +
+          `it. That override exists to fill an upstream gap that has now been filled. ` +
+          `Re-measure and either delete the override or convert it to a path-level one.`
+      );
+    }
+    spec.servers = buildTemplatedServers(entry.urlTemplate, globalEnumUnion);
+    applied.push(`spec-level servers ${entry.urlTemplate}`);
+  }
+
+  const paths = spec.paths as Record<string, unknown> | undefined;
+  for (const override of entry.paths) {
+    const pathItem = paths?.[override.pattern];
+    if (!isRecord(pathItem)) {
+      throw new Error(
+        `fix-specs: ${specName} has no path "${override.pattern}", but ` +
+          `scripts/routing-overrides.yaml declares a routing override for it. The path was ` +
+          `renamed or removed upstream; re-measure and update or delete the override rather ` +
+          `than leaving one that silently applies to nothing.`
+      );
+    }
+    pathItem.servers = buildTemplatedServers(override.urlTemplate, globalEnumUnion);
+    applied.push(`${override.pattern} -> ${override.urlTemplate}`);
+  }
+
+  return applied;
 }
 
 function buildTemplatedPlatformServers(globalEnumUnion: string[]): OpenAPIServer[] {
+  return buildTemplatedServers('https://{environment}.deere.com/platform', globalEnumUnion);
+}
+
+function buildTemplatedServers(urlTemplate: string, globalEnumUnion: string[]): OpenAPIServer[] {
   return [
     {
-      url: 'https://{environment}.deere.com/platform',
+      url: urlTemplate,
       variables: {
         environment: {
           default: 'api',
@@ -553,83 +605,12 @@ function fixExternalRefs(obj: unknown, addedSchemas: Set<string>): unknown {
   return obj;
 }
 
-function injectUndocumentedEndpoints(spec: Record<string, unknown>, filename: string): void {
-  const paths = spec.paths as Record<string, unknown> | undefined;
-  if (!paths) return;
-
-  // Inject GET /organizations/{orgId}/users into organizations spec
-  if (filename === 'organizations.yaml') {
-    if (!paths['/organizations/{orgId}/users']) {
-      console.log('  Injecting undocumented endpoint: GET /organizations/{orgId}/users');
-      paths['/organizations/{orgId}/users'] = {
-        get: {
-          summary: 'List Organization Users',
-          description: 'Returns a list of users belonging to the specified organization.',
-          parameters: [{ $ref: '#/components/parameters/OrgIdGet' }],
-          responses: {
-            '200': {
-              description: 'Organization Users List',
-              content: {
-                'application/vnd.deere.axiom.v3+json': {
-                  schema: {
-                    properties: {
-                      links: {
-                        items: { $ref: '#/components/schemas/OrganizationLink' },
-                      },
-                      values: {
-                        items: { $ref: '#/components/schemas/OrganizationUser' },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            '403': { description: 'Not authorized' },
-            '404': { description: 'Not found' },
-          },
-        },
-      };
-
-      // Add OrganizationUser schema if not present
-      const components = spec.components as Record<string, unknown> | undefined;
-      if (components) {
-        const schemas = components.schemas as Record<string, unknown> | undefined;
-        if (schemas && !schemas.OrganizationUser) {
-          schemas.OrganizationUser = {
-            properties: {
-              accountName: {
-                type: 'string',
-                description: "User's account name.",
-                example: 'JohnDoe',
-              },
-              givenName: {
-                type: 'string',
-                description: "User's first name.",
-                example: 'John',
-              },
-              familyName: {
-                type: 'string',
-                description: "User's last name.",
-                example: 'Doe',
-              },
-              userType: {
-                type: 'string',
-                description: "User's type. Examples are customer, dealer, internal.",
-                example: 'Customer',
-              },
-            },
-          };
-        }
-      }
-    }
-  }
-}
-
 function fixSpec(
   content: string,
   filename: string,
   globalEnumUnion: string[],
-  embedContracts: EmbedContract[]
+  embedContracts: EmbedContract[],
+  routingOverrides: RoutingOverrides
 ): string {
   console.log(`\nProcessing: ${filename}`);
 
@@ -642,9 +623,14 @@ function fixSpec(
     return redactedContent;
   }
 
-  // Fix incorrect swagger version (notifications.yaml has "swagger: '3.0.0'" instead of "openapi: '3.0.0'")
-  if (spec.swagger && !spec.openapi) {
-    console.log(`  Fixing incorrect swagger field: "${spec.swagger}" → openapi: "3.0.0"`);
+  // Fix a misnamed version key (notifications.yaml declares "swagger: '3.0.0'"
+  // where it means "openapi: '3.0.0'"). Guarded on the VALUE, not just the key:
+  // this repairs a mislabel, it is not a 2.0-to-3.0 migration. A genuine
+  // `swagger: "2.0"` document falls through to the check below and is rejected,
+  // because relabelling one as 3.0.0 would feed v2 shape (definitions, host,
+  // basePath, v2 parameters) to a pipeline that assumes v3.
+  if (typeof spec.swagger === 'string' && spec.swagger.startsWith('3.') && !spec.openapi) {
+    console.log(`  Fixing misnamed version key: swagger: "${spec.swagger}" → openapi: "3.0.0"`);
     // Reconstruct spec with openapi at the beginning (YAML preserves key order)
     const { swagger, ...rest } = spec;
     spec = { openapi: '3.0.0', ...rest };
@@ -711,13 +697,12 @@ function fixSpec(
   }
 
   addMissingSchemas(spec, missingRefs);
-  injectUndocumentedEndpoints(spec, filename);
 
   // Apply embed contracts from scripts/embed-contracts.yaml. Runs AFTER
-  // injectUndocumentedEndpoints (the last transform that touches
-  // components.schemas) and BEFORE the server-level transforms below (which
-  // only touch `servers`). If a future transform starts mutating
-  // components.schemas above this point, re-check the ordering.
+  // addMissingSchemas (the last transform that touches components.schemas) and
+  // BEFORE the server-level transforms below (which only touch `servers`). If a
+  // future transform starts mutating components.schemas above this point,
+  // re-check the ordering.
   const specName = filename.replace(/\.yaml$/, '');
   const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
   if (embedPatchCount > 0) {
@@ -764,12 +749,13 @@ function fixSpec(
     );
   }
 
-  // Inject a default templated platform servers block for specs that have
-  // no servers at all (notifications.yaml). Without this they'd be
-  // classified as `kind: 'unavailable'` and throw NoServerConfigError on
-  // every call.
-  if (injectDefaultServers(spec, globalEnumUnion)) {
-    console.log(`  Injected default templated servers block (no servers declared upstream)`);
+  // Apply committed, evidence-backed routing overrides: a spec-level servers
+  // block for a spec that declares none upstream, and path-level servers for
+  // operations Deere serves from a different base than its own spec states.
+  // Runs last in the server region so it sees the normalized shape, and is the
+  // only pass allowed to state a base URL Deere did not publish.
+  for (const applied of applyRoutingOverrides(spec, specName, routingOverrides, globalEnumUnion)) {
+    console.log(`  Applied routing override: ${applied}`);
   }
 
   return yaml.stringify(spec, {
@@ -812,6 +798,15 @@ async function main() {
     `Loaded ${embedContracts.length} embed contract(s): ${embedContracts.map((c) => c.spec).join(', ') || '(none)'}`
   );
 
+  // Loaded once, outside the loop, for the same reason as embed contracts: a
+  // malformed registry is a config error and must abort before any spec is
+  // written, not fail one spec at a time.
+  const routingOverrides = loadRoutingOverrides();
+  console.log(
+    `Loaded routing overrides for ${routingOverrides.specs.length} spec(s): ` +
+      `${routingOverrides.specs.map((s) => s.spec).join(', ') || '(none)'}`
+  );
+
   let fixed = 0;
   let failed = 0;
 
@@ -821,7 +816,13 @@ async function main() {
 
     try {
       const content = readFileSync(inputPath, 'utf-8');
-      const fixedContent = fixSpec(content, yamlFile, globalEnumUnion, embedContracts);
+      const fixedContent = fixSpec(
+        content,
+        yamlFile,
+        globalEnumUnion,
+        embedContracts,
+        routingOverrides
+      );
       writeFileSync(outputPath, fixedContent);
       fixed++;
     } catch (error) {

@@ -114,6 +114,23 @@ export const DEFAULT_ENVIRONMENT: Environment = 'sandboxapi';
 // SpecServerConfig — per-spec URL resolution config
 // ============================================================================
 
+/**
+ * A path served from a different base than its own spec declares.
+ *
+ * Deere does this: `GET /notifications/{sourceEvent}` lives on `/isg` while
+ * the other three operations in the same document live on `/platform`.
+ * Sourced from path-level `servers` in specs/fixed, written there by
+ * scripts/routing-overrides.yaml, which requires measured evidence per entry.
+ */
+export interface PathServerOverride {
+  /** Path pattern; a `{param}` segment matches any single segment. */
+  pattern: string;
+  /** URL template with `{environment}` placeholder. */
+  urlTemplate: string;
+  /** Envs declared in this path item's servers.variables.environment.enum. */
+  supportedEnvironments: readonly Environment[];
+}
+
 export type SpecServerConfig =
   | {
       kind: 'templated';
@@ -121,6 +138,11 @@ export type SpecServerConfig =
       urlTemplate: string;
       /** Envs declared in the spec's servers.variables.environment.enum. */
       supportedEnvironments: readonly Environment[];
+      /**
+       * Paths that override the template above. Absent for the 26 specs where
+       * every path shares the document's base. Checked before `urlTemplate`.
+       */
+      pathOverrides?: readonly PathServerOverride[];
     }
   | {
       kind: 'static';
@@ -356,6 +378,23 @@ export const API_SERVERS: Record<SpecName, SpecServerConfig> = {
       'partnerapiqa',
       'sandboxapiqa',
     ],
+    pathOverrides: [
+      {
+        pattern: '/notifications/{sourceEvent}',
+        urlTemplate: 'https://{environment}.deere.com/isg',
+        supportedEnvironments: [
+          'api',
+          'sandboxapi',
+          'partnerapi',
+          'apicert',
+          'apiqa.tal',
+          'apidev.tal',
+          'partnerapicert',
+          'partnerapiqa',
+          'sandboxapiqa',
+        ],
+      },
+    ],
   },
   operators: {
     kind: 'templated',
@@ -402,6 +441,23 @@ export const API_SERVERS: Record<SpecName, SpecServerConfig> = {
       'apicert',
       'apiqa.tal',
       'apidev.tal',
+    ],
+    pathOverrides: [
+      {
+        pattern: '/activeIngredients',
+        urlTemplate: 'https://{environment}.deere.com/isg',
+        supportedEnvironments: [
+          'api',
+          'sandboxapi',
+          'partnerapi',
+          'apicert',
+          'apiqa.tal',
+          'apidev.tal',
+          'partnerapicert',
+          'partnerapiqa',
+          'sandboxapiqa',
+        ],
+      },
     ],
   },
   users: {
