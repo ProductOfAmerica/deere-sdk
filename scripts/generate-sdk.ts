@@ -818,8 +818,11 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
     }
   }
 
+  // Code-unit order, not localeCompare: collation follows the machine's locale
+  // and ICU version, so the committed map could reorder on a contributor's
+  // machine or a Node upgrade and fail codegen-drift for no real change.
   const mapEntries = Object.entries(entries)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(
       ([path, entry]) =>
         `  '${path}': { parentPath: '${entry.parentPath}', rel: '${entry.rel}', parentSpec: '${entry.parentSpec}' },`

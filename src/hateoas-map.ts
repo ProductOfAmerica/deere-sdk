@@ -65,15 +65,135 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
     rel: 'measurementTypes',
     parentSpec: 'field-operations-api',
   },
+  '/mapLayerSummaries/{id}/mapLayers': {
+    parentPath: '/mapLayerSummaries/{id}',
+    rel: 'mapLayers',
+    parentSpec: 'map-layers',
+  },
   '/mapLayers/{id}/fileResources': {
     parentPath: '/mapLayers/{id}',
     rel: 'fileResources',
     parentSpec: 'map-layers',
   },
-  '/mapLayerSummaries/{id}/mapLayers': {
-    parentPath: '/mapLayerSummaries/{id}',
-    rel: 'mapLayers',
-    parentSpec: 'map-layers',
+  '/organizations/{orgID}/clients/{id}/fields': {
+    parentPath: '/organizations/{orgID}/clients/{id}',
+    rel: 'fields',
+    parentSpec: 'clients',
+  },
+  '/organizations/{orgID}/farms/{id}/fields': {
+    parentPath: '/organizations/{orgID}/farms/{id}',
+    rel: 'fields',
+    parentSpec: 'farms',
+  },
+  '/organizations/{orgID}/fields/{id}/clients': {
+    parentPath: '/organizations/{orgID}/fields/{id}',
+    rel: 'clients',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/assets': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'assets',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/boundaries': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'boundaries',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/clients': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'clients',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/clients/{id}/farms': {
+    parentPath: '/organizations/{orgId}/clients/{id}',
+    rel: 'farms',
+    parentSpec: 'clients',
+  },
+  '/organizations/{orgId}/connections': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'connections',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/farms': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'farms',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/farms/{farmId}/clients': {
+    parentPath: '/organizations/{orgId}/farms/{farmId}',
+    rel: 'clients',
+    parentSpec: 'farms',
+  },
+  '/organizations/{orgId}/fields': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'fields',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/boundaries': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'boundaries',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/farms': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'farms',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/fieldOperations': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'fieldOperations',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/flags': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'flags',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fields/{fieldId}/guidanceLines': {
+    parentPath: '/organizations/{orgId}/fields/{fieldId}',
+    rel: 'guidanceLines',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fields/{id}/mapLayerSummaries': {
+    parentPath: '/organizations/{orgId}/fields/{id}',
+    rel: 'mapLayerSummaries',
+    parentSpec: 'fields',
+  },
+  '/organizations/{orgId}/fileTransfers': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'fileTransfers',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/files': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'files',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/flagCategories': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'flagCategories',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/flagCategories/{categoryId}/flagCategoryPreferences': {
+    parentPath: '/organizations/{orgId}/flagCategories/{categoryId}',
+    rel: 'flagCategoryPreferences',
+    parentSpec: 'flags',
+  },
+  '/organizations/{orgId}/flags': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'flags',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/harvestIdentificationModules': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'harvestIdentificationModules',
+    parentSpec: 'organizations',
+  },
+  '/organizations/{orgId}/operators': {
+    parentPath: '/organizations/{orgId}',
+    rel: 'operators',
+    parentSpec: 'organizations',
   },
   '/organizations/{organizationId}/chemicals': {
     parentPath: '/organizations/{organizationId}',
@@ -113,126 +233,6 @@ export const HATEOAS_MAP: Record<string, HateoasRoute> = {
   '/organizations/{organizationId}/varieties': {
     parentPath: '/organizations/{organizationId}',
     rel: 'varieties',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/assets': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'assets',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/boundaries': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'boundaries',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/clients': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'clients',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/clients/{id}/farms': {
-    parentPath: '/organizations/{orgId}/clients/{id}',
-    rel: 'farms',
-    parentSpec: 'clients',
-  },
-  '/organizations/{orgID}/clients/{id}/fields': {
-    parentPath: '/organizations/{orgID}/clients/{id}',
-    rel: 'fields',
-    parentSpec: 'clients',
-  },
-  '/organizations/{orgId}/connections': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'connections',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/farms': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'farms',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/farms/{farmId}/clients': {
-    parentPath: '/organizations/{orgId}/farms/{farmId}',
-    rel: 'clients',
-    parentSpec: 'farms',
-  },
-  '/organizations/{orgID}/farms/{id}/fields': {
-    parentPath: '/organizations/{orgID}/farms/{id}',
-    rel: 'fields',
-    parentSpec: 'farms',
-  },
-  '/organizations/{orgId}/fields': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'fields',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/fields/{fieldId}/boundaries': {
-    parentPath: '/organizations/{orgId}/fields/{fieldId}',
-    rel: 'boundaries',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/fields/{fieldId}/farms': {
-    parentPath: '/organizations/{orgId}/fields/{fieldId}',
-    rel: 'farms',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/fields/{fieldId}/fieldOperations': {
-    parentPath: '/organizations/{orgId}/fields/{fieldId}',
-    rel: 'fieldOperations',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/fields/{fieldId}/flags': {
-    parentPath: '/organizations/{orgId}/fields/{fieldId}',
-    rel: 'flags',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/fields/{fieldId}/guidanceLines': {
-    parentPath: '/organizations/{orgId}/fields/{fieldId}',
-    rel: 'guidanceLines',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgID}/fields/{id}/clients': {
-    parentPath: '/organizations/{orgID}/fields/{id}',
-    rel: 'clients',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/fields/{id}/mapLayerSummaries': {
-    parentPath: '/organizations/{orgId}/fields/{id}',
-    rel: 'mapLayerSummaries',
-    parentSpec: 'fields',
-  },
-  '/organizations/{orgId}/files': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'files',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/fileTransfers': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'fileTransfers',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/flagCategories': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'flagCategories',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/flagCategories/{categoryId}/flagCategoryPreferences': {
-    parentPath: '/organizations/{orgId}/flagCategories/{categoryId}',
-    rel: 'flagCategoryPreferences',
-    parentSpec: 'flags',
-  },
-  '/organizations/{orgId}/flags': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'flags',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/harvestIdentificationModules': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'harvestIdentificationModules',
-    parentSpec: 'organizations',
-  },
-  '/organizations/{orgId}/operators': {
-    parentPath: '/organizations/{orgId}',
-    rel: 'operators',
     parentSpec: 'organizations',
   },
   '/partnerships/{token}/permissions': {
