@@ -174,7 +174,11 @@ Never hand-edit these — they get clobbered on the next generate run:
 - `src/deere.ts` (the big class with one field per API)
 - `specs/fixed/**`
 
-To change any of them, edit the corresponding generator in `scripts/` and re-run `pnpm generate`. For example:
+To change any of them, edit the corresponding generator in `scripts/`, re-run the offline stages
+(`pnpm redact-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk &&
+pnpm lint:fix`), and commit the regenerated output in the same change. Not `pnpm generate`: it starts with
+`fetch-specs`, which pulls live specs and would carry upstream changes past the sync's classification and version
+bump. For example:
 
 - New spec host logic → `scripts/generate-api-servers.ts`
 - New generated method shape → `scripts/generate-sdk.ts`
@@ -197,6 +201,18 @@ error, timeout, paginated). Never hit the real API in tests — inject a custom 
 CI runs the test matrix on Node 20/22/23/24/25. Node 18 was dropped 2026-05-15 because tsx ≥4.22.0 calls
 `Array.prototype.toReversed()` (ES2023, Node 20+). Node 18 hit EOL April 2025. Keep the code Node-20-compatible
 (no fresh-platform-API-only features beyond Node 20).
+
+TypeScript is pinned to 6.x (`^6.0.3`). openapi-typescript 7.x, which `generate-types` runs, loads the classic
+TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no longer exposes it: the 7.0.2 bump (#39)
+broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
+`typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
+(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor.
+
+CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs and
+fails if anything changes; keep it in lockstep with `sync-api.yml`'s stages. A failure means a dependency bump altered
+codegen output, a generator, registry or manifest change was committed without its regenerated output, a generated file
+was hand-edited, or a biome safe fix touched a hand-written file. Reproduce it with the same offline commands and commit
+the result; when a dependency bump is the cause, decide whether the new output is acceptable before regenerating.
 
 ## Releases
 
