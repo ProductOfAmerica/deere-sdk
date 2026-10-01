@@ -85,10 +85,11 @@ Every run is classified into `sync-report.json` (gitignored) for the workflow:
   reconciles the manifest before any release.
 
 CI's `sync-api.yml` runs the pipeline daily, reads the classification, and bumps accordingly: additive cuts a
-minor, benign spec churn a patch; a breaking run does not release. In practice an additive run that adds a path
-also fails the sync's routing guard, because `tests/routing-guard.test.ts` compares the whole
-`scripts/routing-snapshot.yaml`; until that test learns to accept new rows on the spec's default host, reconcile
-such a run by hand (offline stages, `pnpm generate-routing-snapshot`, manual minor release), as 3.1.0 did.
+minor, benign spec churn a patch; a breaking run does not release. Before committing, the sync runs the routing
+guard (`tests/routing-guard.test.ts`), which fails when a path in `scripts/routing-snapshot.yaml` resolves to a
+different base, when a listed path disappears, or when a new path resolves anywhere but its spec's default base.
+New paths on the default base pass, and the sync's next step (`pnpm generate-routing-snapshot`) appends them, so
+an additive run completes on its own. Anything the guard fails on needs a human to re-measure and regenerate.
 
 When Deere moves an operation to another spec document without changing it, the manifest still binds its method to
 the old spec and the run reads as breaking. Neither freezing the old spec (nothing would ever lift it) nor dropping
@@ -219,8 +220,9 @@ broke type generation for every spec while lint, typecheck, build and tests stay
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
 (openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor.
 
-CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs and
-fails if anything changes; keep it in lockstep with `sync-api.yml`'s stages. A failure means a dependency bump altered
+CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
+then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with
+`sync-api.yml`'s stages. A failure means a dependency bump altered
 codegen output, a generator, registry or manifest change was committed without its regenerated output, a generated file
 was hand-edited, or a biome safe fix touched a hand-written file. Reproduce it with the same offline commands and commit
 the result; when a dependency bump is the cause, decide whether the new output is acceptable before regenerating.
