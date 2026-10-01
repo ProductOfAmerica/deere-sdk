@@ -156,6 +156,87 @@ export function computeReturnType(op: ReturnTypeOp): string {
 }
 
 /**
+ * Whether a GET addresses a collection (paginated list) rather than one item.
+ *
+ * A last segment that is a `{param}` is item access. So is a literal last
+ * segment that the operation itself declares as an `in: path` parameter: Deere
+ * models aliases such as `GET /users/@currentUser` that way (a literal stand-in
+ * for `{username}`), and treating them as collections would type a single
+ * resource as `PaginatedResponse` and name its method `list...`.
+ */
+export function isCollectionEndpoint(
+  path: string,
+  method: string,
+  declaredPathParamNames: readonly string[] = []
+): boolean {
+  if (method !== 'get') return false;
+  const lastSegment = path.split('/').pop() || '';
+  if (lastSegment.startsWith('{')) return false;
+  return !declaredPathParamNames.includes(lastSegment);
+}
+
+/**
+ * Word-wrap `text` into JSDoc lines. The first line starts with `prefix`;
+ * continuation lines start with `   * `.
+ */
+export function wrapJsDocText(text: string, prefix: string, maxWidth = 80): string[] {
+  const words = text.replace(/\s+/g, ' ').trim().split(' ');
+  const lines: string[] = [];
+  let currentLine = prefix;
+
+  for (const word of words) {
+    if (currentLine.length + word.length + 1 > maxWidth && currentLine !== prefix) {
+      lines.push(currentLine);
+      currentLine = `   * ${word}`;
+    } else {
+      currentLine += (currentLine === prefix ? '' : ' ') + word;
+    }
+  }
+
+  if (currentLine !== prefix) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+/** Operation fields a generated method's JSDoc is built from. */
+export interface JsDocOp {
+  method: string;
+  path: string;
+  summary?: string;
+  description?: string;
+  /** OpenAPI `deprecated: true`. */
+  deprecated?: boolean;
+  /** Why, and what to use instead; falls back to a generic note. */
+  deprecationNote?: string;
+}
+
+/** Note used when an operation is deprecated without saying why. */
+export const DEFAULT_DEPRECATION_NOTE = 'John Deere marks this operation deprecated.';
+
+/** The `@deprecated` lines for an operation, or none when it is not deprecated. */
+export function deprecatedJsDocLines(op: JsDocOp): string[] {
+  if (!op.deprecated) return [];
+  return wrapJsDocText(op.deprecationNote || DEFAULT_DEPRECATION_NOTE, '   * @deprecated ');
+}
+
+/** The full JSDoc block (opening and closing lines included) for a generated method. */
+export function buildMethodJsDoc(op: JsDocOp): string[] {
+  const jsdoc: string[] = ['  /**'];
+  if (op.summary) {
+    jsdoc.push(`   * ${op.summary}`);
+  }
+  if (op.description && op.description !== op.summary) {
+    jsdoc.push(...wrapJsDocText(op.description, '   * @description '));
+  }
+  jsdoc.push(...deprecatedJsDocLines(op));
+  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${op.path}`);
+  jsdoc.push('   */');
+  return jsdoc;
+}
+
+/**
  * Whether any operation needs the `PaginatedResponse` import. True for every
  * collection GET, including the `PaginatedResponse<unknown>` fallback above,
  * which would otherwise reference an unimported type and fail to compile.

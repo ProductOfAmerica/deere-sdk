@@ -1,8 +1,12 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
+  buildMethodJsDoc,
   collectionItemType,
   computeReturnType,
+  DEFAULT_DEPRECATION_NOTE,
+  deprecatedJsDocLines,
+  isCollectionEndpoint,
   type ReturnTypeOp,
   resolveContentSchemaRef,
   type SchemaLike,
@@ -200,5 +204,64 @@ describe('generate-sdk helpers', () => {
         }
       }
     });
+  });
+});
+
+describe('isCollectionEndpoint', () => {
+  it('treats a {param} last segment as item access', () => {
+    assert.strictEqual(isCollectionEndpoint('/users/{username}', 'get'), false);
+  });
+
+  it('treats a plain literal last segment as a collection', () => {
+    assert.strictEqual(isCollectionEndpoint('/organizations', 'get'), true);
+    assert.strictEqual(
+      isCollectionEndpoint('/users/{userName}/organizations', 'get', ['userName']),
+      true
+    );
+  });
+
+  it('treats a literal declared as an in:path parameter as item access (@currentUser)', () => {
+    assert.strictEqual(isCollectionEndpoint('/users/@currentUser', 'get', ['@currentUser']), false);
+  });
+
+  it('is never a collection for non-GET methods', () => {
+    assert.strictEqual(isCollectionEndpoint('/organizations', 'post'), false);
+  });
+});
+
+describe('buildMethodJsDoc', () => {
+  const base = {
+    method: 'get',
+    path: '/users/{userName}/organizations',
+    summary: 'View User Orgs',
+  };
+
+  it('emits no @deprecated tag for a live operation', () => {
+    assert.ok(!buildMethodJsDoc(base).some((l) => l.includes('@deprecated')));
+  });
+
+  it('emits the relocation note between the summary and @generated', () => {
+    const lines = buildMethodJsDoc({
+      ...base,
+      deprecated: true,
+      deprecationNote: 'use deere.users.listOrganizations().',
+    });
+    const dep = lines.findIndex((l) =>
+      l.includes('@deprecated use deere.users.listOrganizations().')
+    );
+    const gen = lines.findIndex((l) => l.includes('@generated from GET'));
+    assert.ok(dep > 0 && dep < gen, lines.join('\n'));
+  });
+
+  it('falls back to a generic note when the spec gives no reason', () => {
+    const lines = buildMethodJsDoc({ ...base, deprecated: true });
+    assert.ok(
+      lines.some((l) => l === `   * @deprecated ${DEFAULT_DEPRECATION_NOTE}`),
+      lines.join('\n')
+    );
+  });
+
+  it('has no @deprecated lines helper output for a live operation', () => {
+    assert.deepStrictEqual(deprecatedJsDocLines(base), []);
   });
 });

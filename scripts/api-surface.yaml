@@ -402,8 +402,12 @@ specs:
     - op: PUT /organizations/{organizationId}/varieties/{erid}
       name: update
   users:
+    - op: GET /users/@currentUser
+      name: getCurrentUser
     - op: GET /users/{username}
       name: get
+    - op: GET /users/{userName}/organizations
+      name: listOrganizations
   webhook:
     - op: GET /eventSubscriptionDelivery
       name: listEventSubscriptionDelivery

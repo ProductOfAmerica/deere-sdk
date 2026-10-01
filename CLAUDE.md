@@ -85,7 +85,18 @@ Every run is classified into `sync-report.json` (gitignored) for the workflow:
   reconciles the manifest before any release.
 
 CI's `sync-api.yml` runs the pipeline daily, reads the classification, and bumps accordingly: additive cuts a
-minor, benign spec churn a patch; a breaking run does not release.
+minor, benign spec churn a patch; a breaking run does not release. In practice an additive run that adds a path
+also fails the sync's routing guard, because `tests/routing-guard.test.ts` compares the whole
+`scripts/routing-snapshot.yaml`; until that test learns to accept new rows on the spec's default host, reconcile
+such a run by hand (offline stages, `pnpm generate-routing-snapshot`, manual minor release), as 3.1.0 did.
+
+When Deere moves an operation to another spec document without changing it, the manifest still binds its method to
+the old spec and the run reads as breaking. Neither freezing the old spec (nothing would ever lift it) nor dropping
+the method (the route still works) is right. Instead register a relocation in `scripts/lib/spec-relocations.ts`:
+`fix-specs` copies the operation from the new document back into the owning spec, marked `deprecated` in favour of
+the new spec's method, and throws as soon as the entry stops matching Deere's documents (moved back, published in
+both, dropped, or a shared component diverging). Each entry names `removeInMajor`; a test fails once
+`package.json` reaches that major, so the major release deletes the entry and its manifest entry together.
 
 ## Architecture
 

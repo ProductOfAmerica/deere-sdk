@@ -23,11 +23,15 @@ import {
   serializeApiSurface,
 } from './lib/api-surface.js';
 import {
+  buildMethodJsDoc,
   collectionItemType,
   computeReturnType,
+  deprecatedJsDocLines,
+  isCollectionEndpoint,
   resolveContentSchemaRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
+import { DEPRECATED_REPLACEMENT_KEY } from './lib/spec-relocations.js';
 import { refName, stripDocumentationMarkup, toCamelCase, toPascalCase } from './lib/spec-utils.js';
 
 // ============================================================================
@@ -70,6 +74,9 @@ interface OperationObject {
   parameters?: ParameterObject[];
   requestBody?: RequestBodyObject | { $ref: string };
   responses?: Record<string, ResponseObject | { $ref: string }>;
+  deprecated?: boolean;
+  /** Stamped by fix-specs on relocated operations (scripts/lib/spec-relocations.ts). */
+  [DEPRECATED_REPLACEMENT_KEY]?: string;
 }
 
 interface ParameterObject {
@@ -114,6 +121,8 @@ interface ParsedOperation {
   requestBodySchemaRef?: string;
   responseSchemaRef?: string;
   isCollection: boolean;
+  deprecated: boolean;
+  deprecationNote?: string;
 }
 
 interface PathParam {
@@ -167,36 +176,9 @@ function toResourceName(specName: string): string {
   return toCamelCase(name);
 }
 
-function wrapJsDocText(text: string, prefix: string, maxWidth = 80): string[] {
-  const words = text.replace(/\s+/g, ' ').trim().split(' ');
-  const lines: string[] = [];
-  let currentLine = prefix;
-
-  for (const word of words) {
-    if (currentLine.length + word.length + 1 > maxWidth && currentLine !== prefix) {
-      lines.push(currentLine);
-      currentLine = `   * ${word}`;
-    } else {
-      currentLine += (currentLine === prefix ? '' : ' ') + word;
-    }
-  }
-
-  if (currentLine !== prefix) {
-    lines.push(currentLine);
-  }
-
-  return lines;
-}
-
 function extractPathParams(path: string): string[] {
   const matches = path.match(/\{([^}]+)}/g) || [];
   return matches.map((m) => m.slice(1, -1));
-}
-
-function isCollectionEndpoint(path: string, method: string): boolean {
-  if (method !== 'get') return false;
-  const lastSegment = path.split('/').pop() || '';
-  return !lastSegment.startsWith('{');
 }
 
 function getSchemaType(schema: SchemaObject | undefined): string {
@@ -389,7 +371,20 @@ function parseSpec(specPath: string): GeneratedApi | null {
         requestBodySchemaRef = resolveRequestBodySchema(operation.requestBody, spec);
       }
 
-      const isCollection = isCollectionEndpoint(path, method);
+      // Names of every `in: path` parameter the operation declares, inline or
+      // via $ref, including literal aliases like `@currentUser`.
+      const declaredPathParamNames: string[] = [];
+      for (const param of allParams) {
+        const resolved =
+          '$ref' in param && param.$ref
+            ? spec.components?.parameters?.[refName(param.$ref)]
+            : (param as ParameterObject);
+        if (resolved?.in === 'path' && typeof resolved.name === 'string') {
+          declaredPathParamNames.push(resolved.name);
+        }
+      }
+
+      const isCollection = isCollectionEndpoint(path, method, declaredPathParamNames);
 
       // Extract response schema reference (handles both $ref and inline
       // responses, and unwraps named collection wrappers to their item type
@@ -412,6 +407,8 @@ function parseSpec(specPath: string): GeneratedApi | null {
         requestBodySchemaRef,
         responseSchemaRef,
         isCollection,
+        deprecated: operation.deprecated === true,
+        deprecationNote: operation[DEPRECATED_REPLACEMENT_KEY],
       });
     }
   }
@@ -498,15 +495,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     );
   }
 
-  const jsdoc: string[] = ['  /**'];
-  if (op.summary) {
-    jsdoc.push(`   * ${op.summary}`);
-  }
-  if (op.description && op.description !== op.summary) {
-    jsdoc.push(...wrapJsDocText(op.description, '   * @description '));
-  }
-  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${op.path}`);
-  jsdoc.push('   */');
+  const jsdoc = buildMethodJsDoc(op);
 
   let listAllMethod = '';
   if (op.isCollection && op.method === 'get' && methodName === 'list') {
@@ -516,11 +505,15 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     getAllLines[getAllLines.length - 1] =
       `    return this.client.getAll<${itemType}>(this.spec, path, options);`;
 
+    const listAllDoc = [
+      '  /**',
+      '   * Get all items (follows pagination automatically)',
+      ...deprecatedJsDocLines(op),
+      `   * @generated from ${op.method.toUpperCase()} ${op.path}`,
+      '   */',
+    ].join('\n');
     listAllMethod = `
-  /**
-   * Get all items (follows pagination automatically)
-   * @generated from ${op.method.toUpperCase()} ${op.path}
-   */
+${listAllDoc}
   async listAll(${params.join(', ')}): Promise<${itemType}[]> {
 ${getAllLines.join('\n')}
   }`;

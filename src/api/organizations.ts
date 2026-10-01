@@ -76,6 +76,8 @@ export class OrganizationsApi {
    * will ONLY contain organizations in which the user is a staff member
    * (member=true). This response will NOT contain partner organizations in
    * which the user is not a staff member (member=false).
+   * @deprecated Deere now documents this operation in the users API; use
+   * deere.users.listOrganizations().
    * @generated from GET /users/{userName}/organizations
    */
   async listOrganizations(

@@ -175,6 +175,9 @@ paths:
                             uri: "https://sandboxapi.deere.com/platform/organizations/4321"
                           - rel: "connections"
                             uri: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations"
+      deprecated: true
+      x-relocated-from: "users"
+      x-deprecated-replacement: "Deere now documents this operation in the users API; use deere.users.listOrganizations()."
 components:
   parameters:
     OrgId:

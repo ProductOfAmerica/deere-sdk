@@ -276,6 +276,7 @@ export class EquipmentApi {
    * Get equipment types by make id
    * @description This resource allows the client to view equipment types by
    * providing an equipment make ID.
+   * @deprecated John Deere marks this operation deprecated.
    * @generated from GET /equipmentMakes/{equipmentMakeId}/equipmentTypes
    */
   async getEquipmenttypes(
@@ -320,6 +321,7 @@ export class EquipmentApi {
    * Get equipment types
    * @description This resource allows the client to view equipment types and
    * their associated IDs and names.
+   * @deprecated John Deere marks this operation deprecated.
    * @generated from GET /equipmentTypes
    */
   async listEquipmenttypes(

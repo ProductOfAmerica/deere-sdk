@@ -165,6 +165,8 @@ routes:
     /varieties/{erid}/documents: https://api.deere.com/platform
     /varieties/{erid}/setOverridesForOrg/{organizationId}: https://api.deere.com/platform
   users:
+    /users/@currentUser: https://api.deere.com/platform
+    /users/{userName}/organizations: https://api.deere.com/platform
     /users/{username}: https://api.deere.com/platform
   webhook:
     /eventSubscriptionDelivery: https://api.deere.com/platform
