@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-10-01
+
+### Added
+- `deere.users.getCurrentUser()`: `GET /users/@currentUser`, the authenticated user's own record (optional `embed` query parameter). Typed as a single user, like `deere.users.get()`.
+- `deere.users.listOrganizations(userName)`: `GET /users/{userName}/organizations`, which John Deere now documents in the Users API.
+
+### Deprecated
+- `deere.organizations.listOrganizations(userName)`. John Deere moved `GET /users/{userName}/organizations` from the Organizations document to the Users document without changing the operation, so use `deere.users.listOrganizations(userName)` (same arguments and response). The deprecated method keeps working and is removed in 4.0.
+- `deere.equipment.listEquipmenttypes` and `deere.equipment.getEquipmenttypes` now carry `@deprecated`, reflecting the `deprecated: true` John Deere already publishes on those operations. Their behavior is unchanged.
+
+### Changed
+- Synced with latest John Deere API specifications.
+
 ## [3.0.5] - 2026-09-22
 
 ### Changed

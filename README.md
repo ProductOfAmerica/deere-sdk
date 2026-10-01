@@ -31,7 +31,7 @@
 
 ## Highlights
 
-- **28 APIs** with **201 methods** — Full coverage of John Deere agricultural APIs
+- **28 APIs** with **203 methods** — Full coverage of John Deere agricultural APIs
 - **Fully typed** — Auto-generated TypeScript types from OpenAPI specs
 - **Auto-pagination** — `listAll()` methods handle pagination automatically
 - **HAL support** — Built-in link following for John Deere's HAL-style responses
@@ -201,10 +201,12 @@ Two methods that previously returned 404 now work, with no signature change: `de
 | [Flags](https://developer.deere.com/dev-docs/flags)                       | `deere.flags`                | 15      | Field flags/markers               |
 | [Guidance Lines](https://developer.deere.com/dev-docs/guidance-lines)     | `deere.guidanceLines`        | 5       | GPS guidance lines                |
 | [Operators](https://developer.deere.com/dev-docs/operators)               | `deere.operators`            | 7       | Machine operator management       |
-| [Users](https://developer.deere.com/dev-docs/users)                       | `deere.users`                | 1       | User information                  |
+| [Users](https://developer.deere.com/dev-docs/users)                       | `deere.users`                | 3       | User information                  |
 | [Assets](https://developer.deere.com/dev-docs/assets)                     | `deere.assets`               | 9       | Asset tracking                    |
 | [Webhooks](https://developer.deere.com/dev-docs/webhook)                  | `deere.webhook`              | 7       | Event subscriptions               |
 | [Connections](https://developer.deere.com/dev-docs/connection-management) | `deere.connectionManagement` | 4       | OAuth connections                 |
+
+`deere.organizations.listOrganizations` is deprecated: John Deere now documents `GET /users/{userName}/organizations` in the Users API, so use `deere.users.listOrganizations` (same arguments and response). The deprecated method keeps working and is removed in the next major version.
 
 ### Machine Data APIs
 
