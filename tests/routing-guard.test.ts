@@ -28,8 +28,10 @@ import * as yaml from 'yaml';
 import { findSpecOverride, loadRoutingOverrides } from '../scripts/lib/routing-overrides.js';
 import {
   buildRoutingSnapshot,
+  diffRoutingSnapshot,
+  parseSnapshotRoutes,
+  type RoutingSnapshotRow,
   readRoutingSnapshot,
-  serializeRoutingSnapshot,
 } from '../scripts/lib/routing-snapshot.js';
 
 const RAW_DIR = join(process.cwd(), 'specs', 'raw');
@@ -115,17 +117,42 @@ describe('routing invariants: no stage may manufacture routing data', () => {
 });
 
 describe('routing snapshot', () => {
-  it('matches what resolveRequestUrl actually resolves', () => {
-    const { rows } = buildRoutingSnapshot();
-    const expected = serializeRoutingSnapshot(rows);
-    const committed = readRoutingSnapshot();
+  // Fails on what needs a human: a published path changing host, a path
+  // disappearing, or a new path landing anywhere but its spec's default base.
+  // A new path on the default base is what Deere published (layer 1 proves the
+  // base was not manufactured), so it passes, and the sync then rewrites the
+  // snapshot to include it; see sync-api.yml "Refresh routing snapshot".
+  const diff = diffRoutingSnapshot(
+    parseSnapshotRoutes(readRoutingSnapshot()),
+    buildRoutingSnapshot().rows
+  );
+  const regenerate =
+    'Run `pnpm generate-routing-snapshot`, read the diff, and confirm every change is ' +
+    'intentional and measured before committing it.';
 
-    assert.strictEqual(
-      committed,
-      expected,
-      'scripts/routing-snapshot.yaml is stale. A published method changed host. Run ' +
-        '`pnpm generate-routing-snapshot`, read the diff, and confirm every moved path is ' +
-        'intentional and measured before committing it.'
+  it('no committed path changed host', () => {
+    assert.deepStrictEqual(
+      diff.moved,
+      [],
+      `a published method changed host. ${regenerate} ${JSON.stringify(diff.moved)}`
+    );
+  });
+
+  it('no committed path disappeared', () => {
+    assert.deepStrictEqual(
+      diff.removed,
+      [],
+      `scripts/routing-snapshot.yaml lists paths no fixed spec declares. ${regenerate} ` +
+        JSON.stringify(diff.removed)
+    );
+  });
+
+  it('every new path resolves to its spec default base', () => {
+    assert.deepStrictEqual(
+      diff.newOffDefault,
+      [],
+      `a new path resolves somewhere other than its spec's default base, so a routing ` +
+        `decision was made for it. ${regenerate} ${JSON.stringify(diff.newOffDefault)}`
     );
   });
 
@@ -174,5 +201,65 @@ describe('routing snapshot', () => {
       'https://api.deere.com/platform',
       'the override must not bleed onto its sibling paths'
     );
+  });
+});
+
+describe('diffRoutingSnapshot', () => {
+  const row = (spec: string, path: string, base: string): RoutingSnapshotRow => ({
+    spec,
+    path,
+    base,
+  });
+  const PLATFORM = 'https://api.deere.com/platform';
+  const ISG = 'https://api.deere.com/isg';
+  const defaults = (spec: string) => (spec === 'gone' ? undefined : PLATFORM);
+  const committed = { users: { '/users/{username}': PLATFORM } };
+
+  it('reports nothing when rows match the snapshot', () => {
+    const d = diffRoutingSnapshot(
+      committed,
+      [row('users', '/users/{username}', PLATFORM)],
+      defaults
+    );
+    assert.deepStrictEqual(d, { moved: [], removed: [], newOffDefault: [], newOnDefault: [] });
+  });
+
+  it('accepts a new path on its spec default base', () => {
+    const d = diffRoutingSnapshot(
+      committed,
+      [row('users', '/users/{username}', PLATFORM), row('users', '/users/@currentUser', PLATFORM)],
+      defaults
+    );
+    assert.deepStrictEqual(d.newOnDefault, [
+      { spec: 'users', path: '/users/@currentUser', base: PLATFORM },
+    ]);
+    assert.deepStrictEqual([...d.moved, ...d.removed, ...d.newOffDefault], []);
+  });
+
+  it('flags a new path off its spec default base', () => {
+    const d = diffRoutingSnapshot(
+      committed,
+      [row('users', '/users/{username}', PLATFORM), row('users', '/users/x', ISG)],
+      defaults
+    );
+    assert.strictEqual(d.newOffDefault.length, 1);
+  });
+
+  it('flags a new path in a spec that refuses the snapshot environment', () => {
+    const d = diffRoutingSnapshot({}, [row('gone', '/a', PLATFORM)], defaults);
+    assert.strictEqual(d.newOffDefault.length, 1);
+  });
+
+  it('flags a committed path that changed host or disappeared', () => {
+    const moved = diffRoutingSnapshot(
+      committed,
+      [row('users', '/users/{username}', ISG)],
+      defaults
+    );
+    assert.deepStrictEqual(moved.moved, [
+      { spec: 'users', path: '/users/{username}', from: PLATFORM, to: ISG },
+    ]);
+    const removed = diffRoutingSnapshot(committed, [], defaults);
+    assert.strictEqual(removed.removed.length, 1);
   });
 });

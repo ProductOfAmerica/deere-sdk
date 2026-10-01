@@ -15,6 +15,14 @@ on:
 permissions:
   contents: read
 
+# One sync at a time. Two overlapping runs (a manual dispatch landing on the
+# scheduled one) would both bump the same version, push, and tag; the second
+# loses the push race or tags a release the first already cut. Queue instead of
+# cancelling: a run cancelled mid-push could leave a commit without its tag.
+concurrency:
+  group: sync-api
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -85,6 +93,15 @@ jobs:
           echo "classification=$CLASSIFICATION" >> $GITHUB_OUTPUT
           echo "added_count=$ADDED_COUNT" >> $GITHUB_OUTPUT
 
+          # Neutralize embedded CR/LF in portal-derived fields (spec, path, name)
+          # so a newline inside an operation string cannot inject a spurious
+          # heredoc terminator or a new key=value line into $GITHUB_OUTPUT.
+          {
+            echo "added_ops<<EOF"
+            jq -r '.newOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       # Defence in depth. generate-sdk already exits 1 on a breaking run, so in
       # practice this step is unreachable. That is exactly why it exists: until
       # now a single exit code was all that stood between a breaking upstream
@@ -101,15 +118,6 @@ jobs:
                "which is a major-version decision."
           exit 1
 
-          # Neutralize embedded CR/LF in portal-derived fields (spec, path, name)
-          # so a newline inside an operation string cannot inject a spurious
-          # heredoc terminator or a new key=value line into $GITHUB_OUTPUT.
-          {
-            echo "added_ops<<EOF"
-            jq -r '.newOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
-
       - name: Lint fix generated code
         run: pnpm lint:fix
 
@@ -121,16 +129,24 @@ jobs:
 
       # Blocks the sync before it commits, rather than letting a routing change
       # land on main and turn CI red afterwards. A failure here means an
-      # upstream change moved a published method to a different host, or a
-      # stage manufactured a base URL. Both need a human: re-measure, record the
-      # evidence in scripts/routing-overrides.yaml, run
-      # `pnpm generate-routing-snapshot`, and review the diff.
+      # upstream change moved a published method to a different host, a path
+      # disappeared, a new path resolves somewhere other than its spec's default
+      # base, or a stage manufactured a base URL. All need a human: re-measure,
+      # record the evidence in scripts/routing-overrides.yaml, run
+      # `pnpm generate-routing-snapshot`, and review the diff. New paths on
+      # their spec's default base pass; the next step records them.
       # Via a pnpm script, not a bare `cross-env ...`: GitHub Actions does not
       # put node_modules/.bin on PATH for a plain `run:` step, so the binary
       # would not resolve. Every other step here goes through pnpm for the same
       # reason.
       - name: Routing guard
         run: pnpm test:routing-guard
+
+      # Only reached once the guard has passed, so the rewrite can only add new
+      # paths that resolve to their spec's default base. Keeping them in the
+      # committed snapshot means a later host change for them is caught too.
+      - name: Refresh routing snapshot
+        run: pnpm generate-routing-snapshot
 
       - name: Check for changes
         id: changes
