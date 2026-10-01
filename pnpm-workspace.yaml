@@ -1,3 +1,16 @@
 onlyBuiltDependencies:
   - '@biomejs/biome'
   - esbuild
+
+# Security pins on transitive dev dependencies (this package ships no runtime
+# dependencies). Kept here, not under "pnpm" in package.json: pnpm 11 no longer
+# reads that field, and Dependabot runs pnpm 11, so overrides there were dropped
+# from every lockfile it wrote.
+#   brace-expansion: GHSA-3jxr-9vmj-r5cp and GHSA-q2hr-2g5m-vwhr, fixed in 5.0.12.
+#   js-yaml: GHSA-5p4m-2wfm-xmqj and GHSA-2883-xcg3-v3hh, fixed in 4.3.2. Stay on
+#     4.x: Redocly's vendored shim inside openapi-typescript needs the 4.x API
+#     (5.x crashes generate-types; see #35).
+overrides:
+  brace-expansion: 5.0.12
+  js-yaml: ^4.3.2
+  minimatch: ^10.2.3
