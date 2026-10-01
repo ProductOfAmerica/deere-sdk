@@ -195,11 +195,19 @@ jobs:
       - name: Lint fix generated code
         run: pnpm lint:fix
 
+      # Mirrors the sync's guard and snapshot refresh, so a committed snapshot
+      # missing a new default-base path shows up as drift here too.
+      - name: Routing guard
+        run: pnpm test:routing-guard
+
+      - name: Refresh routing snapshot
+        run: pnpm generate-routing-snapshot
+
       - name: Fail on drift from committed output
         run: |
           drift=$(git status --porcelain --untracked-files=all)
           if [ -n "$drift" ]; then
-            echo "::error::Regenerating from the committed specs changed the files listed below. Likely causes: a dependency bump that changes codegen output; a generator, registry or manifest change committed without its regenerated output; a hand edit to a generated file; or a biome safe fix on a hand-written file. Run the offline chain locally (redact-specs, fix-specs, generate-api-servers, generate-types, generate-sdk, lint:fix; never pnpm generate, which fetches live specs) and commit the result in this PR. See CLAUDE.md, Testing conventions."
+            echo "::error::Regenerating from the committed specs changed the files listed below. Likely causes: a dependency bump that changes codegen output; a generator, registry or manifest change committed without its regenerated output; a hand edit to a generated file; or a biome safe fix on a hand-written file. Run the offline chain locally (redact-specs, fix-specs, generate-api-servers, generate-types, generate-sdk, lint:fix, generate-routing-snapshot; never pnpm generate, which fetches live specs) and commit the result in this PR. See CLAUDE.md, Testing conventions."
             echo "$drift"
             git diff --stat
             exit 1

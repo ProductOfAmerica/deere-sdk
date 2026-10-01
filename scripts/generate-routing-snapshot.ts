@@ -5,9 +5,13 @@
  * Usage: pnpm generate-routing-snapshot
  *
  * Deliberately NOT part of `pnpm generate`. The snapshot is a human approval
- * point, and a file the pipeline rewrites on its own approves nothing. Run this
- * when you have changed URL construction on purpose, read the diff, and commit
- * it with the change that caused it.
+ * point for routing changes: run this when you have changed URL construction on
+ * purpose, read the diff, and commit it with the change that caused it.
+ *
+ * The one automated caller is sync-api.yml, and only AFTER the routing guard
+ * passes. The guard fails on every change that needs a human (a path changing
+ * host, a path disappearing, a new path off its spec's default base), so what
+ * the sync writes back is limited to new paths on their spec's default base.
  */
 
 import { writeFileSync } from 'node:fs';
