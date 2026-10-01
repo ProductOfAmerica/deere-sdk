@@ -15,6 +15,14 @@ on:
 permissions:
   contents: read
 
+# One sync at a time. Two overlapping runs (a manual dispatch landing on the
+# scheduled one) would both bump the same version, push, and tag; the second
+# loses the push race or tags a release the first already cut. Queue instead of
+# cancelling: a run cancelled mid-push could leave a commit without its tag.
+concurrency:
+  group: sync-api
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
