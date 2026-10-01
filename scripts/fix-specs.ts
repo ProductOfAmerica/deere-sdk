@@ -21,6 +21,7 @@ import {
   type RoutingOverrides,
 } from './lib/routing-overrides.js';
 import { redactSpecContent } from './lib/spec-redactor.js';
+import { applyRelocations, RELOCATIONS } from './lib/spec-relocations.js';
 import {
   isDocumentationKey,
   isRecord,
@@ -610,9 +611,11 @@ function fixSpec(
   filename: string,
   globalEnumUnion: string[],
   embedContracts: EmbedContract[],
-  routingOverrides: RoutingOverrides
+  routingOverrides: RoutingOverrides,
+  relocationSources: ReadonlyMap<string, Record<string, unknown>>
 ): string {
   console.log(`\nProcessing: ${filename}`);
+  const specName = filename.replace(/\.yaml$/, '');
 
   const redactedContent = redactSpecContent(content);
   let spec: Record<string, unknown>;
@@ -639,6 +642,14 @@ function fixSpec(
   if (!spec?.openapi) {
     console.log('  Not a valid OpenAPI spec');
     return content;
+  }
+
+  // Copy operations Deere moved to another document back into the spec that
+  // owns their published method (scripts/lib/spec-relocations.ts). Runs first,
+  // on the raw parse, so every transform below treats the copy exactly like a
+  // native operation and its refs never reach the missing-ref stubbing.
+  for (const applied of applyRelocations(spec, specName, relocationSources)) {
+    console.log(`  Relocated: ${applied}`);
   }
 
   const refs = collectRefs(spec);
@@ -703,7 +714,6 @@ function fixSpec(
   // BEFORE the server-level transforms below (which only touch `servers`). If a
   // future transform starts mutating components.schemas above this point,
   // re-check the ordering.
-  const specName = filename.replace(/\.yaml$/, '');
   const embedPatchCount = applyEmbedContracts(spec, specName, embedContracts);
   if (embedPatchCount > 0) {
     console.log(`  Applied ${embedPatchCount} embed-contract patch(es)`);
@@ -807,6 +817,26 @@ async function main() {
       `${routingOverrides.specs.map((s) => s.spec).join(', ') || '(none)'}`
   );
 
+  // Raw documents that relocations copy operations out of, redacted and parsed
+  // the same way fixSpec treats its own input. Loaded once, before any spec is
+  // written: a missing or unparseable source is a config error.
+  const relocationSources = new Map<string, Record<string, unknown>>();
+  for (const from of new Set(RELOCATIONS.map((r) => r.from))) {
+    const sourcePath = join(SPECS_DIR, `${from}.yaml`);
+    if (!existsSync(sourcePath)) {
+      throw new Error(`fix-specs: relocation source ${sourcePath} does not exist.`);
+    }
+    const parsed = yaml.parse(redactSpecContent(readFileSync(sourcePath, 'utf-8')));
+    if (!isRecord(parsed)) {
+      throw new Error(`fix-specs: relocation source ${sourcePath} is not a YAML mapping.`);
+    }
+    relocationSources.set(from, parsed);
+  }
+  console.log(
+    `Loaded ${RELOCATIONS.length} relocation(s): ` +
+      `${RELOCATIONS.map((r) => `${r.from} -> ${r.into}`).join(', ') || '(none)'}`
+  );
+
   let fixed = 0;
   let failed = 0;
 
@@ -821,7 +851,8 @@ async function main() {
         yamlFile,
         globalEnumUnion,
         embedContracts,
-        routingOverrides
+        routingOverrides,
+        relocationSources
       );
       writeFileSync(outputPath, fixedContent);
       fixed++;
