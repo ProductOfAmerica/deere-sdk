@@ -124,6 +124,7 @@ export interface paths {
     };
     /**
      * View User Orgs
+     * @deprecated
      * @description This request will return a list of organizations. The response will ONLY contain organizations in which the user is a staff member (member=true). This response will NOT contain partner organizations in which the user is not a staff member (member=false).
      */
     get: {

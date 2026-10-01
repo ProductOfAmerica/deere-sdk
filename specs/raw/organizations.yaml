@@ -112,57 +112,6 @@ paths:
                         uri: "https://sandboxapi.deere.com/platform/organizations/4321"
                       - rel: "connections"
                         uri: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/select-organizations"
-  /users/{userName}/organizations:
-    get:
-      summary: "View User Orgs"
-      description: "This request will return a list of organizations. The response will ONLY contain organizations in which the user is a staff member (member=true). This response will NOT contain partner organizations in which the user is not a staff member (member=false)."
-      parameters:
-        - $ref: "#/components/parameters/UserName2"
-        - $ref: "#/components/parameters/X-deere-signature2"
-      responses:
-        "200":
-          description: "View Organization List"
-          content:
-            application/vnd.deere.axiom.v3+json:
-              schema:
-                properties:
-                  links:
-                    items:
-                      $ref: "#/components/schemas/OrganizationLink2"
-                  values:
-                    items:
-                      $ref: "#/components/schemas/OrganizationViewGet"
-              examples:
-                No Header:
-                  description: "200 OK <br/>Content-Type: application/vnd.deere.axiom.v3+json <br/>x-deere-signature: 3b5392015e4b4e1c92013026f47109bb"
-                  value:
-                    links:
-                      - rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/users/johndoe/organizations"
-                    total: 2
-                    values:
-                      - "@type": "Organization"
-                        name: "A First Org Name (Is Enabled)"
-                        type: "customer"
-                        member: true
-                        internal: false
-                        id: "1234"
-                        links:
-                          - rel: "self"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/1234"
-                          - rel: "manage_connections"
-                            uri: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/connections-dialog?orgId=1234"
-                      - "@type": "Organization"
-                        name: "A Second Org Name (Not Enabled)"
-                        type: "customer"
-                        member: true
-                        internal: false
-                        id: "4321"
-                        links:
-                          - rel: "self"
-                            uri: "https://sandboxapi.deere.com/platform/organizations/4321"
-                          - rel: "connections"
-                            uri: "https://connections.deere.com/connections/28efb3cb-cbd5-4888-8570-99465ea8860e/organizations"
 components:
   parameters:
     OrgId:
