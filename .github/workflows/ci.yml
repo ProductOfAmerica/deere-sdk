@@ -146,3 +146,61 @@ jobs:
         # produces noise (info/style findings) on existing run: blocks that
         # aren't part of this PR's scope.
         run: ./actionlint -color -shellcheck=''
+
+  # Re-runs every offline codegen stage on the committed specs and fails if the
+  # output differs from what is committed. Guards against dependency bumps and
+  # generator changes that break or alter codegen: the TypeScript 7 bump (#39)
+  # passed the build matrix and only failed the next scheduled sync. fetch-specs
+  # is skipped because it is the only stage that needs the network. Keep the
+  # stages, their order, the Node version and lint:fix in lockstep with
+  # sync-api.yml, or this job stops modelling what the sync will commit. A
+  # separate job, not a 24.x step in build, because the coverage step leaves
+  # untracked files behind.
+  codegen-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # NO job-level permissions block, so it inherits top-level contents: read.
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
+        with:
+          version: 10
+
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Redact specs
+        run: pnpm redact-specs
+
+      - name: Fix specs
+        run: pnpm fix-specs
+
+      - name: Generate API servers
+        run: pnpm generate-api-servers
+
+      - name: Generate types
+        run: pnpm generate-types
+
+      - name: Generate SDK
+        run: pnpm generate-sdk
+
+      - name: Lint fix generated code
+        run: pnpm lint:fix
+
+      - name: Fail on drift from committed output
+        run: |
+          drift=$(git status --porcelain --untracked-files=all)
+          if [ -n "$drift" ]; then
+            echo "::error::Regenerating from the committed specs changed the files listed below. Likely causes: a dependency bump that changes codegen output; a generator, registry or manifest change committed without its regenerated output; a hand edit to a generated file; or a biome safe fix on a hand-written file. Run the offline chain locally (redact-specs, fix-specs, generate-api-servers, generate-types, generate-sdk, lint:fix; never pnpm generate, which fetches live specs) and commit the result in this PR. See CLAUDE.md, Testing conventions."
+            echo "$drift"
+            git diff --stat
+            exit 1
+          fi
