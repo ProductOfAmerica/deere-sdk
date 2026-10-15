@@ -87,7 +87,7 @@ export interface paths {
           registration?: string;
           /** @description Specifies the source system product id of the chemical based on the country of use. */
           sourceSystemProductId?: string;
-          /** @description Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          /** @description Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA. */
           countryCode?: string;
         };
         header?: never;
@@ -142,7 +142,10 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: 'documents' | 'activeIngredients';
+        };
         header?: never;
         path: {
           /**
@@ -283,7 +286,12 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          countryCode?: string;
+          /** @description Specifies the registration number of the chemical. */
+          registration?: string;
+        };
         header?: never;
         path: {
           /**
@@ -489,7 +497,7 @@ export interface paths {
           registration?: string;
           /** @description Specifies the source system product id of the fertilizer based on the country of use. */
           sourceSystemProductId?: string;
-          /** @description Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          /** @description Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA. */
           countryCode?: string;
         };
         header?: never;
@@ -544,7 +552,10 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: 'documents' | 'activeIngredients';
+        };
         header?: never;
         path: {
           /**
@@ -685,7 +696,12 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          countryCode?: string;
+          /** @description Specifies the registration number of the fertilizer. */
+          registration?: string;
+        };
         header?: never;
         path: {
           /**
@@ -2076,7 +2092,7 @@ export interface paths {
           brandName?: string;
           /** @description Specifies the source system product id of the variety based on the country of use. */
           sourceSystemProductId?: string;
-          /** @description Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          /** @description Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA. */
           countryCode?: string;
         };
         header?: never;
@@ -2131,7 +2147,10 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description An embeddable list of properties which are optional by default. */
+          embed?: 'documents';
+        };
         header?: never;
         path: {
           /**
@@ -2279,7 +2298,10 @@ export interface paths {
      */
     get: {
       parameters: {
-        query?: never;
+        query?: {
+          /** @description Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response. */
+          countryCode?: string;
+        };
         header?: never;
         path: {
           /**
@@ -2345,8 +2367,6 @@ export interface paths {
            * @example cf09acfc-9196-4dbb-9b38-1be02673c5ff
            */
           erid: components['parameters']['ERID'];
-          /** @description The identifier of the Organization. */
-          organizationId: components['parameters']['OrganizationID'];
         };
         cookie?: never;
       };
@@ -2608,7 +2628,7 @@ export interface components {
       /** @description Provides a reference to an associated object or list. */
       links?: components['schemas']['Link_TankMix'][];
     };
-    Chemical: components['schemas']['BaseResource_Chemicals'] & {
+    Chemical: {
       /** @example Chemical */
       '@type'?: unknown;
       /**
@@ -2690,17 +2710,6 @@ export interface components {
        * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
        */
       referenceId?: string;
-      /**
-       * Format: double
-       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
-       * @example 3.14
-       */
-      liquidWeight?: number;
-      /**
-       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
-       * @example lb/gal
-       */
-      weightUnit?: string;
       /**
        * @description Country of the product to which it belongs.
        * @example USA
@@ -3874,7 +3883,7 @@ export interface components {
     FertilizerCollection: components['schemas']['CollectionBase_Fertilizers'] & {
       values?: components['schemas']['Fertilizer_Fertilizers'][];
     };
-    Fertilizer_Fertilizers: components['schemas']['BaseResource'] & {
+    Fertilizer_Fertilizers: {
       /** @example Fertilizer */
       '@type'?: unknown;
       /**
@@ -4333,6 +4342,19 @@ export interface components {
          *     ]
          */
         targetCrops?: Record<string, never>;
+        seasonalParameters?: {
+          /**
+           * @description The type of the tank mix SeasonalParameters.
+           * @example SeasonalParameter
+           */
+          '@type'?: string;
+          /**
+           * Format: int32
+           * @description The year in which the tank mix was in use.
+           * @example 2026
+           */
+          year?: number;
+        }[];
       };
     };
     PostFertilizer: {
@@ -4475,9 +4497,9 @@ export interface components {
        * @description The name of the input manufacturer for chemical, fertilizer or variety.
        * @example Monsanto
        */
-      companyName: string;
+      companyName?: string;
       /** @example ProductCompany */
-      '@type': unknown;
+      '@type'?: unknown;
     };
     PutChemical: {
       /** @example Chemical */
@@ -4537,12 +4559,6 @@ export interface components {
        */
       carrier?: boolean;
       /**
-       * Format: double
-       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
-       * @example 3.14
-       */
-      liquidWeight?: number;
-      /**
        * @description Registration id used for regulatory purposes.
        * @example a12e9i84
        */
@@ -4559,11 +4575,6 @@ export interface components {
        * @example 2018-04-06T15:12:52.910Z
        */
       readonly modifiedTime?: string;
-      /**
-       * @description Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available.
-       * @example lb/gal
-       */
-      weightUnit?: string;
       /** @description List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
       activeIngredients?: components['schemas']['ActiveIngredientEmbed'][];
     };
@@ -4701,7 +4712,7 @@ export interface components {
        */
       readonly userLastModifiedTimestamp?: string;
     };
-    ReferenceChemical: components['schemas']['BaseResource_Chemicals'] & {
+    ReferenceChemical: {
       /** @example ReferenceChemical */
       '@type'?: unknown;
       /**
@@ -4800,11 +4811,15 @@ export interface components {
        * @example 2019-03-27T14:59:57.000Z
        */
       modifiedTime?: string;
+      /** @description List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed'][];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document_Chemicals'][];
     };
     ReferenceChemicalCollection: components['schemas']['CollectionBase_Chemicals'] & {
       values?: components['schemas']['ReferenceChemical'][];
     };
-    ReferenceFertilizer: components['schemas']['BaseResource'] & {
+    ReferenceFertilizer: {
       /** @example Fertilizer */
       '@type'?: string;
       /**
@@ -4894,6 +4909,10 @@ export interface components {
        * @example 905P24925
        */
       sourceSystemProductId?: string;
+      /** @description List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used. */
+      activeIngredients?: components['schemas']['ActiveIngredientEmbed_Fertilizers'][];
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used. */
+      documentsList?: components['schemas']['Document'][];
     };
     ReferenceFertilizerCollection: components['schemas']['CollectionBase_Fertilizers'] & {
       values?: components['schemas']['ReferenceFertilizer'][];
@@ -4947,7 +4966,7 @@ export interface components {
        */
       countryCode?: string;
     } & components['schemas']['CommonProductPointerRequest'];
-    ReferenceVariety: components['schemas']['BaseResource'] & {
+    ReferenceVariety: {
       /** @example ReferenceVariety */
       '@type'?: unknown;
       /**
@@ -5016,6 +5035,8 @@ export interface components {
        * @example 2019-03-27T14:59:57.000Z
        */
       modifiedTime?: string;
+      /** @description List of documents for the variety. For example, Tech Sheet, SDS Label. */
+      documentsList?: components['schemas']['Document'][];
     };
     ReferenceVarietyCollection: components['schemas']['CollectionBase'] & {
       values?: components['schemas']['ReferenceVariety'][];

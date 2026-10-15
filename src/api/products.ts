@@ -88,9 +88,13 @@ export class ProductsApi {
    */
   async getChemicals(
     erid: string,
+    params?: { embed?: 'documents' | 'activeIngredients' },
     options?: RequestOptions
   ): Promise<components['schemas']['ReferenceChemical']> {
-    const path = `/chemicals/${erid}`;
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/chemicals/${erid}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceChemical']>(this.spec, path, options);
   }
 
@@ -123,9 +127,14 @@ export class ProductsApi {
    */
   async listChemicalsDocuments(
     erid: string,
+    params?: { countryCode?: string; registration?: string },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Document_Chemicals']>> {
-    const path = `/chemicals/${erid}/documents`;
+    const query = new URLSearchParams();
+    if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
+    if (params?.registration !== undefined) query.set('registration', String(params.registration));
+    const queryString = query.toString();
+    const path = `/chemicals/${erid}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document_Chemicals']>>(
       this.spec,
       path,
@@ -211,9 +220,13 @@ export class ProductsApi {
    */
   async getFertilizers(
     erid: string,
+    params?: { embed?: 'documents' | 'activeIngredients' },
     options?: RequestOptions
   ): Promise<components['schemas']['ReferenceFertilizer']> {
-    const path = `/fertilizers/${erid}`;
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/fertilizers/${erid}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceFertilizer']>(this.spec, path, options);
   }
 
@@ -246,9 +259,14 @@ export class ProductsApi {
    */
   async listFertilizersDocuments(
     erid: string,
+    params?: { countryCode?: string; registration?: string },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Document']>> {
-    const path = `/fertilizers/${erid}/documents`;
+    const query = new URLSearchParams();
+    if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
+    if (params?.registration !== undefined) query.set('registration', String(params.registration));
+    const queryString = query.toString();
+    const path = `/fertilizers/${erid}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document']>>(
       this.spec,
       path,
@@ -773,9 +791,13 @@ export class ProductsApi {
    */
   async getVarieties(
     erid: string,
+    params?: { embed?: 'documents' },
     options?: RequestOptions
   ): Promise<components['schemas']['ReferenceVariety']> {
-    const path = `/varieties/${erid}`;
+    const query = new URLSearchParams();
+    if (params?.embed !== undefined) query.set('embed', String(params.embed));
+    const queryString = query.toString();
+    const path = `/varieties/${erid}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceVariety']>(this.spec, path, options);
   }
 
@@ -806,9 +828,13 @@ export class ProductsApi {
    */
   async listDocuments(
     erid: string,
+    params?: { countryCode?: string },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Document']>> {
-    const path = `/varieties/${erid}/documents`;
+    const query = new URLSearchParams();
+    if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
+    const queryString = query.toString();
+    const path = `/varieties/${erid}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document']>>(
       this.spec,
       path,

@@ -127,7 +127,7 @@ paths:
             example: "905P24930"
         - name: "countryCode"
           in: "query"
-          description: "Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          description: "Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA."
           schema:
             type: "string"
             example: "USA"
@@ -159,6 +159,7 @@ paths:
                         category: "CHEMICAL"
                         epaRegistration: "a12e9i84"
                         referenceId: "8fb34898-64f5-5a1e-a698-34ab348220a7"
+                        referenceGuid: "8fb34898-64f5-5a1e-a698-34ab348220a7"
                         createdTime: "2017-03-21T21:12:53.865Z"
                         modifiedTime: "2018-04-06T15:12:52.910Z"
                         countryCode: "USA"
@@ -215,6 +216,16 @@ paths:
             - "eq1"
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "embed"
+          in: "query"
+          description: "An embeddable list of properties which are optional by default."
+          schema:
+            type: "array"
+            items:
+              type: "string"
+            enum:
+              - "documents"
+              - "activeIngredients"
       responses:
         "200":
           description: "A single chemical matching the specified erid."
@@ -227,6 +238,8 @@ paths:
                   value:
                     "@type": "ReferenceChemical"
                     id: "8fb34898-64f5-5a1e-a698-34ab348220a7"
+                    referenceId: "8fb34898-64f5-5a1e-a698-34ab348220a7"
+                    referenceGuid: "8fb34898-64f5-5a1e-a698-34ab348220a7"
                     name: "Round Up"
                     companyName: "Monsanto"
                     registration: "a12e9i84"
@@ -240,6 +253,32 @@ paths:
                     sourceSystemProductId: "905P24925"
                     createdTime: "2017-03-21T21:12:53.865Z"
                     modifiedTime: "2018-04-06T15:12:52.910Z"
+                    activeIngredients:
+                      - "@type": "ActiveIngredient"
+                        guid: "40ab45ee-96ef-4bfe-883a-fb65ced5b748"
+                        name: "Ammonium sulfate"
+                        percent: 40.25
+                        unit: "%"
+                        value: 40.25
+                    documentsList:
+                      - "@type": "Document"
+                        erid: "4360eaf3-cd0e-486d-88d9-8153ca547084"
+                        productErid: "85f76746-fba2-48d0-bf7c-e46a79b00327"
+                        fileName: "ldC7J001.pdf"
+                        docType: "Specimen Label"
+                        description: "6422SP-0418"
+                      - "@type": "Document"
+                        erid: "8769a734-7a91-4b6d-b829-06e50e25ebc6"
+                        productErid: "85f76746-fba2-48d0-bf7c-e46a79b00327"
+                        fileName: "mpC7J002.pdf"
+                        docType: "SDS"
+                        description: "April 28, 2020"
+                      - "@type": "Document"
+                        erid: "d2c5f59f-1136-449e-9d62-017979f8a617"
+                        productErid: "85f76746-fba2-48d0-bf7c-e46a79b00327"
+                        fileName: "mpC7J004.pdf"
+                        docType: "SDS"
+                        description: "10/29/2024"
         "403":
           description: "The user does not have access to manage products."
         "404":
@@ -337,6 +376,20 @@ paths:
       description: "List of all the documents for a chemical from industry data sources, such as CDMS."
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "countryCode"
+          in: "query"
+          required: true
+          description: "Specifies the region the chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          schema:
+            type: "string"
+            example: "USA"
+        - name: "registration"
+          in: "query"
+          required: true
+          description: "Specifies the registration number of the chemical."
+          schema:
+            type: "string"
+            example: "a12e9i84"
       responses:
         "200":
           description: "A collection of documents for the specified chemical."
@@ -350,10 +403,10 @@ paths:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/chemicals/2efdaf0a-254c-4ba2-9a1f-b3c94f962224/documents?itemLimit=10&pageOffset=0"
+                        uri: "https://sandboxapi.deere.com/platform/chemicals/2efdaf0a-254c-4ba2-9a1f-b3c94f962224/documents?countryCode=USA&registration=a12e9i84&itemLimit=10&pageOffset=0"
                       - "@type": "Link"
                         rel: "next"
-                        uri: "https://sandboxapi.deere.com/platform/chemicals/2efdaf0a-254c-4ba2-9a1f-b3c94f962224/documents?itemLimit=10&pageOffset=10"
+                        uri: "https://sandboxapi.deere.com/platform/chemicals/2efdaf0a-254c-4ba2-9a1f-b3c94f962224/documents?countryCode=USA&registration=a12e9i84&itemLimit=10&pageOffset=10"
                     total: 100
                     values:
                       - "@type": "Document"
@@ -533,7 +586,7 @@ paths:
             example: "13328"
         - name: "countryCode"
           in: "query"
-          description: "Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          description: "Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA."
           schema:
             type: "string"
             example: "USA"
@@ -560,6 +613,7 @@ paths:
                       - "@type": "Fertilizer"
                         id: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
                         referenceId: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
+                        referenceGuid: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
                         name: "Round Up"
                         companyName: "Monsanto"
                         registration: "a12e9i84"
@@ -576,6 +630,7 @@ paths:
                       - "@type": "Fertilizer"
                         id: "4dad43d3-4392-41c3-abcb-3eeed86bb3fb"
                         referenceId: "4dad43d3-4392-41c3-abcb-3eeed86bb3fb"
+                        referenceGuid: "4dad43d3-4392-41c3-abcb-3eeed86bb3fb"
                         name: "Corn Mix LS"
                         companyName: "WinField United"
                         registration: "EXEMPT"
@@ -604,6 +659,16 @@ paths:
       description: "Single fertilizer from industry data sources, such as CDMS."
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "embed"
+          in: "query"
+          description: "An embeddable list of properties which are optional by default."
+          schema:
+            type: "array"
+            items:
+              type: "string"
+            enum:
+              - "documents"
+              - "activeIngredients"
       responses:
         "200":
           description: "A single reference fertilizer matching the specified erid."
@@ -618,6 +683,7 @@ paths:
                     "@type": "Fertilizer"
                     id: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
                     referenceId: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
+                    referenceGuid: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
                     name: "Round Up"
                     companyName: "Monsanto"
                     registration: "a12e9i84"
@@ -631,6 +697,20 @@ paths:
                     restrictedUse: false
                     sourceSystem: "3"
                     sourceSystemProductId: "905P24925"
+                    activeIngredients:
+                      - name: "Urea Nitrogen"
+                        guid: "9ab0fd0d-7ed0-49bd-9a61-0277d89b61f4"
+                        percent: 3.14
+                        unit: "%"
+                        value: 3.14
+                    documentsList:
+                      - "@type": "Document"
+                        erid: "08e930ee-4c31-41b6-b57e-8c0a8e1284a4"
+                        docType: "24(c) Registration"
+                        productErid: "388ab719-277d-4032-a2c3-40a297d8f482"
+                        description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
+                        fileName: "ld7OD026.pdf"
+                        expirationDate: "2017-03-22"
         "403":
           description: "The user does not have access to manage products."
         "404":
@@ -728,6 +808,20 @@ paths:
       description: "List of all the documents for a fertilizer from industry data sources, such as CDMS."
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "countryCode"
+          in: "query"
+          required: true
+          description: "Specifies the region the fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          schema:
+            type: "string"
+            example: "USA"
+        - name: "registration"
+          in: "query"
+          required: true
+          description: "Specifies the registration number of the fertilizer."
+          schema:
+            type: "string"
+            example: "a12e9i84"
       responses:
         "200":
           description: "A collection of documents for the specified fertilizer."
@@ -742,10 +836,10 @@ paths:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=0"
+                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?countryCode=USA&registration=a12e9i84&itemLimit=10&pageOffset=0"
                       - "@type": "Link"
                         rel: "nextPage"
-                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=10"
+                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?countryCode=USA&registration=a12e9i84&itemLimit=10&pageOffset=10"
                     total: 100
                     values:
                       - "@type": "Document"
@@ -1189,8 +1283,6 @@ paths:
                   archived: false
                   restrictedUse: false
                   referenceGuid: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
-                  liquidWeight: 3.14
-                  weightUnit: "lb/gal"
                   epaRegistration: "a12e9i84"
                   createdTime: "2017-03-20T21:12:53.870Z"
                   modifiedTime: "2017-03-22T21:12:53.870Z"
@@ -3259,7 +3351,7 @@ paths:
             example: "79186"
         - name: "countryCode"
           in: "query"
-          description: "Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          description: "Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response. Default region will be USA."
           schema:
             type: "string"
             example: "USA"
@@ -3286,6 +3378,7 @@ paths:
                       - "@type": "ReferenceVariety"
                         id: "1f8c12b4-126f-11ec-82a8-0242ac130003"
                         referenceId: "1f8c12b4-126f-11ec-82a8-0242ac130003"
+                        referenceGuid: "1f8c12b4-126f-11ec-82a8-0242ac130003"
                         category: "VARIETY"
                         name: "S73-Z5 - 50lb bag"
                         companyName: "NK"
@@ -3298,6 +3391,7 @@ paths:
                       - "@type": "ReferenceVariety"
                         id: "75138754-6381-49c7-be9e-9e08a847075a"
                         referenceId: "75138754-6381-49c7-be9e-9e08a847075a"
+                        referenceGuid: "75138754-6381-49c7-be9e-9e08a847075a"
                         category: "VARIETY"
                         name: "Cornelius 155A"
                         companyName: "Cornelius Seed"
@@ -3322,6 +3416,15 @@ paths:
       description: "Single variety from industry data sources, such as CDMS."
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "embed"
+          in: "query"
+          description: "An embeddable list of properties which are optional by default."
+          schema:
+            type: "array"
+            items:
+              type: "string"
+            enum:
+              - "documents"
       responses:
         "200":
           description: "A single variety matching the specified erid."
@@ -3336,6 +3439,7 @@ paths:
                     "@type": "ReferenceVariety"
                     id: "1f8c12b4-126f-11ec-82a8-0242ac130003"
                     referenceId: "1f8c12b4-126f-11ec-82a8-0242ac130003"
+                    referenceGuid: "1f8c12b4-126f-11ec-82a8-0242ac130003"
                     category: "VARIETY"
                     name: "S73-Z5 - 50lb bag"
                     companyName: "NK"
@@ -3345,6 +3449,14 @@ paths:
                     sourceSystemProductId: "905P24925"
                     createdTime: "2017-03-21T21:12:53.865Z"
                     modifiedTime: "2018-04-06T15:12:52.910Z"
+                    documentsList:
+                      - "@type": "Document"
+                        erid: "08e930ee-4c31-41b6-b57e-8c0a8e1284a4"
+                        docType: "24(c) Registration"
+                        productErid: "388ab719-277d-4032-a2c3-40a297d8f482"
+                        description: "CO-090003 R-4310 102119 For Use on Alfalfa Grown for Seed"
+                        fileName: "ld7OD026.pdf"
+                        expirationDate: "2017-03-22"
         "403":
           description: "The user does not have access to manage products."
         "404":
@@ -3432,6 +3544,13 @@ paths:
       description: "List of all the documents for a variety from industry data sources, such as CDMS."
       parameters:
         - $ref: "#/components/parameters/ERID"
+        - name: "countryCode"
+          in: "query"
+          required: true
+          description: "Specifies the region the variety data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+          schema:
+            type: "string"
+            example: "USA"
       responses:
         "200":
           description: "A collection of documents for the specified seed variety."
@@ -3446,10 +3565,10 @@ paths:
                     links:
                       - "@type": "Link"
                         rel: "self"
-                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=0"
+                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?countryCode=USA&itemLimit=10&pageOffset=0"
                       - "@type": "Link"
                         rel: "nextPage"
-                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?itemLimit=10&pageOffset=10"
+                        uri: "https://sandboxapi.deere.com/platform/varieties/579f069a-3a0d-431d-a326-4fdbab12146c/documents?countryCode=USA&itemLimit=10&pageOffset=10"
                     total: 100
                     values:
                       - "@type": "Document"
@@ -3472,7 +3591,6 @@ paths:
       description: "This endpoint will set attribute overrides while importing a reference variety to your organization. The reference varieties are immutable, however, they can still be archived or made available. The response headers from the GET endpoints will include the attributes that can be overridden."
       parameters:
         - $ref: "#/components/parameters/ERID"
-        - $ref: "#/components/parameters/OrganizationID"
       requestBody:
         description: "The product to add."
         content:
@@ -3997,6 +4115,7 @@ components:
           type: "string"
           example: "BaseResource"
         links:
+          required: true
           type: "array"
           description: "Provides a reference to an associated object or list."
           items:
@@ -4054,7 +4173,6 @@ components:
     Chemical:
       type: "object"
       allOf:
-        - $ref: "#/components/schemas/BaseResource_Chemicals"
         - properties:
             "@type":
               example: "Chemical"
@@ -4136,15 +4254,6 @@ components:
               example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
               format: "uuid"
               description: "product reference id"
-            liquidWeight:
-              type: "number"
-              format: "double"
-              example: 3.14
-              description: "Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available."
-            weightUnit:
-              type: "string"
-              example: "lb/gal"
-              description: "Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available."
             countryCode:
               type: "string"
               example: "USA"
@@ -5280,7 +5389,7 @@ components:
                           type: "string"
                           example: "SeasonalParameter"
                         year:
-                          type: "number"
+                          type: "integer"
                           example: 2026
                           format: "int32"
                           description: "The year in which the product is present."
@@ -5300,7 +5409,7 @@ components:
                 type: "string"
                 example: "SeasonalParameter"
               year:
-                type: "number"
+                type: "integer"
                 example: 2026
                 format: "int32"
                 description: "The year in which the dry blend is present."
@@ -5479,7 +5588,6 @@ components:
     Fertilizer_Fertilizers:
       type: "object"
       allOf:
-        - $ref: "#/components/schemas/BaseResource"
         - properties:
             "@type":
               example: "Fertilizer"
@@ -5966,6 +6074,20 @@ components:
                 - "CORN_WET"
                 - "ALFALFA"
               description: "The name of the crop that this variety is associated with."
+            seasonalParameters:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  "@type":
+                    type: "string"
+                    example: "SeasonalParameter"
+                    description: "The type of the tank mix SeasonalParameters."
+                  year:
+                    type: "integer"
+                    example: 2026
+                    format: "int32"
+                    description: "The year in which the tank mix was in use."
     PostFertilizer:
       type: "object"
       allOf:
@@ -6120,16 +6242,13 @@ components:
       allOf:
         - properties:
             companyName:
+              required: true
               type: "string"
               example: "Monsanto"
               description: "The name of the input manufacturer for chemical, fertilizer or variety."
             "@type":
+              required: true
               example: "ProductCompany"
-      required:
-        - "@type"
-        - "id"
-        - "links"
-        - "companyName"
     PutChemical:
       type: "object"
       allOf:
@@ -6189,11 +6308,6 @@ components:
               type: "boolean"
               description: "Whether or not this product has been flagged for use as a tank mix carrier. Only applicable in an organizational context. **If set to true, cannot subsequently set to false.** Also, carrier names must be unique within the organization regardless of their type."
               example: false
-            liquidWeight:
-              type: "number"
-              format: "double"
-              example: 3.14
-              description: "Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available."
             epaRegistration<sup>DEPRECATED</sup>:
               type: "string"
               example: "a12e9i84"
@@ -6203,16 +6317,12 @@ components:
               format: "date-time"
               example: "2017-03-21T21:12:53.865Z"
               description: "product creation time"
-            modifiedTime<sup>DEPRECATED</sup>:
+            modifiedTime:
               type: "string"
               format: "date-time"
               example: "2018-04-06T15:12:52.910Z"
               description: "product modification time"
               readOnly: true
-            weightUnit:
-              type: "string"
-              example: "lb/gal"
-              description: "Optional. Will be present if the chemical's materialClassification is LIQUID and has density information available."
             activeIngredients:
               type: "array"
               items:
@@ -6368,7 +6478,6 @@ components:
     ReferenceChemical:
       type: "object"
       allOf:
-        - $ref: "#/components/schemas/BaseResource_Chemicals"
         - properties:
             "@type":
               example: "ReferenceChemical"
@@ -6459,11 +6568,21 @@ components:
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "product creation time"
-            modifiedTime<sup>DEPRECATED</sup>:
+            modifiedTime:
               type: "string"
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "product modification time"
+            activeIngredients:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/ActiveIngredientEmbed"
+              description: "List of active ingredients present in the chemical. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used."
+            documentsList:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Document_Chemicals"
+              description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
     ReferenceChemicalCollection:
       type: "object"
       allOf:
@@ -6476,7 +6595,6 @@ components:
     ReferenceFertilizer:
       type: "object"
       allOf:
-        - $ref: "#/components/schemas/BaseResource"
         - properties:
             "@type":
               type: "string"
@@ -6544,7 +6662,7 @@ components:
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "production creation time"
-            modifiedTime<sup>DEPRECATED</sup>:
+            modifiedTime:
               type: "string"
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
@@ -6565,6 +6683,16 @@ components:
               description: "The source system identifier for the reference fertilizer."
               example: "905P24925"
               nullable: false
+            activeIngredients:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/ActiveIngredientEmbed_Fertilizers"
+              description: "List of active ingredients present in the fertilizer. Includes the name and quantity of each ingredient. Only present when `embed=activeIngredients` is used."
+            documentsList:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Document"
+              description: "List of documents for the variety. For example, Tech Sheet, SDS Label. Only present when `embed=documents` is used."
     ReferenceFertilizerCollection:
       type: "object"
       allOf:
@@ -6641,7 +6769,6 @@ components:
     ReferenceVariety:
       type: "object"
       allOf:
-        - $ref: "#/components/schemas/BaseResource"
         - properties:
             "@type":
               example: "ReferenceVariety"
@@ -6701,11 +6828,16 @@ components:
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "product created time"
-            modifiedTime<sup>DEPRECATED</sup>:
+            modifiedTime:
               type: "string"
               format: "date-time"
               example: "2019-03-27T14:59:57.000Z"
               description: "product modified time"
+            documentsList:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Document"
+              description: "List of documents for the variety. For example, Tech Sheet, SDS Label."
     ReferenceVarietyCollection:
       type: "object"
       allOf:
