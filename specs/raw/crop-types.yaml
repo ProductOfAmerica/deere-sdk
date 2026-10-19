@@ -175,10 +175,12 @@ components:
                     color: "#FFE119"
                     densityFactor:
                       "@type": "Density"
+                      representation: "vrCropWeightBale"
                       value: 25.4
                       unit: "kg1bu-1"
                     standardPayableMoisture:
                       "@type": "Moisture"
+                      representation: "vrStandardPayableMoisture"
                       value: 15
                       unit: "%"
                     supportedEquipmentTypes:
@@ -222,10 +224,12 @@ components:
                 color: "#FFE119"
                 densityFactor:
                   "@type": "Density"
+                  representation: "vrCropWeightBale"
                   value: 25.4
                   unit: "kg1bu-1"
                 standardPayableMoisture:
                   "@type": "Moisture"
+                  representation: "vrStandardPayableMoisture"
                   value: 15
                   unit: "%"
                 supportedEquipmentTypes:
@@ -271,10 +275,12 @@ components:
                 color: "#FFE119"
                 densityFactor:
                   "@type": "Density"
+                  representation: "vrCropWeightBale"
                   value: 25.4
                   unit: "kg1bu-1"
                 standardPayableMoisture:
                   "@type": "Moisture"
+                  representation: "vrStandardPayableMoisture"
                   value: 15
                   unit: "%"
                 supportedEquipmentTypes:
@@ -327,10 +333,12 @@ components:
                     color: "#FFE119"
                     densityFactor:
                       "@type": "Density"
+                      representation: "vrCropWeightBale"
                       value: 25.4
                       unit: "kg1bu-1"
                     standardPayableMoisture:
                       "@type": "Moisture"
+                      representation: "vrStandardPayableMoisture"
                       value: 15
                       unit: "%"
                     supportedEquipmentTypes:
@@ -379,6 +387,10 @@ components:
           example: "2021-10-14T11:55:00Z"
         Density:
           properties:
+            representation:
+              type: "string"
+              example: "vrCropWeightBale"
+              description: "The representation for density."
             value:
               type: "number"
               example: "0.0"
@@ -389,6 +401,10 @@ components:
               description: "This indicates the unit."
         Moisture:
           properties:
+            representation:
+              type: "string"
+              example: "vrStandardPayableMoisture"
+              description: "The representation for moisture."
             value:
               type: "number"
               example: "1.0"
@@ -436,6 +452,10 @@ components:
           example: "2021-10-14T11:55:00Z"
         Density:
           properties:
+            representation:
+              type: "string"
+              example: "vrCropWeightBale"
+              description: "The representation for density."
             value:
               type: "number"
               example: "0.0"
@@ -446,6 +466,10 @@ components:
               description: "This indicates the unit."
         Moisture:
           properties:
+            representation:
+              type: "string"
+              example: "vrStandardPayableMoisture"
+              description: "The representation for moisture."
             moistureValue:
               type: "number"
               example: "1.0"
@@ -493,6 +517,10 @@ components:
           example: "2021-10-14T11:55:00Z"
         Density:
           properties:
+            representation:
+              type: "string"
+              example: "vrCropWeightBale"
+              description: "The representation for density."
             value:
               type: "number"
               example: "0.0"
@@ -503,6 +531,10 @@ components:
               description: "This indicates the unit."
         Moisture:
           properties:
+            representation:
+              type: "string"
+              example: "vrStandardPayableMoisture"
+              description: "The representation for moisture."
             value:
               type: "number"
               example: "1.0"
@@ -550,6 +582,10 @@ components:
           example: "2021-10-14T11:55:00Z"
         Density:
           properties:
+            representation:
+              type: "string"
+              example: "vrCropWeightBale"
+              description: "The representation for density."
             value:
               type: "number"
               example: "0.0"
@@ -560,6 +596,10 @@ components:
               description: "This indicates the unit."
         Moisture:
           properties:
+            representation:
+              type: "string"
+              example: "vrStandardPayableMoisture"
+              description: "The representation for moisture."
             value:
               type: "number"
               example: "1.0"

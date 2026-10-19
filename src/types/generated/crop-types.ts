@@ -199,6 +199,11 @@ export interface components {
       lastModifiedTime?: string;
       Density?: {
         /**
+         * @description The representation for density.
+         * @example vrCropWeightBale
+         */
+        representation?: string;
+        /**
          * @description This is cropType densityFactor value.
          * @example 0.0
          */
@@ -210,6 +215,11 @@ export interface components {
         unit?: string;
       };
       Moisture?: {
+        /**
+         * @description The representation for moisture.
+         * @example vrStandardPayableMoisture
+         */
+        representation?: string;
         /**
          * @description This is the standard payable moisture value for the crop type.
          * @example 1.0
@@ -267,6 +277,11 @@ export interface components {
       lastModifiedTime?: string;
       Density?: {
         /**
+         * @description The representation for density.
+         * @example vrCropWeightBale
+         */
+        representation?: string;
+        /**
          * @description This is cropType densityFactor value.
          * @example 0.0
          */
@@ -278,6 +293,11 @@ export interface components {
         unit?: string;
       };
       Moisture?: {
+        /**
+         * @description The representation for moisture.
+         * @example vrStandardPayableMoisture
+         */
+        representation?: string;
         /**
          * @description This is cropType standardPayableMoisture value.
          * @example 1.0
@@ -335,6 +355,11 @@ export interface components {
       lastModifiedTime?: string;
       Density?: {
         /**
+         * @description The representation for density.
+         * @example vrCropWeightBale
+         */
+        representation?: string;
+        /**
          * @description This is cropType densityFactor value.
          * @example 0.0
          */
@@ -346,6 +371,11 @@ export interface components {
         unit?: string;
       };
       Moisture?: {
+        /**
+         * @description The representation for moisture.
+         * @example vrStandardPayableMoisture
+         */
+        representation?: string;
         /**
          * @description This is the standard payable moisture value for the crop type.
          * @example 1.0
@@ -403,6 +433,11 @@ export interface components {
       lastModifiedTime?: string;
       Density?: {
         /**
+         * @description The representation for density.
+         * @example vrCropWeightBale
+         */
+        representation?: string;
+        /**
          * @description This is cropType densityFactor value.
          * @example 0.0
          */
@@ -414,6 +449,11 @@ export interface components {
         unit?: string;
       };
       Moisture?: {
+        /**
+         * @description The representation for moisture.
+         * @example vrStandardPayableMoisture
+         */
+        representation?: string;
         /**
          * @description This is the standard payable moisture value for the crop type.
          * @example 1.0

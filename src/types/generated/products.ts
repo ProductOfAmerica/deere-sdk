@@ -4817,7 +4817,7 @@ export interface components {
       documentsList?: components['schemas']['Document_Chemicals'][];
     };
     ReferenceChemicalCollection: components['schemas']['CollectionBase_Chemicals'] & {
-      values?: components['schemas']['ReferenceChemical'][];
+      values?: components['schemas']['ReferenceSearchChemical'][];
     };
     ReferenceFertilizer: {
       /** @example Fertilizer */
@@ -4915,7 +4915,7 @@ export interface components {
       documentsList?: components['schemas']['Document'][];
     };
     ReferenceFertilizerCollection: components['schemas']['CollectionBase_Fertilizers'] & {
-      values?: components['schemas']['ReferenceFertilizer'][];
+      values?: components['schemas']['ReferenceSearchFertilizer'][];
     };
     ReferenceProductOverrideStatus: {
       /**
@@ -4966,6 +4966,267 @@ export interface components {
        */
       countryCode?: string;
     } & components['schemas']['CommonProductPointerRequest'];
+    ReferenceSearchChemical: {
+      /** @example ReferenceChemical */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description The primary identifier of the reference chemical.
+       * @example 8fb34898-64f5-5a1e-a698-34ab348220a7
+       */
+      id?: string;
+      /**
+       * @description The common name of the reference chemical.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example 8fb34898-64f5-5a1e-a698-34ab348220a7
+       */
+      referenceId?: string;
+      /**
+       * @description The state of reference chemical.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example CHEMICAL
+       * @enum {string}
+       */
+      category?: 'CHEMICAL';
+      /**
+       * @description Specifies the region the reference chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Specifies the type of chemical.
+       * @example HERBICIDE
+       * @enum {string}
+       */
+      type?:
+        | 'ADDITIVE'
+        | 'ADJUVANT'
+        | 'DEFOLIANT'
+        | 'FUNGICIDE'
+        | 'GROWTH_REGULATOR'
+        | 'HERBICIDE'
+        | 'INSECTICIDE'
+        | 'NITROGEN_STABILIZER';
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * Format: integer
+       * @description The source system for the reference chemical.
+       * @example 3
+       */
+      sourceSystem?: string;
+      /**
+       * @description The source system identifier for the reference chemical.
+       * @example 905P24925
+       */
+      sourceSystemProductId?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * @description product registration id
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description product creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+    };
+    ReferenceSearchFertilizer: {
+      /** @example Fertilizer */
+      '@type'?: string;
+      /**
+       * @description The primary identifier for the fertilizer.
+       * @example beaa8d07-1cef-4eea-99b6-19f129e988ed
+       */
+      id?: string;
+      /**
+       * @description The common name of the reference fertilizer.
+       * @example Round Up
+       */
+      name?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example Monsanto
+       */
+      companyName?: string;
+      /**
+       * @description Registration id used for regulatory purposes.
+       * @example a12e9i84
+       */
+      registration?: string;
+      /**
+       * @description Specifies the state of the chemical.
+       * @example LIQUID
+       * @enum {string}
+       */
+      materialClassification?: 'DRY' | 'LIQUID' | 'GAS';
+      /**
+       * @example FERTILIZER
+       * @enum {string}
+       */
+      category?: 'FERTILIZER';
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * @description Specifies the region the reference fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * @description Specifies the type of the reference fertilizer.
+       * @example MANURE
+       * @enum {string}
+       */
+      type?: 'MANURE' | 'FERTILIZER';
+      /**
+       * Format: uuid
+       * @description product reference id
+       * @example beaa8d07-1cef-4eea-99b6-19f129e988ed
+       */
+      referenceId?: string;
+      /**
+       * @description production registration number details
+       * @example a12e9i84
+       */
+      epaRegistration?: string;
+      /**
+       * Format: date-time
+       * @description production creation time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description production modification time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+      /**
+       * @description Whether or not the product is restricted for use by the governing entity.
+       * @example false
+       */
+      restrictedUse?: boolean;
+      /**
+       * Format: integer
+       * @description The source system for the reference fertilizer.
+       * @example 3
+       */
+      sourceSystem?: string;
+      /**
+       * @description The source system identifier for the reference fertilizer.
+       * @example 905P24925
+       */
+      sourceSystemProductId?: string;
+    };
+    ReferenceSearchVariety: {
+      /** @example ReferenceVariety */
+      '@type'?: unknown;
+      /**
+       * Format: uuid
+       * @description Primary identifier for reference variety.
+       * @example 1f8c12b4-126f-11ec-82a8-0242ac130003
+       */
+      id?: string;
+      /**
+       * Format: uuid
+       * @description product id of the reference variety
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceId?: string;
+      /**
+       * @example VARIETY
+       * @enum {string}
+       */
+      category?: 'VARIETY';
+      /**
+       * @description The common name of the reference variety.
+       * @example S73-Z5 - 50lb bag
+       */
+      name?: string;
+      /**
+       * Format: uuid
+       * @description Optional. Denotes whether this product is from the global reference list.
+       * @example 87b4a1e7-210b-482c-8a7a-19e9f644e914
+       */
+      referenceGuid?: string;
+      /**
+       * @description The name of the input manufacturer.
+       * @example NK
+       */
+      companyName?: string;
+      /**
+       * @description The identifier of the crop type that this reference variety is associated with (see the Crop Types API).
+       * @example SOYBEANS
+       */
+      cropName?: string;
+      /**
+       * @description Specifies the region the reference variety data belongs to. Some data may not be available in certain regions and data will not be included in the response.
+       * @example USA
+       */
+      countryCode?: string;
+      /**
+       * Format: integer
+       * @description The source system for the reference variety.
+       * @example 3
+       */
+      sourceSystem?: string;
+      /**
+       * @description The source system identifier for the reference variety.
+       * @example 905P24925
+       */
+      sourceSystemProductId?: string;
+      /**
+       * Format: date-time
+       * @description product created time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      createdTime?: string;
+      /**
+       * Format: date-time
+       * @description product modified time
+       * @example 2019-03-27T14:59:57.000Z
+       */
+      modifiedTime?: string;
+    };
     ReferenceVariety: {
       /** @example ReferenceVariety */
       '@type'?: unknown;
@@ -5039,7 +5300,7 @@ export interface components {
       documentsList?: components['schemas']['Document'][];
     };
     ReferenceVarietyCollection: components['schemas']['CollectionBase'] & {
-      values?: components['schemas']['ReferenceVariety'][];
+      values?: components['schemas']['ReferenceSearchVariety'][];
     };
     SeasonalParameters: {
       /** @example SeasonalParameter */

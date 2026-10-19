@@ -6448,7 +6448,7 @@ components:
             values:
               type: "array"
               items:
-                $ref: "#/components/schemas/ReferenceChemical"
+                $ref: "#/components/schemas/ReferenceSearchChemical"
     ReferenceFertilizer:
       type: "object"
       allOf:
@@ -6558,7 +6558,7 @@ components:
             values:
               type: "array"
               items:
-                $ref: "#/components/schemas/ReferenceFertilizer"
+                $ref: "#/components/schemas/ReferenceSearchFertilizer"
     ReferenceProductOverrideStatus:
       type: "object"
       properties:
@@ -6623,6 +6623,262 @@ components:
               description: "Country of the product to which it belongs."
               x-required-boolean: true
         - $ref: "#/components/schemas/CommonProductPointerRequest"
+    ReferenceSearchChemical:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              example: "ReferenceChemical"
+            id:
+              type: "string"
+              format: "uuid"
+              example: "8fb34898-64f5-5a1e-a698-34ab348220a7"
+              description: "The primary identifier of the reference chemical."
+              nullable: false
+            name:
+              type: "string"
+              example: "Round Up"
+              description: "The common name of the reference chemical."
+              nullable: false
+            companyName:
+              type: "string"
+              description: "The name of the input manufacturer."
+              example: "Monsanto"
+              nullable: false
+            registration:
+              type: "string"
+              example: "a12e9i84"
+              description: "Registration id used for regulatory purposes."
+              nullable: false
+            referenceId:
+              type: "string"
+              example: "8fb34898-64f5-5a1e-a698-34ab348220a7"
+              format: "uuid"
+              description: "product reference id"
+            materialClassification:
+              type: "string"
+              enum:
+                - "DRY"
+                - "LIQUID"
+                - "GAS"
+              example: "LIQUID"
+              description: "The state of reference chemical."
+            category:
+              type: "string"
+              enum:
+                - "CHEMICAL"
+              example: "CHEMICAL"
+            countryCode:
+              type: "string"
+              example: "USA"
+              description: "Specifies the region the reference chemical data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+            type:
+              type: "string"
+              nullable: false
+              example: "HERBICIDE"
+              enum:
+                - "ADDITIVE"
+                - "ADJUVANT"
+                - "DEFOLIANT"
+                - "FUNGICIDE"
+                - "GROWTH_REGULATOR"
+                - "HERBICIDE"
+                - "INSECTICIDE"
+                - "NITROGEN_STABILIZER"
+              description: "Specifies the type of chemical."
+            restrictedUse:
+              type: "boolean"
+              example: false
+              nullable: false
+              description: "Whether or not the product is restricted for use by the governing entity."
+            sourceSystem:
+              type: "string"
+              format: "integer"
+              description: "The source system for the reference chemical."
+              example: 3
+              nullable: false
+            sourceSystemProductId:
+              type: "string"
+              description: "The source system identifier for the reference chemical."
+              example: "905P24925"
+              nullable: false
+            referenceGuid:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "Optional. Denotes whether this product is from the global reference list."
+            epaRegistration:
+              type: "string"
+              example: "a12e9i84"
+              description: "product registration id"
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product creation time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product modification time"
+    ReferenceSearchFertilizer:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              type: "string"
+              example: "Fertilizer"
+            id:
+              type: "string"
+              example: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
+              description: "The primary identifier for the fertilizer."
+            name:
+              type: "string"
+              example: "Round Up"
+              description: "The common name of the reference fertilizer."
+              nullable: false
+            companyName:
+              type: "string"
+              description: "The name of the input manufacturer."
+              example: "Monsanto"
+              nullable: false
+            registration:
+              type: "string"
+              example: "a12e9i84"
+              description: "Registration id used for regulatory purposes."
+              nullable: false
+            materialClassification:
+              type: "string"
+              enum:
+                - "DRY"
+                - "LIQUID"
+                - "GAS"
+              example: "LIQUID"
+              description: "Specifies the state of the chemical."
+            category:
+              type: "string"
+              enum:
+                - "FERTILIZER"
+              example: "FERTILIZER"
+            referenceGuid:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "Optional. Denotes whether this product is from the global reference list."
+            countryCode:
+              type: "string"
+              example: "USA"
+              description: "Specifies the region the reference fertilizer data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+            type:
+              type: "string"
+              nullable: false
+              example: "MANURE"
+              enum:
+                - "MANURE"
+                - "FERTILIZER"
+              description: "Specifies the type of the reference fertilizer."
+            referenceId:
+              type: "string"
+              example: "beaa8d07-1cef-4eea-99b6-19f129e988ed"
+              format: "uuid"
+              description: "product reference id"
+            epaRegistration:
+              type: "string"
+              example: "a12e9i84"
+              description: "production registration number details"
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "production creation time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "production modification time"
+            restrictedUse:
+              type: "boolean"
+              example: false
+              nullable: false
+              description: "Whether or not the product is restricted for use by the governing entity."
+            sourceSystem:
+              type: "string"
+              format: "integer"
+              description: "The source system for the reference fertilizer."
+              example: 3
+              nullable: false
+            sourceSystemProductId:
+              type: "string"
+              description: "The source system identifier for the reference fertilizer."
+              example: "905P24925"
+              nullable: false
+    ReferenceSearchVariety:
+      type: "object"
+      allOf:
+        - properties:
+            "@type":
+              example: "ReferenceVariety"
+            id:
+              description: "Primary identifier for reference variety."
+              type: "string"
+              format: "uuid"
+              example: "1f8c12b4-126f-11ec-82a8-0242ac130003"
+              nullable: false
+            referenceId:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "product id of the reference variety"
+            category:
+              type: "string"
+              enum:
+                - "VARIETY"
+              example: "VARIETY"
+            name:
+              type: "string"
+              example: "S73-Z5 - 50lb bag"
+              description: "The common name of the reference variety."
+              nullable: false
+            referenceGuid:
+              type: "string"
+              example: "87b4a1e7-210b-482c-8a7a-19e9f644e914"
+              format: "uuid"
+              description: "Optional. Denotes whether this product is from the global reference list."
+            companyName:
+              type: "string"
+              description: "The name of the input manufacturer."
+              example: "NK"
+              nullable: false
+            cropName:
+              type: "string"
+              example: "SOYBEANS"
+              description: "The identifier of the crop type that this reference variety is associated with (see the Crop Types API)."
+              nullable: false
+            countryCode:
+              type: "string"
+              example: "USA"
+              description: "Specifies the region the reference variety data belongs to. Some data may not be available in certain regions and data will not be included in the response."
+            sourceSystem:
+              type: "string"
+              format: "integer"
+              description: "The source system for the reference variety."
+              example: 3
+              nullable: false
+            sourceSystemProductId:
+              type: "string"
+              description: "The source system identifier for the reference variety."
+              example: "905P24925"
+              nullable: false
+            createdTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product created time"
+            modifiedTime:
+              type: "string"
+              format: "date-time"
+              example: "2019-03-27T14:59:57.000Z"
+              description: "product modified time"
     ReferenceVariety:
       type: "object"
       allOf:
@@ -6703,7 +6959,7 @@ components:
             values:
               type: "array"
               items:
-                $ref: "#/components/schemas/ReferenceVariety"
+                $ref: "#/components/schemas/ReferenceSearchVariety"
     SeasonalParameters:
       type: "object"
       properties:

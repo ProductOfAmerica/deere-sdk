@@ -62,7 +62,7 @@ export class ProductsApi {
       countryCode?: string;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ReferenceChemical']>> {
+  ): Promise<PaginatedResponse<components['schemas']['ReferenceSearchChemical']>> {
     const query = new URLSearchParams();
     if (params?.searchString !== undefined) query.set('searchString', String(params.searchString));
     if (params?.chemicalType !== undefined) query.set('chemicalType', String(params.chemicalType));
@@ -74,7 +74,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
     const path = `/chemicals${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ReferenceChemical']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['ReferenceSearchChemical']>>(
       this.spec,
       path,
       options
@@ -193,7 +193,7 @@ export class ProductsApi {
       countryCode?: string;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ReferenceFertilizer']>> {
+  ): Promise<PaginatedResponse<components['schemas']['ReferenceSearchFertilizer']>> {
     const query = new URLSearchParams();
     if (params?.searchString !== undefined) query.set('searchString', String(params.searchString));
     if (params?.fertilizerType !== undefined)
@@ -206,7 +206,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
     const path = `/fertilizers${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ReferenceFertilizer']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['ReferenceSearchFertilizer']>>(
       this.spec,
       path,
       options
@@ -766,7 +766,7 @@ export class ProductsApi {
       countryCode?: string;
     },
     options?: RequestOptions
-  ): Promise<PaginatedResponse<components['schemas']['ReferenceVariety']>> {
+  ): Promise<PaginatedResponse<components['schemas']['ReferenceSearchVariety']>> {
     const query = new URLSearchParams();
     if (params?.searchString !== undefined) query.set('searchString', String(params.searchString));
     if (params?.cropName !== undefined) query.set('cropName', String(params.cropName));
@@ -777,7 +777,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
     const path = `/varieties${queryString ? `?${queryString}` : ''}`;
-    return this.client.get<PaginatedResponse<components['schemas']['ReferenceVariety']>>(
+    return this.client.get<PaginatedResponse<components['schemas']['ReferenceSearchVariety']>>(
       this.spec,
       path,
       options
