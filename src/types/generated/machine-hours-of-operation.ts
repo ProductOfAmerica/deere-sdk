@@ -92,7 +92,7 @@ export interface operations {
         startDate?: string;
         /** @description Filters hours of operation before a specified date. Request date as UTC Timestamp. */
         endDate?: string;
-        /** @description Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState */
+        /** @description Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState. This parameter is gated and is not yet available for all organizations. It will become generally available after the Measurement 2.0 release. */
         detailedState?: string;
         /** @description Only EngagedStates of RearPTOEngagement and FWDActuatorState are returned after merging, if the duration between 2 consecutive EngagedStates is less than provided value. */
         summarizeDuration?: string;

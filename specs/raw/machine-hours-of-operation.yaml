@@ -65,7 +65,7 @@ paths:
             default: "N/A"
         - name: "detailedState"
           in: "query"
-          description: "Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState"
+          description: "Current Supported DetailedStates (Send one at a time) - RearPTOEngagement, GenericMachineUtilization, GenericEngineUtilization, RoadbuildingMachineState, AutonomyMachineState and FrontWheelDriveActuatorState. This parameter is gated and is not yet available for all organizations. It will become generally available after the Measurement 2.0 release."
           required: false
           schema:
             type: "string"
