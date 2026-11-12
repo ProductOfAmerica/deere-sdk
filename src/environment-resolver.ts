@@ -62,9 +62,9 @@ export class UnsupportedEnvironmentError extends DeereError {
 /**
  * Find the override, if any, whose pattern this concrete path matches.
  *
- * Absent for 26 of 27 specs, so this returns undefined immediately in the
- * common case. Query strings are stripped before matching, because the
- * pattern describes the path only.
+ * Absent for most specs, so this returns undefined immediately in the common
+ * case. Query strings are stripped before matching, because the pattern
+ * describes the path only.
  *
  * Note on `supportedEnvironments`: it is recorded on each override but not
  * enforced here, deliberately mirroring the templated config above, which also

@@ -68,12 +68,14 @@ const deere = new Deere({
 
 // List all organizations
 const orgs = await deere.organizations.listAll();
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
 
 // Get fields for an organization
-const fields = await deere.fields.listAll(orgs[0].id);
+const fields = await deere.fields.listAll(orgId);
 
-// Get equipment
-const equipment = await deere.equipment.get();
+// Get farms for an organization
+const farms = await deere.farms.listAll(orgId);
 ```
 
 ---
@@ -131,7 +133,7 @@ The SDK uses raw John Deere subdomain names as environment values. Pass the subd
 | `sandboxapiqa`   | sandboxapiqa.deere.com     | Sandbox QA                       |
 | `apidev.tal`     | apidev.tal.deere.com       | Internal dev tier (rarely used)  |
 
-Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), the constructor throws `UnsupportedEnvironmentError` with the valid values for that spec.
+Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), calls to that API throw `UnsupportedEnvironmentError` before any request goes out, with the valid values for that spec. The constructor only rejects an environment name that isn't in the table above.
 
 </details>
 
@@ -604,7 +606,9 @@ const deere = new Deere({
 
 // Same API — HATEOAS resolution is transparent
 const orgs = await deere.organizations.listAll();
-const fields = await deere.fields.listAll(orgs[0].id);
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
+const fields = await deere.fields.listAll(orgId);
 ```
 
 When `hateoas: true`, the SDK fetches parent resources and follows their HAL links before accessing child resources. For example, `deere.fields.list('org-123')` first fetches `/organizations/org-123`, finds the `fields` link in its response, and uses that discovered URL. Link responses are cached per-session, so subsequent calls incur no extra latency.
@@ -627,9 +631,13 @@ await deere.client.warmLinkCache('organizations', ['/organizations']);
 
 // 3. Use the SDK normally — HATEOAS happens transparently
 const orgs = await deere.organizations.listAll();
-const org = await deere.organizations.get(orgs[0].id);
-const fields = await deere.fields.listAll(org.id);
-const boundaries = await deere.boundaries.listBoundaries(org.id, fields[0].id);
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
+const org = await deere.organizations.get(orgId);
+const fields = await deere.fields.listAll(orgId);
+const fieldId = fields[0]?.id;
+if (!fieldId) throw new Error('This organization has no fields');
+const boundaries = await deere.boundaries.listBoundaries(orgId, fieldId);
 
 // Console output (with hateoasDebug: true):
 // [HATEOAS] /organizations/org-123/fields → parent: /organizations/org-123, rel: fields → https://...
@@ -697,8 +705,8 @@ const deere = new Deere({
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
-| `UnsupportedEnvironmentError` | Constructor threw because `environment` doesn't match the spec's `servers` block. | N/A (thrown at construction) |
-| `NoServerConfigError`         | Constructor threw because a spec has no `servers` block at all.    | N/A      |
+| `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
+| `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
 
 ```typescript
 import {

@@ -6,6 +6,7 @@ import {
   UnsupportedEnvironmentError,
 } from '../src/environment-resolver.js';
 import { DeereError } from '../src/errors.js';
+import * as sdk from '../src/index.js';
 
 describe('resolveRequestUrl', () => {
   describe('templated specs', () => {
@@ -332,5 +333,21 @@ describe('resolveRequestUrl', () => {
         assert.notStrictEqual(err.status, 0);
       }
     });
+  });
+});
+
+// Regression: the README and the changelog document these names as importable
+// from 'deere-sdk', but the root index did not export them, so a consumer could
+// not write the documented `instanceof UnsupportedEnvironmentError` check.
+describe('package root exports', () => {
+  it('exposes the resolver error classes', () => {
+    assert.strictEqual(sdk.UnsupportedEnvironmentError, UnsupportedEnvironmentError);
+    assert.strictEqual(sdk.NoServerConfigError, NoServerConfigError);
+  });
+
+  it('exposes the SpecName type', () => {
+    // Type-level: `pnpm typecheck:test` fails if the export goes missing.
+    const spec: sdk.SpecName = 'fields';
+    assert.strictEqual(spec, 'fields');
   });
 });

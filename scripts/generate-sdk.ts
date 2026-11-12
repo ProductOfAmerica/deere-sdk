@@ -666,20 +666,22 @@ import { SafeFacades } from './safe/index.js';
  *
  * const deere = new Deere({
  *   accessToken: 'your-token',
- *   environment: 'sandbox',
+ *   environment: 'sandboxapi',
  * });
  *
  * const orgs = await deere.organizations.listAll();
- * const farms = await deere.farms.listAll(orgs[0].id);
- * const fields = await deere.fields.listAll(orgs[0].id);
+ * const orgId = orgs[0]?.id;
+ * if (!orgId) throw new Error('No organization available for this token');
+ *
+ * const farms = await deere.farms.listAll(orgId);
+ * const fields = await deere.fields.listAll(orgId);
+ * const fieldId = fields[0]?.id;
+ * if (!fieldId) throw new Error('This organization has no fields');
  *
  * // Safe facades force query params that JD's API requires for a complete
  * // response but the raw SDK leaves optional. See src/safe/ and
  * // scripts/embed-contracts.yaml for the contract invariants they enforce.
- * const ops = await deere.safe.fieldOperations.listAllWithMeasurements(
- *   orgs[0].id,
- *   fields[0].id
- * );
+ * const ops = await deere.safe.fieldOperations.listAllWithMeasurements(orgId, fieldId);
  * \`\`\`
  */
 export class Deere {

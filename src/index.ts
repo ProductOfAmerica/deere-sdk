@@ -9,21 +9,21 @@
  *
  * const deere = new Deere({
  *   accessToken: 'your-token',
- *   environment: 'sandbox', // or 'production'
+ *   environment: 'sandboxapi', // or 'api' for production
  * });
  *
  * // List all organizations
  * const orgs = await deere.organizations.listAll();
- * console.log(orgs);
+ * const orgId = orgs[0]?.id;
+ * if (!orgId) throw new Error('No organization available for this token');
  *
  * // Get fields for an organization
- * const fields = await deere.fields.listAll(orgs[0].id);
+ * const fields = await deere.fields.listAll(orgId);
+ * const fieldId = fields[0]?.id;
+ * if (!fieldId) throw new Error('This organization has no fields');
  *
- * // Get field boundary
- * const boundary = await deere.fields.getActiveBoundary(orgs[0].id, fields[0].id);
- *
- * // Get harvest data
- * const harvests = await deere.fieldOperations.getHarvestData(orgs[0].id, fields[0].id);
+ * // Get a field's operations with their measurement data
+ * const ops = await deere.safe.fieldOperations.listAllWithMeasurements(orgId, fieldId);
  * ```
  *
  * @packageDocumentation
@@ -37,6 +37,7 @@ export type {
   Link,
   PaginatedResponse,
   RequestOptions,
+  SpecName,
 } from './client.js';
 // Low-level client
 export {
@@ -49,6 +50,8 @@ export {
 } from './client.js';
 // Main SDK class
 export { createDeere, Deere } from './deere.js';
+// URL-resolver errors, thrown per call before any HTTP request
+export { NoServerConfigError, UnsupportedEnvironmentError } from './environment-resolver.js';
 
 // Safe facades that force query params the raw API leaves optional.
 // See scripts/embed-contracts.yaml and src/safe/ for context.
