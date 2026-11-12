@@ -40,7 +40,9 @@ export class NoServerConfigError extends DeereError {
 
 /**
  * Thrown when a spec is available but does not support the requested
- * environment. The error message lists supported envs + concrete alternatives.
+ * environment. The message lists the environments the spec does support and
+ * names no others: it used to recommend 'apiqa.tal' for every spec, which
+ * `equipment` and `aemp` reject with this same error.
  */
 export class UnsupportedEnvironmentError extends DeereError {
   constructor(specName: string, environment: string, supported: readonly string[]) {
@@ -48,10 +50,7 @@ export class UnsupportedEnvironmentError extends DeereError {
     super(
       `The '${specName}' API does not support environment '${environment}'.\n\n` +
         `Supported environments for this spec: ${supportedList}.\n\n` +
-        `This usually means the underlying JD backend has a different tier ` +
-        `structure than the platform APIs (the ISG proxy uses qual/cert/prod ` +
-        `tiers, with no sandbox or dev tier). For testing, try environment ` +
-        `'apiqa.tal' (qual tier). For production, use 'api' (prod tier).`,
+        `John Deere's spec for this API declares no server for that environment.`,
       CLIENT_ERROR_STATUS,
       'UnsupportedEnvironment'
     );
