@@ -7,13 +7,21 @@
  *
  * Two checks per fenced `typescript` block:
  *   1. It compiles, as its own module, with `deere-sdk` mapped to src/index.ts.
- *   2. Every API it reaches is served in the environment of every client it
- *      constructs. Types cannot see this one: `deere.equipment.get()` compiles
- *      on any client and throws at the first call on the default environment.
+ *   2. Every call to an API with a fixed host list is made on a client built
+ *      for an environment that API has a host for. Types cannot see this one:
+ *      `deere.equipment.get()` compiles on any client and throws at the first
+ *      call on the default environment.
  *
- * Neither check says anything about what John Deere's API accepts at runtime.
- * The second cannot see through a deliberate escape from the type system
- * (`as any`), and does not look at absolute URLs passed to `fetchUrl`.
+ * The second check refuses what it cannot follow. A call counts as fine only
+ * when the check can trace the object it is made on back to a `const` client
+ * constructed in the same block with a literal environment (or to the default
+ * client a fragment may assume). A parameter, a `let`, a helper, a class field:
+ * all reported. That costs some legitimate ways of writing an example, and in
+ * exchange an unfamiliar construction cannot pass by going unrecognised.
+ *
+ * Limits. Neither check says anything about what John Deere's API accepts at
+ * runtime. The second does not see a call made through a value typed `any`,
+ * and does not look at absolute URLs passed to `fetchUrl` or `followLink`.
  */
 
 import assert from 'node:assert';
@@ -47,29 +55,18 @@ interface BlockDiagnostic {
   message: string;
 }
 
-/** A place where a block has its hands on a John Deere API. */
-interface ApiUse {
+/** A call to an SDK method that sends a request, or a reference that could become one. */
+interface ApiCall {
   line: number;
   text: string;
-  /** Name of the generated API class or safe facade the value is an instance of. */
+  /** The generated API class or safe facade the method belongs to. */
   apiClass?: string;
-  /** Spec name passed straight to a `DeereClient` method. */
+  /** The spec name, for a call made straight on `DeereClient`. */
   spec?: string;
-  /** Why the API cannot be told: the use is reported whatever the environment. */
-  unknown?: string;
-}
-
-/** A client that a block constructs, or is handed from outside. */
-interface ClientOrigin {
-  line: number;
-  text: string;
-  /** The environment it was built for; undefined when the block does not show it. */
-  environment: string | undefined;
-}
-
-interface Reach {
-  uses: ApiUse[];
-  clients: ClientOrigin[];
+  /** The environment of the client the call is made on, when the block shows it. */
+  environment?: string;
+  /** Why the spec or the environment could not be established. */
+  unclear?: string;
 }
 
 /**
@@ -86,6 +83,7 @@ declare const accessToken: string;
 const MARKER = /^<!--\s*readme-check:\s*(.*?)\s*-->\s*$/;
 const SKIP_DIRECTIVE = /^skip:\s*(\S.*)$/;
 const FENCE = /^(\s*)(`{3,}|~{3,})\s*(.*?)\s*$/;
+const QUOTED_FENCE = /^\s*>[>\s]*(`{3,}|~{3,})\s*(.*?)\s*$/;
 const TYPESCRIPT_INFO = /^(typescript|typescriptreact|ts|tsx|mts|cts)\b/i;
 /** The one spelling that is compiled. Every other TypeScript fence is reported. */
 const CHECKED_FENCE = /^```typescript\s*$/;
@@ -101,19 +99,22 @@ const CHECKED_FENCE = /^```typescript\s*$/;
  * Everything that would leave code unchecked without saying so is reported in
  * `problems` instead: a marker with no reason, a marker that no typescript
  * block follows, a TypeScript fence written any way other than ```typescript
- * at the start of a line (indented, `~~~`, `ts`, `tsx`, attributes), and a
- * block that is never closed.
+ * at the start of a line (indented, quoted, `~~~`, `ts`, `tsx`, attributes),
+ * and a fence of any language that is never closed, since it would swallow
+ * every block after it.
  */
 function extractBlocks(markdown: string): { blocks: Block[]; problems: string[] } {
   const blocks: Block[] = [];
   const problems: string[] = [];
   let open: { line: number; code: string[]; skip?: string } | undefined;
-  /** The fence characters that opened a block this check does not compile. */
-  let otherFence: string | undefined;
+  /** A fence this check does not compile: the characters that opened it, and where. */
+  let other: { fence: string; line: number } | undefined;
   let marker: { line: number; skip?: string } | undefined;
 
   const orphaned = (at: { line: number }) =>
     `README.md:${at.line} readme-check marker is not followed by a typescript block`;
+  const unchecked = (line: number) =>
+    `README.md:${line} TypeScript block is not checked: open it with \`\`\`typescript at the start of a line`;
 
   markdown.split(/\r?\n/).forEach((text, index) => {
     const line = index + 1;
@@ -127,9 +128,21 @@ function extractBlocks(markdown: string): { blocks: Block[]; problems: string[] 
       }
       return;
     }
-    if (otherFence) {
-      const closing = FENCE.exec(text);
-      if (closing && closing[3] === '' && closing[2].startsWith(otherFence)) otherFence = undefined;
+    if (other) {
+      const inner = FENCE.exec(text);
+      if (inner?.[2].startsWith(other.fence)) {
+        if (inner[3] === '') {
+          other = undefined;
+        } else if (TYPESCRIPT_INFO.test(inner[3])) {
+          // Markdown reads this line as text inside the block above, so the
+          // example would render as part of it and never be checked. A fence
+          // that is meant to hold fences is opened with a longer run.
+          problems.push(
+            `README.md:${line} TypeScript block is not checked: the block opened at ` +
+              `README.md:${other.line} is still open here`
+          );
+        }
+      }
       return;
     }
 
@@ -150,26 +163,28 @@ function extractBlocks(markdown: string): { blocks: Block[]; problems: string[] 
     } else {
       if (marker) problems.push(orphaned(marker));
       const fence = FENCE.exec(text);
+      const quoted = QUOTED_FENCE.exec(text);
       if (fence) {
-        otherFence = fence[2];
-        if (TYPESCRIPT_INFO.test(fence[3])) {
-          problems.push(
-            `README.md:${line} TypeScript block is not checked: open it with \`\`\`typescript at the start of a line`
-          );
-        }
+        other = { fence: fence[2], line };
+        if (TYPESCRIPT_INFO.test(fence[3])) problems.push(unchecked(line));
+      } else if (quoted && TYPESCRIPT_INFO.test(quoted[2])) {
+        problems.push(unchecked(line));
       }
     }
     marker = undefined;
   });
 
   if (open) problems.push(`README.md:${open.line - 1} typescript block is never closed`);
+  if (other) {
+    problems.push(`README.md:${other.line} fence is never closed, so nothing after it is checked`);
+  }
   if (marker) problems.push(orphaned(marker));
   return { blocks, problems };
 }
 
 /**
  * Compile `blocks` in memory. Returns their diagnostics and, for each block,
- * the APIs it reaches and the clients it reaches them through.
+ * its calls to the SDK methods that send requests.
  *
  * This is the only function that touches the TypeScript compiler API. That API
  * is the classic JS one that TypeScript 7 no longer ships (see the TypeScript
@@ -177,7 +192,7 @@ function extractBlocks(markdown: string): { blocks: Block[]; problems: string[] 
  */
 function analyzeBlocks(blocks: readonly Block[]): {
   diagnostics: BlockDiagnostic[];
-  reach: Map<Block, Reach>;
+  calls: Map<Block, ApiCall[]>;
 } {
   const options: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2022,
@@ -242,59 +257,67 @@ function analyzeBlocks(blocks: readonly Block[]): {
     }
   }
 
-  // What a block reaches is decided by the TYPE of its expressions, never by
-  // how they are spelled. A value typed as a generated API is a use of that
-  // API whether it came from `deere.equipment`, `deere['equipment']`,
-  // destructuring, an alias, optional chaining on a union, or a subclass.
   const checker = program.getTypeChecker();
   const fileOf = (node: ts.Node | undefined) => normalize(node?.getSourceFile().fileName ?? '');
+  const inSdk = (node: ts.Node | undefined) => fileOf(node).startsWith(`${ROOT}/src/`);
+  const isApiFile = (file: string) =>
+    file.startsWith(`${ROOT}/src/api/`) || file.startsWith(`${ROOT}/src/safe/`);
 
-  type Role = 'client' | 'facades' | 'api';
-  /** The SDK classes a type is an instance of, through unions, base classes and generics. */
-  const sdkClasses = (type: ts.Type): Array<{ name: string; role: Role }> => {
-    const found: Array<{ name: string; role: Role }> = [];
-    const pending = [type];
-    while (pending.length > 0) {
-      const current = pending.pop();
-      if (!current) continue;
-      if (current.isUnionOrIntersection()) {
-        pending.push(...current.types);
-        continue;
-      }
-      if (current.flags & ts.TypeFlags.Instantiable) {
-        // A type parameter or `Deere[K]`: judge it by what it is constrained to.
-        const constraint = checker.getBaseConstraintOfType(current);
-        if (constraint && constraint !== current) pending.push(constraint);
-        continue;
-      }
-      if (!current.isClass()) continue;
-      pending.push(...checker.getBaseTypes(current));
-      const symbol = current.getSymbol();
-      const name = symbol?.getName() ?? '';
-      const file = fileOf(symbol?.declarations?.[0]);
-      if (file === `${ROOT}/src/deere.ts` && name === 'Deere') {
-        found.push({ name, role: 'client' });
-      } else if (file === `${ROOT}/src/client.ts` && name === 'DeereClient') {
-        found.push({ name, role: 'client' });
-      } else if (file === `${ROOT}/src/safe/index.ts` && name === 'SafeFacades') {
-        found.push({ name, role: 'facades' });
-      } else if (file.startsWith(`${ROOT}/src/api/`) || file.startsWith(`${ROOT}/src/safe/`)) {
-        found.push({ name, role: 'api' });
-      }
-    }
-    return found;
+  /**
+   * The request-sending SDK method a declaration is, if it is one: a method of
+   * a generated API class or safe facade, or one of the DeereClient methods
+   * that take the spec name first (`fetchUrl` and `followLink` do not).
+   *
+   * Everything below asks this of a RESOLVED declaration, the one the type
+   * checker says a call or a value leads to. So it does not matter how the
+   * method was reached: through `Pick<EquipmentApi, 'get'>`, an interface that
+   * extends the class, a subclass, `super`, a computed key, `bind`.
+   */
+  const sdkMethod = (
+    declaration: ts.Declaration | undefined
+  ): { apiClass: string } | 'client' | undefined => {
+    if (!declaration || !ts.isMethodDeclaration(declaration)) return undefined;
+    const owner = declaration.parent;
+    // A method of an object literal has no class, and so no name here.
+    const className = ts.isClassDeclaration(owner) ? owner.name?.text : undefined;
+    const file = fileOf(owner);
+    if (className && isApiFile(file)) return { apiClass: className };
+    const takesSpec = declaration.parameters[0]?.name.getText() === 'specName';
+    return file === `${ROOT}/src/client.ts` && className === 'DeereClient' && takesSpec
+      ? 'client'
+      : undefined;
   };
-  const rolesOf = (node: ts.Node) => sdkClasses(checker.getTypeAtLocation(node));
 
-  /** True for `new Deere(...)`, `new DeereClient(...)` and the two factory functions. */
-  const constructsSdkClient = (node: ts.NewExpression | ts.CallExpression): boolean => {
+  /** Strip the wrappers that change how a value is typed or grouped, not what it is. */
+  const unwrap = (node: ts.Expression): ts.Expression => {
+    let inner = node;
+    while (
+      ts.isParenthesizedExpression(inner) ||
+      ts.isNonNullExpression(inner) ||
+      ts.isAsExpression(inner) ||
+      ts.isSatisfiesExpression(inner)
+    ) {
+      inner = inner.expression;
+    }
+    return inner;
+  };
+
+  /** What `new X(...)` or `f(...)` constructs, when X or f is the SDK's own. */
+  const constructs = (node: ts.NewExpression | ts.CallExpression): 'client' | 'api' | undefined => {
     let symbol = checker.getSymbolAtLocation(node.expression);
     if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = checker.getAliasedSymbol(symbol);
-    const where = `${fileOf(symbol?.declarations?.[0])}#${symbol?.getName()}`;
-    return ts.isNewExpression(node)
-      ? where === `${ROOT}/src/deere.ts#Deere` || where === `${ROOT}/src/client.ts#DeereClient`
-      : where === `${ROOT}/src/deere.ts#createDeere` ||
-          where === `${ROOT}/src/client.ts#createClient`;
+    const file = fileOf(symbol?.declarations?.[0]);
+    const where = `${file}#${symbol?.getName()}`;
+    if (ts.isCallExpression(node)) {
+      const factory =
+        where === `${ROOT}/src/deere.ts#createDeere` ||
+        where === `${ROOT}/src/client.ts#createClient`;
+      return factory ? 'client' : undefined;
+    }
+    if (where === `${ROOT}/src/deere.ts#Deere` || where === `${ROOT}/src/client.ts#DeereClient`) {
+      return 'client';
+    }
+    return isApiFile(file) ? 'api' : undefined;
   };
 
   /** The `environment` a config literal sets, the default if it sets none, undefined if unclear. */
@@ -308,206 +331,183 @@ function analyzeBlocks(blocks: readonly Block[]): {
       if (!name || !(ts.isIdentifier(name) || ts.isStringLiteralLike(name))) {
         environment = undefined;
       } else if (name.text === 'environment') {
-        let value = ts.isPropertyAssignment(property) ? property.initializer : undefined;
-        // `'api' as const` and `('api')` are still the literal.
-        while (
-          value &&
-          (ts.isAsExpression(value) ||
-            ts.isSatisfiesExpression(value) ||
-            ts.isParenthesizedExpression(value))
-        ) {
-          value = value.expression;
-        }
+        const value = ts.isPropertyAssignment(property) ? unwrap(property.initializer) : undefined;
         environment = value && ts.isStringLiteralLike(value) ? value.text : undefined;
       }
     }
     return environment;
   };
 
-  /**
-   * For an expression that only passes a value along, the expressions the
-   * value can come from. Undefined for anything that makes a value of its own.
-   */
-  const passesAlong = (node: ts.Node): ts.Expression[] | undefined => {
-    if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-      return [node.expression];
-    }
-    if (
-      ts.isParenthesizedExpression(node) ||
-      ts.isAsExpression(node) ||
-      ts.isSatisfiesExpression(node) ||
-      ts.isTypeAssertionExpression(node) ||
-      ts.isNonNullExpression(node) ||
-      ts.isAwaitExpression(node)
-    ) {
-      return [node.expression];
-    }
-    if (ts.isConditionalExpression(node)) return [node.whenTrue, node.whenFalse];
-    if (ts.isBinaryExpression(node)) return [node.left, node.right];
-    return undefined;
-  };
-
-  /** True when `node` names a DeereClient method that takes the spec name first. */
-  const isSpecMethod = (declaration: ts.Declaration | undefined): boolean => {
-    if (!declaration || !ts.isMethodDeclaration(declaration)) return false;
-    const owner = declaration.parent;
-    return (
-      ts.isClassDeclaration(owner) &&
-      owner.name?.text === 'DeereClient' &&
-      fileOf(owner) === `${ROOT}/src/client.ts` &&
-      declaration.parameters[0]?.name.getText() === 'specName'
-    );
-  };
-
-  const reach = new Map<Block, Reach>();
+  const calls = new Map<Block, ApiCall[]>();
   for (const [name, block] of blockOf) {
     const source = program.getSourceFile(name);
-    if (!source) continue;
-    const found: Reach = { uses: [], clients: [] };
-    reach.set(block, found);
+    // Skipping a block here would report it as having no calls at all.
+    assert.ok(source, `README.md:${block.line} was not compiled`);
+    const found: ApiCall[] = [];
+    calls.set(block, found);
 
     const line = (node: ts.Node) =>
       block.line + source.getLineAndCharacterOfPosition(node.getStart(source)).line;
     const text = (node: ts.Node) => node.getText(source).replace(/\s+/g, ' ').slice(0, 80);
-    const seenDeclarations = new Set<ts.Node>();
-    const origin = (node: ts.Node, environment: string | undefined) => {
-      found.clients.push({ line: line(node), text: text(node), environment });
+
+    /**
+     * The environment of the client that `expression` is, or belongs to.
+     *
+     * Every branch that returns an environment names a construction it has
+     * read. Anything else ends in the last line, which is the point: a form
+     * this function does not know cannot be mistaken for a known client.
+     */
+    const explain = (expression: ts.Expression): { environment?: string; unclear?: string } => {
+      const node = unwrap(expression);
+
+      // `deere.equipment`, `deere.safe.products`, `deere.client`: a member of
+      // an SDK object belongs to the same client as the object.
+      if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+        const member = ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression;
+        if (!inSdk(checker.getSymbolAtLocation(member)?.valueDeclaration)) {
+          return { unclear: `\`${text(node)}\` is not a member of an SDK object` };
+        }
+        return explain(node.expression);
+      }
+
+      if (ts.isIdentifier(node)) {
+        const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
+        if (fileOf(declaration) === ambientName) return { environment: DEFAULT_ENVIRONMENT };
+
+        // `const sdk = <something explained>`. Not `let`: it can be given
+        // another client anywhere, including places this does not read.
+        const isConst = (list: ts.Node) =>
+          ts.isVariableDeclarationList(list) && (list.flags & ts.NodeFlags.Const) !== 0;
+        if (
+          declaration &&
+          ts.isVariableDeclaration(declaration) &&
+          ts.isIdentifier(declaration.name) &&
+          declaration.initializer &&
+          isConst(declaration.parent)
+        ) {
+          return explain(declaration.initializer);
+        }
+
+        // `const { equipment } = deere`: the same as `deere.equipment`.
+        if (declaration && ts.isBindingElement(declaration)) {
+          const pattern = declaration.parent;
+          const holder = pattern.parent;
+          const key = declaration.propertyName ?? declaration.name;
+          if (
+            ts.isObjectBindingPattern(pattern) &&
+            ts.isVariableDeclaration(holder) &&
+            holder.initializer &&
+            isConst(holder.parent) &&
+            !declaration.dotDotDotToken &&
+            !declaration.initializer &&
+            ts.isIdentifier(key)
+          ) {
+            const from = checker.getTypeAtLocation(holder.initializer);
+            if (inSdk(checker.getPropertyOfType(from, key.text)?.valueDeclaration)) {
+              return explain(holder.initializer);
+            }
+          }
+        }
+        return { unclear: `\`${node.text}\` is not a \`const\` client constructed in this block` };
+      }
+
+      if (ts.isNewExpression(node) || ts.isCallExpression(node)) {
+        const made = constructs(node);
+        if (made === 'client') {
+          const environment = environmentIn(node.arguments?.[0]);
+          return environment === undefined
+            ? { unclear: `\`${text(node)}\` does not set its environment with a literal` }
+            : { environment };
+        }
+        // `new EquipmentApi(client)`: an API is on whatever client it was given.
+        const on = made === 'api' ? node.arguments?.[0] : undefined;
+        if (on) return explain(on);
+      }
+
+      return { unclear: `\`${text(node)}\` is not a client constructed in this block` };
+    };
+
+    /** True when `node`, possibly wrapped, is what a call expression calls. */
+    const isCalled = (node: ts.Node) => {
+      let callee = node;
+      while (
+        ts.isParenthesizedExpression(callee.parent) ||
+        ts.isNonNullExpression(callee.parent) ||
+        ts.isAsExpression(callee.parent) ||
+        ts.isSatisfiesExpression(callee.parent)
+      ) {
+        callee = callee.parent;
+      }
+      return ts.isCallExpression(callee.parent) && callee.parent.expression === callee;
     };
 
     /**
-     * Record where an SDK value entered the block. Values derived from another
-     * SDK value (`deere.client`, `const { equipment } = deere`) are not
-     * origins; whatever they were derived from is.
+     * Places a method may sit without being called there, because every later
+     * use of the value is itself looked at: the name or the initial value of a
+     * variable, and the receiver of `.bind(...)`.
      */
-    const recordOrigin = (node: ts.Node, isClient: boolean) => {
-      if (ts.isNewExpression(node) || ts.isCallExpression(node)) {
-        if (isClient && constructsSdkClient(node)) {
-          origin(node, environmentIn(node.arguments?.[0]));
-        } else if (
-          ts.isNewExpression(node) &&
-          !isClient &&
-          (node.arguments ?? []).some((argument) => rolesOf(argument).length > 0)
-        ) {
-          // An API or facade built on an SDK value takes that value's environment.
-        } else {
-          origin(node, undefined);
-        }
-        return;
-      }
-
-      // A value that is only passed along has no origin of its own, as long as
-      // what it passes along is itself an SDK value. `await somePromise` and
-      // `holder.sdk` are not: there the client appears from nowhere the check
-      // can read.
-      const sources = passesAlong(node);
-      if (sources) {
-        if (!sources.some((from) => rolesOf(from).length > 0)) origin(node, undefined);
-        return;
-      }
-
-      if (!ts.isIdentifier(node)) {
-        // `this`, and any other way to hold an SDK value.
-        origin(node, undefined);
-        return;
-      }
-      const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
-      if (!declaration || seenDeclarations.has(declaration)) return;
-      seenDeclarations.add(declaration);
-
-      if (fileOf(declaration) === ambientName) {
-        origin(node, DEFAULT_ENVIRONMENT);
-      } else if (ts.isVariableDeclaration(declaration)) {
-        const from = declaration.initializer;
-        const list = declaration.parent;
-        // `let sdk: Deere;` gets its value from a later assignment, which is an
-        // expression and is examined as one. A `declare`d or loop variable never
-        // shows where its value came from.
-        const assignedLater =
-          ts.isVariableDeclarationList(list) &&
-          ts.isVariableStatement(list.parent) &&
-          !(list.flags & ts.NodeFlags.Const) &&
-          !(ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Ambient);
-        if (from ? rolesOf(from).length === 0 : !assignedLater) origin(node, undefined);
-      } else if (ts.isBindingElement(declaration)) {
-        let holder: ts.Node = declaration;
-        while (
-          ts.isBindingElement(holder) ||
-          ts.isObjectBindingPattern(holder) ||
-          ts.isArrayBindingPattern(holder)
-        ) {
-          holder = holder.parent;
-        }
-        const from = ts.isVariableDeclaration(holder) ? holder.initializer : undefined;
-        if (!from || rolesOf(from).length === 0) origin(node, undefined);
-      } else {
-        // A parameter, or anything else that hands the block a value.
-        origin(node, undefined);
-      }
-    };
-
-    /** Identifiers that name a value. Type names and import bindings are not uses. */
-    const namesAValue = (node: ts.Identifier) => {
-      const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
+    const isHeldForLater = (node: ts.Node) => {
+      const parent = node.parent;
+      if (ts.isVariableDeclaration(parent) || ts.isBindingElement(parent)) return true;
       return (
-        declaration !== undefined &&
-        (ts.isVariableDeclaration(declaration) ||
-          ts.isBindingElement(declaration) ||
-          ts.isParameter(declaration))
+        ts.isPropertyAccessExpression(parent) &&
+        parent.expression === node &&
+        parent.name.text === 'bind' &&
+        isCalled(parent)
       );
     };
 
     const visit = (node: ts.Node): void => {
-      // Annotations and `typeof deere` mention a value without using it.
-      if (ts.isTypeNode(node)) return;
+      // Annotations and `typeof x` mention a value without using it. A heritage
+      // clause and `f<T>` hold real expressions under a type node's kind, so
+      // those are still walked.
+      if (ts.isTypeNode(node) && !ts.isExpressionWithTypeArguments(node)) return;
 
-      // get, post, paginate and the rest of DeereClient take the spec name
-      // first. A direct call is found through its resolved signature, so a
-      // subclass, an alias, `bind` or a destructured method is covered, and
-      // fetchUrl (a URL, not a spec) is not.
-      if (
-        ts.isCallExpression(node) &&
-        isSpecMethod(checker.getResolvedSignature(node)?.declaration)
-      ) {
-        const argument = node.arguments[0];
-        const type = argument ? checker.getTypeAtLocation(argument) : undefined;
-        found.uses.push({
-          line: line(node),
-          text: text(node),
-          ...(type?.isStringLiteral()
-            ? { spec: type.value }
-            : { unknown: 'the spec name is not one literal, so this could call any API' }),
-        });
-      }
-      // The same method taken off the client without being called on the
-      // spot (`client.get.call(...)`, a callback) can be given any spec later.
-      if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-        const member = ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression;
-        const called = ts.isCallExpression(node.parent) && node.parent.expression === node;
-        if (!called && isSpecMethod(checker.getSymbolAtLocation(member)?.valueDeclaration)) {
-          found.uses.push({
+      const called = ts.isCallExpression(node)
+        ? sdkMethod(checker.getResolvedSignature(node)?.declaration)
+        : undefined;
+      if (called && ts.isCallExpression(node)) {
+        const callee = unwrap(node.expression);
+        const on =
+          ts.isPropertyAccessExpression(callee) || ts.isElementAccessExpression(callee)
+            ? explain(callee.expression)
+            : { unclear: 'it is not called on the object it belongs to' };
+        const call = { line: line(node), text: text(node) };
+        if (called !== 'client') {
+          found.push({ ...call, apiClass: called.apiClass, ...on });
+        } else {
+          const argument = node.arguments[0];
+          const type = argument ? checker.getTypeAtLocation(argument) : undefined;
+          found.push(
+            type?.isStringLiteral()
+              ? { ...call, spec: type.value, ...on }
+              : {
+                  ...call,
+                  unclear: 'the spec name is not one literal, so this could call any API',
+                }
+          );
+        }
+      } else if (ts.isExpression(node) && !isCalled(node) && !isHeldForLater(node)) {
+        // A method that is a value here and is not being called: handed to
+        // `.call`, passed as a callback, put in an array. Wherever it goes
+        // next, nothing ties it to a client any more. This includes a call
+        // whose RESULT is such a method, as `client.get.bind(client)` is.
+        const isMemberName =
+          ts.isPropertyAccessExpression(node.parent) && node.parent.name === node;
+        // `type Get = typeof client.get` names a type after the method. The
+        // name is an identifier too, but it is not a value anything can call.
+        const namesAType =
+          ts.isIdentifier(node) &&
+          ((checker.getSymbolAtLocation(node)?.flags ?? 0) & ts.SymbolFlags.Value) === 0;
+        const declaration = checker.getTypeAtLocation(node).getSymbol()?.valueDeclaration;
+        const method = isMemberName || namesAType ? undefined : sdkMethod(declaration);
+        if (method) {
+          found.push({
             line: line(node),
             text: text(node),
-            unknown: 'this client method is not called directly, so it could be given any spec',
+            ...(method === 'client' ? {} : { apiClass: method.apiClass }),
+            unclear: 'the method is used as a value without being called there',
           });
-        }
-      }
-
-      const tracked =
-        passesAlong(node) !== undefined ||
-        ts.isCallExpression(node) ||
-        ts.isNewExpression(node) ||
-        node.kind === ts.SyntaxKind.ThisKeyword ||
-        (ts.isIdentifier(node) && namesAValue(node));
-      if (tracked) {
-        const roles = rolesOf(node);
-        for (const { name: apiClass, role } of roles) {
-          if (role === 'api') found.uses.push({ line: line(node), text: text(node), apiClass });
-        }
-        if (roles.length > 0) {
-          recordOrigin(
-            node,
-            roles.some(({ role }) => role === 'client')
-          );
         }
       }
       ts.forEachChild(node, visit);
@@ -515,7 +515,7 @@ function analyzeBlocks(blocks: readonly Block[]): {
     visit(source);
   }
 
-  return { diagnostics, reach };
+  return { diagnostics, calls };
 }
 
 const format = (d: BlockDiagnostic) => `README.md:${d.line} TS${d.code}: ${d.message}`;
@@ -549,61 +549,41 @@ function serves(spec: string, environment: string): boolean {
 }
 
 /**
- * The APIs a block reaches that one of its clients cannot serve.
+ * The calls that would throw before any request is sent, and the ones the
+ * check could not rule out.
  *
- * The rule is deliberately blunt: every API the block reaches must be served
- * in the environment of EVERY client the block constructs or is handed. It
- * does not trace which client a call goes through, so no reassignment, alias
- * or helper can route a call past it. A block that mixes clients for different
- * environments has to be split, which reads better anyway.
- *
- * Only specs with a fixed host list can fail: the resolver does not check a
- * templated spec against its environment list.
+ * Only a spec with a fixed host list can fail: the resolver does not check a
+ * templated spec against its environment list. So a call the check could not
+ * trace to a client is reported only when its spec is one of those.
  */
-function unservedApis(reach: Reach | undefined): string[] {
-  const problems = new Map<string, string>();
-  const report = (key: string, message: string) => {
-    if (!problems.has(key)) problems.set(key, message);
-  };
-
-  for (const use of reach?.uses ?? []) {
-    const where = `README.md:${use.line} ${use.text}`;
-    if (use.unknown) {
-      report(where, `${where}: ${use.unknown}`);
-      continue;
-    }
-    const spec = use.spec ?? SPEC_OF_CLASS.get(use.apiClass ?? '');
+function unservedApis(calls: readonly ApiCall[] = []): string[] {
+  const problems: string[] = [];
+  for (const call of calls) {
+    const where = `README.md:${call.line} ${call.text}`;
+    const spec = call.spec ?? SPEC_OF_CLASS.get(call.apiClass ?? '');
     if (!spec) {
-      report(where, `${where}: cannot tell which spec ${use.apiClass} belongs to`);
+      const why = call.apiClass ? `no spec is known for ${call.apiClass}` : call.unclear;
+      problems.push(`${where}: ${why}`);
       continue;
     }
 
     const served = KNOWN_ENVIRONMENTS.filter((environment) => serves(spec, environment));
     if (served.length === KNOWN_ENVIRONMENTS.length) continue;
-    const only = `'${spec}' is served on ${served.join(', ')} only`;
 
-    const clients = reach?.clients ?? [];
-    if (clients.length === 0) {
-      report(`${spec} with no client`, `${where}: ${only}, and this block constructs no client`);
-    }
-    for (const client of clients) {
-      const whose = `\`${client.text}\` (README.md:${client.line})`;
-      if (client.environment === undefined) {
-        report(
-          `${spec} through ${whose}`,
-          `${where}: ${only}, and the block does not show which environment ${whose} uses. ` +
-            'Construct every client here with a literal environment.'
-        );
-      } else if (!serves(spec, client.environment)) {
-        report(
-          `${spec} on ${client.environment}`,
-          `${where}: '${spec}' is not served on '${client.environment}', the environment of ` +
-            `${whose}. It is served on ${served.join(', ')} only.`
-        );
-      }
+    if (call.environment === undefined) {
+      problems.push(
+        `${where}: '${spec}' is served on ${served.join(', ')} only, and the check cannot tell ` +
+          `which environment this uses: ${call.unclear}. Call it on a \`const\` client ` +
+          'constructed in this block with a literal environment.'
+      );
+    } else if (!serves(spec, call.environment)) {
+      problems.push(
+        `${where}: '${spec}' is not served on '${call.environment}', the environment of the ` +
+          `client this is called on. It is served on ${served.join(', ')} only.`
+      );
     }
   }
-  return [...problems.values()];
+  return [...new Set(problems)];
 }
 
 /** Diagnostics that belong to a block, plus those that belong to none (line 0). */
@@ -629,27 +609,31 @@ describe('README examples', () => {
       assert.deepStrictEqual(within(analysis.diagnostics, block).map(format), []);
     });
 
-    it(`README.md:${block.line} reaches only APIs its clients' environments serve`, {
+    it(`README.md:${block.line} calls only APIs its client's environment serves`, {
       skip: block.skip,
     }, () => {
-      assert.deepStrictEqual(unservedApis(analysis.reach.get(block)), []);
+      assert.deepStrictEqual(unservedApis(analysis.calls.get(block)), []);
     });
   }
 });
 
 describe('the README checker catches what it exists to catch', () => {
   const NOT_ON_SANDBOX = /'equipment' is not served on 'sandboxapi'/;
-  const ENVIRONMENT_NOT_SHOWN =
-    /'equipment' is served on api, partnerapi only, and the block does not show/;
+  const CANNOT_TELL = /'equipment' is served on api, partnerapi only, and the check cannot tell/;
+  const AS_A_VALUE = /the method is used as a value without being called there/;
 
-  // One compile for every control. `unserved` is the list of patterns the
-  // environment check must report, in order; `codes` the compile diagnostics.
+  const DEERE = "import { Deere } from 'deere-sdk';\n";
+  const DEERE_TYPE = "import type { Deere } from 'deere-sdk';\n";
+  const ON_API = "{ accessToken: 't', environment: 'api' }";
+  const ON_DEFAULT = "{ accessToken: 't' }";
+
+  // One compile for every control. `codes` are the compile diagnostics a
+  // control must produce and `unserved` the environment problems, in order.
+  // A control that names neither must be clean on both counts.
   const CONTROLS: Record<string, { code: string; codes?: number[]; unserved?: RegExp[] }> = {
+    // The compile check.
     'a method that does not exist': {
-      code:
-        "import { Deere } from 'deere-sdk';\n" +
-        "const sdk = new Deere({ accessToken: 't' });\n" +
-        'await sdk.fields.noSuchMethod();',
+      code: `${DEERE}const sdk = new Deere(${ON_DEFAULT});\nawait sdk.fields.noSuchMethod();`,
       codes: [2339],
     },
     'a name the package does not export': {
@@ -666,18 +650,20 @@ describe('the README checker catches what it exists to catch', () => {
         'await deere.fields.listAll(orgs[0].id);',
       codes: [2345],
     },
+
+    // The environment check: clients it can trace.
     'nothing, for an API that every environment serves': {
       code: "await deere.fields.listAll(accessToken);\nawait client.get('fields', '/x');",
     },
-    'an API the default environment does not serve': {
+    'a call on the default client': {
       code: 'await deere.equipment.get();',
       unserved: [NOT_ON_SANDBOX],
     },
-    'the same API through its safe facade': {
-      code: 'void deere.safe.equipment;',
+    'a call through a safe facade': {
+      code: 'await deere.safe.equipment.getWithEmbed({} as never);',
       unserved: [NOT_ON_SANDBOX],
     },
-    'nothing, once the client is built for an environment that serves it': {
+    'nothing, on clients built for environments that serve the API': {
       code:
         "import { Deere, createDeere } from 'deere-sdk';\n" +
         'const sdk = new Deere({ accessToken: "t", environment: "api" });\n' +
@@ -685,18 +671,23 @@ describe('the README checker catches what it exists to catch', () => {
         'await sdk.equipment.get();\n' +
         'await other.equipment.get();',
     },
-    'a default client beside one built for a serving environment': {
+    'nothing, when each call is made on a client that serves it': {
       code:
-        "import { Deere, DeereClient } from 'deere-sdk';\n" +
-        "export const other = new DeereClient({ accessToken: 't', environment: 'api' });\n" +
-        "const sdk = new Deere({ accessToken: 't' });\n" +
-        'await sdk.equipment.get();',
+        `${DEERE}const prod = new Deere(${ON_API});\n` +
+        `const sandbox = new Deere(${ON_DEFAULT});\n` +
+        'await prod.equipment.get();\n' +
+        "await sandbox.fields.listAll('org');",
+    },
+    'a call on a default client that sits beside a serving one': {
+      code:
+        `${DEERE}export const prod = new Deere(${ON_API});\n` +
+        `const sandbox = new Deere(${ON_DEFAULT});\n` +
+        'await sandbox.equipment.get();',
       unserved: [NOT_ON_SANDBOX],
     },
     'an environment that appears only in a comment inside the config': {
       code:
-        "import { Deere } from 'deere-sdk';\n" +
-        'const sdk = new Deere({\n' +
+        `${DEERE}const sdk = new Deere({\n` +
         "  accessToken: 't',\n" +
         "  // environment: 'api',\n" +
         '});\n' +
@@ -706,96 +697,10 @@ describe('the README checker catches what it exists to catch', () => {
     'nothing, when the environment is written `as const` and a default client is only named in a type':
       {
         code:
-          "import { Deere } from 'deere-sdk';\n" +
-          "const sdk = new Deere({ accessToken: 't', environment: 'api' as const });\n" +
+          `${DEERE}const sdk = new Deere({ accessToken: 't', environment: 'api' as const });\n` +
           'export type Ambient = typeof deere;\n' +
           'await sdk.equipment.get();',
       },
-    'nothing, when a client is declared first and constructed afterwards': {
-      code:
-        "import { Deere } from 'deere-sdk';\n" +
-        'let sdk: Deere;\n' +
-        "sdk = new Deere({ accessToken: 't', environment: 'api' });\n" +
-        'await sdk.equipment.get();',
-    },
-    'a client that arrives through a promise, beside one built for a serving environment': {
-      code:
-        "import { Deere } from 'deere-sdk';\n" +
-        'declare function connect(): Promise<Deere>;\n' +
-        "const prod = new Deere({ accessToken: 't', environment: 'api' });\n" +
-        'const sdk = await connect();\n' +
-        'await prod.equipment.get();\n' +
-        'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'a client kept on another object': {
-      code:
-        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
-        'await context.sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'a client destructured from another object': {
-      code:
-        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
-        'const { sdk } = context;\n' +
-        'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'an API picked off the client by a generic key': {
-      code:
-        "async function pick<K extends 'equipment'>(key: K) {\n" +
-        '  return deere[key];\n' +
-        '}\n' +
-        "await (await pick('equipment')).get();",
-      unserved: [NOT_ON_SANDBOX, ENVIRONMENT_NOT_SHOWN],
-    },
-    'a client read out of untyped data': {
-      code:
-        "const sdk: import('deere-sdk').Deere = JSON.parse('{}');\n" + 'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'an API reached through `this` in a subclass': {
-      code:
-        "import { Deere } from 'deere-sdk';\n" +
-        'export class Mine extends Deere {\n' +
-        '  machines() {\n' +
-        '    return this.equipment.get();\n' +
-        '  }\n' +
-        '}',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'nothing, for an API class constructed on a client built for a serving environment': {
-      code:
-        "import { DeereClient, EquipmentApi } from 'deere-sdk';\n" +
-        "const api = new EquipmentApi(new DeereClient({ accessToken: 't', environment: 'api' }));\n" +
-        'await api.get();',
-    },
-    'an API reached through a subclass of the generated class': {
-      code:
-        "import { EquipmentApi } from 'deere-sdk';\n" +
-        'class Machines extends EquipmentApi {}\n' +
-        'await new Machines(client).get();',
-      unserved: [NOT_ON_SANDBOX],
-    },
-    'an API used inside a generic function, where only the constraint names it': {
-      code:
-        "export function run<K extends 'equipment'>(key: K) {\n" +
-        '  return deere[key].get();\n' +
-        '}',
-      unserved: [NOT_ON_SANDBOX],
-    },
-    'a client method invoked through call, where the spec is not the first argument': {
-      code: "await client.get.call(client, 'equipment', '/equipment');",
-      unserved: [/client\.get: this client method is not called directly/],
-    },
-    'a client reassigned to one built for another environment': {
-      code:
-        "import { Deere } from 'deere-sdk';\n" +
-        "let sdk = new Deere({ accessToken: 't', environment: 'api' });\n" +
-        "sdk = new Deere({ accessToken: 't' });\n" +
-        'await sdk.equipment.get();',
-      unserved: [NOT_ON_SANDBOX],
-    },
     'an API taken off the client by destructuring': {
       code: 'const { equipment } = deere;\nawait equipment.get();',
       unserved: [NOT_ON_SANDBOX],
@@ -804,33 +709,44 @@ describe('the README checker catches what it exists to catch', () => {
       code: "await deere['equipment'].get();",
       unserved: [NOT_ON_SANDBOX],
     },
-    'an API reached through a subclass of the client': {
+    'an API reached through a chain of const aliases': {
+      code: 'const sdk = deere;\nconst machines = sdk.equipment;\nawait (machines!).get();',
+      unserved: [NOT_ON_SANDBOX],
+    },
+    'nothing, for an API class constructed on a client that serves it': {
       code:
-        "import { Deere } from 'deere-sdk';\n" +
-        'class Mine extends Deere {}\n' +
-        "const sdk: Deere = new Mine({ accessToken: 't' });\n" +
+        "import { DeereClient, EquipmentApi } from 'deere-sdk';\n" +
+        `const api = new EquipmentApi(new DeereClient(${ON_API}));\n` +
+        'await api.get();',
+    },
+    'an API class constructed on the default client': {
+      code: "import { EquipmentApi } from 'deere-sdk';\nawait new EquipmentApi(client).get();",
+      unserved: [NOT_ON_SANDBOX],
+    },
+
+    // The environment check: clients it refuses to guess about.
+    'a client that can be reassigned': {
+      code:
+        `${DEERE}let sdk = new Deere(${ON_API});\n` +
+        `sdk = new Deere(${ON_DEFAULT});\n` +
         'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
+      unserved: [/cannot tell which environment this uses: `sdk` is not a `const` client/],
     },
-    'a client that may be undefined': {
+    'a client built from a config held in a variable': {
       code:
-        "declare const maybe: import('deere-sdk').Deere | undefined;\n" +
-        'await maybe?.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
-    },
-    'a client from a helper the check knows nothing about': {
-      code:
-        "import type { Deere } from 'deere-sdk';\n" +
-        'declare function make(config: { accessToken: string }, tier: string): Deere;\n' +
-        "const sdk = make({ accessToken: 't' }, 'apicert');\n" +
+        `${DEERE}const config = { accessToken: 't', environment: 'api' as const };\n` +
+        'const sdk = new Deere(config);\n' +
         'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
+      unserved: [/cannot tell .*`new Deere\(config\)` does not set its environment with a literal/],
     },
-    'a client passed in as a parameter': {
+    'a `let` client filled in by a destructuring assignment': {
       code:
-        "import type { Deere } from 'deere-sdk';\n" +
-        'export const list = (sdk: Deere) => sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
+        `${DEERE}export const prod = new Deere(${ON_API});\n` +
+        'declare const holder: { sdk: Deere };\n' +
+        'let sdk: Deere;\n' +
+        '({ sdk } = holder);\n' +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
     },
     'a client whose environment is not a literal': {
       code:
@@ -838,22 +754,199 @@ describe('the README checker catches what it exists to catch', () => {
         'declare const environment: Environment;\n' +
         "const sdk = new Deere({ accessToken: 't', environment });\n" +
         'await sdk.equipment.get();',
-      unserved: [ENVIRONMENT_NOT_SHOWN],
+      unserved: [CANNOT_TELL],
     },
-    'a spec name passed straight to the client, but not a URL passed to fetchUrl': {
+    'a client whose config is spread from somewhere else': {
       code:
-        "await client.get('equipment', '/equipment');\n" +
-        "await deere.client.get('equipment', '/equipment');\n" +
-        "await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');",
+        `${DEERE}declare const base: { accessToken: string };\n` +
+        "const sdk = new Deere({ environment: 'api', ...base });\n" +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a subclass of the client': {
+      code:
+        `${DEERE}class Mine extends Deere {}\n` +
+        `const sdk = new Mine(${ON_API});\n` +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client that may be undefined': {
+      code:
+        "declare const maybe: import('deere-sdk').Deere | undefined;\n" +
+        'await maybe?.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client from a helper the check knows nothing about': {
+      code:
+        `${DEERE_TYPE}declare function make(config: { accessToken: string }, tier: string): Deere;\n` +
+        "const sdk = make({ accessToken: 't' }, 'apicert');\n" +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client made by a tagged template': {
+      code:
+        `${DEERE_TYPE}declare function make(strings: TemplateStringsArray): Deere;\n` +
+        'const sdk = make`x`;\n' +
+        'await sdk.equipment.get();',
+      unserved: [/cannot tell which environment this uses: `make`x`` is not a client constructed/],
+    },
+    'a client passed in as a parameter': {
+      code: `${DEERE_TYPE}export const list = (sdk: Deere) => sdk.equipment.get();`,
+      unserved: [CANNOT_TELL],
+    },
+    'a client that arrives through a promise, beside one built for a serving environment': {
+      code:
+        `${DEERE}declare function connect(): Promise<Deere>;\n` +
+        `const prod = new Deere(${ON_API});\n` +
+        'const sdk = await connect();\n' +
+        'await prod.equipment.get();\n' +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client kept on another object': {
+      code:
+        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
+        'await context.sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client destructured from another object': {
+      code:
+        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
+        'const { sdk } = context;\n' +
+        'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'a client read out of untyped data': {
+      code:
+        "const sdk: import('deere-sdk').Deere = JSON.parse('{}');\n" + 'await sdk.equipment.get();',
+      unserved: [CANNOT_TELL],
+    },
+    'an API reached through `this` in a subclass': {
+      code:
+        `${DEERE}export class Mine extends Deere {\n` +
+        '  machines() {\n' +
+        '    return this.equipment.get();\n' +
+        '  }\n' +
+        '}',
+      unserved: [CANNOT_TELL],
+    },
+    'an API reached through `super` in a subclass': {
+      code:
+        "import { EquipmentApi } from 'deere-sdk';\n" +
+        'export class Machines extends EquipmentApi {\n' +
+        '  all() {\n' +
+        '    return super.get();\n' +
+        '  }\n' +
+        '}',
+      unserved: [CANNOT_TELL],
+    },
+    'an API reached through a subclass of the generated class': {
+      code:
+        "import { EquipmentApi } from 'deere-sdk';\n" +
+        'class Machines extends EquipmentApi {}\n' +
+        'await new Machines(client).get();',
+      unserved: [CANNOT_TELL],
+    },
+    'an API seen only through a structural type': {
+      code:
+        "import type { EquipmentApi } from 'deere-sdk';\n" +
+        "export const list = (api: Pick<EquipmentApi, 'get'>) => api.get();",
+      unserved: [CANNOT_TELL],
+    },
+    'an API picked off the client with a key the check cannot read': {
+      code:
+        "export function run<K extends 'equipment'>(key: K) {\n" +
+        '  return deere[key].get();\n' +
+        '}',
+      unserved: [CANNOT_TELL],
+    },
+    'a call made inside the expression a class extends': {
+      code:
+        'declare function mixin(value: unknown): new () => object;\n' +
+        "export class Fleet extends mixin(client.get('equipment', '/equipment')) {}",
       unserved: [NOT_ON_SANDBOX],
     },
-    'a spec name held in a variable': {
+
+    // The environment check: spec names given straight to the client.
+    'a spec name passed to the client, but not a URL passed to fetchUrl': {
+      code:
+        "await client.get('equipment', '/equipment');\n" +
+        "await deere.client.post('equipment', '/equipment', {});\n" +
+        "await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');",
+      unserved: [NOT_ON_SANDBOX, NOT_ON_SANDBOX],
+    },
+    'a spec name held in a constant': {
       code: "const spec = 'equipment';\nawait client.get(spec, '/equipment');",
       unserved: [NOT_ON_SANDBOX],
     },
     'a spec name that could be any spec': {
       code: "declare const spec: import('deere-sdk').SpecName;\n" + "await client.get(spec, '/x');",
       unserved: [/the spec name is not one literal/],
+    },
+
+    // The environment check: methods that leave their object.
+    'a client method invoked through call': {
+      code: "await client.get.call(client, 'equipment', '/equipment');",
+      unserved: [AS_A_VALUE],
+    },
+    'a destructured client method invoked through call': {
+      code: "const { get } = client;\nawait get.call(client, 'equipment', '/equipment');",
+      unserved: [AS_A_VALUE],
+    },
+    'a client method reached with a computed key and invoked through call': {
+      code: "const name = 'get';\nawait client[name].call(client, 'equipment', '/equipment');",
+      unserved: [AS_A_VALUE],
+    },
+    'a bound client method invoked through call': {
+      code: "await client.get.bind(client).call(null, 'equipment', '/equipment');",
+      unserved: [AS_A_VALUE],
+    },
+    'a client method given type arguments and invoked through call': {
+      code:
+        'const typed = client.get<string[]>;\n' +
+        "await typed.call(client, 'equipment', '/equipment');",
+      // Reported where the method leaves the client. `typed` itself has an
+      // instantiated type that no longer names the method.
+      unserved: [/client\.get: the method is used as a value/],
+    },
+    'a client method passed as a callback': {
+      code:
+        'declare function later(run: (spec: "equipment", path: string) => unknown): void;\n' +
+        'later(client.get);',
+      unserved: [AS_A_VALUE],
+    },
+    'nothing, for methods the block declares itself, whatever they are called': {
+      code:
+        'class Helper {\n' +
+        '  get(spec: string) {\n    return spec;\n  }\n' +
+        '}\n' +
+        "new Helper().get('equipment');\n" +
+        'const tool = {\n' +
+        '  get(specName: string) {\n    return specName;\n  },\n' +
+        '};\n' +
+        "tool.get('equipment');",
+    },
+    'nothing, for a type that only names a client method': {
+      code:
+        'export type Get = typeof client.get;\n' + "export type GetAgain = (typeof client)['get'];",
+    },
+    'nothing, for a bound client method called with a spec every environment serves': {
+      code: "const get = client.get.bind(client);\nawait get('fields', '/x');",
+    },
+    'a bound client method called with a spec the default environment does not serve': {
+      code: "const get = client.get.bind(client);\nawait get('equipment', '/equipment');",
+      unserved: [CANNOT_TELL],
+    },
+    'an API method held in a constant and called later': {
+      code: 'const get = deere.equipment.get;\nawait get();',
+      unserved: [CANNOT_TELL],
+    },
+    'an API method passed as a callback': {
+      code: 'declare function later(run: () => unknown): void;\nlater(deere.equipment.get);',
+      unserved: [CANNOT_TELL],
+    },
+    'nothing, for a method passed around when every environment serves its API': {
+      code: 'declare function later(run: (org: string) => unknown): void;\nlater(deere.fields.listAll);',
     },
   };
 
@@ -878,7 +971,7 @@ describe('the README checker catches what it exists to catch', () => {
         expected.codes ?? []
       );
 
-      const unserved = unservedApis(analysis.reach.get(block));
+      const unserved = unservedApis(analysis.calls.get(block));
       const patterns = expected.unserved ?? [];
       assert.strictEqual(unserved.length, patterns.length, unserved.join('\n'));
       patterns.forEach((pattern, at) => {
@@ -903,6 +996,23 @@ describe('the README checker catches what it exists to catch', () => {
       assert.strictEqual(found.blocks[0]?.skip, undefined);
     });
 
+    it('a skip marker followed by another marker, which leaves the first exempting nothing', () => {
+      const found = extractBlocks(
+        `<!-- readme-check: skip: first -->\n<!-- readme-check: skip: second -->\n${fence('a')}`
+      );
+      assert.deepStrictEqual(found.problems, [
+        'README.md:1 readme-check marker is not followed by a typescript block',
+      ]);
+      assert.strictEqual(found.blocks[0]?.skip, 'second');
+    });
+
+    it('a skip marker at the end of the file', () => {
+      const found = extractBlocks(`${fence('a')}\n\n<!-- readme-check: skip: nothing follows -->`);
+      assert.deepStrictEqual(found.problems, [
+        'README.md:5 readme-check marker is not followed by a typescript block',
+      ]);
+    });
+
     it('a well-formed marker exempts the next block and only that one', () => {
       const found = extractBlocks(
         `<!-- readme-check: skip: shows a removed call -->\n\n${fence('a')}\n\n${fence('b')}`
@@ -922,6 +1032,7 @@ describe('the README checker catches what it exists to catch', () => {
       ['in another case', fence('a', '```TypeScript')],
       ['indented', fence('  a', '  ```typescript', '  ```')],
       ['with tildes', fence('a', '~~~typescript', '~~~')],
+      ['inside a blockquote', fence('> a', '> ```typescript', '> ```')],
     ] as const) {
       it(`a TypeScript block it would not compile: fenced ${how}`, () => {
         const found = extractBlocks(markdown);
@@ -934,6 +1045,23 @@ describe('the README checker catches what it exists to catch', () => {
       const found = extractBlocks("```typescript\nconst x: number = 'a';");
       assert.deepStrictEqual(found.blocks, []);
       assert.strictEqual(found.problems.length, 1);
+    });
+
+    it('a typescript block swallowed by an earlier block that was not closed', () => {
+      const found = extractBlocks(`\`\`\`bash\nnpm install\n\n${fence('a')}`);
+      assert.deepStrictEqual(found.blocks, []);
+      assert.strictEqual(found.problems.length, 1);
+      assert.match(
+        found.problems[0],
+        /^README\.md:4 .* the block opened at README\.md:1 is still open/
+      );
+    });
+
+    it('a block in another language that runs to the end of the file', () => {
+      const found = extractBlocks('Text.\n\n```bash\nnpm install');
+      assert.deepStrictEqual(found.blocks, []);
+      assert.strictEqual(found.problems.length, 1);
+      assert.match(found.problems[0], /^README\.md:3 fence is never closed/);
     });
 
     it('and stays quiet about other languages, whose contents it never reads as markup', () => {

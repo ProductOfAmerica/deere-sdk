@@ -401,6 +401,39 @@ describe('fix-specs utilities', () => {
       assert.throws(() => fixProseEnums(spec, 'equipment', [DROP]), /other values too/);
     });
 
+    // A reworded sentence is not a repair. Skipping it would put the new
+    // sentence into the generated types with nothing to notice.
+    it('throws when a drop entry finds the sentence reworded', () => {
+      const spec = parameterSpec(['a string, or part of one, with * wildcards']);
+      assert.throws(() => fixProseEnums(spec, 'equipment', [DROP]), /different lone value/);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        'a string, or part of one, with * wildcards',
+      ]);
+    });
+
+    it('no-ops when a drop entry finds a real enum with several members', () => {
+      const spec = parameterSpec(['9RX420', '9RX470']);
+      assert.strictEqual(fixProseEnums(spec, 'equipment', [DROP]), 0);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        '9RX420',
+        '9RX470',
+      ]);
+    });
+
+    it('throws when a replace entry finds the note reworded', () => {
+      const spec = schemaSpec(['isCarrier', 'archived', 'registration (not for carriers)']);
+      assert.throws(() => fixProseEnums(spec, 'products', [REPLACE]), /with other words/);
+    });
+
+    it('no-ops when a replace entry finds neither the prose nor anything like it', () => {
+      const spec = schemaSpec(['isCarrier', 'archived']);
+      assert.strictEqual(fixProseEnums(spec, 'products', [REPLACE]), 0);
+      assert.deepStrictEqual(spec.components.schemas.Status.properties.key.enum, [
+        'isCarrier',
+        'archived',
+      ]);
+    });
+
     describe('against the committed specs', () => {
       const fixedSpec = (spec: string): unknown =>
         yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
@@ -423,10 +456,12 @@ describe('fix-specs utilities', () => {
       // component and the prose comes back under the new name.
       //
       // There is deliberately no test for the opposite case, an entry that
-      // John Deere's repair has made redundant. The sync does not run tests, so
-      // such a test would turn main and every open PR red after an upstream
-      // improvement, over an entry that is by then inert. Like
-      // restoreEquipmentItemRefs, a redundant entry is simply skipped.
+      // John Deere's repair has made redundant. The sync runs the routing guard
+      // and the type-checks before it commits, but not this suite, so such a
+      // test would turn main and every open PR red after an upstream
+      // improvement, over an entry that is by then inert. A redundant entry is
+      // skipped, as restoreEquipmentItemRefs does. A REWORDED one is not
+      // redundant: fixProseEnums throws on it, which fails the sync itself.
       it('no registered prose is left in any enum of specs/fixed', () => {
         for (const spec of new Set(PROSE_ENUM_FIXES.map((fix) => fix.spec))) {
           const prose = PROSE_ENUM_FIXES.filter((fix) => fix.spec === spec).map((fix) => fix.prose);

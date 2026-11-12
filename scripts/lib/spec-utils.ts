@@ -318,12 +318,18 @@ export const PROSE_ENUM_FIXES: readonly ProseEnumFix[] = [
 /**
  * Apply `fixes` to one spec. Returns the number of enums changed.
  *
- * Self-neutralizing: an entry whose location or prose string is gone is
- * skipped, so nothing happens once John Deere repairs the document. An entry
- * with no replacement removes the `enum` (the schema's `type` still constrains
- * the value) and applies only while the prose is the sole member. If John Deere
- * adds real values beside it, the claim no longer holds and this throws rather
- * than guess which members to keep.
+ * Each entry is a claim about one enum, and what happens depends on whether
+ * the claim still holds:
+ *
+ * - The prose is there as registered: the enum is dropped (the schema's `type`
+ *   still constrains the value), or the member is replaced.
+ * - The location or the enum is gone, or the real value now stands where the
+ *   prose was: John Deere repaired or removed it. The entry is skipped, so a
+ *   repair never stops the sync.
+ * - The enum is there but holds something else in the prose's place, a
+ *   reworded sentence or real values beside it: documentation would reach the
+ *   generated types again, and skipping would hide that. This throws, so the
+ *   entry is re-read before anything is committed.
  */
 export function fixProseEnums(
   spec: Record<string, unknown>,
@@ -341,22 +347,40 @@ export function fixProseEnums(
     if (!isRecord(node) || !Array.isArray(node.enum)) continue;
 
     const values: unknown[] = node.enum;
-    if (!values.includes(fix.prose)) continue;
+    const mismatch = (found: string) =>
+      new Error(
+        `fixProseEnums: ${specName} ${fix.at.join('/')} ${found}: ${JSON.stringify(values)}. ` +
+          `Its PROSE_ENUM_FIXES entry registered "${fix.prose}". Re-read the document, then ` +
+          `update the entry or delete it.`
+      );
 
     if (fix.replacement === null) {
-      if (values.some((value) => value !== fix.prose)) {
-        throw new Error(
-          `fixProseEnums: ${specName} ${fix.at.join('/')} still lists "${fix.prose}" but now ` +
-            `has other values too (${JSON.stringify(values)}). Its PROSE_ENUM_FIXES entry ` +
-            `assumed the enum held only that sentence. Re-read the document and update the entry.`
-        );
+      // The claim: this enum is that one sentence and nothing else.
+      if (values.length === 1 && values[0] === fix.prose) {
+        delete node.enum;
+        fixed += 1;
+      } else if (values.includes(fix.prose)) {
+        throw mismatch('still lists the sentence but now has other values too');
+      } else if (values.length === 1) {
+        throw mismatch('now holds a different lone value, which reads like the sentence reworded');
       }
-      delete node.enum;
-    } else {
-      const replaced = values.map((value) => (value === fix.prose ? fix.replacement : value));
-      node.enum = replaced.filter((value, index) => replaced.indexOf(value) === index);
+      continue;
     }
-    fixed += 1;
+
+    // The claim: one member is the real value with a note attached.
+    const replacement = fix.replacement;
+    if (values.includes(fix.prose)) {
+      const replaced = values.map((value) => (value === fix.prose ? replacement : value));
+      node.enum = replaced.filter((value, index) => replaced.indexOf(value) === index);
+      fixed += 1;
+    } else if (
+      values.some(
+        (value) =>
+          typeof value === 'string' && value !== replacement && value.startsWith(replacement)
+      )
+    ) {
+      throw mismatch(`no longer has the registered text but has "${replacement}" with other words`);
+    }
   }
   return fixed;
 }
