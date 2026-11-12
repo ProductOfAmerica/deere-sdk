@@ -270,6 +270,10 @@ describe('Fuzz Tests', () => {
 
   describe('Pagination handling', () => {
     it('handles arbitrary paginated response shapes', async () => {
+      // The one nextPage link in this property that the client may follow. It
+      // refuses any that is not an https deere.com URL, and an arbitrary string
+      // never is one, so without this the follow path would not run at all.
+      const FOLLOWABLE = 'https://api.deere.com/platform/test?page=2';
       const paginatedResponseArb = fc.record({
         values: fc.array(fc.jsonValue(), { maxLength: 10 }),
         total: fc.option(fc.integer({ min: 0, max: 1000 })),
@@ -277,7 +281,7 @@ describe('Fuzz Tests', () => {
           fc.array(
             fc.record({
               rel: fc.constantFrom('self', 'nextPage', 'prevPage'),
-              uri: fc.string(),
+              uri: fc.oneof(fc.string(), fc.constant(FOLLOWABLE)),
             }),
             { maxLength: 3 }
           )
@@ -286,43 +290,43 @@ describe('Fuzz Tests', () => {
 
       await fc.assert(
         fc.asyncProperty(paginatedResponseArb, async (response) => {
+          let fetches = 0;
           const client = new DeereClient({
             accessToken: 'test-token',
             // Return the response once, then empty to stop pagination
-            fetch: (() => {
-              let called = false;
-              return async () => {
-                if (!called) {
-                  called = true;
-                  return new Response(JSON.stringify(response), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                  });
-                }
-                return new Response(JSON.stringify({ values: [] }), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' },
-                });
-              };
-            })(),
+            fetch: async () => {
+              fetches++;
+              return new Response(JSON.stringify(fetches === 1 ? response : { values: [] }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+              });
+            },
             maxRetries: 0,
           });
 
-          // Should handle arbitrary response shapes without crashing. v2
-          // paginate() follows nextPage links via fetchUrl, which throws
-          // TypeError on invalid URLs (fuzzer can produce " " / garbage
-          // URIs). That's expected — assert the error type is controlled.
-          const results: unknown[] = [];
+          let error: unknown;
           try {
             for await (const page of client.paginate('organizations', '/test')) {
-              results.push(...page);
-              if (results.length > 100) break;
+              assert(Array.isArray(page));
             }
-          } catch (error) {
+          } catch (caught) {
+            error = caught;
+          }
+
+          // The client follows the first nextPage link, and so does this.
+          const next = response.links?.find((link) => link.rel === 'nextPage')?.uri;
+          if (!next) {
+            assert.strictEqual(error, undefined, `no link to follow, yet: ${String(error)}`);
+            assert.strictEqual(fetches, 1);
+          } else if (next === FOLLOWABLE) {
+            assert.strictEqual(error, undefined, `a followable link, yet: ${String(error)}`);
+            assert.strictEqual(fetches, 2);
+          } else {
             assert(
-              error instanceof TypeError || error instanceof Error,
-              `Unexpected error type: ${(error as Error).constructor.name}`
+              error instanceof DeereError && error.statusText === 'UntrustedLink',
+              `expected ${JSON.stringify(next)} to be refused, got: ${String(error)}`
             );
+            assert.strictEqual(fetches, 1, 'a refused link must not be requested');
           }
         }),
         { numRuns: 50 }

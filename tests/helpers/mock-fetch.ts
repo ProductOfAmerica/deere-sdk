@@ -131,7 +131,8 @@ export function mockTimeout(): typeof fetch {
  */
 export function mockPaginatedResponse<T>(
   pages: T[][],
-  baseUrl = 'https://api.example.com'
+  // A deere.com host: the client refuses a nextPage link anywhere else.
+  baseUrl = 'https://api.deere.com'
 ): typeof fetch {
   let pageIndex = 0;
 
