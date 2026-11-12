@@ -233,8 +233,8 @@ Tests use `tests/helpers/mock-fetch.ts` for injecting fetch behaviour (JSON succ
 error, timeout, paginated). Never hit the real API in tests: inject a custom `fetch` via `DeereClientConfig.fetch`.
 `fuzz.test.ts` uses `fast-check`. `pnpm test` already includes it; `pnpm test:fuzz` runs it alone, and CI adds that
 dedicated step only on Node 24.x. `readme-examples.test.ts` type-checks every `typescript` block in `README.md`
-against `src/` and checks that the APIs it calls are served in the environment it configures. A block that cannot
-compile on purpose needs `<!-- readme-check: skip: reason -->` above its fence.
+against `src/`. A block that cannot compile on purpose needs `<!-- readme-check: skip: reason -->` above its fence.
+It checks types only: an example can compile and still call an API its environment does not serve.
 
 CI runs the test matrix on Node 20/22/23/24/25. Node 18 was dropped 2026-05-15 because tsx ≥4.22.0 calls
 `Array.prototype.toReversed()` (ES2023, Node 20+). Node 18 hit EOL April 2025. Keep the code Node-20-compatible
@@ -245,7 +245,7 @@ TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no lon
 broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
 (openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. `readme-examples.test.ts` uses the
-same API, confined to its `analyzeBlocks` function, and needs porting at the same time.
+same API, confined to its `typecheckBlocks` function, and needs porting at the same time.
 
 CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
 then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with
