@@ -25,6 +25,8 @@ const SDK_ENTRY = `${ROOT}/src/index.ts`;
 interface Block {
   line: number;
   code: string;
+  /** Reason from a `<!-- readme-check: skip: reason -->` marker above the fence. */
+  skip?: string;
 }
 
 interface BlockDiagnostic {
@@ -45,24 +47,71 @@ declare const client: import('deere-sdk').DeereClient;
 declare const accessToken: string;
 `;
 
-function extractBlocks(markdown: string): Block[] {
+const MARKER = /^<!--\s*readme-check:\s*(.*?)\s*-->\s*$/;
+const SKIP_DIRECTIVE = /^skip:\s*(\S.*)$/;
+
+/**
+ * Find the fenced `typescript` blocks, and the markers that exempt one.
+ *
+ * A block that cannot compile on purpose (the migration example shows a call
+ * that no longer exists) is exempted by an HTML comment above its fence:
+ *
+ *     <!-- readme-check: skip: why this block is not valid code -->
+ *
+ * The reason is required and the marker must be followed by a typescript
+ * block, with nothing but blank lines between. Anything else is reported in
+ * `problems`, so a marker cannot quietly exempt nothing or the wrong block.
+ */
+function extractBlocks(markdown: string): { blocks: Block[]; problems: string[] } {
   const blocks: Block[] = [];
-  let open: { line: number; code: string[] } | undefined;
+  const problems: string[] = [];
+  let open: { line: number; code: string[]; skip?: string } | undefined;
+  let inOtherFence = false;
+  let marker: { line: number; skip?: string } | undefined;
+
+  const orphaned = (at: { line: number }) =>
+    `README.md:${at.line} readme-check marker is not followed by a typescript block`;
 
   markdown.split(/\r?\n/).forEach((text, index) => {
-    if (!open) {
-      if (/^```(typescript|ts)\s*$/.test(text)) open = { line: index + 2, code: [] };
+    const line = index + 1;
+
+    if (open) {
+      if (/^```\s*$/.test(text)) {
+        blocks.push({ line: open.line, code: open.code.join('\n'), skip: open.skip });
+        open = undefined;
+      } else {
+        open.code.push(text);
+      }
       return;
     }
-    if (/^```\s*$/.test(text)) {
-      blocks.push({ line: open.line, code: open.code.join('\n') });
-      open = undefined;
+    if (inOtherFence) {
+      if (/^```\s*$/.test(text)) inOtherFence = false;
       return;
     }
-    open.code.push(text);
+
+    const directive = MARKER.exec(text)?.[1];
+    if (directive !== undefined) {
+      if (marker) problems.push(orphaned(marker));
+      const reason = SKIP_DIRECTIVE.exec(directive)?.[1];
+      if (reason === undefined) {
+        problems.push(`README.md:${line} readme-check marker must read "skip: <reason>"`);
+      }
+      marker = { line, skip: reason };
+      return;
+    }
+    if (text.trim() === '') return;
+
+    if (/^```(typescript|ts)\s*$/.test(text)) {
+      open = { line: line + 1, code: [], skip: marker?.skip };
+    } else {
+      if (marker) problems.push(orphaned(marker));
+      if (text.startsWith('```')) inOtherFence = true;
+    }
+    marker = undefined;
   });
 
-  return blocks;
+  if (marker) problems.push(orphaned(marker));
+  return { blocks, problems };
 }
 
 /**
@@ -141,19 +190,19 @@ function typecheckBlocks(blocks: readonly Block[]): BlockDiagnostic[] {
 const format = (d: BlockDiagnostic) => `README.md:${d.line} TS${d.code}: ${d.message}`;
 
 describe('README examples', () => {
-  const blocks = extractBlocks(readFileSync(join(ROOT, 'README.md'), 'utf8'));
-
-  // Only the Quick Start for now; the remaining blocks are checked once the
-  // examples that currently fail have been corrected.
-  const checked = blocks.slice(0, 1);
-  const diagnostics = typecheckBlocks(checked);
+  const { blocks, problems } = extractBlocks(readFileSync(join(ROOT, 'README.md'), 'utf8'));
+  const diagnostics = typecheckBlocks(blocks.filter((block) => block.skip === undefined));
 
   it('finds the fenced typescript blocks', () => {
     assert.ok(blocks.length > 0, 'no ```typescript blocks found in README.md');
   });
 
-  for (const block of checked) {
-    it(`README.md:${block.line} compiles against src`, () => {
+  it('has only well-formed readme-check markers', () => {
+    assert.deepStrictEqual(problems, []);
+  });
+
+  for (const block of blocks) {
+    it(`README.md:${block.line} compiles against src`, { skip: block.skip }, () => {
       const last = block.line + block.code.split('\n').length;
       const mine = diagnostics.filter(
         (d) => d.line === 0 || (d.line >= block.line && d.line <= last)
@@ -164,6 +213,30 @@ describe('README examples', () => {
 
   describe('the checker catches what it exists to catch', () => {
     const codes = (code: string) => typecheckBlocks([{ line: 1, code }]).map((d) => d.code);
+    const fence = (code: string) => `\`\`\`typescript\n${code}\n\`\`\``;
+
+    it('a skip marker that gives no reason', () => {
+      const found = extractBlocks(`<!-- readme-check: skip -->\n${fence('a')}`);
+      assert.strictEqual(found.problems.length, 1);
+      assert.strictEqual(found.blocks[0]?.skip, undefined);
+    });
+
+    it('a skip marker that no typescript block follows', () => {
+      const found = extractBlocks(`<!-- readme-check: skip: reason -->\nProse.\n${fence('a')}`);
+      assert.strictEqual(found.problems.length, 1);
+      assert.strictEqual(found.blocks[0]?.skip, undefined);
+    });
+
+    it('a well-formed marker exempts the next block and only that one', () => {
+      const found = extractBlocks(
+        `<!-- readme-check: skip: shows a removed call -->\n\n${fence('a')}\n\n${fence('b')}`
+      );
+      assert.deepStrictEqual(found.problems, []);
+      assert.deepStrictEqual(
+        found.blocks.map((block) => block.skip),
+        ['shows a removed call', undefined]
+      );
+    });
 
     it('a method that does not exist', () => {
       const found = codes(

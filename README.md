@@ -152,6 +152,7 @@ Passing a v1 name to the v2 constructor throws immediately with a migration hint
 | `cert`         | `apicert`      |
 | `qa`           | `apiqa.tal`    |
 
+<!-- readme-check: skip: shows the v1 call that v2 rejects, next to its replacement -->
 ```typescript
 // v1
 const deere = new Deere({ accessToken, environment: 'sandbox' });
@@ -346,7 +347,11 @@ const filtered = await deere.equipment.get({
 const machine = await deere.equipment.getEquipment('equipment-id');
 
 // CRUD
-await deere.equipment.create('org-id', {type: 'Machine', name: 'Tractor 1'});
+await deere.equipment.create('org-id', {
+    name: 'Tractor 1',
+    serialNumber: 'SN-0001',
+    model: {id: 'equipment-model-id'},
+});
 await deere.equipment.update('equipment-id', {name: 'Updated'});
 await deere.equipment.delete('equipment-id');
 
@@ -443,11 +448,13 @@ const critical = await deere.notifications.list('org-id', {
     severities: 'HIGH,CRITICAL'
 });
 
-// Create notification
+// Create notification. John Deere's sample request also sends `links` to a
+// contribution definition, which its published schema leaves out.
 await deere.notifications.create({
-    sourceEvent: 'my-app-event-123',
     title: 'Action Required',
-    message: 'Please review the prescription map'
+    text: 'Please review the prescription map',
+    severity: 'HIGH',
+    eventType: 'AGRONOMY',
 });
 
 // Delete notification
@@ -479,9 +486,16 @@ const locations = await deere.assets.listLocations('asset-id', {
     endDate: '2026-01-31T23:59:59Z'
 });
 
+// John Deere takes the GeoJSON as a string
 await deere.assets.createLocations('asset-id', {
     timestamp: '2026-01-15T12:00:00Z',
-    geometry: {type: 'Point', coordinates: [-93.5, 42.5]}
+    geometry: JSON.stringify({
+        type: 'Feature',
+        geometry: {
+            type: 'GeometryCollection',
+            geometries: [{type: 'Point', coordinates: [-93.5, 42.5]}],
+        },
+    }),
 });
 ```
 
@@ -543,7 +557,7 @@ await deere.partnerships.createPermissions('token', {
 For custom endpoints or advanced use cases:
 
 ```typescript
-import {DeereClient} from 'deere-sdk';
+import {DeereClient, type PaginatedResponse} from 'deere-sdk';
 
 const client = new DeereClient({
     accessToken: 'your-token',
@@ -554,11 +568,13 @@ const client = new DeereClient({
 
 // Raw requests. The first argument is the spec name; it selects the host,
 // since different John Deere APIs live on different subdomains and paths.
-const response = await client.get<CustomType>('organizations', '/organizations');
+type Organization = {id?: string; name?: string};
+const response = await client.get<PaginatedResponse<Organization>>('organizations', '/organizations');
 const created = await client.post('fields', '/organizations/123/fields', {name: 'North'});
 
 // Follow HAL links
-const nextPage = await client.followLink(response.links[0]);
+const next = response.links?.find((link) => link.rel === 'nextPage');
+const nextPage = next ? await client.followLink<PaginatedResponse<Organization>>(next) : undefined;
 
 // Automatic pagination
 for await (const items of client.paginate('fields', '/organizations/123/fields')) {
@@ -597,6 +613,8 @@ Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppress
 John Deere requires applications to demonstrate [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) compliance before granting production API access. When enabled, the SDK automatically follows HAL links from parent resources instead of constructing URLs directly — producing the exact traffic pattern John Deere's certification requires.
 
 ```typescript
+import {Deere} from 'deere-sdk';
+
 const deere = new Deere({
     accessToken: 'your-token',
     environment: 'sandboxapi',
@@ -684,14 +702,16 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
 ```typescript
+import {Deere} from 'deere-sdk';
+
 // Customize retry behavior
-const deere = new Deere({
+const patient = new Deere({
     accessToken: 'your-token',
     maxRetries: 5,  // More retries (default: 3)
 });
 
 // Disable retries entirely
-const deere = new Deere({
+const noRetries = new Deere({
     accessToken: 'your-token',
     maxRetries: 0,
 });
