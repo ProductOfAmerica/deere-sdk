@@ -402,9 +402,8 @@ describe('fix-specs utilities', () => {
     });
 
     describe('against the committed specs', () => {
-      const committed = (stage: 'raw' | 'fixed', spec: string): unknown =>
-        yaml.parse(readFileSync(join(process.cwd(), 'specs', stage, `${spec}.yaml`), 'utf8'));
-      const fixedSpec = (spec: string) => committed('fixed', spec);
+      const fixedSpec = (spec: string): unknown =>
+        yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
 
       /** Every enum in a document, with the path of the schema that owns it. */
       function* enums(node: unknown, path: string[] = []): Generator<[string, unknown[]]> {
@@ -422,6 +421,12 @@ describe('fix-specs utilities', () => {
       // transform. This looks at every enum in the spec, not only the
       // registered locations, so it also fails when John Deere renames a
       // component and the prose comes back under the new name.
+      //
+      // There is deliberately no test for the opposite case, an entry that
+      // John Deere's repair has made redundant. The sync does not run tests, so
+      // such a test would turn main and every open PR red after an upstream
+      // improvement, over an entry that is by then inert. Like
+      // restoreEquipmentItemRefs, a redundant entry is simply skipped.
       it('no registered prose is left in any enum of specs/fixed', () => {
         for (const spec of new Set(PROSE_ENUM_FIXES.map((fix) => fix.spec))) {
           const prose = PROSE_ENUM_FIXES.filter((fix) => fix.spec === spec).map((fix) => fix.prose);
@@ -429,27 +434,6 @@ describe('fix-specs utilities', () => {
             .filter(([, values]) => values.some((value) => prose.includes(value as string)))
             .map(([path]) => `${spec} ${path}`);
           assert.deepStrictEqual(left, []);
-        }
-      });
-
-      // fixProseEnums skips an entry that no longer applies, which is right in
-      // the sync: a repaired document must not stop it. But a skipped entry is
-      // dead code, so fail here once John Deere's own document (specs/raw) no
-      // longer holds the prose at the registered location, whether because it
-      // was repaired, removed or renamed. Every current entry sits at the same
-      // path in raw and fixed.
-      it('every entry still describes what John Deere publishes in specs/raw', () => {
-        for (const fix of PROSE_ENUM_FIXES) {
-          let node: unknown = committed('raw', fix.spec);
-          for (const key of fix.at) {
-            node = (node as Record<string, unknown> | undefined)?.[key];
-          }
-          const values = (node as { enum?: unknown[] } | undefined)?.enum;
-          assert.ok(
-            Array.isArray(values) && values.includes(fix.prose),
-            `${fix.spec} ${fix.at.join('/')} no longer lists "${fix.prose}" in specs/raw. ` +
-              'Delete its PROSE_ENUM_FIXES entry, or repoint it if John Deere renamed the component.'
-          );
         }
       });
     });

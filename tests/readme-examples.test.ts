@@ -55,8 +55,8 @@ interface ApiUse {
   apiClass?: string;
   /** Spec name passed straight to a `DeereClient` method. */
   spec?: string;
-  /** A `DeereClient` call whose spec argument is not one literal. */
-  unknownSpec?: true;
+  /** Why the API cannot be told: the use is reported whatever the environment. */
+  unknown?: string;
 }
 
 /** A client that a block constructs, or is handed from outside. */
@@ -86,7 +86,7 @@ declare const accessToken: string;
 const MARKER = /^<!--\s*readme-check:\s*(.*?)\s*-->\s*$/;
 const SKIP_DIRECTIVE = /^skip:\s*(\S.*)$/;
 const FENCE = /^(\s*)(`{3,}|~{3,})\s*(.*?)\s*$/;
-const TYPESCRIPT_INFO = /^(typescript|ts|tsx|mts|cts)\b/i;
+const TYPESCRIPT_INFO = /^(typescript|typescriptreact|ts|tsx|mts|cts)\b/i;
 /** The one spelling that is compiled. Every other TypeScript fence is reported. */
 const CHECKED_FENCE = /^```typescript\s*$/;
 
@@ -250,13 +250,24 @@ function analyzeBlocks(blocks: readonly Block[]): {
   const fileOf = (node: ts.Node | undefined) => normalize(node?.getSourceFile().fileName ?? '');
 
   type Role = 'client' | 'facades' | 'api';
-  /** The SDK classes a type is an instance of, through unions and base classes. */
+  /** The SDK classes a type is an instance of, through unions, base classes and generics. */
   const sdkClasses = (type: ts.Type): Array<{ name: string; role: Role }> => {
     const found: Array<{ name: string; role: Role }> = [];
-    const pending = type.isUnionOrIntersection() ? [...type.types] : [type];
+    const pending = [type];
     while (pending.length > 0) {
       const current = pending.pop();
-      if (!current?.isClass()) continue;
+      if (!current) continue;
+      if (current.isUnionOrIntersection()) {
+        pending.push(...current.types);
+        continue;
+      }
+      if (current.flags & ts.TypeFlags.Instantiable) {
+        // A type parameter or `Deere[K]`: judge it by what it is constrained to.
+        const constraint = checker.getBaseConstraintOfType(current);
+        if (constraint && constraint !== current) pending.push(constraint);
+        continue;
+      }
+      if (!current.isClass()) continue;
       pending.push(...checker.getBaseTypes(current));
       const symbol = current.getSymbol();
       const name = symbol?.getName() ?? '';
@@ -297,11 +308,55 @@ function analyzeBlocks(blocks: readonly Block[]): {
       if (!name || !(ts.isIdentifier(name) || ts.isStringLiteralLike(name))) {
         environment = undefined;
       } else if (name.text === 'environment') {
-        const value = ts.isPropertyAssignment(property) ? property.initializer : undefined;
+        let value = ts.isPropertyAssignment(property) ? property.initializer : undefined;
+        // `'api' as const` and `('api')` are still the literal.
+        while (
+          value &&
+          (ts.isAsExpression(value) ||
+            ts.isSatisfiesExpression(value) ||
+            ts.isParenthesizedExpression(value))
+        ) {
+          value = value.expression;
+        }
         environment = value && ts.isStringLiteralLike(value) ? value.text : undefined;
       }
     }
     return environment;
+  };
+
+  /**
+   * For an expression that only passes a value along, the expressions the
+   * value can come from. Undefined for anything that makes a value of its own.
+   */
+  const passesAlong = (node: ts.Node): ts.Expression[] | undefined => {
+    if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+      return [node.expression];
+    }
+    if (
+      ts.isParenthesizedExpression(node) ||
+      ts.isAsExpression(node) ||
+      ts.isSatisfiesExpression(node) ||
+      ts.isTypeAssertionExpression(node) ||
+      ts.isNonNullExpression(node) ||
+      ts.isAwaitExpression(node)
+    ) {
+      return [node.expression];
+    }
+    if (ts.isConditionalExpression(node)) return [node.whenTrue, node.whenFalse];
+    if (ts.isBinaryExpression(node)) return [node.left, node.right];
+    return undefined;
+  };
+
+  /** True when `node` names a DeereClient method that takes the spec name first. */
+  const isSpecMethod = (declaration: ts.Declaration | undefined): boolean => {
+    if (!declaration || !ts.isMethodDeclaration(declaration)) return false;
+    const owner = declaration.parent;
+    return (
+      ts.isClassDeclaration(owner) &&
+      owner.name?.text === 'DeereClient' &&
+      fileOf(owner) === `${ROOT}/src/client.ts` &&
+      declaration.parameters[0]?.name.getText() === 'specName'
+    );
   };
 
   const reach = new Map<Block, Reach>();
@@ -326,35 +381,67 @@ function analyzeBlocks(blocks: readonly Block[]): {
      */
     const recordOrigin = (node: ts.Node, isClient: boolean) => {
       if (ts.isNewExpression(node) || ts.isCallExpression(node)) {
-        const known = isClient && constructsSdkClient(node);
-        origin(node, known ? environmentIn(node.arguments?.[0]) : undefined);
-      } else if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-        if (rolesOf(node.expression).length === 0) origin(node, undefined);
-      } else if (ts.isIdentifier(node)) {
-        const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
-        if (!declaration || seenDeclarations.has(declaration)) return;
-        seenDeclarations.add(declaration);
-        if (fileOf(declaration) === ambientName) {
-          origin(node, DEFAULT_ENVIRONMENT);
-        } else if (ts.isVariableDeclaration(declaration)) {
-          // With an initializer the value came from that expression, which is
-          // visited on its own, as is anything assigned to the variable later.
-          if (!declaration.initializer) origin(node, undefined);
-        } else if (ts.isBindingElement(declaration)) {
-          let holder: ts.Node = declaration;
-          while (
-            ts.isBindingElement(holder) ||
-            ts.isObjectBindingPattern(holder) ||
-            ts.isArrayBindingPattern(holder)
-          ) {
-            holder = holder.parent;
-          }
-          const from = ts.isVariableDeclaration(holder) ? holder.initializer : undefined;
-          if (!from || rolesOf(from).length === 0) origin(node, undefined);
+        if (isClient && constructsSdkClient(node)) {
+          origin(node, environmentIn(node.arguments?.[0]));
+        } else if (
+          ts.isNewExpression(node) &&
+          !isClient &&
+          (node.arguments ?? []).some((argument) => rolesOf(argument).length > 0)
+        ) {
+          // An API or facade built on an SDK value takes that value's environment.
         } else {
-          // A parameter, or anything else that hands the block a value.
           origin(node, undefined);
         }
+        return;
+      }
+
+      // A value that is only passed along has no origin of its own, as long as
+      // what it passes along is itself an SDK value. `await somePromise` and
+      // `holder.sdk` are not: there the client appears from nowhere the check
+      // can read.
+      const sources = passesAlong(node);
+      if (sources) {
+        if (!sources.some((from) => rolesOf(from).length > 0)) origin(node, undefined);
+        return;
+      }
+
+      if (!ts.isIdentifier(node)) {
+        // `this`, and any other way to hold an SDK value.
+        origin(node, undefined);
+        return;
+      }
+      const declaration = checker.getSymbolAtLocation(node)?.valueDeclaration;
+      if (!declaration || seenDeclarations.has(declaration)) return;
+      seenDeclarations.add(declaration);
+
+      if (fileOf(declaration) === ambientName) {
+        origin(node, DEFAULT_ENVIRONMENT);
+      } else if (ts.isVariableDeclaration(declaration)) {
+        const from = declaration.initializer;
+        const list = declaration.parent;
+        // `let sdk: Deere;` gets its value from a later assignment, which is an
+        // expression and is examined as one. A `declare`d or loop variable never
+        // shows where its value came from.
+        const assignedLater =
+          ts.isVariableDeclarationList(list) &&
+          ts.isVariableStatement(list.parent) &&
+          !(list.flags & ts.NodeFlags.Const) &&
+          !(ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Ambient);
+        if (from ? rolesOf(from).length === 0 : !assignedLater) origin(node, undefined);
+      } else if (ts.isBindingElement(declaration)) {
+        let holder: ts.Node = declaration;
+        while (
+          ts.isBindingElement(holder) ||
+          ts.isObjectBindingPattern(holder) ||
+          ts.isArrayBindingPattern(holder)
+        ) {
+          holder = holder.parent;
+        }
+        const from = ts.isVariableDeclaration(holder) ? holder.initializer : undefined;
+        if (!from || rolesOf(from).length === 0) origin(node, undefined);
+      } else {
+        // A parameter, or anything else that hands the block a value.
+        origin(node, undefined);
       }
     };
 
@@ -370,35 +457,46 @@ function analyzeBlocks(blocks: readonly Block[]): {
     };
 
     const visit = (node: ts.Node): void => {
-      if (ts.isCallExpression(node)) {
-        // get, post, paginate and the rest of DeereClient take the spec name
-        // first. Found through the resolved signature, so a subclass or an
-        // alias of the client is covered, and fetchUrl (a URL, not a spec) is not.
-        const declaration = checker.getResolvedSignature(node)?.declaration;
-        const owner =
-          declaration && ts.isMethodDeclaration(declaration) ? declaration.parent : undefined;
-        if (
-          owner &&
-          ts.isClassDeclaration(owner) &&
-          owner.name?.text === 'DeereClient' &&
-          fileOf(owner) === `${ROOT}/src/client.ts` &&
-          declaration?.parameters[0]?.name.getText() === 'specName'
-        ) {
-          const argument = node.arguments[0];
-          const type = argument ? checker.getTypeAtLocation(argument) : undefined;
+      // Annotations and `typeof deere` mention a value without using it.
+      if (ts.isTypeNode(node)) return;
+
+      // get, post, paginate and the rest of DeereClient take the spec name
+      // first. A direct call is found through its resolved signature, so a
+      // subclass, an alias, `bind` or a destructured method is covered, and
+      // fetchUrl (a URL, not a spec) is not.
+      if (
+        ts.isCallExpression(node) &&
+        isSpecMethod(checker.getResolvedSignature(node)?.declaration)
+      ) {
+        const argument = node.arguments[0];
+        const type = argument ? checker.getTypeAtLocation(argument) : undefined;
+        found.uses.push({
+          line: line(node),
+          text: text(node),
+          ...(type?.isStringLiteral()
+            ? { spec: type.value }
+            : { unknown: 'the spec name is not one literal, so this could call any API' }),
+        });
+      }
+      // The same method taken off the client without being called on the
+      // spot (`client.get.call(...)`, a callback) can be given any spec later.
+      if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+        const member = ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression;
+        const called = ts.isCallExpression(node.parent) && node.parent.expression === node;
+        if (!called && isSpecMethod(checker.getSymbolAtLocation(member)?.valueDeclaration)) {
           found.uses.push({
             line: line(node),
             text: text(node),
-            ...(type?.isStringLiteral() ? { spec: type.value } : { unknownSpec: true as const }),
+            unknown: 'this client method is not called directly, so it could be given any spec',
           });
         }
       }
 
       const tracked =
-        ts.isPropertyAccessExpression(node) ||
-        ts.isElementAccessExpression(node) ||
+        passesAlong(node) !== undefined ||
         ts.isCallExpression(node) ||
         ts.isNewExpression(node) ||
+        node.kind === ts.SyntaxKind.ThisKeyword ||
         (ts.isIdentifier(node) && namesAValue(node));
       if (tracked) {
         const roles = rolesOf(node);
@@ -470,8 +568,8 @@ function unservedApis(reach: Reach | undefined): string[] {
 
   for (const use of reach?.uses ?? []) {
     const where = `README.md:${use.line} ${use.text}`;
-    if (use.unknownSpec) {
-      report(where, `${where}: the spec name is not one literal, so this could call any API`);
+    if (use.unknown) {
+      report(where, `${where}: ${use.unknown}`);
       continue;
     }
     const spec = use.spec ?? SPEC_OF_CLASS.get(use.apiClass ?? '');
@@ -595,9 +693,100 @@ describe('the README checker catches what it exists to catch', () => {
         'await sdk.equipment.get();',
       unserved: [NOT_ON_SANDBOX],
     },
-    'an environment that appears only in a comment': {
-      code: "// environment: 'api'\nawait deere.equipment.get();",
+    'an environment that appears only in a comment inside the config': {
+      code:
+        "import { Deere } from 'deere-sdk';\n" +
+        'const sdk = new Deere({\n' +
+        "  accessToken: 't',\n" +
+        "  // environment: 'api',\n" +
+        '});\n' +
+        'await sdk.equipment.get();',
       unserved: [NOT_ON_SANDBOX],
+    },
+    'nothing, when the environment is written `as const` and a default client is only named in a type':
+      {
+        code:
+          "import { Deere } from 'deere-sdk';\n" +
+          "const sdk = new Deere({ accessToken: 't', environment: 'api' as const });\n" +
+          'export type Ambient = typeof deere;\n' +
+          'await sdk.equipment.get();',
+      },
+    'nothing, when a client is declared first and constructed afterwards': {
+      code:
+        "import { Deere } from 'deere-sdk';\n" +
+        'let sdk: Deere;\n' +
+        "sdk = new Deere({ accessToken: 't', environment: 'api' });\n" +
+        'await sdk.equipment.get();',
+    },
+    'a client that arrives through a promise, beside one built for a serving environment': {
+      code:
+        "import { Deere } from 'deere-sdk';\n" +
+        'declare function connect(): Promise<Deere>;\n' +
+        "const prod = new Deere({ accessToken: 't', environment: 'api' });\n" +
+        'const sdk = await connect();\n' +
+        'await prod.equipment.get();\n' +
+        'await sdk.equipment.get();',
+      unserved: [ENVIRONMENT_NOT_SHOWN],
+    },
+    'a client kept on another object': {
+      code:
+        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
+        'await context.sdk.equipment.get();',
+      unserved: [ENVIRONMENT_NOT_SHOWN],
+    },
+    'a client destructured from another object': {
+      code:
+        "declare const context: { sdk: import('deere-sdk').Deere };\n" +
+        'const { sdk } = context;\n' +
+        'await sdk.equipment.get();',
+      unserved: [ENVIRONMENT_NOT_SHOWN],
+    },
+    'an API picked off the client by a generic key': {
+      code:
+        "async function pick<K extends 'equipment'>(key: K) {\n" +
+        '  return deere[key];\n' +
+        '}\n' +
+        "await (await pick('equipment')).get();",
+      unserved: [NOT_ON_SANDBOX, ENVIRONMENT_NOT_SHOWN],
+    },
+    'a client read out of untyped data': {
+      code:
+        "const sdk: import('deere-sdk').Deere = JSON.parse('{}');\n" + 'await sdk.equipment.get();',
+      unserved: [ENVIRONMENT_NOT_SHOWN],
+    },
+    'an API reached through `this` in a subclass': {
+      code:
+        "import { Deere } from 'deere-sdk';\n" +
+        'export class Mine extends Deere {\n' +
+        '  machines() {\n' +
+        '    return this.equipment.get();\n' +
+        '  }\n' +
+        '}',
+      unserved: [ENVIRONMENT_NOT_SHOWN],
+    },
+    'nothing, for an API class constructed on a client built for a serving environment': {
+      code:
+        "import { DeereClient, EquipmentApi } from 'deere-sdk';\n" +
+        "const api = new EquipmentApi(new DeereClient({ accessToken: 't', environment: 'api' }));\n" +
+        'await api.get();',
+    },
+    'an API reached through a subclass of the generated class': {
+      code:
+        "import { EquipmentApi } from 'deere-sdk';\n" +
+        'class Machines extends EquipmentApi {}\n' +
+        'await new Machines(client).get();',
+      unserved: [NOT_ON_SANDBOX],
+    },
+    'an API used inside a generic function, where only the constraint names it': {
+      code:
+        "export function run<K extends 'equipment'>(key: K) {\n" +
+        '  return deere[key].get();\n' +
+        '}',
+      unserved: [NOT_ON_SANDBOX],
+    },
+    'a client method invoked through call, where the spec is not the first argument': {
+      code: "await client.get.call(client, 'equipment', '/equipment');",
+      unserved: [/client\.get: this client method is not called directly/],
     },
     'a client reassigned to one built for another environment': {
       code:
@@ -729,6 +918,7 @@ describe('the README checker catches what it exists to catch', () => {
       ['as ts', fence('a', '```ts')],
       ['with attributes', fence('a', '```typescript title="x"')],
       ['as tsx', fence('a', '```tsx')],
+      ['as typescriptreact', fence('a', '```typescriptreact')],
       ['in another case', fence('a', '```TypeScript')],
       ['indented', fence('  a', '  ```typescript', '  ```')],
       ['with tildes', fence('a', '~~~typescript', '~~~')],
