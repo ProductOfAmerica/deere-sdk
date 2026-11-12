@@ -139,7 +139,7 @@ export type SpecServerConfig =
       /** Envs declared in the spec's servers.variables.environment.enum. */
       supportedEnvironments: readonly Environment[];
       /**
-       * Paths that override the template above. Absent for the 26 specs where
+       * Paths that override the template above. Absent for most specs, where
        * every path shares the document's base. Checked before `urlTemplate`.
        */
       pathOverrides?: readonly PathServerOverride[];

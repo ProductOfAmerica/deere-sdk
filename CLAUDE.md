@@ -1,15 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## What this is
 
-Unofficial TypeScript SDK for John Deere Operations Center API. 28 APIs / 202 operations. Mostly generated code: specs
-are pulled from John Deere's portal, patched, and fed through a codegen pipeline into `src/api/*.ts`,
+Unofficial TypeScript SDK for John Deere Operations Center API. 28 APIs, roughly 200 generated methods. Mostly generated
+code: specs are pulled from John Deere's portal, patched, and fed through a codegen pipeline into `src/api/*.ts`,
 `src/types/generated/*`, `src/api-servers.generated.ts`, and `src/hateoas-map.ts`.
-
-See `AGENTS.md` for the mandatory GitNexus-based workflow (impact analysis before edits, change detection before
-commits). Its rules override defaults for this repo.
 
 ## Commands
 
@@ -22,7 +17,9 @@ pnpm lint                 # biome check
 pnpm lint:fix             # biome check --write (run before committing)
 pnpm test                 # node --test tests/*.test.ts
 pnpm test:coverage        # same + experimental coverage
-pnpm test:fuzz            # fast-check property tests
+pnpm test:fuzz            # fuzz.test.ts alone (pnpm test already includes it)
+pnpm test:routing-guard   # hermetic routing guard only, no network
+pnpm probe-routes         # LIVE: unauthenticated GETs against Deere's gateway; never part of a build
 ```
 
 Run a single test file:
@@ -55,21 +52,20 @@ before parse; `redact-specs` stays downstream as an idempotent safety net.
 Servers reconciliation is family-aware. Documents that differ only as environment instances or doc defects of
 the shared `https://{environment}.deere.com/platform` family resolve to the primary's servers block (`fix-specs`
 normalizes it to the templated form downstream); a genuinely different family (a deere host on a non-platform
-path, or mixed families) refuses to merge, preserving the per-family host trust boundary.
+path, or mixed families) refuses to merge, preserving the per-family host trust boundary, unless
+`scripts/routing-overrides.yaml` acknowledges the divergence with evidence.
 
 #### The api-surface manifest (`scripts/api-surface.yaml`)
 
 Committed and version-controlled. It maps each operation's **identity** (HTTP method + normalized path) to the
 public method name the generator emits, so an upstream `paths` reorder cannot rebind a published method to a
-different endpoint (the failure that took the daily sync red on 2026-06-24: a `paths` reorder rebound
-`FieldOperationsApi.get` to a different endpoint). Identity
-normalizes every `{param}` to `{_}`, so a param rename (`{orgId}` becomes `{organizationId}`) is absorbed and
-the method name is preserved. The one exception is sibling operations that differ **only** by param name
-(crop-types declares both `GET /cropTypes/{name}` and `GET /cropTypes/{id}`): those match by exact raw path, so a
-rename inside such a set is not absorbed and surfaces as breaking for a human to reconcile. `listAll` never
-appears in the manifest; it is always derived from a `list` collection GET. New operations receive deterministic
-proposed names (verb plus the capitalized last non-param segment, with a documented tiebreak chain; no
-positional counters).
+different endpoint (on 2026-06-24 one rebound `FieldOperationsApi.get` and took the daily sync red). Identity
+normalizes every `{param}` to `{_}`, so a param rename (`{orgId}` becomes `{organizationId}`) keeps the method name.
+The one exception is sibling operations that differ **only** by param name (crop-types declares both
+`GET /cropTypes/{name}` and `GET /cropTypes/{id}`): those match by exact raw path, so a rename inside such a set
+surfaces as breaking for a human to reconcile. `listAll` never appears in the manifest; it is always derived from a
+`list` collection GET. New operations receive deterministic proposed names (verb plus the capitalized last
+non-param segment, with a documented tiebreak chain; no positional counters).
 
 Editing the `name:` values is how you approve an upstream change: repoint an entry's `op:` to a renamed path
 (the name, hence the public method, is preserved), or delete an entry to drop a removed endpoint's method (a
@@ -78,7 +74,7 @@ rather than silently dropping the method.
 
 Every run is classified into `sync-report.json` (gitignored) for the workflow:
 
-- **benign**: no new and no missing operations. No release.
+- **benign**: no new and no missing operations. Patch release if specs or generated output changed, else none.
 - **additive**: new operations, none missing. Minor release; `generate-sdk` rewrites the manifest, folding the
   new entries in with their proposed names.
 - **breaking**: a manifest entry lost its operation. The sync fails and surfaces the missing operations; a human
@@ -89,7 +85,13 @@ minor, benign spec churn a patch; a breaking run does not release. Before commit
 guard (`tests/routing-guard.test.ts`), which fails when a path in `scripts/routing-snapshot.yaml` resolves to a
 different base, when a listed path disappears, or when a new path resolves anywhere but its spec's default base.
 New paths on the default base pass, and the sync's next step (`pnpm generate-routing-snapshot`) appends them, so
-an additive run completes on its own. Anything the guard fails on needs a human to re-measure and regenerate.
+an additive run completes on its own. Anything the guard fails on needs a human: re-measure, record any override
+with its evidence in `scripts/routing-overrides.yaml`, run `pnpm generate-routing-snapshot`, and review the diff.
+
+Two other daily workflows watch Deere's side, separate from CI: `api-health.yml` (05:00 UTC, same validator as
+`fetch-specs`, drives the health badge) and `probe-routes.yml` (05:30 UTC). The probe is report-only for outages
+and timeouts. It goes red only when a shipped route answers a deterministic 404/403 while its controls validate,
+meaning Deere removed the route: lift a freeze and cut the major, add a routing override, or drop the method.
 
 When Deere moves an operation to another spec document without changing it, the manifest still binds its method to
 the old spec and the run reads as breaking. Neither freezing the old spec (nothing would ever lift it) nor dropping
@@ -98,6 +100,25 @@ the method (the route still works) is right. Instead register a relocation in `s
 the new spec's method, and throws as soon as the entry stops matching Deere's documents (moved back, published in
 both, dropped, or a shared component diverging). Each entry names `removeInMajor`; a test fails once
 `package.json` reaches that major, so the major release deletes the entry and its manifest entry together.
+
+#### Other hand-edited pipeline inputs (`scripts/`)
+
+No generator rewrites these, so their comments survive. Each file's header is the full reference.
+
+- `spec-registry.yaml`: which specs `fetch-specs` and `check-api-health.ts` fetch, and each one's portal slug. The key
+  is the internal name (raw/fixed filename, `*Api` class, public `SpecName`) and never tracks an upstream rename;
+  repoint `slug:` instead. An active spec fails the run if it can't be fetched or validated, or if its slug now serves
+  a different contract (under half the committed operations survive). `status: frozen` (with `reason:` and `since:`)
+  keeps the committed raw file: still fetched for the log, never written, never fails. Check here first when a spec
+  isn't picking up upstream changes.
+- `routing-overrides.yaml`: base URLs where Deere's spec is wrong or silent, per spec or per path. `fix-specs` writes
+  them as `servers` blocks; path-level ones surface as `pathOverrides` in `API_SERVERS`. The loader rejects an entry
+  without `evidence:`, so record what was measured and when. `acknowledgedDivergentServers: true` is the only way a
+  slug whose documents declare mixed server families will merge.
+- `embed-contracts.yaml`: response fields Deere returns but its spec omits (e.g. `?embed=measurementTypes`), patched
+  into `specs/fixed` before type generation. Each entry needs a hand-written wrapper in `src/safe/` that forces the
+  query param, plus a field in `SafeFacades` (`src/safe/index.ts`). Consumers reach it through
+  `deere.safe.<resource>`; the generator needs no change.
 
 ## Architecture
 
@@ -118,7 +139,7 @@ deere.equipment.getEquipment(id)
   → this.client.get('equipment', '/equipment/...')
     → resolveRequestUrl('equipment', path, env)          // src/environment-resolver.ts
        → API_SERVERS['equipment']                        // src/api-servers.generated.ts
-          → templated   → urlTemplate.replace('{environment}', env)
+          → templated   → (pathOverrides match ?? urlTemplate).replace('{environment}', env)
           → static      → urlByEnvironment[env]  or throw UnsupportedEnvironmentError
           → unavailable → throw NoServerConfigError
     → requestUrl('GET', url, …)                          // fetch + retry + timeout
@@ -126,7 +147,11 @@ deere.equipment.getEquipment(id)
 
 `API_SERVERS` is derived at build time from each spec's `servers` block. **There is no scalar `baseUrl` in the client.**
 Different spec families live on different hosts (`api.deere.com/platform`, `equipmentapi.deere.com/isg`, etc.) and
-v1's "route everything through one baseUrl" approach 404'd equipment endpoints silently — do not reintroduce it.
+v1's "route everything through one baseUrl" approach 404'd equipment endpoints silently. Do not reintroduce it.
+
+A templated spec can carry `pathOverrides` for paths Deere serves from a different base than the spec declares
+(`/notifications/{sourceEvent}` is on `/isg` while the rest of its spec is on `/platform`). They come from
+`scripts/routing-overrides.yaml` with measured evidence, never from a guess.
 
 ### No silent environment fallbacks
 
@@ -157,14 +182,14 @@ output file.
 `DeereClient.fetchUrl` (and `followLink`) is the one entry point for absolute URLs. It attaches the
 `Authorization: Bearer …` header **only** to hosts matching `TRUSTED_HOSTS = /^([a-z0-9-]+\.)*deere\.com$/i`.
 Third-party URLs (e.g. a HAL link that somehow points off-domain, or a user-supplied webhook URL) get no Authorization
-header. This is a deliberate token-leakage safeguard — if you touch `requestUrl`'s header-building logic, preserve the
+header. This is a deliberate token-leakage safeguard. If you touch `requestUrl`'s header-building logic, preserve the
 `_noAuth` path and the rule "user-supplied `options.headers.Authorization` always wins."
 
 ### Retry policy
 
 `requestUrl` retries on `{429, 500, 502, 503, 504}`, abort/timeout, and `TypeError`/"fetch" network errors. Exponential
 backoff with full jitter; respects `Retry-After` on 429 (capped by `maxDelay`). Auth errors (401/403) and client
-errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx — `handleError` intentionally
+errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError` intentionally
 turns 401/403 into `AuthError` and everything else into `DeereError`.
 
 Client-side errors (thrown from the resolver before any HTTP) use `CLIENT_ERROR_STATUS = -1` so they can't be confused
@@ -177,10 +202,11 @@ Lives in `src/errors.ts` (separate from `client.ts` to break a circular import w
 
 ## Generated-code boundary
 
-Never hand-edit these — they get clobbered on the next generate run:
+Never hand-edit these. They get clobbered on the next generate run:
 
 - `src/api/*.ts` (except `src/api/index.ts` which is also generated but safe to regen)
 - `src/types/generated/**`
+- `src/types/index.ts` (written by `generate-sdk`)
 - `src/api-servers.generated.ts`
 - `src/hateoas-map.ts`
 - `src/deere.ts` (the big class with one field per API)
@@ -196,19 +222,20 @@ bump. For example:
 - New generated method shape → `scripts/generate-sdk.ts`
 - New spec-level patch → `scripts/fix-specs.ts`
 
-Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/index.ts`.
+Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/path-pattern.ts`,
+`src/index.ts`, and `src/safe/**` (the `deere.safe.*` facades).
 
-`scripts/api-surface.yaml` sits between the two: it is committed and version-controlled, but `generate-sdk`
-rewrites it wholesale on additive runs. Only its `name:` values are meant to be hand-edited (the rename/removal
-approval point described above); per-entry hand comments do not survive a rewrite. `scripts/canonicalize-specs.ts`
-is a rerunnable, idempotent one-off that renormalizes committed `specs/raw/*.yaml` to the key order `fetch-specs`
-now emits, so live fetches diff cleanly against them.
+`scripts/api-surface.yaml` sits between the two: `generate-sdk` rewrites it wholesale on additive runs, so only its
+`name:` values are meant to be hand-edited (the rename/removal approval point described above) and per-entry hand
+comments do not survive. `scripts/canonicalize-specs.ts` is a rerunnable, idempotent one-off that renormalizes
+committed `specs/raw/*.yaml` to the key order `fetch-specs` now emits, so live fetches diff cleanly against them.
 
 ## Testing conventions
 
 Tests use `tests/helpers/mock-fetch.ts` for injecting fetch behaviour (JSON success, error, retry-sequence, spy, network
-error, timeout, paginated). Never hit the real API in tests — inject a custom `fetch` via `DeereClientConfig.fetch`.
-`fuzz.test.ts` uses `fast-check`; run separately via `pnpm test:fuzz` (CI runs it only on Node 24.x).
+error, timeout, paginated). Never hit the real API in tests: inject a custom `fetch` via `DeereClientConfig.fetch`.
+`fuzz.test.ts` uses `fast-check`. `pnpm test` already includes it; `pnpm test:fuzz` runs it alone, and CI adds that
+dedicated step only on Node 24.x.
 
 CI runs the test matrix on Node 20/22/23/24/25. Node 18 was dropped 2026-05-15 because tsx ≥4.22.0 calls
 `Array.prototype.toReversed()` (ES2023, Node 20+). Node 18 hit EOL April 2025. Keep the code Node-20-compatible
@@ -227,26 +254,23 @@ codegen output, a generator, registry or manifest change was committed without i
 was hand-edited, or a biome safe fix touched a hand-written file. Reproduce it with the same offline commands and commit
 the result; when a dependency bump is the cause, decide whether the new output is acceptable before regenerating.
 
+## Code intelligence (`typescript-lsp`)
+
+The server loads the workspace's TypeScript, so a fresh clone needs `pnpm install` before it works. A worktree under
+`.claude/worktrees/` entered mid-session needs no install for it: types resolve upward into the main checkout's
+`node_modules`, so the worktree's code is checked against the main checkout's dependency versions (pnpm scripts
+there still fail until `pnpm install`). Reference results cover only the tsconfig projects the server has loaded,
+and the root `tsconfig.json` is `src`-only: before trusting a caller count, touch any file under `tests/` (its
+`tsconfig.json` spans `src`, `scripts` and `tests`) and repeat the first query, which returns before the project
+finishes loading.
+
 ## Releases
 
-**Normal development** – just commit and push as usual. No release happens:
+Ordinary commits and pushes release nothing. To release, update `CHANGELOG.md`, then:
 
 ```bash
-git add -A
-git commit -m "fix: whatever you fixed"
-git push
-```
-
-**When ready to release** a new version:
-
-```bash
-# 1. Update CHANGELOG.md with what changed
-
-# 2. Bump version (auto-commits + auto-creates tag)
-npm version patch   # or: minor, major
-
-# 3. Push commit and tag together
-git push --follow-tags
+npm version patch         # or minor, major; auto-commits and creates the tag
+git push --follow-tags    # pushes the commit and the tag together
 ```
 
 CI sees the tag → creates GitHub Release → publishes to npm.
@@ -260,48 +284,3 @@ gh workflow run release.yml --ref vX.Y.Z
 ```
 
 `release.yml` also accepts `workflow_dispatch`, so this produces an identical run against the tag's commit.
-
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
-
-This project is indexed by GitNexus as **deere-sdk** (2699 symbols, 6803 relationships, 227 execution flows).
-
-> Index stale? Run `node .gitnexus/run.cjs analyze --index-only` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? Bootstrap with `npx`, `bunx`, or `pnpm dlx` — e.g. `bunx gitnexus@latest analyze` (npm 11 npx crash; #1939).
-
-## Always Do
-
-- **MUST run impact before editing.** Use `impact({target: "symbolName", direction: "upstream"})` or `node .gitnexus/run.cjs impact "symbolName" --direction upstream --repo .`; report callers, processes, and risk. Never substitute grep for graph analysis.
-- **MUST analyze graph changes before committing.** Use `detect_changes({scope: "all"})` (MCP) or `node .gitnexus/run.cjs detect-changes --scope all --repo .` (CLI fallback). `partial: true` or `truncated: true` is not a clean check — a zero means unseen, not unaffected; re-run it. For regression review: `detect_changes({scope: "compare", base_ref: "main"})` or `node .gitnexus/run.cjs detect-changes --scope compare --base-ref "main" --repo .`.
-- MUST warn on HIGH/CRITICAL `risk` pre-edit; never use `riskSharedAxes` to waive a HIGH/CRITICAL `risk` warning. Compare File/symbol: MCP File omits axes; Graph-RAG expands File.
-- **MUST treat `risk: UNKNOWN` as unresolved, not as low.** An empty caller set is not evidence the symbol is unused — it can also mean the callers are not resolvable by the index (plain-object property access, dynamic dispatch, cross-language calls). `impact` pairs `UNKNOWN` with a `riskNote` saying so. Confirm with a text search before treating the symbol as safe to change or delete; do not proceed on the strength of a zero.
-- **MUST use `query({search_query: "concept"})` for concepts/flows, `context({name: "symbolName"})` for a named symbol, or `impact` for blast radius, on read-only callers, dependencies, imports, or execution flow.** Graph first; text search only for empty/`UNKNOWN`/literals.
-- For security review, `explain({target: "fileOrSymbol"})` lists taint findings (source→sink flows; needs `analyze --pdg`).
-
-## Never Do
-
-- NEVER edit a function, class, or method before MCP/CLI impact analysis.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis, and never read `UNKNOWN` as an all-clear — it means the walk could not answer, which is the one verdict that requires confirming by other means.
-- NEVER rename symbols with find-and-replace — use `rename` which understands the call graph.
-- NEVER commit before MCP/CLI graph change analysis.
-
-## Resources
-
-| Resource | Use for |
-| --- | --- |
-| `gitnexus://repo/deere-sdk/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/deere-sdk/clusters` | All functional areas |
-| `gitnexus://repo/deere-sdk/processes` | All execution flows |
-| `gitnexus://repo/deere-sdk/process/{name}` | Step-by-step execution trace |
-
-## CLI
-
-| Task | Read this skill file |
-| --- | --- |
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus-cli/SKILL.md` |
-
-<!-- gitnexus:end -->

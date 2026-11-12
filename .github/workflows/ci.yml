@@ -103,7 +103,7 @@ jobs:
           path: .github/badges/coverage.json
           retention-days: 1
 
-  # STRICT: needs: build waits for ALL 6 matrix entries. If ANY Node version fails
+  # STRICT: needs: build waits for ALL matrix entries. If ANY Node version fails
   # (including flakes), the badge does NOT update that run. This is more correct
   # than the pre-split racy behavior — don't advertise a passing badge when a
   # matrix entry actually failed. Flaky CI is a separate problem to fix upstream.

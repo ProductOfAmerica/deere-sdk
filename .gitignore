@@ -31,8 +31,6 @@ Thumbs.db
 
 bash.exe.stackdump
 settings.local.json
-.gitnexus
-/.agents/skills/gitnexus/
 
 # Machine-readable sync classification output (regenerated per run)
 sync-report.json
