@@ -332,7 +332,13 @@ await deere.boundaries.delete('org-id', 'field-id', 'boundary-id');
 <details>
 <summary><strong>Equipment</strong></summary>
 
+John Deere serves the Equipment API from a single host, which this SDK treats as production: it is available on `api` and `partnerapi` only. On the default `sandboxapi`, every equipment call throws `UnsupportedEnvironmentError` before a request is sent.
+
 ```typescript
+import {Deere} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token', environment: 'api'});
+
 // Get all equipment
 const equipment = await deere.equipment.get();
 
@@ -346,7 +352,19 @@ const filtered = await deere.equipment.get({
 // Get equipment details
 const machine = await deere.equipment.getEquipment('equipment-id');
 
-// CRUD
+// Reference data
+const makes = await deere.equipment.list();
+const types = await deere.equipment.listEquipmenttypes();
+const models = await deere.equipment.listEquipmentmodels({equipmentModelName: '9RX*'});
+```
+
+Creating, updating and deleting equipment go to that same production host. This SDK has no test tier for them, so these calls change real data:
+
+```typescript
+import {Deere} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token', environment: 'api'});
+
 await deere.equipment.create('org-id', {
     name: 'Tractor 1',
     serialNumber: 'SN-0001',
@@ -354,11 +372,6 @@ await deere.equipment.create('org-id', {
 });
 await deere.equipment.update('equipment-id', {name: 'Updated'});
 await deere.equipment.delete('equipment-id');
-
-// Reference data
-const makes = await deere.equipment.list();
-const types = await deere.equipment.listEquipmenttypes();
-const models = await deere.equipment.listEquipmentmodels({equipmentModelName: '9RX*'});
 ```
 
 </details>

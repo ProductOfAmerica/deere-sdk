@@ -17,6 +17,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
 import ts from 'typescript';
+import { DEFAULT_ENVIRONMENT, type Environment } from '../src/api-servers.generated.js';
+import { resolveRequestUrl } from '../src/environment-resolver.js';
+import { Deere } from '../src/index.js';
 
 const ROOT = process.cwd().replaceAll('\\', '/');
 const SDK_ENTRY = `${ROOT}/src/index.ts`;
@@ -189,6 +192,53 @@ function typecheckBlocks(blocks: readonly Block[]): BlockDiagnostic[] {
 
 const format = (d: BlockDiagnostic) => `README.md:${d.line} TS${d.code}: ${d.message}`;
 
+/** Never sends a request: used only to read which spec each API field belongs to. */
+const probe = new Deere({ accessToken: 'readme-check' });
+
+/** The spec behind `deere.<field>` or `deere.safe.<field>`, or undefined if it is not an API. */
+function specOf(safe: boolean, field: string): string | undefined {
+  const api: unknown = Reflect.get(safe ? probe.safe : probe, field);
+  // A safe facade wraps the generated API it guards in `raw`.
+  const generated: unknown = safe && api instanceof Object ? Reflect.get(api, 'raw') : api;
+  const spec: unknown = generated instanceof Object ? Reflect.get(generated, 'spec') : undefined;
+  return typeof spec === 'string' ? spec : undefined;
+}
+
+/**
+ * APIs a block calls that are not served in the environment it configures, or
+ * in the default environment when it configures none.
+ *
+ * Types cannot catch this. `deere.equipment.get()` compiles on any client and
+ * throws at the first call unless the client was built for an environment the
+ * equipment spec has a host for. The Quick Start shipped exactly that.
+ *
+ * Only specs with a fixed host list can fail here, because the resolver does
+ * not check a templated spec against its environment list.
+ */
+function unservedApis(block: Block): string[] {
+  const named = [...block.code.matchAll(/\benvironment:\s*'([^']+)'/g)].map((match) => match[1]);
+  const environments = named.length > 0 ? [...new Set(named)] : [DEFAULT_ENVIRONMENT];
+
+  const calls = new Map<string, string>();
+  for (const [, safe, field] of block.code.matchAll(/\bdeere\.(safe\.)?(\w+)\./g)) {
+    const spec = specOf(safe !== undefined, field);
+    if (spec) calls.set(`deere.${safe ?? ''}${field}`, spec);
+  }
+
+  const unserved: string[] = [];
+  for (const [call, spec] of calls) {
+    for (const environment of environments) {
+      try {
+        resolveRequestUrl(spec, '/', environment as Environment);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message.split('\n')[0] : String(error);
+        unserved.push(`README.md:${block.line} ${call}: ${reason}`);
+      }
+    }
+  }
+  return unserved;
+}
+
 describe('README examples', () => {
   const { blocks, problems } = extractBlocks(readFileSync(join(ROOT, 'README.md'), 'utf8'));
   const diagnostics = typecheckBlocks(blocks.filter((block) => block.skip === undefined));
@@ -209,11 +259,35 @@ describe('README examples', () => {
       );
       assert.deepStrictEqual(mine.map(format), []);
     });
+
+    it(`README.md:${block.line} calls only APIs its environment serves`, {
+      skip: block.skip,
+    }, () => {
+      assert.deepStrictEqual(unservedApis(block), []);
+    });
   }
 
   describe('the checker catches what it exists to catch', () => {
     const codes = (code: string) => typecheckBlocks([{ line: 1, code }]).map((d) => d.code);
     const fence = (code: string) => `\`\`\`typescript\n${code}\n\`\`\``;
+
+    it('an API that the default environment does not serve', () => {
+      const found = unservedApis({ line: 1, code: 'await deere.equipment.get();' });
+      assert.strictEqual(found.length, 1);
+      assert.match(found[0], /deere\.equipment: .*'sandboxapi'/);
+    });
+
+    it('the same API through its safe facade', () => {
+      const found = unservedApis({ line: 1, code: 'await deere.safe.equipment.anything();' });
+      assert.strictEqual(found.length, 1);
+    });
+
+    it('but not once the block configures an environment that serves it', () => {
+      const code =
+        "const deere = new Deere({ accessToken: 't', environment: 'api' });\n" +
+        'await deere.equipment.get();';
+      assert.deepStrictEqual(unservedApis({ line: 1, code }), []);
+    });
 
     it('a skip marker that gives no reason', () => {
       const found = extractBlocks(`<!-- readme-check: skip -->\n${fence('a')}`);
