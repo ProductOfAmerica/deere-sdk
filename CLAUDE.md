@@ -12,7 +12,7 @@ code: specs are pulled from John Deere's portal, patched, and fed through a code
 pnpm install              # bootstrap
 pnpm build                # tsc → dist/
 pnpm typecheck            # src only (no emit)
-pnpm typecheck:test       # src + scripts + tests
+pnpm typecheck:test       # src + scripts + tests (CI and the daily sync run it too)
 pnpm lint                 # biome check
 pnpm lint:fix             # biome check --write (run before committing)
 pnpm test                 # node --test tests/*.test.ts

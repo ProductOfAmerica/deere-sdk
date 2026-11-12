@@ -127,6 +127,12 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      # Before the commit, like the routing guard below: a sync whose
+      # regenerated types break a type-level contract under tests/types fails
+      # here instead of releasing and turning CI red afterwards.
+      - name: Type check tests and scripts
+        run: pnpm typecheck:test
+
       # Blocks the sync before it commits, rather than letting a routing change
       # land on main and turn CI red afterwards. A failure here means an
       # upstream change moved a published method to a different host, a path

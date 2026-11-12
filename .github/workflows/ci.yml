@@ -61,6 +61,12 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      # `pnpm typecheck` covers src only, and the test runner strips types
+      # without checking them. This is the one step that type-checks tests/
+      # and scripts/, including the type-level contracts under tests/types.
+      - name: Type check tests and scripts
+        run: pnpm typecheck:test
+
       - name: Build
         run: pnpm build
 
