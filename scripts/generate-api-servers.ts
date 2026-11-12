@@ -32,9 +32,33 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
+import {
+  assertEnvironmentName,
+  assertPathKey,
+  isHttpsDeereBaseUrl,
+  tsStringLiteral,
+} from './lib/emit.js';
 
 const SPECS_DIR = join(process.cwd(), 'specs', 'fixed');
 const OUTPUT_FILE = join(process.cwd(), 'src', 'api-servers.generated.ts');
+
+/**
+ * Stands in for `{environment}` when checking where a templated URL leads.
+ * Any accepted environment name gives the same answer: the names are
+ * restricted to what one or more hostname labels can hold
+ * (assertEnvironmentName), so none can end the host or supply a different one.
+ */
+const SAMPLE_ENVIRONMENT = 'api';
+
+/**
+ * Whether a `{environment}` URL template resolves to a plain https base on
+ * deere.com. It must name the variable exactly once: the resolver substitutes
+ * the first occurrence only, so a second would reach the request URL as text.
+ */
+function templateStaysOnDeere(urlTemplate: string): boolean {
+  if (urlTemplate.split('{environment}').length !== 2) return false;
+  return isHttpsDeereBaseUrl(urlTemplate.replace('{environment}', SAMPLE_ENVIRONMENT));
+}
 
 // ============================================================================
 // Types
@@ -197,6 +221,19 @@ function collectPathOverrides(spec: OpenAPISpec, specName: string): PathServerOv
       );
     }
 
+    // The pattern, the names and the URL are all written into the generated
+    // table, and the names are substituted into the URL's host at run time.
+    const where = `${specName}.yaml path ${JSON.stringify(pattern)}`;
+    assertPathKey(pattern, `${specName}.yaml`);
+    for (const name of enumValues) assertEnvironmentName(name, where);
+    if (!templateStaysOnDeere(url)) {
+      throw new Error(
+        `${where} declares the servers URL ${JSON.stringify(url)}, which is not a plain ` +
+          `https base on deere.com with {environment} named once. Requests to anything else ` +
+          `would carry no access token or go to the wrong place, so this is refused, not emitted.`
+      );
+    }
+
     overrides.push({ pattern, urlTemplate: url, supportedEnvironments: enumValues });
   }
 
@@ -231,6 +268,13 @@ function classifySpec(spec: OpenAPISpec, specName: string): SpecConfig {
         reason: `${specName}.yaml has a templated servers URL but declares no environment enum.`,
       };
     }
+    for (const name of enumValues) assertEnvironmentName(name, `${specName}.yaml servers`);
+    if (!templateStaysOnDeere(first.url)) {
+      return {
+        kind: 'unavailable',
+        reason: `${specName}.yaml has a templated servers URL that is not a plain https base on deere.com with {environment} named once: ${first.url.slice(0, 80)}`,
+      };
+    }
     const pathOverrides = collectPathOverrides(spec, specName);
     return {
       kind: 'templated',
@@ -262,6 +306,12 @@ function classifySpec(spec: OpenAPISpec, specName: string): SpecConfig {
       return {
         kind: 'unavailable',
         reason: `${specName}.yaml has a server URL with an unsupported template variable (only {environment} is recognized).`,
+      };
+    }
+    if (!isHttpsDeereBaseUrl(server.url)) {
+      return {
+        kind: 'unavailable',
+        reason: `${specName}.yaml has a server URL that is not a plain https base on deere.com: ${server.url.slice(0, 80)}`,
       };
     }
     parsedServers.push({ url: server.url, tier: classifyHostname(hostname) });
@@ -413,9 +463,9 @@ function emitFile(classified: ClassifiedSpec[], envs: string[]): string {
 
   const coverageMatrix = buildCoverageMatrix(classified, envs);
 
-  const specNameUnion = specNames.map((n) => `  | '${n}'`).join('\n');
-  const envUnion = envs.map((e) => `  | '${e}'`).join('\n');
-  const envListArray = envs.map((e) => `  '${e}',`).join('\n');
+  const specNameUnion = specNames.map((n) => `  | ${tsStringLiteral(n)}`).join('\n');
+  const envUnion = envs.map((e) => `  | ${tsStringLiteral(e)}`).join('\n');
+  const envListArray = envs.map((e) => `  ${tsStringLiteral(e)},`).join('\n');
 
   // Emit each spec's config. Quote keys that contain dots (e.g. 'apiqa.tal')
   // or hyphens (e.g. 'equipment-measurement').
@@ -525,10 +575,10 @@ function emitPathOverrides(overrides: PathServerOverride[] | undefined): string 
 
   const entries = overrides
     .map((o) => {
-      const envs = o.supportedEnvironments.map((e) => `'${e}'`).join(', ');
+      const envs = o.supportedEnvironments.map((e) => tsStringLiteral(e)).join(', ');
       return `      {
-        pattern: '${o.pattern}',
-        urlTemplate: '${o.urlTemplate}',
+        pattern: ${tsStringLiteral(o.pattern)},
+        urlTemplate: ${tsStringLiteral(o.urlTemplate)},
         supportedEnvironments: [${envs}],
       },`;
     })
@@ -541,20 +591,20 @@ ${entries}
 }
 
 function emitSpecEntry({ specName, config }: ClassifiedSpec): string {
-  const key = needsQuotes(specName) ? `'${specName}'` : specName;
+  const key = needsQuotes(specName) ? tsStringLiteral(specName) : specName;
 
   if (config.kind === 'unavailable') {
     return `  ${key}: {
     kind: 'unavailable',
-    reason: ${JSON.stringify(config.reason)},
+    reason: ${tsStringLiteral(config.reason)},
   },`;
   }
 
   if (config.kind === 'templated') {
-    const envs = config.supportedEnvironments.map((e) => `'${e}'`).join(', ');
+    const envs = config.supportedEnvironments.map((e) => tsStringLiteral(e)).join(', ');
     return `  ${key}: {
     kind: 'templated',
-    urlTemplate: '${config.urlTemplate}',
+    urlTemplate: ${tsStringLiteral(config.urlTemplate)},
     supportedEnvironments: [${envs}],${emitPathOverrides(config.pathOverrides)}
   },`;
   }
@@ -562,8 +612,8 @@ function emitSpecEntry({ specName, config }: ClassifiedSpec): string {
   // static
   const urlEntries = Object.entries(config.urlByEnvironment)
     .map(([env, url]) => {
-      const envKey = needsQuotes(env) ? `'${env}'` : env;
-      return `      ${envKey}: '${url}',`;
+      const envKey = needsQuotes(env) ? tsStringLiteral(env) : env;
+      return `      ${envKey}: ${tsStringLiteral(url)},`;
     })
     .join('\n');
   return `  ${key}: {

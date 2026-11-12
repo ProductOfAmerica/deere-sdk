@@ -219,6 +219,33 @@ pnpm lint:fix`), and commit the regenerated output in the same change. Not `pnpm
 bump. Spec host logic lives in `scripts/generate-api-servers.ts`, generated method shape in
 `scripts/generate-sdk.ts`, and spec-level patches in `scripts/fix-specs.ts`.
 
+### Spec text is untrusted where it is emitted
+
+The specs come from John Deere's portal and the sync publishes what the generators write without a person reading it,
+so text from a spec must never be able to end the literal, comment or identifier it is written into. A summary
+containing a comment terminator used to become a class member that ran when the generated module loaded; a run that
+only changes a description classifies as benign and is released. `scripts/lib/emit.ts` is the one place this is
+handled, and a generator never builds quotes or a comment around spec text itself:
+
+- Text that stays data is escaped: `tsStringLiteral` for anything quoted (parameter names, enum values, schema names,
+  URLs, map keys) and `jsDocText` for anything placed in a comment.
+- Text that becomes syntax is checked and the run stops when it does not fit: `assertPathKey` for path keys (which are
+  written unescaped into a template literal and supply parameter identifiers), `assertEnvironmentName` for environment
+  names (substituted into a hostname at run time). A failure means upstream published a new shape; widen the grammar
+  there once a person has looked.
+- `generate-api-servers` classifies a spec as `unavailable` when its server URL is not a plain https base on deere.com
+  (no credentials, query or fragment, and `{environment}` named exactly once in a template), and refuses a path-level
+  one outright. The resolver appends the request path to that string, so anything else would send requests to another
+  host, to the wrong path, or not at all.
+
+`tests/generated-structure.test.ts` is the second line of defence and does not rely on the list of emit sites: it fails
+if a committed generated file contains anything of a kind no generator emits (a class member, a top-level statement, a
+computed value in a table, a default parameter value, or a statement or call in a method body other than the few every
+method is built from). It does not look inside string or template literals. It runs only in CI, which gates no
+release: the sync commits and tags, and the release workflow publishes, without running the suite. When a generator
+starts emitting a new shape on purpose (a value import, a call to a helper), that test is where it gets allowed; allow
+the exact import or callee, not the kind.
+
 Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/path-pattern.ts`,
 `src/index.ts`, and `src/safe/**` (the `deere.safe.*` facades).
 
@@ -244,8 +271,9 @@ TypeScript is pinned to 6.x (`^6.0.3`). openapi-typescript 7.x, which `generate-
 TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no longer exposes it: the 7.0.2 bump (#39)
 broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
-(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. `readme-examples.test.ts` uses the
-same API, confined to its `typecheckBlocks` function, and needs porting at the same time.
+(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. Two tests use the same API and need
+porting at the same time: `readme-examples.test.ts`, confined to its `typecheckBlocks` function, and
+`generated-structure.test.ts`, which only parses.
 
 CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
 then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with
