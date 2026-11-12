@@ -6587,7 +6587,7 @@ components:
           enum:
             - "isCarrier"
             - "archived"
-            - "registration (chemicals and fertilizers only)"
+            - "registration"
         success:
           nullable: false
           type: "boolean"
@@ -6606,7 +6606,7 @@ components:
           enum:
             - "isCarrier"
             - "archived"
-            - "registration (chemicals and fertilizers only)"
+            - "registration"
         success:
           nullable: false
           type: "boolean"

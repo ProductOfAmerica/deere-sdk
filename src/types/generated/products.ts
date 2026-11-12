@@ -4937,7 +4937,7 @@ export interface components {
        * @example isCarrier
        * @enum {string}
        */
-      key?: 'isCarrier' | 'archived' | 'registration (chemicals and fertilizers only)';
+      key?: 'isCarrier' | 'archived' | 'registration';
       /**
        * @description Whether or not the override was successfully applied
        * @example true
@@ -4951,7 +4951,7 @@ export interface components {
        * @example isCarrier
        * @enum {string}
        */
-      key?: 'isCarrier' | 'archived' | 'registration (chemicals and fertilizers only)';
+      key?: 'isCarrier' | 'archived' | 'registration';
       /**
        * @description Whether or not the override was successfully applied
        * @example true

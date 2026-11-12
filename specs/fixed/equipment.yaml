@@ -642,8 +642,6 @@ components:
       description: "It should be equipment model name"
       schema:
         type: "string"
-        enum:
-          - "string or partial string with * wildcard search"
       example:
         - "9RX420"
         - "9RX*"
