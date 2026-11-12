@@ -1,31 +1,40 @@
 name: CI
 
+# Path filters use `paths` with `!` exclusions, not `paths-ignore`, because one
+# Markdown file has to trigger CI: tests/readme-examples.test.ts type-checks the
+# examples in README.md, and `paths-ignore` cannot re-include a file. Order
+# matters: a positive pattern after a matching exclusion includes the path
+# again, which is what puts README.md back after '!**.md'.
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.gitignore'
-      - '.gitattributes'
-      - '.nvmrc'
-      - '.github/badges/**'
-      - '.github/dependabot.yml'
-      - '.github/CODEOWNERS'
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!**.md'
+      - 'README.md'
+      - '!LICENSE'
+      - '!.gitignore'
+      - '!.gitattributes'
+      - '!.nvmrc'
+      - '!.github/badges/**'
+      - '!.github/dependabot.yml'
+      - '!.github/CODEOWNERS'
+      - '!.github/workflows/**'
   pull_request:
     branches: [main]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.gitignore'
-      - '.gitattributes'
-      - '.nvmrc'
-      - '.github/badges/**'
-      - '.github/dependabot.yml'
-      - '.github/CODEOWNERS'
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!**.md'
+      - 'README.md'
+      - '!LICENSE'
+      - '!.gitignore'
+      - '!.gitattributes'
+      - '!.nvmrc'
+      - '!.github/badges/**'
+      - '!.github/dependabot.yml'
+      - '!.github/CODEOWNERS'
+      - '!.github/workflows/**'
 
 permissions:
   contents: read
