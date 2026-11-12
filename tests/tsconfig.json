@@ -1,0 +1,7 @@
+// Editors and language servers only discover files named tsconfig.json. Without this one,
+// test files land in an inferred project with no "types": ["node"], and the server reports
+// errors (TS2591 on the node:test imports) that `pnpm typecheck:test` does not. Nothing in
+// the build reads this file: the test and typecheck scripts name tsconfig.test.json explicitly.
+{
+  "extends": "../tsconfig.test.json"
+}

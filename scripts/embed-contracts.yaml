@@ -10,8 +10,6 @@
 # the relevant query param. Otherwise the patched type is only available to
 # raw callers willing to narrow optional fields manually.
 #
-# See plan: docs/designs or the relevant CEO/eng review for context.
-#
 # Patch operations:
 #   - addProperty: inject a property onto an existing schema in components.schemas
 #   - addSchema:   inject a new named schema into components.schemas

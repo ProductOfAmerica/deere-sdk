@@ -61,6 +61,12 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      # `pnpm typecheck` covers src only, and the test runner strips types
+      # without checking them. This is the one step that type-checks tests/
+      # and scripts/, including the type-level contracts under tests/types.
+      - name: Type check tests and scripts
+        run: pnpm typecheck:test
+
       - name: Build
         run: pnpm build
 
@@ -103,7 +109,7 @@ jobs:
           path: .github/badges/coverage.json
           retention-days: 1
 
-  # STRICT: needs: build waits for ALL 6 matrix entries. If ANY Node version fails
+  # STRICT: needs: build waits for ALL matrix entries. If ANY Node version fails
   # (including flakes), the badge does NOT update that run. This is more correct
   # than the pre-split racy behavior — don't advertise a passing badge when a
   # matrix entry actually failed. Flaky CI is a separate problem to fix upstream.

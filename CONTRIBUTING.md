@@ -90,7 +90,7 @@ Use clear, descriptive commit messages:
 deere-sdk/
 ├── src/              # Source code
 │   ├── client.ts     # Core API client
-│   ├── apis/         # API wrapper classes
+│   ├── api/          # API wrapper classes
 │   └── types/        # TypeScript types
 ├── tests/            # Test files
 ├── scripts/          # Build/generation scripts
