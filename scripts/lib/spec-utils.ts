@@ -326,10 +326,15 @@ export const PROSE_ENUM_FIXES: readonly ProseEnumFix[] = [
  * - The location or the enum is gone, or the real value now stands where the
  *   prose was: John Deere repaired or removed it. The entry is skipped, so a
  *   repair never stops the sync.
- * - The enum is there but holds something else in the prose's place, a
- *   reworded sentence or real values beside it: documentation would reach the
- *   generated types again, and skipping would hide that. This throws, so the
- *   entry is re-read before anything is committed.
+ * - The enum is there but holds something else in the prose's place:
+ *   documentation would reach the generated types again, and skipping would
+ *   hide that. This throws, so the entry is re-read before anything is
+ *   committed. Two shapes are recognized, because nothing here guesses whether
+ *   a string is prose. For a dropped enum: the sentence beside other values, or
+ *   a different lone value. For a replaced member: a value that begins with the
+ *   real one and carries more text, which a real value such as
+ *   "registrationNumber" would also match. Any other rewording is skipped like
+ *   a repair.
  */
 export function fixProseEnums(
   spec: Record<string, unknown>,

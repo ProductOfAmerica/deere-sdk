@@ -332,7 +332,7 @@ await deere.boundaries.delete('org-id', 'field-id', 'boundary-id');
 <details>
 <summary><strong>Equipment</strong></summary>
 
-John Deere serves the Equipment API from a single host, which this SDK treats as production: it is available on `api` and `partnerapi` only. On the default `sandboxapi`, every equipment call throws `UnsupportedEnvironmentError` before a request is sent.
+John Deere serves the Equipment API from a single host, which this SDK treats as production: it is available on `api` and `partnerapi` only. On the default `sandboxapi`, equipment calls throw `UnsupportedEnvironmentError` before a request is sent. With `hateoas: true` a few of them behave differently; see [Strict Mode](#strict-mode).
 
 ```typescript
 import {Deere} from 'deere-sdk';
@@ -365,10 +365,12 @@ import {Deere} from 'deere-sdk';
 
 const deere = new Deere({accessToken: 'your-token', environment: 'api'});
 
+// John Deere's sample request also sends a top-level '@type': 'Machine',
+// which its published schema leaves out.
 await deere.equipment.create('org-id', {
     name: 'Tractor 1',
     serialNumber: 'SN-0001',
-    model: {id: 'equipment-model-id'},
+    model: {'@type': 'EquipmentModel', id: 'equipment-model-id'},
 });
 await deere.equipment.update('equipment-id', {name: 'Updated'});
 await deere.equipment.delete('equipment-id');
@@ -694,6 +696,12 @@ try {
     }
 }
 ```
+
+In HATEOAS mode the SDK builds only the parent's URL, so the per-API environment check runs against the parent's API, not the child's. When an API has no server for the configured environment:
+
+- A call whose parent belongs to another API is not refused. `deere.equipment.create(orgId, ...)` fetches the organization and sends the request to its `equipment` link.
+- A call whose parent belongs to that same API (`deere.equipment.getEquipmenttypes(makeId)`) throws `HateoasError`, with the `UnsupportedEnvironmentError` as its `cause`.
+- A call with no parent to follow (`deere.equipment.get()`) throws `UnsupportedEnvironmentError`, as it does without HATEOAS.
 
 ---
 

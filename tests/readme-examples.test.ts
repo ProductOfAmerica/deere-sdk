@@ -40,6 +40,8 @@ interface Block {
 }
 
 interface BlockDiagnostic {
+  /** The block the compiler reported this in. Absent for one that belongs to no block. */
+  block?: Block;
   /** README line the diagnostic points at, or 0 for one that belongs to no block. */
   line: number;
   code: number;
@@ -222,7 +224,16 @@ function typecheckBlocks(blocks: readonly Block[]): BlockDiagnostic[] {
     const block = file ? blockOf.get(normalize(file.fileName)) : undefined;
     if (file && block) {
       const { line } = file.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
-      diagnostics.push({ line: block.line + line, code: diagnostic.code, message });
+      // An unclosed brace, comment or template literal is reported at the end
+      // of the file, past the `export {}` appended above. Point it at the
+      // block's last line, not at the README text below the block.
+      const lastCodeLine = block.code.split('\n').length - 1;
+      diagnostics.push({
+        block,
+        line: block.line + Math.min(line, lastCodeLine),
+        code: diagnostic.code,
+        message,
+      });
     } else if (!file || normalize(file.fileName) === ambientName) {
       // A global or ambient failure would otherwise vanish, leaving every block
       // looking clean.
@@ -234,10 +245,15 @@ function typecheckBlocks(blocks: readonly Block[]): BlockDiagnostic[] {
 
 const format = (d: BlockDiagnostic) => `README.md:${d.line} TS${d.code}: ${d.message}`;
 
-/** Diagnostics that belong to a block, plus those that belong to none (line 0). */
+/**
+ * Diagnostics that belong to a block, plus those that belong to none.
+ *
+ * Matched by the block the compiler reported them in. Matching by line range
+ * dropped every end-of-file diagnostic, which lies past the block's last line,
+ * so an example with an unclosed brace passed.
+ */
 function within(items: readonly BlockDiagnostic[], block: Block): BlockDiagnostic[] {
-  const last = block.line + block.code.split('\n').length;
-  return items.filter((item) => item.line === 0 || (item.line >= block.line && item.line <= last));
+  return items.filter((item) => item.block === undefined || item.block === block);
 }
 
 describe('README examples', () => {
@@ -260,8 +276,8 @@ describe('README examples', () => {
 });
 
 describe('the README checker catches what it exists to catch', () => {
-  // One compile for every control. Each gets its own line range, so its
-  // diagnostics can be told apart from the others'.
+  // One compile for every control. None depends on a detail of John Deere's
+  // specs that a daily sync could change, beyond the methods existing.
   const CONTROLS: Record<string, { code: string; codes: number[] }> = {
     'a method that does not exist': {
       code:
@@ -279,14 +295,16 @@ describe('the README checker catches what it exists to catch', () => {
       codes: [2339],
     },
     'an optional id passed where a string is required': {
-      code:
-        'const orgs = await deere.organizations.listAll();\n' +
-        'await deere.fields.listAll(orgs[0].id);',
+      code: 'const org: { id?: string } = {};\nawait deere.fields.listAll(org.id);',
       codes: [2345],
     },
     'a request body the schema rejects': {
-      code: "await deere.equipment.create('org-id', { type: 'Machine', name: 'Tractor 1' });",
+      code: "await deere.equipment.create('org-id', { name: 'Tractor 1', noSuchField: true });",
       codes: [2353],
+    },
+    'a brace that is never closed, which the compiler reports past the end of the block': {
+      code: 'for (const x of [1, 2]) {\n  console.log(x);',
+      codes: [1005],
     },
     'nothing, for an example that is correct': {
       code:
@@ -302,10 +320,7 @@ describe('the README checker catches what it exists to catch', () => {
   };
 
   const names = Object.keys(CONTROLS);
-  const controlBlocks = names.map((name, index) => ({
-    line: (index + 1) * 1000,
-    code: CONTROLS[name].code,
-  }));
+  const controlBlocks: Block[] = names.map((name) => ({ line: 1, code: CONTROLS[name].code }));
   const diagnostics = typecheckBlocks(controlBlocks);
 
   names.forEach((name, index) => {
