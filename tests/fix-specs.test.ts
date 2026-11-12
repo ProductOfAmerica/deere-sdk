@@ -402,8 +402,9 @@ describe('fix-specs utilities', () => {
     });
 
     describe('against the committed specs', () => {
-      const fixedSpec = (spec: string): unknown =>
-        yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
+      const committed = (stage: 'raw' | 'fixed', spec: string): unknown =>
+        yaml.parse(readFileSync(join(process.cwd(), 'specs', stage, `${spec}.yaml`), 'utf8'));
+      const fixedSpec = (spec: string) => committed('fixed', spec);
 
       /** Every enum in a document, with the path of the schema that owns it. */
       function* enums(node: unknown, path: string[] = []): Generator<[string, unknown[]]> {
@@ -431,19 +432,23 @@ describe('fix-specs utilities', () => {
         }
       });
 
-      // fixProseEnums skips an entry whose location is gone, which is right in
-      // the sync but would let a stale entry sit here forever. Fail instead, so
-      // someone deletes it or repoints it.
-      it('every registered location still exists in specs/fixed', () => {
+      // fixProseEnums skips an entry that no longer applies, which is right in
+      // the sync: a repaired document must not stop it. But a skipped entry is
+      // dead code, so fail here once John Deere's own document (specs/raw) no
+      // longer holds the prose at the registered location, whether because it
+      // was repaired, removed or renamed. Every current entry sits at the same
+      // path in raw and fixed.
+      it('every entry still describes what John Deere publishes in specs/raw', () => {
         for (const fix of PROSE_ENUM_FIXES) {
-          let node: unknown = fixedSpec(fix.spec);
+          let node: unknown = committed('raw', fix.spec);
           for (const key of fix.at) {
             node = (node as Record<string, unknown> | undefined)?.[key];
           }
+          const values = (node as { enum?: unknown[] } | undefined)?.enum;
           assert.ok(
-            node !== null && typeof node === 'object',
-            `${fix.spec} ${fix.at.join('/')} no longer exists. Delete its PROSE_ENUM_FIXES ` +
-              'entry, or repoint it if John Deere renamed the component.'
+            Array.isArray(values) && values.includes(fix.prose),
+            `${fix.spec} ${fix.at.join('/')} no longer lists "${fix.prose}" in specs/raw. ` +
+              'Delete its PROSE_ENUM_FIXES entry, or repoint it if John Deere renamed the component.'
           );
         }
       });
