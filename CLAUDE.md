@@ -245,7 +245,7 @@ TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no lon
 broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
 (openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. `readme-examples.test.ts` uses the
-same API, confined to its `typecheckBlocks` function, and needs porting at the same time.
+same API, confined to its `analyzeBlocks` function, and needs porting at the same time.
 
 CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
 then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with

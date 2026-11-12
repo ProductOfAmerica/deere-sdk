@@ -401,21 +401,52 @@ describe('fix-specs utilities', () => {
       assert.throws(() => fixProseEnums(spec, 'equipment', [DROP]), /other values too/);
     });
 
-    // Wiring guard: codegen-drift only proves that regenerating reproduces what
-    // is committed, so it would not notice fix-specs no longer calling this.
-    it('is applied by fix-specs: no registered prose survives in specs/fixed', () => {
-      for (const fix of PROSE_ENUM_FIXES) {
-        const path = join(process.cwd(), 'specs', 'fixed', `${fix.spec}.yaml`);
-        let node: unknown = yaml.parse(readFileSync(path, 'utf8'));
-        for (const key of fix.at) {
-          node = (node as Record<string, unknown> | undefined)?.[key];
+    describe('against the committed specs', () => {
+      const fixedSpec = (spec: string): unknown =>
+        yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
+
+      /** Every enum in a document, with the path of the schema that owns it. */
+      function* enums(node: unknown, path: string[] = []): Generator<[string, unknown[]]> {
+        if (Array.isArray(node)) {
+          for (const [index, item] of node.entries()) yield* enums(item, [...path, String(index)]);
+        } else if (node !== null && typeof node === 'object') {
+          const record = node as Record<string, unknown>;
+          if (Array.isArray(record.enum)) yield [path.join('/'), record.enum];
+          for (const [key, value] of Object.entries(record)) yield* enums(value, [...path, key]);
         }
-        const values = (node as { enum?: unknown[] } | undefined)?.enum ?? [];
-        assert.ok(
-          !values.includes(fix.prose),
-          `${fix.spec} ${fix.at.join('/')} still lists "${fix.prose}"`
-        );
       }
+
+      // codegen-drift only proves that regenerating reproduces what is
+      // committed, so it would not notice fix-specs no longer calling the
+      // transform. This looks at every enum in the spec, not only the
+      // registered locations, so it also fails when John Deere renames a
+      // component and the prose comes back under the new name.
+      it('no registered prose is left in any enum of specs/fixed', () => {
+        for (const spec of new Set(PROSE_ENUM_FIXES.map((fix) => fix.spec))) {
+          const prose = PROSE_ENUM_FIXES.filter((fix) => fix.spec === spec).map((fix) => fix.prose);
+          const left = [...enums(fixedSpec(spec))]
+            .filter(([, values]) => values.some((value) => prose.includes(value as string)))
+            .map(([path]) => `${spec} ${path}`);
+          assert.deepStrictEqual(left, []);
+        }
+      });
+
+      // fixProseEnums skips an entry whose location is gone, which is right in
+      // the sync but would let a stale entry sit here forever. Fail instead, so
+      // someone deletes it or repoints it.
+      it('every registered location still exists in specs/fixed', () => {
+        for (const fix of PROSE_ENUM_FIXES) {
+          let node: unknown = fixedSpec(fix.spec);
+          for (const key of fix.at) {
+            node = (node as Record<string, unknown> | undefined)?.[key];
+          }
+          assert.ok(
+            node !== null && typeof node === 'object',
+            `${fix.spec} ${fix.at.join('/')} no longer exists. Delete its PROSE_ENUM_FIXES ` +
+              'entry, or repoint it if John Deere renamed the component.'
+          );
+        }
+      });
     });
   });
 });
