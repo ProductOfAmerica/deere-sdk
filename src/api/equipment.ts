@@ -298,10 +298,7 @@ export class EquipmentApi {
    * @generated from GET /equipmentModels
    */
   async listEquipmentmodels(
-    params?: {
-      embed?: 'make' | 'type' | 'isgType';
-      equipmentModelName?: 'string or partial string with * wildcard search';
-    },
+    params?: { embed?: 'make' | 'type' | 'isgType'; equipmentModelName?: string },
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['equipment-model']>> {
     const query = new URLSearchParams();

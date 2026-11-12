@@ -38,16 +38,14 @@ fetch-specs → redact-specs → fix-specs → generate-api-servers → generate
   raw/*.yaml    raw/*.yaml     fixed/*.yaml    api-servers.ts       types/generated    api/*.ts
 ```
 
-Each stage is independently runnable (e.g. `pnpm fix-specs`). Re-run the whole pipeline after pulling new specs.
-
-`fetch-specs` validates **every** document the portal returns for a slug. A slug can return more than one
-document; when it does, they are structurally merged into a single spec (`mergeSpecDocs` in
-`scripts/lib/spec-merge.ts`). The primary document is pinned by the repo-owned `PRIMARY_ENDPOINT_NAME` table
-(falling back to the slug-named document, else a loud error); the primary owns the merged `info` and its
-committed `components` names, so a portal reorder cannot silently rename the public type surface. The merged (or
-single) document is then canonicalized to a deterministic key order, so an upstream reorder of
-`paths`/`components` yields a byte-identical raw file instead of a misleading diff. Redaction runs per document
-before parse; `redact-specs` stays downstream as an idempotent safety net.
+Each stage is independently runnable (e.g. `pnpm fix-specs`). `fetch-specs` validates **every** document the portal
+returns for a slug. A slug can return more than one document; when it does, they are structurally merged into a single
+spec (`mergeSpecDocs` in `scripts/lib/spec-merge.ts`). The primary document is pinned by the repo-owned
+`PRIMARY_ENDPOINT_NAME` table (falling back to the slug-named document, else a loud error); the primary owns the merged
+`info` and its committed `components` names, so a portal reorder cannot silently rename the public type surface. The
+merged (or single) document is then canonicalized to a deterministic key order, so an upstream reorder of
+`paths`/`components` yields a byte-identical raw file instead of a misleading diff. Redaction runs per document before
+parse; `redact-specs` stays downstream as an idempotent safety net.
 
 Servers reconciliation is family-aware. Documents that differ only as environment instances or doc defects of
 the shared `https://{environment}.deere.com/platform` family resolve to the primary's servers block (`fix-specs`
@@ -198,7 +196,9 @@ with the `status === 0 && statusText === 'Timeout'` sentinel that's the only ret
 ### Error hierarchy
 
 Lives in `src/errors.ts` (separate from `client.ts` to break a circular import with `environment-resolver.ts`).
-`client.ts` re-exports everything for backward compat with consumers importing from `'deere-sdk'` root.
+`client.ts` re-exports everything for backward compat with consumers importing from `'deere-sdk'` root. The two
+resolver errors live in `environment-resolver.ts` instead, so `src/index.ts` exports them itself. A name is not
+public until `src/index.ts` lists it: these two were documented from 2.0.0 onward without being exported.
 
 ## Generated-code boundary
 
@@ -216,11 +216,8 @@ To change any of them, edit the corresponding generator in `scripts/`, re-run th
 (`pnpm redact-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk &&
 pnpm lint:fix`), and commit the regenerated output in the same change. Not `pnpm generate`: it starts with
 `fetch-specs`, which pulls live specs and would carry upstream changes past the sync's classification and version
-bump. For example:
-
-- New spec host logic → `scripts/generate-api-servers.ts`
-- New generated method shape → `scripts/generate-sdk.ts`
-- New spec-level patch → `scripts/fix-specs.ts`
+bump. Spec host logic lives in `scripts/generate-api-servers.ts`, generated method shape in
+`scripts/generate-sdk.ts`, and spec-level patches in `scripts/fix-specs.ts`.
 
 Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/path-pattern.ts`,
 `src/index.ts`, and `src/safe/**` (the `deere.safe.*` facades).
@@ -235,7 +232,9 @@ committed `specs/raw/*.yaml` to the key order `fetch-specs` now emits, so live f
 Tests use `tests/helpers/mock-fetch.ts` for injecting fetch behaviour (JSON success, error, retry-sequence, spy, network
 error, timeout, paginated). Never hit the real API in tests: inject a custom `fetch` via `DeereClientConfig.fetch`.
 `fuzz.test.ts` uses `fast-check`. `pnpm test` already includes it; `pnpm test:fuzz` runs it alone, and CI adds that
-dedicated step only on Node 24.x.
+dedicated step only on Node 24.x. `readme-examples.test.ts` type-checks every `typescript` block in `README.md`
+against `src/`. A block that cannot compile on purpose needs `<!-- readme-check: skip: reason -->` above its fence.
+It checks types only: an example can compile and still call an API its environment does not serve.
 
 CI runs the test matrix on Node 20/22/23/24/25. Node 18 was dropped 2026-05-15 because tsx ≥4.22.0 calls
 `Array.prototype.toReversed()` (ES2023, Node 20+). Node 18 hit EOL April 2025. Keep the code Node-20-compatible
@@ -245,14 +244,15 @@ TypeScript is pinned to 6.x (`^6.0.3`). openapi-typescript 7.x, which `generate-
 TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no longer exposes it: the 7.0.2 bump (#39)
 broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
-(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor.
+(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. `readme-examples.test.ts` uses the
+same API, confined to its `typecheckBlocks` function, and needs porting at the same time.
 
 CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
 then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with
-`sync-api.yml`'s stages. A failure means a dependency bump altered
-codegen output, a generator, registry or manifest change was committed without its regenerated output, a generated file
-was hand-edited, or a biome safe fix touched a hand-written file. Reproduce it with the same offline commands and commit
-the result; when a dependency bump is the cause, decide whether the new output is acceptable before regenerating.
+`sync-api.yml`'s stages. A failure means a dependency bump altered codegen output, a generator, registry or manifest
+change was committed without its regenerated output, a generated file was hand-edited, or a biome safe fix touched a
+hand-written file. Reproduce it with the same offline commands and commit the result; when a dependency bump is the
+cause, decide whether the new output is acceptable before regenerating.
 
 ## Code intelligence (`typescript-lsp`)
 

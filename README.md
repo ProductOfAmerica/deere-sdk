@@ -68,12 +68,14 @@ const deere = new Deere({
 
 // List all organizations
 const orgs = await deere.organizations.listAll();
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
 
 // Get fields for an organization
-const fields = await deere.fields.listAll(orgs[0].id);
+const fields = await deere.fields.listAll(orgId);
 
-// Get equipment
-const equipment = await deere.equipment.get();
+// Get farms for an organization
+const farms = await deere.farms.listAll(orgId);
 ```
 
 ---
@@ -131,7 +133,7 @@ The SDK uses raw John Deere subdomain names as environment values. Pass the subd
 | `sandboxapiqa`   | sandboxapiqa.deere.com     | Sandbox QA                       |
 | `apidev.tal`     | apidev.tal.deere.com       | Internal dev tier (rarely used)  |
 
-Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), the constructor throws `UnsupportedEnvironmentError` with the valid values for that spec.
+Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), calls to that API throw `UnsupportedEnvironmentError` before any request goes out, with the valid values for that spec. The constructor only rejects an environment name that isn't in the table above.
 
 </details>
 
@@ -150,6 +152,7 @@ Passing a v1 name to the v2 constructor throws immediately with a migration hint
 | `cert`         | `apicert`      |
 | `qa`           | `apiqa.tal`    |
 
+<!-- readme-check: skip: shows the v1 call that v2 rejects, next to its replacement -->
 ```typescript
 // v1
 const deere = new Deere({ accessToken, environment: 'sandbox' });
@@ -329,7 +332,13 @@ await deere.boundaries.delete('org-id', 'field-id', 'boundary-id');
 <details>
 <summary><strong>Equipment</strong></summary>
 
+John Deere serves the Equipment API from a single host, which this SDK treats as production: it is available on `api` and `partnerapi` only. On the default `sandboxapi`, equipment calls throw `UnsupportedEnvironmentError` before a request is sent. With `hateoas: true` a few of them behave differently; see [Strict Mode](#strict-mode).
+
 ```typescript
+import {Deere} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token', environment: 'api'});
+
 // Get all equipment
 const equipment = await deere.equipment.get();
 
@@ -343,15 +352,28 @@ const filtered = await deere.equipment.get({
 // Get equipment details
 const machine = await deere.equipment.getEquipment('equipment-id');
 
-// CRUD
-await deere.equipment.create('org-id', {type: 'Machine', name: 'Tractor 1'});
-await deere.equipment.update('equipment-id', {name: 'Updated'});
-await deere.equipment.delete('equipment-id');
-
 // Reference data
 const makes = await deere.equipment.list();
 const types = await deere.equipment.listEquipmenttypes();
 const models = await deere.equipment.listEquipmentmodels({equipmentModelName: '9RX*'});
+```
+
+Creating, updating and deleting equipment go to that same production host. This SDK has no test tier for them, so these calls change real data:
+
+```typescript
+import {Deere} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token', environment: 'api'});
+
+// John Deere's sample request also sends a top-level '@type': 'Machine',
+// which its published schema leaves out.
+await deere.equipment.create('org-id', {
+    name: 'Tractor 1',
+    serialNumber: 'SN-0001',
+    model: {'@type': 'EquipmentModel', id: 'equipment-model-id'},
+});
+await deere.equipment.update('equipment-id', {name: 'Updated'});
+await deere.equipment.delete('equipment-id');
 ```
 
 </details>
@@ -441,11 +463,13 @@ const critical = await deere.notifications.list('org-id', {
     severities: 'HIGH,CRITICAL'
 });
 
-// Create notification
+// Create notification. John Deere's sample request also sends `links` to a
+// contribution definition, which its published schema leaves out.
 await deere.notifications.create({
-    sourceEvent: 'my-app-event-123',
     title: 'Action Required',
-    message: 'Please review the prescription map'
+    text: 'Please review the prescription map',
+    severity: 'HIGH',
+    eventType: 'AGRONOMY',
 });
 
 // Delete notification
@@ -477,9 +501,16 @@ const locations = await deere.assets.listLocations('asset-id', {
     endDate: '2026-01-31T23:59:59Z'
 });
 
+// John Deere takes the GeoJSON as a string
 await deere.assets.createLocations('asset-id', {
     timestamp: '2026-01-15T12:00:00Z',
-    geometry: {type: 'Point', coordinates: [-93.5, 42.5]}
+    geometry: JSON.stringify({
+        type: 'Feature',
+        geometry: {
+            type: 'GeometryCollection',
+            geometries: [{type: 'Point', coordinates: [-93.5, 42.5]}],
+        },
+    }),
 });
 ```
 
@@ -541,7 +572,7 @@ await deere.partnerships.createPermissions('token', {
 For custom endpoints or advanced use cases:
 
 ```typescript
-import {DeereClient} from 'deere-sdk';
+import {DeereClient, type PaginatedResponse} from 'deere-sdk';
 
 const client = new DeereClient({
     accessToken: 'your-token',
@@ -552,11 +583,13 @@ const client = new DeereClient({
 
 // Raw requests. The first argument is the spec name; it selects the host,
 // since different John Deere APIs live on different subdomains and paths.
-const response = await client.get<CustomType>('organizations', '/organizations');
+type Organization = {id?: string; name?: string};
+const response = await client.get<PaginatedResponse<Organization>>('organizations', '/organizations');
 const created = await client.post('fields', '/organizations/123/fields', {name: 'North'});
 
 // Follow HAL links
-const nextPage = await client.followLink(response.links[0]);
+const next = response.links?.find((link) => link.rel === 'nextPage');
+const nextPage = next ? await client.followLink<PaginatedResponse<Organization>>(next) : undefined;
 
 // Automatic pagination
 for await (const items of client.paginate('fields', '/organizations/123/fields')) {
@@ -595,6 +628,8 @@ Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppress
 John Deere requires applications to demonstrate [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) compliance before granting production API access. When enabled, the SDK automatically follows HAL links from parent resources instead of constructing URLs directly — producing the exact traffic pattern John Deere's certification requires.
 
 ```typescript
+import {Deere} from 'deere-sdk';
+
 const deere = new Deere({
     accessToken: 'your-token',
     environment: 'sandboxapi',
@@ -604,7 +639,9 @@ const deere = new Deere({
 
 // Same API — HATEOAS resolution is transparent
 const orgs = await deere.organizations.listAll();
-const fields = await deere.fields.listAll(orgs[0].id);
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
+const fields = await deere.fields.listAll(orgId);
 ```
 
 When `hateoas: true`, the SDK fetches parent resources and follows their HAL links before accessing child resources. For example, `deere.fields.list('org-123')` first fetches `/organizations/org-123`, finds the `fields` link in its response, and uses that discovered URL. Link responses are cached per-session, so subsequent calls incur no extra latency.
@@ -627,9 +664,13 @@ await deere.client.warmLinkCache('organizations', ['/organizations']);
 
 // 3. Use the SDK normally — HATEOAS happens transparently
 const orgs = await deere.organizations.listAll();
-const org = await deere.organizations.get(orgs[0].id);
-const fields = await deere.fields.listAll(org.id);
-const boundaries = await deere.boundaries.listBoundaries(org.id, fields[0].id);
+const orgId = orgs[0]?.id;
+if (!orgId) throw new Error('No organization available for this token');
+const org = await deere.organizations.get(orgId);
+const fields = await deere.fields.listAll(orgId);
+const fieldId = fields[0]?.id;
+if (!fieldId) throw new Error('This organization has no fields');
+const boundaries = await deere.boundaries.listBoundaries(orgId, fieldId);
 
 // Console output (with hateoasDebug: true):
 // [HATEOAS] /organizations/org-123/fields → parent: /organizations/org-123, rel: fields → https://...
@@ -656,6 +697,12 @@ try {
 }
 ```
 
+In HATEOAS mode the SDK builds only the parent's URL, so the per-API environment check runs against the parent's API, not the child's. When an API has no server for the configured environment:
+
+- A call whose parent belongs to another API is not refused. `deere.equipment.create(orgId, ...)` fetches the organization and sends the request to its `equipment` link.
+- A call whose parent belongs to that same API (`deere.equipment.getEquipmenttypes(makeId)`) throws `HateoasError`, with the `UnsupportedEnvironmentError` as its `cause`.
+- A call with no parent to follow (`deere.equipment.get()`) throws `UnsupportedEnvironmentError`, as it does without HATEOAS.
+
 ---
 
 ## Error Handling
@@ -676,14 +723,16 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
 ```typescript
+import {Deere} from 'deere-sdk';
+
 // Customize retry behavior
-const deere = new Deere({
+const patient = new Deere({
     accessToken: 'your-token',
     maxRetries: 5,  // More retries (default: 3)
 });
 
 // Disable retries entirely
-const deere = new Deere({
+const noRetries = new Deere({
     accessToken: 'your-token',
     maxRetries: 0,
 });
@@ -697,8 +746,8 @@ const deere = new Deere({
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
-| `UnsupportedEnvironmentError` | Constructor threw because `environment` doesn't match the spec's `servers` block. | N/A (thrown at construction) |
-| `NoServerConfigError`         | Constructor threw because a spec has no `servers` block at all.    | N/A      |
+| `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
+| `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
 
 ```typescript
 import {

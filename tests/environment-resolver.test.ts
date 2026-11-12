@@ -1,11 +1,22 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
+import { KNOWN_ENVIRONMENTS } from '../src/api-servers.generated.js';
 import {
   NoServerConfigError,
   resolveRequestUrl,
   UnsupportedEnvironmentError,
 } from '../src/environment-resolver.js';
 import { DeereError } from '../src/errors.js';
+import * as sdk from '../src/index.js';
+
+/**
+ * The environment names a message mentions, matched as whole tokens. A
+ * substring check cannot tell them apart: 'api' occurs inside 'sandboxapi'.
+ */
+function environmentsNamedIn(message: string): string[] {
+  const tokens = message.split(/[^a-z.]+/).map((token) => token.replace(/\.+$/, ''));
+  return KNOWN_ENVIRONMENTS.filter((env) => tokens.includes(env)).sort();
+}
 
 describe('resolveRequestUrl', () => {
   describe('templated specs', () => {
@@ -79,9 +90,14 @@ describe('resolveRequestUrl', () => {
         (err: unknown) => {
           assert(err instanceof UnsupportedEnvironmentError);
           assert(err.message.includes("'equipment'"));
-          assert(err.message.includes('sandboxapi'));
-          assert(err.message.includes('api'));
-          assert(err.message.includes('partnerapi'));
+          // The requested environment plus the two this spec supports, and
+          // nothing else: the message must not suggest an environment that
+          // would throw the same error.
+          assert.deepStrictEqual(environmentsNamedIn(err.message), [
+            'api',
+            'partnerapi',
+            'sandboxapi',
+          ]);
           return true;
         }
       );
@@ -152,8 +168,16 @@ describe('resolveRequestUrl', () => {
         () => resolveRequestUrl('equipment-measurement', '/foo', 'sandboxapi'),
         (err: unknown) => {
           assert(err instanceof UnsupportedEnvironmentError);
-          assert(err.message.includes('sandboxapi'));
-          assert(err.message.includes('apiqa.tal'));
+          assert.deepStrictEqual(environmentsNamedIn(err.message), [
+            'api',
+            'apicert',
+            'apiqa.tal',
+            'partnerapi',
+            'partnerapicert',
+            'partnerapiqa',
+            'sandboxapi',
+            'sandboxapiqa',
+          ]);
           return true;
         }
       );
@@ -198,7 +222,16 @@ describe('resolveRequestUrl', () => {
     it('aemp throws UnsupportedEnvironmentError for apicert (no cert tier)', () => {
       assert.throws(
         () => resolveRequestUrl('aemp', '/Fleet/1', 'apicert'),
-        UnsupportedEnvironmentError
+        (err: unknown) => {
+          assert(err instanceof UnsupportedEnvironmentError);
+          assert.deepStrictEqual(environmentsNamedIn(err.message), [
+            'api',
+            'apicert',
+            'partnerapi',
+            'sandboxapi',
+          ]);
+          return true;
+        }
       );
     });
 
@@ -332,5 +365,21 @@ describe('resolveRequestUrl', () => {
         assert.notStrictEqual(err.status, 0);
       }
     });
+  });
+});
+
+// Regression: the README and the changelog document these names as importable
+// from 'deere-sdk', but the root index did not export them, so a consumer could
+// not write the documented `instanceof UnsupportedEnvironmentError` check.
+describe('package root exports', () => {
+  it('exposes the resolver error classes', () => {
+    assert.strictEqual(sdk.UnsupportedEnvironmentError, UnsupportedEnvironmentError);
+    assert.strictEqual(sdk.NoServerConfigError, NoServerConfigError);
+  });
+
+  it('exposes the SpecName type', () => {
+    // Type-level: `pnpm typecheck:test` fails if the export goes missing.
+    const spec: sdk.SpecName = 'fields';
+    assert.strictEqual(spec, 'fields');
   });
 });

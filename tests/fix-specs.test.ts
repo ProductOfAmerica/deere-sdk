@@ -1,7 +1,13 @@
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
+import * as yaml from 'yaml';
 import {
+  fixProseEnums,
   isDocumentationKey,
+  PROSE_ENUM_FIXES,
+  type ProseEnumFix,
   restoreEquipmentItemRefs,
   sanitizePropertyKey,
   stripDocumentationMarkup,
@@ -299,6 +305,172 @@ describe('fix-specs utilities', () => {
     it('is a no-op for specs without components.responses or components.schemas', () => {
       assert.strictEqual(restoreEquipmentItemRefs({}), 0);
       assert.strictEqual(restoreEquipmentItemRefs({ components: {} }), 0);
+    });
+  });
+
+  describe('fixProseEnums', () => {
+    const DROP: ProseEnumFix = {
+      spec: 'equipment',
+      at: ['components', 'parameters', 'ModelName', 'schema'],
+      prose: 'string or partial string',
+      replacement: null,
+      evidence: 'test fixture',
+    };
+    const REPLACE: ProseEnumFix = {
+      spec: 'products',
+      at: ['components', 'schemas', 'Status', 'properties', 'key'],
+      prose: 'registration (chemicals only)',
+      replacement: 'registration',
+      evidence: 'test fixture',
+    };
+    const parameterSpec = (values: unknown[]) => ({
+      components: { parameters: { ModelName: { schema: { type: 'string', enum: values } } } },
+    });
+    const schemaSpec = (values: unknown[]) => ({
+      components: {
+        schemas: { Status: { properties: { key: { type: 'string', enum: values } } } },
+      },
+    });
+
+    it('drops an enum whose only member is the registered prose and keeps the type', () => {
+      const spec = parameterSpec(['string or partial string']);
+      assert.strictEqual(fixProseEnums(spec, 'equipment', [DROP]), 1);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema, { type: 'string' });
+    });
+
+    it('replaces the prose inside a mixed enum and keeps the other values in order', () => {
+      const spec = schemaSpec(['isCarrier', 'archived', 'registration (chemicals only)']);
+      assert.strictEqual(fixProseEnums(spec, 'products', [REPLACE]), 1);
+      assert.deepStrictEqual(spec.components.schemas.Status.properties.key.enum, [
+        'isCarrier',
+        'archived',
+        'registration',
+      ]);
+    });
+
+    it('does not duplicate the replacement when the real value is already listed', () => {
+      const spec = schemaSpec(['registration', 'registration (chemicals only)', 'archived']);
+      assert.strictEqual(fixProseEnums(spec, 'products', [REPLACE]), 1);
+      assert.deepStrictEqual(spec.components.schemas.Status.properties.key.enum, [
+        'registration',
+        'archived',
+      ]);
+    });
+
+    it('no-ops once the prose is gone (a repaired document)', () => {
+      const spec = schemaSpec(['isCarrier', 'archived', 'registration']);
+      assert.strictEqual(fixProseEnums(spec, 'products', [REPLACE]), 0);
+      assert.deepStrictEqual(spec.components.schemas.Status.properties.key.enum, [
+        'isCarrier',
+        'archived',
+        'registration',
+      ]);
+    });
+
+    it('no-ops for another spec that has the same location and string', () => {
+      const spec = parameterSpec(['string or partial string']);
+      assert.strictEqual(fixProseEnums(spec, 'fields', [DROP]), 0);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        'string or partial string',
+      ]);
+    });
+
+    it('no-ops when the location is missing or carries no enum', () => {
+      assert.strictEqual(fixProseEnums({}, 'equipment', [DROP]), 0);
+      assert.strictEqual(
+        fixProseEnums(
+          { components: { parameters: { ModelName: { schema: { type: 'string' } } } } },
+          'equipment',
+          [DROP]
+        ),
+        0
+      );
+    });
+
+    it('leaves an unregistered enum value alone even when it contains spaces', () => {
+      const spec = parameterSpec(['Engines & Components', 'Commercial Worksite Products']);
+      assert.strictEqual(fixProseEnums(spec, 'equipment', [DROP]), 0);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        'Engines & Components',
+        'Commercial Worksite Products',
+      ]);
+    });
+
+    it('throws when a drop entry finds real values beside the prose', () => {
+      const spec = parameterSpec(['string or partial string', '9RX*']);
+      assert.throws(() => fixProseEnums(spec, 'equipment', [DROP]), /other values too/);
+    });
+
+    // A reworded sentence is not a repair. Skipping it would put the new
+    // sentence into the generated types with nothing to notice.
+    it('throws when a drop entry finds the sentence reworded', () => {
+      const spec = parameterSpec(['a string, or part of one, with * wildcards']);
+      assert.throws(() => fixProseEnums(spec, 'equipment', [DROP]), /different lone value/);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        'a string, or part of one, with * wildcards',
+      ]);
+    });
+
+    it('no-ops when a drop entry finds a real enum with several members', () => {
+      const spec = parameterSpec(['9RX420', '9RX470']);
+      assert.strictEqual(fixProseEnums(spec, 'equipment', [DROP]), 0);
+      assert.deepStrictEqual(spec.components.parameters.ModelName.schema.enum, [
+        '9RX420',
+        '9RX470',
+      ]);
+    });
+
+    it('throws when a replace entry finds the note reworded', () => {
+      const spec = schemaSpec(['isCarrier', 'archived', 'registration (not for carriers)']);
+      assert.throws(() => fixProseEnums(spec, 'products', [REPLACE]), /with other words/);
+    });
+
+    it('no-ops when a replace entry finds neither the prose nor anything like it', () => {
+      const spec = schemaSpec(['isCarrier', 'archived']);
+      assert.strictEqual(fixProseEnums(spec, 'products', [REPLACE]), 0);
+      assert.deepStrictEqual(spec.components.schemas.Status.properties.key.enum, [
+        'isCarrier',
+        'archived',
+      ]);
+    });
+
+    describe('against the committed specs', () => {
+      const fixedSpec = (spec: string): unknown =>
+        yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
+
+      /** Every enum in a document, with the path of the schema that owns it. */
+      function* enums(node: unknown, path: string[] = []): Generator<[string, unknown[]]> {
+        if (Array.isArray(node)) {
+          for (const [index, item] of node.entries()) yield* enums(item, [...path, String(index)]);
+        } else if (node !== null && typeof node === 'object') {
+          const record = node as Record<string, unknown>;
+          if (Array.isArray(record.enum)) yield [path.join('/'), record.enum];
+          for (const [key, value] of Object.entries(record)) yield* enums(value, [...path, key]);
+        }
+      }
+
+      // codegen-drift only proves that regenerating reproduces what is
+      // committed, so it would not notice fix-specs no longer calling the
+      // transform. This looks at every enum in the spec, not only the
+      // registered locations, so it also fails when John Deere renames a
+      // component and the prose comes back under the new name.
+      //
+      // There is deliberately no test for the opposite case, an entry that
+      // John Deere's repair has made redundant. The sync runs the routing guard
+      // and the type-checks before it commits, but not this suite, so such a
+      // test would turn main and every open PR red after an upstream
+      // improvement, over an entry that is by then inert. A redundant entry is
+      // skipped, as restoreEquipmentItemRefs does. A REWORDED one is not
+      // redundant: fixProseEnums throws on it, which fails the sync itself.
+      it('no registered prose is left in any enum of specs/fixed', () => {
+        for (const spec of new Set(PROSE_ENUM_FIXES.map((fix) => fix.spec))) {
+          const prose = PROSE_ENUM_FIXES.filter((fix) => fix.spec === spec).map((fix) => fix.prose);
+          const left = [...enums(fixedSpec(spec))]
+            .filter(([, values]) => values.some((value) => prose.includes(value as string)))
+            .map(([path]) => `${spec} ${path}`);
+          assert.deepStrictEqual(left, []);
+        }
+      });
     });
   });
 });

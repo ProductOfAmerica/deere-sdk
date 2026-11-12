@@ -254,3 +254,138 @@ export function restoreEquipmentItemRefs(spec: Record<string, unknown>): number 
   }
   return restored;
 }
+
+/** One place where John Deere published documentation text as an enum value. */
+export interface ProseEnumFix {
+  /** Spec the entry applies to. The same location in another spec is never touched. */
+  spec: string;
+  /** Keys from the spec root to the schema object that owns the `enum`. */
+  at: readonly string[];
+  /** The exact string John Deere published in the enum. */
+  prose: string;
+  /** The value the prose stands for, or `null` when the enum constrains nothing. */
+  replacement: string | null;
+  /** What was observed, and where, so the claim can be re-checked. */
+  evidence: string;
+}
+
+/**
+ * Enum values that are documentation, not values. openapi-typescript turns an
+ * enum into a union of string literals, so each of these made a parameter or
+ * property accept only the documentation sentence.
+ *
+ * Every entry is a claim about John Deere's document, keyed by exact spec,
+ * location and string. Real enum values that happen to contain spaces (the
+ * equipment market segments, such as "Engines & Components") are not listed
+ * and are never touched: there is deliberately no rule that guesses from the
+ * shape of a value.
+ */
+export const PROSE_ENUM_FIXES: readonly ProseEnumFix[] = [
+  {
+    spec: 'equipment',
+    at: ['components', 'parameters', 'EquipmentModelName', 'schema'],
+    prose: 'string or partial string with * wildcard search',
+    replacement: null,
+    evidence:
+      'specs/raw/equipment.yaml, 2026-11-12: the enum holds this one sentence, while the ' +
+      'examples on the same parameter are "9RX420" and "9RX*".',
+  },
+  {
+    spec: 'products',
+    at: ['components', 'schemas', 'ReferenceProductOverrideStatus_Chemicals', 'properties', 'key'],
+    prose: 'registration (chemicals and fertilizers only)',
+    replacement: 'registration',
+    evidence:
+      'specs/raw/products.yaml, 2026-11-12: this response reports the status of each override ' +
+      'key sent in the request. The request schema lists the key as "registration" and every ' +
+      'request example sends "registration".',
+  },
+  {
+    spec: 'products',
+    at: [
+      'components',
+      'schemas',
+      'ReferenceProductOverrideStatus_Fertilizers',
+      'properties',
+      'key',
+    ],
+    prose: 'registration (chemicals and fertilizers only)',
+    replacement: 'registration',
+    evidence: 'Same defect and evidence as the chemicals status schema above.',
+  },
+];
+
+/**
+ * Apply `fixes` to one spec. Returns the number of enums changed.
+ *
+ * Each entry is a claim about one enum, and what happens depends on whether
+ * the claim still holds:
+ *
+ * - The prose is there as registered: the enum is dropped (the schema's `type`
+ *   still constrains the value), or the member is replaced.
+ * - The location or the enum is gone, or the real value now stands where the
+ *   prose was: John Deere repaired or removed it. The entry is skipped, so a
+ *   repair never stops the sync.
+ * - The enum is there but holds something else in the prose's place:
+ *   documentation would reach the generated types again, and skipping would
+ *   hide that. This throws, so the entry is re-read before anything is
+ *   committed. Two shapes are recognized, because nothing here guesses whether
+ *   a string is prose. For a dropped enum: the sentence beside other values, or
+ *   a different lone value. For a replaced member: a value that begins with the
+ *   real one and carries more text, which a real value such as
+ *   "registrationNumber" would also match. Any other rewording is skipped like
+ *   a repair.
+ */
+export function fixProseEnums(
+  spec: Record<string, unknown>,
+  specName: string,
+  fixes: readonly ProseEnumFix[] = PROSE_ENUM_FIXES
+): number {
+  let fixed = 0;
+  for (const fix of fixes) {
+    if (fix.spec !== specName) continue;
+
+    let node: unknown = spec;
+    for (const key of fix.at) {
+      node = isRecord(node) ? node[key] : undefined;
+    }
+    if (!isRecord(node) || !Array.isArray(node.enum)) continue;
+
+    const values: unknown[] = node.enum;
+    const mismatch = (found: string) =>
+      new Error(
+        `fixProseEnums: ${specName} ${fix.at.join('/')} ${found}: ${JSON.stringify(values)}. ` +
+          `Its PROSE_ENUM_FIXES entry registered "${fix.prose}". Re-read the document, then ` +
+          `update the entry or delete it.`
+      );
+
+    if (fix.replacement === null) {
+      // The claim: this enum is that one sentence and nothing else.
+      if (values.length === 1 && values[0] === fix.prose) {
+        delete node.enum;
+        fixed += 1;
+      } else if (values.includes(fix.prose)) {
+        throw mismatch('still lists the sentence but now has other values too');
+      } else if (values.length === 1) {
+        throw mismatch('now holds a different lone value, which reads like the sentence reworded');
+      }
+      continue;
+    }
+
+    // The claim: one member is the real value with a note attached.
+    const replacement = fix.replacement;
+    if (values.includes(fix.prose)) {
+      const replaced = values.map((value) => (value === fix.prose ? replacement : value));
+      node.enum = replaced.filter((value, index) => replaced.indexOf(value) === index);
+      fixed += 1;
+    } else if (
+      values.some(
+        (value) =>
+          typeof value === 'string' && value !== replacement && value.startsWith(replacement)
+      )
+    ) {
+      throw mismatch(`no longer has the registered text but has "${replacement}" with other words`);
+    }
+  }
+  return fixed;
+}

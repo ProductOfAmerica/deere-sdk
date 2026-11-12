@@ -1972,7 +1972,7 @@ export interface components {
      *       "9RX*"
      *     ]
      */
-    EquipmentModelName: 'string or partial string with * wildcard search';
+    EquipmentModelName: string;
     /** @description List of serial numbers of the equipment */
     EquipmentSerialNumbers: string[];
     /** @description ID for Equipment Type */

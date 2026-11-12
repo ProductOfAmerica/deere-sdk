@@ -23,6 +23,7 @@ import {
 import { redactSpecContent } from './lib/spec-redactor.js';
 import { applyRelocations, RELOCATIONS } from './lib/spec-relocations.js';
 import {
+  fixProseEnums,
   isDocumentationKey,
   isRecord,
   refName,
@@ -740,6 +741,15 @@ function fixSpec(
     if (restoredItemRefs > 0) {
       console.log(`  Restored ${restoredItemRefs} equipment list-envelope item ref(s)`);
     }
+  }
+
+  // Drop or replace enum values that are documentation text (PROSE_ENUM_FIXES
+  // in spec-utils). Keyed by spec name and exact location, so it is a no-op for
+  // every other spec. In the schema-mutation region with the transforms above,
+  // after fixTypes has normalized whitespace in every string.
+  const fixedProseEnums = fixProseEnums(spec, specName);
+  if (fixedProseEnums > 0) {
+    console.log(`  Fixed ${fixedProseEnums} prose enum value(s)`);
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs
