@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-11-12
+
+### Added
+- `UnsupportedEnvironmentError`, `NoServerConfigError` and the `SpecName` type are now exported from the package root. The 2.0.0 entry below and the README said they were, but no release from 2.0.0 through 3.1.4 exported them, so the documented `import { UnsupportedEnvironmentError } from 'deere-sdk'` failed. The errors were thrown all along; only the exports were missing.
+
+### Changed
+- The README's Equipment section now says that the Equipment API is available on `api` and `partnerapi` only, and keeps the calls that change data apart from the reads. The HATEOAS section describes how the environment errors surface when `hateoas: true`.
+- README examples are type-checked against the SDK in CI, so an example that drifts from the SDK fails the build.
+
+### Fixed
+- `UnsupportedEnvironmentError`'s message told every caller to try `apiqa.tal` for testing, including callers of `equipment` and `aemp`, which reject that environment with the same error. The message now names the requested environment and the ones that API supports, and no others. The class and its constructor are unchanged. Code that matches on the old message text needs updating.
+- `deere.equipment.listEquipmentmodels({ equipmentModelName })` accepted one string literal only: a sentence of documentation that John Deere publishes as the parameter's `enum`. It now accepts any `string`, for example `'9RX*'`.
+- In `Types.Products`, the `key` of `ReferenceProductOverrideStatus_Chemicals` and `ReferenceProductOverrideStatus_Fertilizers` listed `'registration (chemicals and fertilizers only)'` as a value. It is now `'registration'`, the value John Deere's request schema and examples use. A comparison against the old literal no longer compiles.
+- README examples that did not compile against the SDK or sent a request body the generated types reject: creating equipment, creating a notification, creating asset locations, and the low-level `DeereClient` example. Examples that passed an optional `id` straight into another call now check it first, as do the JSDoc examples on the package and on the `Deere` class.
+- The README said the constructor throws `UnsupportedEnvironmentError` and `NoServerConfigError`. They are thrown by the call that targets the unsupported API. The constructor only rejects an environment name it does not know.
+
 ## [3.1.4] - 2026-11-07
 
 ### Changed
