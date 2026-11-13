@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-11-13
+
+This release changes behaviour in several places. Read "Changed" before upgrading if you pass `timeout`, `signal`, `defaultHeaders` or ids that are already percent-encoded.
+
+### Security
+- The access token is now sent only to an `https` URL on `deere.com` or one of its subdomains, and that is decided in one place for every request. Before, a link taken from a response body in HATEOAS mode received the token whatever host it named. A link the client follows on its own that is not `https` on deere.com is refused instead of followed: a HATEOAS link throws `HateoasError`, and a `nextPage` link throws a `DeereError` with statusText `'UntrustedLink'`. Before, a `nextPage` link on another host was requested without the token but with the headers the caller passed. A URL you pass to `fetchUrl` or `followLink` is still requested as asked, without the token when it is not trusted.
+- Generated methods now percent-encode every path parameter into exactly one path segment. Before, a value containing `/`, `?`, `#` or a dot segment changed which resource the request addressed.
+- The code generators escape or refuse text from John Deere's specs wherever they write it into source. Before, spec text that ended the string or comment it was written into would become code in the published package.
+
+### Added
+- `retryNonIdempotent` client option. It defaults to `true`, which is the behaviour until now. With `false`, a POST or PATCH is retried only after a 429, and is sent once after a 500, 502, 503 or 504, a network error or a timeout, since it may already have been carried out. The default becomes `false` in 4.0.
+- `encodePathParam` is exported from the package root, for callers who build a path for `DeereClient.get` and its siblings, which send the path as written. `encodeURIComponent` is not a substitute: it leaves `..` alone.
+- `deere.safe.fieldOperations.listAllWithMeasurements`, `listWithMeasurements` and `getWithMeasurements` take `options?: RequestOptions` as their last argument, so a caller can pass a `signal`, a `timeout` and `headers`.
+
+### Changed
+- The `timeout` now covers the whole attempt, reading the response body included. A body that outlasts it is retried for a GET, PUT or DELETE, and the call then ends in `DeereError` `'Timeout'`, where it used to wait for the body.
+- A POST or PATCH that received a success status is never sent again, whatever `retryNonIdempotent` says. Before, a connection dropped while its response body was read resent it.
+- A `timeout` that is not a duration is refused: 0, a negative number, `NaN`, or a value that is not a number or numeric string. The constructor throws, and a per-call value rejects with a `DeereError` with statusText `'InvalidTimeout'` before anything is sent. `Infinity` turns the timeout off. Before, such a value timed out any request not answered at once.
+- A call cancelled through `options.signal` rejects with the signal's reason (an `AbortError` by default), not with `DeereError` `'Request timeout'`, and is never retried.
+- Path parameters: `$ % & + , ; = [ ] |` in a value are now percent-encoded, so an id passed already percent-encoded is encoded again; pass the id itself. `undefined`, `null`, the empty string, objects, `.` and `..` are refused with a `DeereError` with statusText `'InvalidPathParameter'`; `undefined` used to be sent as the text "undefined".
+- An `Authorization` entry in `defaultHeaders` is ignored; pass the header per request. An `http` URL on deere.com no longer receives the token. A caller's `Authorization` header is matched in any letter case and replaces the token.
+- A `maxRetries` below zero now makes the one attempt. Nothing produces the statusText `'RetryExhausted'` any more.
+- A custom `fetch` is handed the attempt's own signal, not the caller's object, and has to honour it.
+- A parameter John Deere adds, removes or retypes on an existing method, or a change of the type a method returns, no longer ships in an automatic patch release. Each method's signature is pinned, and the daily sync stops for a person to look when one changes. What a named schema type contains is not pinned and can still change in a patch. The README's new versioning section says what a version number does and does not promise.
+- The daily sync and the release workflow run the whole test suite before anything is committed or published, and `npm version` runs the same checks before it commits and tags.
+- The README and the generated environment matrix now say what an environment a spec does not list really does: an API served from fixed hosts throws `UnsupportedEnvironmentError`, and one served from a URL template sends the request to the environment asked for.
+
+### Fixed
+- A request given `options.signal` had no timeout at all, and a cancellation was retried and reported as a timeout. In HATEOAS mode the request for the parent resource got neither the signal nor the call's timeout.
+- A `timeout` of `Infinity` now means no timeout. Without a signal it used to time out every attempt.
+- `deere.mapLayers.updateFileResources(id, options)` sent its `options` to John Deere as the request body and applied none of them. They now take effect, and the request carries no body.
+- The generator dropped a whole API class without a word when its spec file was missing. The run now stops and names the spec.
+
 ## [3.2.0] - 2026-11-12
 
 ### Added
