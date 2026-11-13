@@ -565,8 +565,11 @@ describe('DeereClient', () => {
       await assert.rejects(
         () => client.get('organizations', '/test', { timeout: 50 }), // Override to 50ms
         (_error: Error) => {
+          // What this proves is that the 50ms override fired and the 10s
+          // default did not, so the bound sits between the two with room for
+          // a slow runner. It used to be 200ms, which a busy machine can miss.
           const elapsed = Date.now() - requestStartTime;
-          assert(elapsed < 200, `Timeout should have triggered quickly, took ${elapsed}ms`);
+          assert(elapsed < 5000, `the per-request timeout did not fire: took ${elapsed}ms`);
           return true;
         }
       );

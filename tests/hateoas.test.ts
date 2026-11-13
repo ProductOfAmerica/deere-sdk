@@ -359,6 +359,34 @@ describe('HATEOAS mode', () => {
       assert.equal(calls.length, 2); // only the actual request
     });
 
+    // What `parentSpec` in the generated map is for. The equipment spec lives
+    // on its own host, but the organization its paths hang under is declared
+    // by the organizations spec, on the platform host. Fetched through the
+    // child's spec, the parent request would go to a host that does not serve
+    // organizations. Every other test here uses specs that share one host, so
+    // none of them can tell the two apart.
+    it('fetches a parent declared by another spec from that spec host, not the child one', async () => {
+      const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
+      const parent = 'https://api.deere.com/platform/organizations/123';
+      const discovered = 'https://equipmentapi.deere.com/isg/organizations/123/equipment';
+      responses.set(parent, { id: '123', links: [{ rel: 'equipment', uri: discovered }] });
+      responses.set(discovered, { values: [] });
+
+      const client = new DeereClient({
+        accessToken: 'test',
+        fetch: mockFetch,
+        hateoas: true,
+        environment: 'api',
+        maxRetries: 0,
+      });
+
+      await client.get('equipment', '/organizations/123/equipment');
+      assert.deepEqual(
+        calls.map((call) => call.url),
+        [parent, discovered]
+      );
+    });
+
     it('fetchUrl bypasses HATEOAS (e.g. from followLink / nextPage)', async () => {
       const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
       const fullUrl = `${BASE}/organizations/123/fields`;
