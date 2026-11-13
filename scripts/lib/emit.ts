@@ -112,16 +112,28 @@ export function assertIdentifier(name: string, where: string): void {
  * Throws unless `path` is a path key the generators can emit: a `/`, then
  * segments that are each either `{parameter}` or made only of letters, digits
  * and `_ . @ -`. A path key is written into a template literal, into object
- * keys and into comments, and its parameter names become identifiers.
+ * keys and into comments, and its parameter names become the identifiers of a
+ * method's parameters, so no name may appear twice.
  */
 export function assertPathKey(path: string, where: string): void {
   if (!path.startsWith('/')) {
     refuse(where, 'path', path, 'it does not start with "/"', widen('assertPathKey'));
   }
+  const parameters = new Set<string>();
   for (const segment of path.slice(1).split('/')) {
     const parameter = /^\{(.*)\}$/.exec(segment);
     if (parameter) {
       assertIdentifier(parameter[1], `${where}, path ${JSON.stringify(path)}`);
+      if (parameters.has(parameter[1])) {
+        refuse(
+          where,
+          'path',
+          path,
+          `it names the parameter {${parameter[1]}} twice, and a method cannot take two arguments with one name`,
+          'If John Deere really publishes this, the generator has to tell the two apart before it can emit the method.'
+        );
+      }
+      parameters.add(parameter[1]);
     } else if (segment === '.' || segment === '..' || !LITERAL_PATH_SEGMENT.test(segment)) {
       refuse(
         where,

@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/flags.js';
 
 export class FlagsApi {
@@ -51,7 +52,7 @@ export class FlagsApi {
     if (params?.simple !== undefined) query.set('simple', String(params.simple));
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/flags${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(
       this.spec,
       path,
@@ -90,7 +91,7 @@ export class FlagsApi {
     if (params?.simple !== undefined) query.set('simple', String(params.simple));
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/flags${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/flags${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['ValuesFlagId']>(this.spec, path, options);
   }
 
@@ -108,7 +109,7 @@ export class FlagsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/flagCategories${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FlagCategory2']>>(
       this.spec,
       path,
@@ -127,7 +128,7 @@ export class FlagsApi {
     data: components['schemas']['PutResponse'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flagCategories`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -148,7 +149,7 @@ export class FlagsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/flagCategories/${categoryId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories/${encodePathParam('categoryId', categoryId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['FlagCategory']>(this.spec, path, options);
   }
 
@@ -163,7 +164,7 @@ export class FlagsApi {
     data: components['schemas']['PutResponse'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flagCategories/${categoryId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories/${encodePathParam('categoryId', categoryId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -178,7 +179,7 @@ export class FlagsApi {
     categoryId: string,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flagCategories/${categoryId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories/${encodePathParam('categoryId', categoryId)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -200,7 +201,7 @@ export class FlagsApi {
     const query = new URLSearchParams();
     if (params?.prefKey !== undefined) query.set('prefKey', String(params.prefKey));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/flagCategories/${categoryId}/flagCategoryPreferences${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategories/${encodePathParam('categoryId', categoryId)}/flagCategoryPreferences${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FlagCategoryPreference']>>(
       this.spec,
       path,
@@ -219,7 +220,7 @@ export class FlagsApi {
     flagCategoryPreferencesId: string,
     options?: RequestOptions
   ): Promise<components['schemas']['FlagCategoryPreference']> {
-    const path = `/organizations/${orgId}/flagCategoryPreferences/${flagCategoryPreferencesId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategoryPreferences/${encodePathParam('flagCategoryPreferencesId', flagCategoryPreferencesId)}`;
     return this.client.get<components['schemas']['FlagCategoryPreference']>(
       this.spec,
       path,
@@ -239,7 +240,7 @@ export class FlagsApi {
     data: components['schemas']['FlagCategoryPreference'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flagCategoryPreferences/${flagCategoryPreferencesId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flagCategoryPreferences/${encodePathParam('flagCategoryPreferencesId', flagCategoryPreferencesId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -277,7 +278,7 @@ export class FlagsApi {
     if (params?.simple !== undefined) query.set('simple', String(params.simple));
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/flags${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flags${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ValuesFlagId']>>(
       this.spec,
       path,
@@ -295,7 +296,7 @@ export class FlagsApi {
     data: components['schemas']['ValuesFlagIdPut'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flags`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flags`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -334,7 +335,7 @@ export class FlagsApi {
     if (params?.simple !== undefined) query.set('simple', String(params.simple));
     if (params?.metadataOnly !== undefined) query.set('metadataOnly', String(params.metadataOnly));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/flags/${flagId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flags/${encodePathParam('flagId', flagId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ValuesFlagId']>(this.spec, path, options);
   }
 
@@ -349,7 +350,7 @@ export class FlagsApi {
     data: components['schemas']['ValuesFlagIdPut'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/flags/${flagId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flags/${encodePathParam('flagId', flagId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -360,7 +361,7 @@ export class FlagsApi {
    * @generated from DELETE /organizations/{orgId}/flags/{flagId}
    */
   async delete(orgId: string, flagId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/flags/${flagId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/flags/${encodePathParam('flagId', flagId)}`;
     await this.client.delete(this.spec, path, options);
   }
 }

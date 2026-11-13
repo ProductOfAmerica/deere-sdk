@@ -25,6 +25,7 @@ import {
 import { assertPathKey, jsDocText, tsStringLiteral } from './lib/emit.js';
 import {
   buildMethodJsDoc,
+  buildPathTemplate,
   collectionItemType,
   computeReturnType,
   deprecatedJsDocLines,
@@ -469,10 +470,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
   // PaginatedResponse<unknown>, not bare unknown.
   const returnType = computeReturnType(op);
 
-  let pathTemplate = op.path;
-  for (const pp of op.pathParams) {
-    pathTemplate = pathTemplate.replace(`{${pp.name}}`, `\${${pp.name}}`);
-  }
+  const pathTemplate = buildPathTemplate(op.path);
 
   const lines: string[] = [];
 
@@ -583,6 +581,12 @@ function generateApiClass(api: GeneratedApi, names: Map<string, string>): string
     `import type { ${clientImports.join(', ')} } from '../client.js';`,
     `import type { SpecName } from '../api-servers.generated.js';`,
   ];
+  // The one value import a generated class has: every `{param}` in a path is
+  // filled in through it. Skipped for a class with none, where it would be an
+  // unused import.
+  if (api.operations.some((op) => op.pathParams.length > 0)) {
+    imports.push(`import { encodePathParam } from '../path-pattern.js';`);
+  }
   if (usesComponents) {
     imports.push(`import type { components } from '../types/generated/${api.typesImportPath}.js';`);
   }

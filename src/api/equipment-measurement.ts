@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/equipment-measurement.js';
 
 export class EquipmentMeasurementApi {
@@ -83,7 +84,7 @@ export class EquipmentMeasurementApi {
     data: components['schemas']['EquipmentMeasurementsNew'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/equipment/${principalId}/measurements`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/equipment/${encodePathParam('principalId', principalId)}/measurements`;
     await this.client.post(this.spec, path, data, options);
   }
 }

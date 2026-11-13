@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/machine-alerts.js';
 
 export class MachineAlertsApi {
@@ -41,7 +42,7 @@ export class MachineAlertsApi {
     if (params?.excludeAcknowledged !== undefined)
       query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/alerts${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['AlertValue']>>(
       this.spec,
       path,
@@ -63,7 +64,7 @@ export class MachineAlertsApi {
     if (params?.excludeAcknowledged !== undefined)
       query.set('excludeAcknowledged', String(params.excludeAcknowledged));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/alerts${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/alerts${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['AlertValue']>(this.spec, path, options);
   }
 }

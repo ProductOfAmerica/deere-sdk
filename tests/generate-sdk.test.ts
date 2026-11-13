@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   buildMethodJsDoc,
+  buildPathTemplate,
   collectionItemType,
   computeReturnType,
   DEFAULT_DEPRECATION_NOTE,
@@ -296,6 +297,29 @@ describe('buildMethodJsDoc', () => {
         });
       }
     }
+  });
+});
+
+describe('buildPathTemplate', () => {
+  it('leaves a path with no parameters as it is', () => {
+    assert.strictEqual(buildPathTemplate('/organizations'), '/organizations');
+    assert.strictEqual(buildPathTemplate('/users/@currentUser'), '/users/@currentUser');
+  });
+
+  it('passes each parameter through the encoder, under its own name', () => {
+    assert.strictEqual(
+      buildPathTemplate('/notificationEvents/{sourceEvent}'),
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the emitted template body, as text
+      "/notificationEvents/${encodePathParam('sourceEvent', sourceEvent)}"
+    );
+  });
+
+  it('keeps several parameters in the order the path has them', () => {
+    assert.strictEqual(
+      buildPathTemplate('/organizations/{orgId}/fields/{fieldId}/boundaries'),
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the emitted template body, as text
+      "/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/boundaries"
+    );
   });
 });
 

@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/machine-device-state-reports.js';
 
 export class MachineDeviceStateReportsApi {
@@ -44,7 +45,7 @@ export class MachineDeviceStateReportsApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/deviceStateReports${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/deviceStateReports${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['DeviceStateReport']>>(
       this.spec,
       path,
