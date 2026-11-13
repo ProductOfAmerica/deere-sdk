@@ -456,12 +456,11 @@ describe('fix-specs utilities', () => {
       // component and the prose comes back under the new name.
       //
       // There is deliberately no test for the opposite case, an entry that
-      // John Deere's repair has made redundant. The sync runs the routing guard
-      // and the type-checks before it commits, but not this suite, so such a
-      // test would turn main and every open PR red after an upstream
-      // improvement, over an entry that is by then inert. A redundant entry is
-      // skipped, as restoreEquipmentItemRefs does. A REWORDED one is not
-      // redundant: fixProseEnums throws on it, which fails the sync itself.
+      // John Deere's repair has made redundant. The sync runs this suite
+      // before it commits, so such a test would stop the sync after an
+      // upstream improvement, over an entry that is by then inert. A redundant
+      // entry is skipped, as restoreEquipmentItemRefs does. A REWORDED one is
+      // not redundant: fixProseEnums throws on it, which fails the sync itself.
       it('no registered prose is left in any enum of specs/fixed', () => {
         for (const spec of new Set(PROSE_ENUM_FIXES.map((fix) => fix.spec))) {
           const prose = PROSE_ENUM_FIXES.filter((fix) => fix.spec === spec).map((fix) => fix.prose);

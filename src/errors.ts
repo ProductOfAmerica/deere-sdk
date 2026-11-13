@@ -54,8 +54,8 @@ export class HateoasError extends Error {
 
 /**
  * Sentinel status for client-side errors that were never sent over HTTP.
- * Distinct from HTTP 0 (which requestUrl uses for timeouts), so the retry
- * logic in requestUrl that checks `error.status === 0 && error.statusText ===
- * 'Timeout'` never fires for config/resolver errors.
+ * Distinct from 0, the status of requestUrl's timeout error (`status === 0`
+ * with `statusText === 'Timeout'`), so a config or resolver error cannot be
+ * taken for a timeout.
  */
 export const CLIENT_ERROR_STATUS = -1;

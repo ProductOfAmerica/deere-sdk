@@ -577,7 +577,7 @@ import {DeereClient, type PaginatedResponse} from 'deere-sdk';
 const client = new DeereClient({
     accessToken: 'your-token',
     environment: 'sandboxapi',
-    timeout: 30000,   // Request timeout in ms (default: 30000)
+    timeout: 30000,   // Per-attempt timeout in ms (default: 30000)
     maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
 
@@ -613,24 +613,28 @@ const fields = await client.get('fields', `/organizations/${encodePathParam('org
 
 There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. Passing a spec name that does not ship your chosen environment throws `UnsupportedEnvironmentError` before any request goes out.
 
-### fetchUrl — Bearer token hostname guard
+### Where the access token is sent
 
-`DeereClient` exposes `fetchUrl(method, url, body?, options?)` and `followLink(url)` for calling absolute URLs (e.g., HAL `next` page links, externally-discovered URLs). Both **suppress the OAuth Bearer token** on any URL whose hostname is not a trusted `*.deere.com` origin. This prevents accidental token leakage if a HATEOAS response, user-supplied URL, or link cache ever includes a third-party host.
+The client attaches the OAuth Bearer token only to an `https` URL on `*.deere.com`. That holds for every request it makes: calls resolved from a spec name, pages followed by `paginate`, links followed in HATEOAS mode, and absolute URLs you pass to `fetchUrl(method, url, body?, options?)` or `followLink(link)`. Any other URL you pass to those two is requested without an `Authorization` header.
 
 ```typescript
-// Bearer token attached (trusted host)
+// Bearer token attached (https on deere.com)
 await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');
 
-// Bearer token SUPPRESSED (untrusted host) — request still goes out, just without Authorization
+// Bearer token suppressed: the request still goes out, with no Authorization header
 await client.fetchUrl('GET', 'https://example.com/some-webhook');
 
-// You can opt in explicitly by passing your own Authorization header:
+// To send a token elsewhere, pass your own Authorization header for that request
 await client.fetchUrl('GET', 'https://example.com/api', undefined, {
     headers: { Authorization: 'Bearer some-other-token' },
 });
 ```
 
-Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppressed, so you can audit where your HATEOAS graph is pointing.
+- An `Authorization` header in a request's `options.headers` is sent as given, to any host, and replaces the access token for that request. The header name is matched in any letter case.
+- An `Authorization` entry in `defaultHeaders` is ignored.
+- A link the client follows on its own, a HATEOAS link or a `nextPage`, must be an `https` URL on `*.deere.com`. Any other is not followed at all: the call throws (see [Error Types](#error-types)). Following it without the token would still send the request there, with the headers you passed and, for a `POST` or `PUT`, its body.
+
+Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppressed.
 
 ---
 
@@ -693,7 +697,7 @@ const boundaries = await deere.boundaries.listBoundaries(orgId, fieldId);
 
 ### Strict Mode
 
-HATEOAS mode is strict: if link resolution fails (parent returns no matching link, parent fetch errors), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate.
+HATEOAS mode is strict: if link resolution fails (the parent returns no matching link, the parent fetch errors, or the link is not an `https` URL on `*.deere.com`), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate. The one exception is a call you have cancelled: it rejects with your signal's reason, as described under [Timeouts and Cancellation](#timeouts-and-cancellation).
 
 ```typescript
 import {HateoasError} from 'deere-sdk';
@@ -730,6 +734,9 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 | Timeouts                   | Yes      | Request took too long         |
 | `401`, `403` Auth errors   | No       | Refresh your token            |
 | `400`, `404`, `422`        | No       | Fix your request              |
+| Cancelled by your `signal` | No       | See below                     |
+
+The server-error, network and timeout rows apply to a `POST` or `PATCH` only while `retryNonIdempotent` is on, which is the default, and never once a success status has arrived for it. See [Requests that change data](#requests-that-change-data).
 
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
@@ -749,6 +756,56 @@ const noRetries = new Deere({
 });
 ```
 
+#### Requests that change data
+
+By default a `POST` or `PATCH` is retried like any other request. One that ends in a server error, a network failure or a timeout may still have been carried out, so sending it again can do the work twice.
+
+```typescript
+import {Deere} from 'deere-sdk';
+
+const careful = new Deere({
+    accessToken: 'your-token',
+    retryNonIdempotent: false,
+});
+```
+
+With `retryNonIdempotent: false`, a `POST` or `PATCH` is retried only after a `429`, on the understanding that a rate limiter turns a request away before it is handled. `GET`, `PUT` and `DELETE` are retried as before. The option defaults to `true` in 3.x; the default becomes `false` in 4.0.
+
+Whatever the option says, a `POST` or `PATCH` is never sent again once a success status has arrived for it: if the timeout or a dropped connection interrupts the reading of that response's body, the call rejects with that error, because the server has already carried the request out.
+
+### Timeouts and Cancellation
+
+Every generated method takes `options` as its last argument, and so does every method of the `deere.safe` facades, as do `get`, `post`, `put`, `patch`, `delete`, `paginate`, `getAll`, `fetchUrl` and `followLink` on `DeereClient`. Two of the options end a call early:
+
+```typescript
+import {Deere, DeereError} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token'});
+const controller = new AbortController();
+// Call controller.abort() from anywhere to cancel, e.g. when the user leaves the page.
+
+try {
+    const fields = await deere.fields.listAll('org-id', undefined, {
+        signal: controller.signal,
+        timeout: 10000, // for this call; the client's `timeout` is the default
+    });
+    console.log(fields.length);
+} catch (error) {
+    if (controller.signal.aborted) {
+        // Cancelled. `error` is controller.signal.reason, an AbortError by default.
+    } else if (error instanceof DeereError && error.statusText === 'Timeout') {
+        // The last attempt did not finish in time, its response body included.
+    } else {
+        throw error;
+    }
+}
+```
+
+- **`timeout`** is how long each attempt may take, from sending the request to reading the whole response body. An attempt that times out is retried like any other transient failure, except a `POST` or `PATCH` whose success status had already arrived (see [Requests that change data](#requests-that-change-data)). When the timeout cuts short the body of an error response, the call rejects with that HTTP error, whose `body` is then missing. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. `Infinity` turns the timeout off. A timeout must be a number of milliseconds greater than `0`: the constructor throws for `0`, a negative number, `NaN` or anything that is not a number, and a call given such a value in `options` rejects before sending anything (see [Error Types](#error-types)). A numeric string such as `'30000'` is accepted.
+- **`signal`** cancels the call. The call rejects with the signal's `reason`: an `AbortError` by default, or whatever you passed to `abort()`. That is what `fetch` does, so the error is not a `DeereError`. A cancelled call is never retried, a wait before a retry ends at once, and `paginate`, `getAll` and HATEOAS mode request nothing further.
+- The two apply together. Passing a `signal` does not switch the timeout off.
+- A custom `fetch` must honour the `signal` it is handed. If it does not, neither a timeout nor a cancellation can interrupt a request already in flight.
+
 ### Error Types
 
 | Error                         | When it's thrown                                                  | Retried? |
@@ -756,7 +813,11 @@ const noRetries = new Deere({
 | `DeereError`                  | Base class. Any HTTP error from John Deere (400/404/422/5xx).     | Only 5xx |
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
-| `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
+| `DeereError` with `status` `0` and `statusText` `'Timeout'` | The last attempt did not finish within `timeout`, reading the response body included. | Yes      |
+| `DeereError` with `status` `-1` and `statusText` `'InvalidTimeout'` | The `timeout` in a call's `options` is not a number of milliseconds greater than `0`. Thrown before any request goes out. | No       |
+| The `reason` of your `signal` (an `AbortError` by default) | You aborted the `signal` you passed in `options`. Not a `DeereError`. See [Timeouts and Cancellation](#timeouts-and-cancellation). | No       |
+| `HateoasError`                | HATEOAS link resolution fails (parent fetch errored, no matching link, or the link is not an `https` URL on `*.deere.com`). | No       |
+| `DeereError` with `status` `-1` and `statusText` `'UntrustedLink'` | `paginate` or `getAll` met a `nextPage` link that is not an `https` URL on `*.deere.com`. The link is not requested. | No       |
 | `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
 | `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
 | `DeereError` with `status` `-1` and `statusText` `'InvalidPathParameter'` | A path parameter, given to a generated method or to `encodePathParam`, cannot be one path segment: it is not a string, a finite number, a bigint or a boolean, or it is an empty string, `.`, `..` or malformed text. Thrown before any request goes out. | No       |
@@ -902,7 +963,7 @@ npm version patch   # or: minor, major
 git push --follow-tags
 ```
 
-CI sees the tag → creates GitHub Release → publishes to npm.
+CI sees the tag → type-checks and tests that commit → creates GitHub Release → publishes to npm. If a test fails, no release is created and nothing is published.
 
 npm publishing uses Trusted Publishing/OIDC via `release.yml`; do not create or restore an `NPM_TOKEN` for CI publishing.
 
