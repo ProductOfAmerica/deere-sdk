@@ -50,6 +50,7 @@
     "build": "tsc",
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm clean && pnpm build",
+    "version": "pnpm typecheck:test && pnpm test",
     "fetch-specs": "tsx scripts/fetch-specs.ts",
     "redact-specs": "tsx scripts/redact-specs.ts",
     "canonicalize-specs": "tsx scripts/canonicalize-specs.ts",
