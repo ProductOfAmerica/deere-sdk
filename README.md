@@ -725,6 +725,8 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 | `400`, `404`, `422`        | No       | Fix your request              |
 | Cancelled by your `signal` | No       | See below                     |
 
+The server-error, network and timeout rows apply to a `POST` or `PATCH` only while `retryNonIdempotent` is on, which is the default. See [Requests that change data](#requests-that-change-data).
+
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
 ```typescript
@@ -742,6 +744,21 @@ const noRetries = new Deere({
     maxRetries: 0,
 });
 ```
+
+#### Requests that change data
+
+By default a `POST` or `PATCH` is retried like any other request. One that ends in a server error, a network failure or a timeout may still have been carried out, so sending it again can do the work twice.
+
+```typescript
+import {Deere} from 'deere-sdk';
+
+const careful = new Deere({
+    accessToken: 'your-token',
+    retryNonIdempotent: false,
+});
+```
+
+With `retryNonIdempotent: false`, a `POST` or `PATCH` is retried only after a `429`, on the understanding that a rate limiter turns a request away before it is handled. `GET`, `PUT` and `DELETE` are retried as before. The option defaults to `true` in 3.x; the default becomes `false` in 4.0.
 
 ### Timeouts and Cancellation
 
