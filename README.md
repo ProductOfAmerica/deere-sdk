@@ -725,7 +725,7 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 | `400`, `404`, `422`        | No       | Fix your request              |
 | Cancelled by your `signal` | No       | See below                     |
 
-The server-error, network and timeout rows apply to a `POST` or `PATCH` only while `retryNonIdempotent` is on, which is the default. See [Requests that change data](#requests-that-change-data).
+The server-error, network and timeout rows apply to a `POST` or `PATCH` only while `retryNonIdempotent` is on, which is the default, and never once a success status has arrived for it. See [Requests that change data](#requests-that-change-data).
 
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
@@ -760,6 +760,8 @@ const careful = new Deere({
 
 With `retryNonIdempotent: false`, a `POST` or `PATCH` is retried only after a `429`, on the understanding that a rate limiter turns a request away before it is handled. `GET`, `PUT` and `DELETE` are retried as before. The option defaults to `true` in 3.x; the default becomes `false` in 4.0.
 
+Whatever the option says, a `POST` or `PATCH` is never sent again once a success status has arrived for it: if the timeout or a dropped connection interrupts the reading of that response's body, the call rejects with that error, because the server has already carried the request out.
+
 ### Timeouts and Cancellation
 
 Every generated method takes `options` as its last argument, and so does every method of the `deere.safe` facades, as do `get`, `post`, `put`, `patch`, `delete`, `paginate`, `getAll`, `fetchUrl` and `followLink` on `DeereClient`. Two of the options end a call early:
@@ -781,14 +783,14 @@ try {
     if (controller.signal.aborted) {
         // Cancelled. `error` is controller.signal.reason, an AbortError by default.
     } else if (error instanceof DeereError && error.statusText === 'Timeout') {
-        // The last attempt got no response in time.
+        // The last attempt did not finish in time, its response body included.
     } else {
         throw error;
     }
 }
 ```
 
-- **`timeout`** is how long each attempt may wait for a response to start. An attempt that times out is retried like any other transient failure. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. Reading a response body is not limited by the timeout, and `Infinity` turns it off. A timeout must be a number of milliseconds greater than `0`: the constructor throws for `0`, a negative number, `NaN` or anything that is not a number, and a call given such a value in `options` rejects before sending anything (see [Error Types](#error-types)). A numeric string such as `'30000'` is accepted.
+- **`timeout`** is how long each attempt may take, from sending the request to reading the whole response body. An attempt that times out is retried like any other transient failure, except a `POST` or `PATCH` whose success status had already arrived (see [Requests that change data](#requests-that-change-data)). When the timeout cuts short the body of an error response, the call rejects with that HTTP error, whose `body` is then missing. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. `Infinity` turns the timeout off. A timeout must be a number of milliseconds greater than `0`: the constructor throws for `0`, a negative number, `NaN` or anything that is not a number, and a call given such a value in `options` rejects before sending anything (see [Error Types](#error-types)). A numeric string such as `'30000'` is accepted.
 - **`signal`** cancels the call. The call rejects with the signal's `reason`: an `AbortError` by default, or whatever you passed to `abort()`. That is what `fetch` does, so the error is not a `DeereError`. A cancelled call is never retried, a wait before a retry ends at once, and `paginate`, `getAll` and HATEOAS mode request nothing further.
 - The two apply together. Passing a `signal` does not switch the timeout off.
 - A custom `fetch` must honour the `signal` it is handed. If it does not, neither a timeout nor a cancellation can interrupt a request already in flight.
@@ -800,7 +802,7 @@ try {
 | `DeereError`                  | Base class. Any HTTP error from John Deere (400/404/422/5xx).     | Only 5xx |
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
-| `DeereError` with `status` `0` and `statusText` `'Timeout'` | The last attempt got no response within `timeout`. | Yes      |
+| `DeereError` with `status` `0` and `statusText` `'Timeout'` | The last attempt did not finish within `timeout`, reading the response body included. | Yes      |
 | `DeereError` with `status` `-1` and `statusText` `'InvalidTimeout'` | The `timeout` in a call's `options` is not a number of milliseconds greater than `0`. Thrown before any request goes out. | No       |
 | The `reason` of your `signal` (an `AbortError` by default) | You aborted the `signal` you passed in `options`. Not a `DeereError`. See [Timeouts and Cancellation](#timeouts-and-cancellation). | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored, no matching link, or the link is not an `https` URL on `*.deere.com`). | No       |

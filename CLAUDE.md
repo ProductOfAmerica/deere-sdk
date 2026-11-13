@@ -229,6 +229,11 @@ The rule is an allow-list, `IDEMPOTENT_METHODS`, so a method it does not know (`
 wrote, compared in upper case) is treated as POST is. The default becomes `false` in 4.0, and a test in
 `tests/retry.test.ts` fails once `package.json` reaches major 4 until the constructor is changed.
 
+Whatever `retryNonIdempotent` says, an attempt that got a success status (`succeeded` in `requestUrl`) is sent again
+after a timeout or network error during its body read only when the method is in `IDEMPOTENT_METHODS`: the server has
+carried the request out, so a second POST would do the work twice. Before the timeout covered the body, a dropped
+connection mid-body was enough to resend a POST.
+
 Client-side errors (thrown from the resolver before any HTTP) use `CLIENT_ERROR_STATUS = -1` so they can't be confused
 with the timeout error, `status === 0 && statusText === 'Timeout'`.
 
@@ -239,8 +244,12 @@ timeout, and the caller's `options.signal` through a listener that the attempt's
 flag says which. The error fetch rejects with does not, so never classify by `error.name === 'AbortError'`: doing that
 is what once had a cancellation retried and reported as a timeout.
 
-- A timeout is retried, and ends as `DeereError('Request timeout', 0, 'Timeout')`. It runs until the response starts;
-  body reads are not limited by it. A `timeout` above what a timer can hold (`Infinity` is the documented way to turn
+- A timeout is retried, and ends as `DeereError('Request timeout', 0, 'Timeout')`. It covers the whole attempt, the
+  body read included (an error body too): the timer is cleared only in the attempt's `finally`. A body that outlasts it
+  is retried for an idempotent method and never for a POST or PATCH that got a success status (see "Retry policy").
+  One that fires while `handleError` reads an error body surfaces as that HTTP error, without its body, because the
+  `DeereError` check comes first in the catch. A body that ignores the abort and completes anyway is returned. A
+  `timeout` above what a timer can hold (`Infinity` is the documented way to turn
   it off) arms no timer, because Node would set that timer for 1 ms.
 - A timeout that is not a duration is refused, because Node arms a timer for 1 ms when handed 0, a negative number,
   NaN or a non-number. Accepted: a number or string whose `Number()` is above 0, kept as given (a numeric string worked

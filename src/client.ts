@@ -80,10 +80,12 @@ export interface DeereClientConfig {
    */
   defaultHeaders?: Record<string, string>;
   /**
-   * How long each attempt may wait for a response to start, in milliseconds.
-   * Defaults to 30000. Reading the response body is not limited by it.
-   * `Infinity` turns it off. The constructor throws for 0, a negative number,
-   * NaN, or anything other than a number or a numeric string.
+   * How long each attempt may take, in milliseconds, from sending the request
+   * to reading the whole response body, an error body included. Defaults to
+   * 30000. `Infinity` turns it off. A POST or PATCH whose success status had
+   * arrived before the timeout is not sent again. The constructor throws for
+   * 0, a negative number, NaN, or anything other than a number or a numeric
+   * string.
    */
   timeout?: number;
   /** Maximum number of retry attempts for failed requests. Defaults to 3. Set to 0 to disable retries. */
@@ -102,6 +104,10 @@ export interface DeereClientConfig {
    *
    * With `false`, a method passed to `fetchUrl` that RFC 9110 does not define
    * as idempotent is treated as POST and PATCH are.
+   *
+   * Either way, once a success status has arrived, a timeout or network error
+   * while its body is read sends such a request again only if it is
+   * idempotent: the server has already carried it out.
    */
   retryNonIdempotent?: boolean;
   /**
@@ -562,7 +568,8 @@ export class DeereClient {
     // left it carried out: a server error, a dropped connection, a timeout.
     // The method is compared in upper case because fetchUrl passes it on as
     // the caller wrote it.
-    const repeatable = this.retryNonIdempotent || IDEMPOTENT_METHODS.has(method.toUpperCase());
+    const idempotent = IDEMPOTENT_METHODS.has(method.toUpperCase());
+    const repeatable = this.retryNonIdempotent || idempotent;
 
     for (let attempt = 0; ; attempt++) {
       const mayRetry = attempt < this.retryConfig.maxRetries;
@@ -580,8 +587,13 @@ export class DeereClient {
       // and then reported as a timeout.
       const controller = new AbortController();
       let timedOut = false;
-      // A timeout longer than a timer can hold gets no timer, so `Infinity`
-      // means what it says: no timeout.
+      // Whether this attempt got a success status. The server has carried the
+      // request out by then, so a failure while its body is read is no reason
+      // to send a POST or PATCH again.
+      let succeeded = false;
+      // The timer runs until the attempt ends, body read included: the
+      // `finally` below is the only place it is cleared. A timeout longer than
+      // a timer can hold gets no timer, so `Infinity` means no timeout.
       const timeoutId =
         timeout > MAX_TIMER_DELAY
           ? undefined
@@ -601,11 +613,8 @@ export class DeereClient {
           signal: controller.signal,
         });
 
-        // The timeout is for the wait until a response starts. Reading the
-        // body is not limited by it, though the caller can still cancel that.
-        clearTimeout(timeoutId);
-
         if (response.ok) {
+          succeeded = true;
           // Handle empty responses
           const contentLength = response.headers.get('content-length');
           if (contentLength === '0' || response.status === 204) {
@@ -630,7 +639,8 @@ export class DeereClient {
           response.status === 429 ? mayRetry : mayRepeat && this.isRetryable(response.status);
         if (!retryIt) {
           // Always throws. Awaited here so that reading the error body is
-          // still inside the try, where the caller can cancel it.
+          // still inside the try, where the caller's signal and the timeout
+          // both still apply.
           return await this.handleError(response);
         }
 
@@ -649,12 +659,19 @@ export class DeereClient {
         if (callerSignal?.aborted) throw callerSignal.reason;
 
         // An error response, already turned into the error to report. Checked
-        // before the network rule below, which goes by the message's wording.
+        // before the network rule below, which goes by the message's wording,
+        // and before the timeout: one that fires while handleError reads the
+        // error body leaves that error without its body, but the status is
+        // what the server answered, and a timeout would hide it.
         if (error instanceof DeereError) throw error;
 
+        // After a success status only a method HTTP defines as idempotent is
+        // sent again, whatever retryNonIdempotent says: the request has been
+        // carried out, and a second POST would do the work twice.
+        const maySendAgain = succeeded ? mayRetry && idempotent : mayRepeat;
         if (timedOut) {
-          if (!mayRepeat) throw new DeereError('Request timeout', 0, 'Timeout');
-        } else if (!mayRepeat || !this.isNetworkError(error)) {
+          if (!maySendAgain) throw new DeereError('Request timeout', 0, 'Timeout');
+        } else if (!maySendAgain || !this.isNetworkError(error)) {
           throw error;
         }
         retryDelay = this.calculateRetryDelay(attempt);
