@@ -27,6 +27,7 @@ import {
   opKey,
   proposeName,
   resolveMethodNames,
+  resolveSurface,
   type SurfaceEntry,
   type SurfaceOp,
   serializeApiSurface,
@@ -1030,32 +1031,200 @@ describe('acceptSignatures', () => {
 // here is an unreviewed release.
 describe('stopReasons', () => {
   const operation = { spec: 's', method: 'GET', path: '/a', name: 'get' };
-  const report = (missing: boolean, changed: boolean) => ({
+  const report = (missing: boolean, changed: boolean, absent: boolean) => ({
     missingOperations: missing ? [operation] : [],
     changedSignatures: changed ? [{ ...operation, pinned: 'A', current: 'B' }] : [],
+    absentSpecs: absent ? ['s'] : [],
   });
 
   const cases: Array<
-    [missing: boolean, changed: boolean, accept: boolean, stopsFor: [boolean, boolean], why: string]
+    [
+      missing: boolean,
+      changed: boolean,
+      absent: boolean,
+      accept: boolean,
+      stopsFor: [boolean, boolean],
+      why: string,
+    ]
   > = [
-    [false, false, false, [false, false], 'nothing to stop for'],
-    [false, false, true, [false, false], 'nothing to accept either'],
-    [false, true, false, [false, true], 'a changed signature stops a plain run'],
-    [false, true, true, [false, false], 'accepting is what lets it through'],
-    [true, false, false, [true, false], 'a missing operation stops a plain run'],
-    [true, false, true, [true, false], 'and an accepting run just the same'],
-    [true, true, false, [true, true], 'both are reported when both are true'],
-    [true, true, true, [true, false], 'accepting signatures does not accept a missing operation'],
+    [false, false, false, false, [false, false], 'nothing to stop for'],
+    [false, false, false, true, [false, false], 'nothing to accept either'],
+    [false, true, false, false, [false, true], 'a changed signature stops a plain run'],
+    [false, true, false, true, [false, false], 'accepting is what lets it through'],
+    [true, false, false, false, [true, false], 'a missing operation stops a plain run'],
+    [true, false, false, true, [true, false], 'and an accepting run just the same'],
+    [true, true, false, false, [true, true], 'both are reported when both are true'],
+    [
+      true,
+      true,
+      false,
+      true,
+      [true, false],
+      'accepting signatures does not accept a missing operation',
+    ],
+    // An absent spec comes with its entries as missing operations. It stops
+    // the run on its own as well, so the class cannot be dropped even if its
+    // entries were somehow not listed.
+    [true, false, true, false, [true, false], 'a spec with no file stops a plain run'],
+    [true, false, true, true, [true, false], 'accepting signatures does not accept it either'],
+    [false, false, true, false, [true, false], 'the absent spec alone is enough to stop'],
+    [false, false, true, true, [true, false], 'also when accepting signatures'],
   ];
 
-  for (const [missing, changed, accept, [forMissing, forSignatures], why] of cases) {
-    it(`missing=${missing} changed=${changed} accept=${accept}: ${why}`, () => {
-      assert.deepStrictEqual(stopReasons(report(missing, changed), { acceptSignatures: accept }), {
-        missing: forMissing,
-        signatures: forSignatures,
-      });
+  for (const [missing, changed, absent, accept, [forMissing, forSignatures], why] of cases) {
+    it(`missing=${missing} changed=${changed} absent=${absent} accept=${accept}: ${why}`, () => {
+      assert.deepStrictEqual(
+        stopReasons(report(missing, changed, absent), { acceptSignatures: accept }),
+        { missing: forMissing, signatures: forSignatures }
+      );
     });
   }
+});
+
+// ---------------------------------------------------------------------------
+// resolveSurface
+// ---------------------------------------------------------------------------
+
+describe('resolveSurface', () => {
+  const op = (method: SurfaceOp['method'], path: string): SurfaceOp => ({
+    operationId: `${method}${path}`,
+    method,
+    path,
+    isCollection: false,
+  });
+  const entry = (op: string, name: string): SurfaceEntry => ({ op, name });
+
+  it('reports every entry of a manifest spec with no file as missing, and the run as breaking', () => {
+    const surface: ApiSurface = {
+      version: 1,
+      specs: {
+        present: [entry('GET /p', 'getP')],
+        gone: [entry('GET /g/{id}', 'get'), entry('DELETE /g/{id}', 'delete')],
+      },
+    };
+    const { namesBySpec, perSpec } = resolveSurface(surface, [
+      { specName: 'present', operations: [op('get', '/p')] },
+    ]);
+
+    assert.deepStrictEqual(perSpec, [
+      {
+        specName: 'gone',
+        newEntries: [],
+        missing: surface.specs.gone,
+        changedSignatures: [],
+        absent: true,
+      },
+      { specName: 'present', newEntries: [], missing: [], changedSignatures: [], absent: false },
+    ]);
+    // It gets no names: there is no class to write for it.
+    assert.deepStrictEqual([...namesBySpec.keys()], ['present']);
+
+    const report = buildSyncReport(perSpec);
+    assert.strictEqual(report.classification, 'breaking');
+    assert.deepStrictEqual(report.absentSpecs, ['gone']);
+    assert.deepStrictEqual(
+      report.missingOperations.map((o) => `${o.spec} ${o.method} ${o.path} ${o.name}`),
+      ['gone DELETE /g/{id} delete', 'gone GET /g/{id} get']
+    );
+    assert.deepStrictEqual(stopReasons(report, { acceptSignatures: true }).missing, true);
+  });
+
+  it('passes over a manifest spec with no entries and no file', () => {
+    const surface: ApiSurface = { version: 1, specs: { empty: [] } };
+    const { namesBySpec, perSpec } = resolveSurface(surface, []);
+    assert.deepStrictEqual(perSpec, []);
+    assert.strictEqual(namesBySpec.size, 0);
+    const report = buildSyncReport(perSpec);
+    assert.strictEqual(report.classification, 'benign');
+    assert.deepStrictEqual(report.absentSpecs, []);
+  });
+
+  it('reports a spec file with no operations as missing them, not as absent', () => {
+    const surface: ApiSurface = { version: 1, specs: { hollow: [entry('GET /h', 'getH')] } };
+    const { perSpec } = resolveSurface(surface, [{ specName: 'hollow', operations: [] }]);
+    assert.deepStrictEqual(perSpec, [
+      {
+        specName: 'hollow',
+        newEntries: [],
+        missing: surface.specs.hollow,
+        changedSignatures: [],
+        absent: false,
+      },
+    ]);
+    const report = buildSyncReport(perSpec);
+    assert.strictEqual(report.classification, 'breaking');
+    assert.deepStrictEqual(report.absentSpecs, []);
+  });
+
+  it('proposes names for a spec the manifest does not know, as an additive run', () => {
+    const { namesBySpec, perSpec } = resolveSurface({ version: 1, specs: {} }, [
+      { specName: 'fresh', operations: [op('get', '/widgets/{id}')] },
+    ]);
+    assert.deepStrictEqual(perSpec, [
+      {
+        specName: 'fresh',
+        newEntries: [entry('GET /widgets/{id}', 'getWidgets')],
+        missing: [],
+        changedSignatures: [],
+        absent: false,
+      },
+    ]);
+    assert.deepStrictEqual(Object.fromEntries(namesBySpec.get('fresh') ?? []), {
+      'GET /widgets/{id}': 'getWidgets',
+    });
+    const report = buildSyncReport(perSpec);
+    assert.strictEqual(report.classification, 'additive');
+    assert.deepStrictEqual(report.absentSpecs, []);
+  });
+
+  // The committed manifest, with every spec's operations rebuilt from its own
+  // entries, and three specs left out so that they are absent.
+  const committed = loadApiSurface();
+  const specNames = Object.keys(committed.specs).sort();
+  const left = specNames.slice(0, 3);
+  const parsed = specNames
+    .filter((name) => !left.includes(name))
+    .map((specName) => ({
+      specName,
+      operations: committed.specs[specName].map((e) => {
+        const [method, path] = e.op.split(' ');
+        return { ...op(method.toLowerCase() as SurfaceOp['method'], path), signature: e.signature };
+      }),
+    }));
+
+  it('gives the names and results the per-spec loop in generate-sdk gave', () => {
+    const { namesBySpec, perSpec } = resolveSurface(committed, parsed);
+    for (const { specName, operations } of parsed) {
+      const old = resolveMethodNames(specName, operations, committed);
+      assert.deepStrictEqual(namesBySpec.get(specName), old.names, specName);
+      const result = perSpec.find((r) => r.specName === specName);
+      assert.deepStrictEqual(
+        result,
+        {
+          specName,
+          newEntries: old.newEntries,
+          missing: old.missing,
+          changedSignatures: old.changedSignatures,
+          absent: false,
+        },
+        specName
+      );
+    }
+    assert.deepStrictEqual(
+      perSpec.filter((r) => r.absent).map((r) => r.specName),
+      left
+    );
+  });
+
+  it('does not depend on the order the specs are handed in', () => {
+    const expected = resolveSurface(committed, parsed);
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const shuffled = resolveSurface(committed, seededShuffle(parsed, seed));
+      assert.deepStrictEqual(shuffled.perSpec, expected.perSpec, `seed ${seed}`);
+      assert.deepStrictEqual(shuffled.namesBySpec, expected.namesBySpec, `seed ${seed}`);
+      assert.deepStrictEqual(buildSyncReport(shuffled.perSpec), buildSyncReport(expected.perSpec));
+    }
+  });
 });
 
 describe('the committed manifest', () => {
@@ -1113,12 +1282,28 @@ describe('classifyRun', () => {
 // ---------------------------------------------------------------------------
 
 describe('buildSyncReport', () => {
-  it('classifies empty input as benign with three empty arrays', () => {
+  it('classifies empty input as benign with four empty arrays', () => {
     const report = buildSyncReport([]);
     assert.strictEqual(report.classification, 'benign');
     assert.deepStrictEqual(report.newOperations, []);
     assert.deepStrictEqual(report.missingOperations, []);
     assert.deepStrictEqual(report.changedSignatures, []);
+    assert.deepStrictEqual(report.absentSpecs, []);
+  });
+
+  it('lists the absent specs, sorted, and only those', () => {
+    const report = buildSyncReport([
+      { specName: 'zeta', newEntries: [], missing: [{ op: 'GET /z', name: 'getZ' }], absent: true },
+      { specName: 'mid', newEntries: [], missing: [{ op: 'GET /m', name: 'getM' }] },
+      {
+        specName: 'alpha',
+        newEntries: [],
+        missing: [{ op: 'GET /a', name: 'getA' }],
+        absent: true,
+      },
+    ]);
+    assert.deepStrictEqual(report.absentSpecs, ['alpha', 'zeta']);
+    assert.strictEqual(report.classification, 'breaking');
   });
 
   it('carries changed signatures, null for one that was not pinned, and is breaking', () => {

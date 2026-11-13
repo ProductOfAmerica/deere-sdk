@@ -71,6 +71,23 @@ Editing the `name:` values is how you approve an upstream change: repoint an ent
 major-version decision). A manifest entry with no matching operation fails the sync with per-entry diagnostics
 rather than silently dropping the method.
 
+A manifest key with entries and no file under `specs/fixed` fails the same way, with every one of its entries
+missing and the spec named in `absentSpecs` (`resolveSurface` in `scripts/lib/api-surface.ts`). It used to be
+skipped, and the generator dropped the whole class. No pipeline stage deletes a spec file, so every way here is a
+file deleted by hand (the raw file of a frozen spec is one). `fix-specs` applies a relocation while it processes the
+`into` spec's raw file, so a relocation into a spec with no file is skipped without a word; that spec's manifest key
+is then what reports it. Editing entries is the wrong fix here. Either:
+
+- restore the spec: its file under `specs/raw`, then the offline stages, which write `specs/fixed` from it; or
+- remove the API, a major-version decision. Delete `specs/raw/<spec>.yaml`, `specs/fixed/<spec>.yaml`,
+  `src/api/<spec>.ts` and `src/types/generated/<spec>.ts`, the spec's key in this manifest and its entry in
+  `scripts/spec-registry.yaml`; run the offline stages, then `pnpm generate-routing-snapshot`, which drops its
+  rows; and lower the spec-count floor in `tests/generate-api-servers.test.ts`. The raw file matters most:
+  `fix-specs` processes every file under `specs/raw` without consulting the registry, so while it is there the
+  spec comes back, and with its key gone the run is additive and re-adds every method under a newly proposed name.
+  Nothing else deletes these files, and `tsc` fails on a stale wrapper once `generate-api-servers` has dropped the
+  spec from `SpecName`. The API table in README.md lists the class too, and no check catches that row.
+
 Each entry also pins its method's **signature**: the parameters and return type as one line of text, built by
 `methodSignature` (`scripts/lib/sdk-gen-utils.ts`) from the same pieces as the emitted method. Before this, a
 parameter John Deere added, removed or retyped was published in the next patch release with nobody having looked.
@@ -85,8 +102,9 @@ Every run is classified into `sync-report.json` (gitignored) for the workflow:
   changed, else none.
 - **additive**: new operations, nothing missing or changed. Minor release; `generate-sdk` rewrites the manifest,
   folding the new entries in with their proposed names and their signatures.
-- **breaking**: a manifest entry lost its operation, or a method's signature is not the one pinned (an entry with
-  no signature counts). `generate-sdk` exits before it writes a class or the manifest, and the sync fails there
+- **breaking**: a manifest entry lost its operation (including every entry of a spec whose file is gone, listed in
+  `absentSpecs`), or a method's signature is not the one pinned (an entry with no signature counts). `generate-sdk`
+  exits before it writes a class or the manifest, and the sync fails there
   and surfaces them; a human reconciles before any release.
 
 **When a signature stops the sync.** Nothing was committed, tagged or published, and each daily run stops again

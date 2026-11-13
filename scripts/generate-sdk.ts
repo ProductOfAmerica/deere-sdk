@@ -18,12 +18,10 @@ import * as yaml from 'yaml';
 import {
   acceptSignatures,
   buildSyncReport,
-  type ChangedSignature,
   displayOp,
   loadApiSurface,
   normalizePathPattern,
-  resolveMethodNames,
-  type SurfaceEntry,
+  resolveSurface,
   serializeApiSurface,
   stopReasons,
 } from './lib/api-surface.js';
@@ -966,22 +964,7 @@ async function main() {
   // re-pinned to what the specs say now. Nothing else re-pins a signature.
   const acceptingSignatures = process.argv.includes(ACCEPT_SIGNATURES_FLAG);
 
-  const namesBySpec = new Map<string, Map<string, string>>();
-  const perSpec: Array<{
-    specName: string;
-    newEntries: SurfaceEntry[];
-    missing: SurfaceEntry[];
-    changedSignatures: ChangedSignature[];
-  }> = [];
-  for (const api of apis) {
-    const { names, newEntries, missing, changedSignatures } = resolveMethodNames(
-      api.specName,
-      api.operations,
-      surface
-    );
-    namesBySpec.set(api.specName, names);
-    perSpec.push({ specName: api.specName, newEntries, missing, changedSignatures });
-  }
+  const { namesBySpec, perSpec } = resolveSurface(surface, apis);
 
   // The workflow's classify step reads sync-report.json unconditionally, so
   // write it on EVERY run, before any generated file or the manifest. It
@@ -1005,14 +988,33 @@ async function main() {
       'BREAKING: manifest operations are missing upstream. No API class was written, ' +
         'and the manifest was left untouched.\n'
     );
+    const absent = new Set(report.absentSpecs);
+    if (absent.size > 0) {
+      console.error(
+        'scripts/api-surface.yaml has entries for these specs and specs/fixed has no file ' +
+          `for them, so every one of their operations is missing: ${report.absentSpecs.join(', ')}\n`
+      );
+    }
     const remediation =
       "upstream renamed the path: edit this entry's op: in scripts/api-surface.yaml " +
       'to the new path to keep the name; endpoint removed upstream: delete the entry, ' +
       'understanding the public method disappears, a major-version consideration';
+    // Editing the entry is the wrong fix when the whole spec file is gone.
+    const absentRemediation = (spec: string) =>
+      `the spec file is gone, not the operation: restore specs/raw/${spec}.yaml and rerun ` +
+      'the offline stages, which write specs/fixed from it; or remove the API, a ' +
+      `major-version decision: delete specs/raw/${spec}.yaml (left in place, it brings the ` +
+      `spec back under new method names), specs/fixed/${spec}.yaml, src/api/${spec}.ts, ` +
+      `src/types/generated/${spec}.ts, the "${spec}" key in scripts/api-surface.yaml and its ` +
+      'entry in scripts/spec-registry.yaml, run the offline stages and then ' +
+      'pnpm generate-routing-snapshot, and lower the spec-count floor in ' +
+      'tests/generate-api-servers.test.ts (see "The api-surface manifest" in CLAUDE.md)';
     for (const op of report.missingOperations) {
       console.error(`  ${op.spec}: ${op.method} ${op.path}`);
       console.error(`    bound method name: ${op.name}`);
-      console.error(`    remediation: ${remediation}`);
+      console.error(
+        `    remediation: ${absent.has(op.spec) ? absentRemediation(op.spec) : remediation}`
+      );
     }
   }
 

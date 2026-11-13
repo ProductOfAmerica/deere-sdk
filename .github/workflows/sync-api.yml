@@ -381,11 +381,14 @@ jobs:
             # and backticks are taken out: neither can end the span or start a
             # line of the summary.
             CHANGED_SIGS=$(jq -r 'def clean: gsub("\\r|\\n|`"; " "); (.changedSignatures // [])[] | "- `" + (.spec | clean) + "`: " + .method + " " + (.path | clean) + " (as `" + (.name | clean) + "`)\n  - pinned: `" + ((.pinned // "(none pinned)") | clean) + "`\n  - current: `" + (.current | clean) + "`"' sync-report.json 2>/dev/null || echo "")
+            # Spec names come from file names and manifest keys; cleaned the same way.
+            ABSENT_SPECS=$(jq -r 'def clean: gsub("\\r|\\n|`"; " "); (.absentSpecs // []) | map("`" + clean + "`") | join(", ")' sync-report.json 2>/dev/null || echo "")
 
             echo "### ⚠️ Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
             echo "Nothing was committed, tagged or published. Each daily run stops here again until this is resolved." >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
+            if [[ -n "$ABSENT_SPECS" ]]; then printf '%s\n\n' "Specs with entries in scripts/api-surface.yaml and no file under specs/fixed: $ABSENT_SPECS. All their operations are listed as missing below. For those, do not edit the entries: restore the spec, or remove the API (a major-version decision); see \"The api-surface manifest\" in CLAUDE.md." >> $GITHUB_STEP_SUMMARY || true; fi
             if [[ -n "$MISSING_OPS" ]]; then
               echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
               echo "" >> $GITHUB_STEP_SUMMARY || true
