@@ -105,6 +105,70 @@ function bodyCompleteAfter(ms: number, status = 200): typeof fetch {
 }
 
 /**
+ * A fetch whose response starts at once and whose body, `{"ok":true}`, takes
+ * no notice of its signal except to finish when it aborts: a custom fetch
+ * that completes the read it had started.
+ */
+function bodyFinishesOnAbort(): typeof fetch {
+  return async (_input, init) => {
+    const signal = init?.signal;
+    const text = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(text.encode('{"ok":'));
+        signal?.addEventListener(
+          'abort',
+          () => {
+            controller.enqueue(text.encode('true}'));
+            controller.close();
+          },
+          { once: true }
+        );
+      },
+    });
+    return new Response(body, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+}
+
+/**
+ * A fetch whose first response is a 200 whose body breaks off halfway with
+ * the TypeError undici gives for a dropped connection, and whose later
+ * responses are whole.
+ */
+function bodyBreaksOffOnce(): typeof fetch {
+  let calls = 0;
+  return async () => {
+    calls++;
+    if (calls > 1) {
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const text = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(text.encode('{"ok":'));
+        setTimeout(() => controller.error(new TypeError('terminated')), 5);
+      },
+    });
+    return new Response(body, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+}
+
+/** `fetchFn`, counting the calls made to it. */
+function counted(fetchFn: typeof fetch): { fetch: typeof fetch; callCount: () => number } {
+  let calls = 0;
+  return {
+    fetch: (input, init) => {
+      calls++;
+      return fetchFn(input, init);
+    },
+    callCount: () => calls,
+  };
+}
+
+/**
  * A path whose HATEOAS parent belongs to a spec with no server in some
  * environment, with that spec and environment. Looked up, not written down:
  * which specs those are is John Deere's to change.
@@ -214,7 +278,9 @@ describe('the timeout', () => {
     });
   }
 
-  it('covers the wait for a response, not the reading of its body', {
+  // Until the timeout covered the body, this read ran to its end, and one
+  // that never ended hung the call.
+  it('covers the reading of the body, not only the wait for a response', {
     timeout: 2000,
   }, async () => {
     const client = new DeereClient({
@@ -224,7 +290,196 @@ describe('the timeout', () => {
       maxRetries: 0,
     });
 
+    await assert.rejects(client.get('organizations', '/organizations'), (error: unknown) => {
+      assertIsTimeout(error);
+      return true;
+    });
+  });
+});
+
+describe('a response body that outlasts the timeout', () => {
+  it('is retried for a GET, then reported as a timeout', { timeout: 2000 }, async (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    const { fetch, callCount } = counted(bodyCompleteAfter(Number.POSITIVE_INFINITY));
+    const client = new DeereClient({ accessToken: 'test', fetch, timeout: 30, maxRetries: 1 });
+
+    await assert.rejects(client.get('organizations', '/organizations'), (error: unknown) => {
+      assertIsTimeout(error);
+      return true;
+    });
+    assert.strictEqual(callCount(), 2);
+  });
+
+  // The 200 says the server has carried the POST out. Sending it again would
+  // do the work twice, so it is not, whatever retryNonIdempotent says.
+  it('is not sent again for a POST, on default settings', { timeout: 2000 }, async (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    const { fetch, callCount } = counted(bodyCompleteAfter(Number.POSITIVE_INFINITY));
+    const client = new DeereClient({ accessToken: 'test', fetch, timeout: 30, maxRetries: 2 });
+
+    await assert.rejects(
+      client.post('organizations', '/organizations', { name: 'x' }),
+      (error: unknown) => {
+        assertIsTimeout(error);
+        return true;
+      }
+    );
+    assert.strictEqual(callCount(), 1);
+  });
+
+  // The status is a fact from the server; the body that would explain it is
+  // what the timeout cut short. So the caller gets the HTTP error, without it.
+  for (const status of [404, 500]) {
+    it(`of a ${status} gives the ${status}, not a timeout`, { timeout: 2000 }, async () => {
+      const { fetch, callCount } = counted(bodyCompleteAfter(Number.POSITIVE_INFINITY, status));
+      const client = new DeereClient({ accessToken: 'test', fetch, timeout: 30, maxRetries: 0 });
+
+      await assert.rejects(client.get('organizations', '/organizations'), (error: unknown) => {
+        assert(error instanceof DeereError, `expected a DeereError, got ${String(error)}`);
+        assert.strictEqual(error.status, status);
+        assert.strictEqual(error.body, undefined);
+        return true;
+      });
+      assert.strictEqual(callCount(), 1);
+    });
+  }
+
+  it('on page 2 of paginate ends in a timeout after page 1', { timeout: 2000 }, async () => {
+    let calls = 0;
+    const stalled = bodyCompleteAfter(Number.POSITIVE_INFINITY);
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch: async (input, init) => {
+        calls++;
+        if (calls > 1) return stalled(input, init);
+        const next = { rel: 'nextPage', uri: `${BASE}/organizations?page=2` };
+        return new Response(JSON.stringify({ values: [{ id: 1 }], links: [next] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      },
+      timeout: 30,
+      maxRetries: 0,
+    });
+
+    const seen: unknown[] = [];
+    const reading = (async () => {
+      for await (const page of client.paginate('organizations', '/organizations')) {
+        seen.push(...page);
+      }
+    })();
+
+    await assert.rejects(reading, (error: unknown) => {
+      assertIsTimeout(error);
+      return true;
+    });
+    assert.deepStrictEqual(seen, [{ id: 1 }]);
+    assert.strictEqual(calls, 2);
+  });
+
+  it('of a HATEOAS parent ends in a HateoasError caused by the timeout', {
+    timeout: 2000,
+  }, async () => {
+    const { fetch, callCount } = counted(bodyCompleteAfter(Number.POSITIVE_INFINITY));
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch,
+      hateoas: true,
+      timeout: 30,
+      maxRetries: 0,
+    });
+
+    await assert.rejects(client.get('fields', '/organizations/123/fields'), (error: unknown) => {
+      assert(error instanceof HateoasError, `expected HateoasError, got ${String(error)}`);
+      assertIsTimeout(error.cause);
+      return true;
+    });
+    assert.strictEqual(callCount(), 1);
+  });
+
+  // A custom fetch whose body takes no notice of the abort, and completes.
+  // The data arrived, so it is returned. The body finishes on the abort
+  // itself, so nothing here depends on timing.
+  it('is returned when the body finishes after all', { timeout: 2000 }, async () => {
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch: bodyFinishesOnAbort(),
+      timeout: 30,
+      maxRetries: 0,
+    });
+
     assert.deepStrictEqual(await client.get('organizations', '/organizations'), { ok: true });
+  });
+
+  it('is not limited when the timeout is Infinity', { timeout: 2000 }, async () => {
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch: bodyCompleteAfter(60),
+      timeout: Number.POSITIVE_INFINITY,
+      maxRetries: 0,
+    });
+
+    assert.deepStrictEqual(await client.get('organizations', '/organizations'), { ok: true });
+  });
+
+  it('is read in full when it finishes within the timeout', { timeout: 2000 }, async () => {
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch: bodyCompleteAfter(40),
+      timeout: 1000,
+      maxRetries: 0,
+    });
+
+    assert.deepStrictEqual(await client.get('organizations', '/organizations'), { ok: true });
+  });
+
+  it('leaves no listener and no timer behind', { timeout: 2000 }, async (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    const timers = () => process.getActiveResourcesInfo().filter((r) => r === 'Timeout').length;
+    const before = timers();
+    const client = new DeereClient({
+      accessToken: 'test',
+      fetch: bodyCompleteAfter(Number.POSITIVE_INFINITY),
+      timeout: 30,
+      maxRetries: 1,
+    });
+    const caller = new AbortController();
+
+    await assert.rejects(
+      client.get('organizations', '/organizations', { signal: caller.signal }),
+      (error: unknown) => {
+        assertIsTimeout(error);
+        return true;
+      }
+    );
+    assert.deepStrictEqual(getEventListeners(caller.signal, 'abort'), []);
+    assert.strictEqual(timers(), before);
+  });
+});
+
+// A dropped connection while a successful response's body is read. Before
+// this was looked at, it was retried as any network error is, which sends
+// a POST the server has already carried out a second time.
+describe('a successful response whose body breaks off', () => {
+  it('is not sent again for a POST, on default settings', { timeout: 2000 }, async (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    const { fetch, callCount } = counted(bodyBreaksOffOnce());
+    const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
+
+    await assert.rejects(
+      client.post('organizations', '/organizations', { name: 'x' }),
+      (error: unknown) => error instanceof TypeError && error.message === 'terminated'
+    );
+    assert.strictEqual(callCount(), 1);
+  });
+
+  it('is sent again for a GET', { timeout: 2000 }, async (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    const { fetch, callCount } = counted(bodyBreaksOffOnce());
+    const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 3 });
+
+    assert.deepStrictEqual(await client.get('organizations', '/organizations'), { ok: true });
+    assert.strictEqual(callCount(), 2);
   });
 });
 
@@ -303,8 +558,8 @@ describe('a request the caller aborts', () => {
     assert.strictEqual(calls, 1);
   });
 
-  // The timeout is over once a response starts, but the caller's signal has
-  // to stay in force until the body is read, an error body included.
+  // The caller's signal, like the timeout, stays in force until the body is
+  // read, an error body included.
   for (const [status, what] of [
     [200, 'a response'],
     [500, 'an error response'],

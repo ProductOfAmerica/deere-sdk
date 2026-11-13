@@ -508,6 +508,25 @@ describe('retry behavior', () => {
           }),
         (e) => e instanceof DeereError && e.statusText === 'Timeout',
       ],
+      [
+        'a success whose body stalls past the timeout',
+        async (init) => {
+          const signal = init?.signal;
+          const body = new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new TextEncoder().encode('{"done":'));
+              signal?.addEventListener('abort', () => controller.error(signal.reason), {
+                once: true,
+              });
+            },
+          });
+          return new Response(body, {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        },
+        (e) => e instanceof DeereError && e.statusText === 'Timeout',
+      ],
     ];
 
     for (const method of ['POST', 'PATCH'] as const) {
