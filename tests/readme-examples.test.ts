@@ -298,9 +298,15 @@ describe('the README checker catches what it exists to catch', () => {
       code: 'const org: { id?: string } = {};\nawait deere.fields.listAll(org.id);',
       codes: [2345],
     },
-    'a request body the schema rejects': {
-      code: "await deere.equipment.create('org-id', { name: 'Tractor 1', noSuchField: true });",
-      codes: [2353],
+    // Proves a request body is checked against a generated type and is not
+    // `any`. `null`, because it is refused by every body type with the same
+    // error. An unknown property is only an error while the schema is closed,
+    // and a number gets a different error code depending on whether the schema
+    // has required properties. Both are John Deere's to change, and a control
+    // relying on either would stop the sync the day they did.
+    'a request body of the wrong type': {
+      code: "await deere.equipment.create('org-id', null);",
+      codes: [2345],
     },
     'a brace that is never closed, which the compiler reports past the end of the block': {
       code: 'for (const x of [1, 2]) {\n  console.log(x);',
