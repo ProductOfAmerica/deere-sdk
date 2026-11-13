@@ -15,7 +15,7 @@ pnpm typecheck            # src only (no emit)
 pnpm typecheck:test       # src + scripts + tests (CI and the daily sync run it too)
 pnpm lint                 # biome check
 pnpm lint:fix             # biome check --write (run before committing)
-pnpm test                 # node --test tests/*.test.ts
+pnpm test                 # node --test tests/*.test.ts (CI, the daily sync and release.yml run it)
 pnpm test:coverage        # same + experimental coverage
 pnpm test:fuzz            # fuzz.test.ts alone (pnpm test already includes it)
 pnpm test:routing-guard   # hermetic routing guard only, no network
@@ -85,6 +85,20 @@ different base, when a listed path disappears, or when a new path resolves anywh
 New paths on the default base pass, and the sync's next step (`pnpm generate-routing-snapshot`) appends them, so
 an additive run completes on its own. Anything the guard fails on needs a human: re-measure, record any override
 with its evidence in `scripts/routing-overrides.yaml`, run `pnpm generate-routing-snapshot`, and review the diff.
+
+After the snapshot refresh, and still before anything is committed, the sync runs the whole suite (`pnpm test`) on
+the regenerated tree. `release.yml` runs `typecheck:test` and the suite again on the tagged commit before it builds,
+because the sync rebases before pushing and a hand-pushed tag never went through the sync. So the sync commits only a
+tree whose suite passed, and nothing is published with a red suite. What can still happen: main moves while the sync
+runs, so the rebased commit is not the one that was tested. If that commit fails the suite, `release.yml` refuses it,
+which leaves a tag and a CHANGELOG entry for a version that was never published; fix the cause and cut the next
+version.
+
+The other side of running the suite there: a test that writes down a fact about John Deere's specs stops the sync on
+the day the fact changes. Pin such a fact only when a person should look before it ships (the host an environment
+reaches, a new environment name, a published method name). Do not pin one that changes no behaviour: the per-spec
+environment counts that used to be asserted were removed for that reason. There is no retry: a sync that fails at
+"Run tests" is re-run once by hand, and a second failure is real.
 
 Two other daily workflows watch Deere's side, separate from CI: `api-health.yml` (05:00 UTC, same validator as
 `fetch-specs`, drives the health badge) and `probe-routes.yml` (05:30 UTC). The probe is report-only for outages
@@ -324,7 +338,8 @@ npm version patch         # or minor, major; auto-commits and creates the tag
 git push --follow-tags    # pushes the commit and the tag together
 ```
 
-CI sees the tag → creates GitHub Release → publishes to npm.
+CI sees the tag → type-checks and tests that commit → creates GitHub Release → publishes to npm. A test failure
+stops before the release is created; fix it with a new commit and a new tag.
 
 npm publishing uses Trusted Publishing/OIDC via `release.yml`; do not create or restore an `NPM_TOKEN` for CI publishing.
 

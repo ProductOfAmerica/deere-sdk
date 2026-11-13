@@ -938,7 +938,7 @@ npm version patch   # or: minor, major
 git push --follow-tags
 ```
 
-CI sees the tag → creates GitHub Release → publishes to npm.
+CI sees the tag → type-checks and tests that commit → creates GitHub Release → publishes to npm. If a test fails, no release is created and nothing is published.
 
 npm publishing uses Trusted Publishing/OIDC via `release.yml`; do not create or restore an `NPM_TOKEN` for CI publishing.
 
