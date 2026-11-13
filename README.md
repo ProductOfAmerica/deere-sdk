@@ -762,7 +762,7 @@ With `retryNonIdempotent: false`, a `POST` or `PATCH` is retried only after a `4
 
 ### Timeouts and Cancellation
 
-Every generated method takes `options` as its last argument, and so do `get`, `post`, `put`, `patch`, `delete`, `paginate`, `getAll`, `fetchUrl` and `followLink` on `DeereClient`. Two of the options end a call early:
+Every generated method takes `options` as its last argument, and so does every method of the `deere.safe` facades, as do `get`, `post`, `put`, `patch`, `delete`, `paginate`, `getAll`, `fetchUrl` and `followLink` on `DeereClient`. Two of the options end a call early:
 
 ```typescript
 import {Deere, DeereError} from 'deere-sdk';

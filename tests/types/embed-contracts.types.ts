@@ -47,6 +47,18 @@ async function _typeCheck() {
     void _check;
   }
 
+  // Each safe method takes the raw method's `options` last.
+  const controller = new AbortController();
+  const _withOptions: FieldOperationWithMeasurements[] =
+    await deere.safe.fieldOperations.listAllWithMeasurements(
+      'org',
+      'field',
+      {},
+      { signal: controller.signal, timeout: 5000, headers: { 'X-Trace': 'abc' } }
+    );
+  await deere.safe.fieldOperations.listWithMeasurements('org', 'field', {}, { timeout: 5000 });
+  await deere.safe.fieldOperations.getWithMeasurements('op', {}, { signal: controller.signal });
+
   // --- Raw path: measurementTypes is optional. Caller MUST narrow. ---
   const raw = await deere.fieldOperations.listAll('org', 'field');
 
@@ -65,6 +77,7 @@ async function _typeCheck() {
   void _appTotals;
   void _rawFails;
   void _rawOk;
+  void _withOptions;
 }
 
 void _typeCheck;

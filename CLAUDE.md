@@ -115,7 +115,8 @@ No generator rewrites these, so their comments survive. Each file's header is th
   slug whose documents declare mixed server families will merge.
 - `embed-contracts.yaml`: response fields Deere returns but its spec omits (e.g. `?embed=measurementTypes`), patched
   into `specs/fixed` before type generation. Each entry needs a hand-written wrapper in `src/safe/` that forces the
-  query param, plus a field in `SafeFacades` (`src/safe/index.ts`). Consumers reach it through
+  query param and takes `options?: RequestOptions` last, forwarding it to the raw method (without it a caller cannot
+  pass a signal, timeout or headers), plus a field in `SafeFacades` (`src/safe/index.ts`). Consumers reach it through
   `deere.safe.<resource>`; the generator needs no change.
 
 ## Architecture
