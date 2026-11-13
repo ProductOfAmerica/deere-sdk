@@ -359,6 +359,144 @@ describe('HATEOAS mode', () => {
       assert.equal(calls.length, 2); // only the actual request
     });
 
+    // A link is text from a response body. These cover what happens when it
+    // names somewhere the access token and the request body must not go.
+    describe('a discovered link that is not an https deere.com URL', () => {
+      const PARENT = `${BASE}/organizations/123`;
+
+      function clientWithFieldsLink(uri: string) {
+        const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
+        responses.set(PARENT, { id: '123', links: [{ rel: 'fields', uri }] });
+        const client = new DeereClient({
+          accessToken: 'test',
+          fetch: mockFetch,
+          hateoas: true,
+          maxRetries: 0,
+        });
+        return { client, calls };
+      }
+
+      function assertOnlyTheParentWasFetched(calls: Array<{ url: string; init?: RequestInit }>) {
+        assert.equal(calls.length, 1, `expected the parent fetch only, saw ${calls.length} calls`);
+        assert.equal(calls[0].url, PARENT);
+        const headers = calls[0].init?.headers as Record<string, string> | undefined;
+        assert.equal(headers?.Authorization, 'Bearer test');
+      }
+
+      function isRefusal(host: string) {
+        return (err: HateoasError) => {
+          assert.equal(err.name, 'HateoasError');
+          // Capture the quoted host instead of substring-matching it (CodeQL
+          // js/incomplete-url-substring-sanitization false positive otherwise).
+          const quoted = err.message.match(/'([^']+)'/);
+          assert.ok(quoted, `message should quote the refused host: ${err.message}`);
+          assert.equal(quoted[1], host);
+          return true;
+        };
+      }
+
+      it('is refused on a GET, and nothing is sent to the other host', async () => {
+        const { client, calls } = clientWithFieldsLink('https://untrusted.example/collect');
+
+        await assert.rejects(
+          () => client.get('fields', '/organizations/123/fields'),
+          isRefusal('untrusted.example')
+        );
+        assertOnlyTheParentWasFetched(calls);
+      });
+
+      it('is refused on a POST, so the body is not sent there either', async () => {
+        const { client, calls } = clientWithFieldsLink('https://untrusted.example/collect');
+
+        await assert.rejects(
+          () => client.post('fields', '/organizations/123/fields', { name: 'North 40' }),
+          isRefusal('untrusted.example')
+        );
+        assertOnlyTheParentWasFetched(calls);
+      });
+
+      it('is refused on the first page of getAll', async () => {
+        const { client, calls } = clientWithFieldsLink('https://untrusted.example/collect');
+
+        await assert.rejects(
+          () => client.getAll('fields', '/organizations/123/fields'),
+          isRefusal('untrusted.example')
+        );
+        assertOnlyTheParentWasFetched(calls);
+      });
+
+      it('is refused when it downgrades a deere.com host to http', async () => {
+        const { client, calls } = clientWithFieldsLink(
+          'http://sandboxapi.deere.com/platform/organizations/123/fields'
+        );
+
+        await assert.rejects(
+          () => client.get('fields', '/organizations/123/fields'),
+          isRefusal('sandboxapi.deere.com')
+        );
+        assertOnlyTheParentWasFetched(calls);
+      });
+
+      it('is refused at once when it is not an absolute URL', { timeout: 2000 }, async () => {
+        // This fetch rejects a relative URL with a TypeError, as the real one
+        // does. The client treats a TypeError as a network failure and retries
+        // it with backoff, so the link has to be rejected before it gets there.
+        const calls: string[] = [];
+        const fetchFn = async (input: string | URL | Request) => {
+          const url = typeof input === 'string' ? input : input.toString();
+          calls.push(url);
+          if (!/^https?:\/\//.test(url)) throw new TypeError('Invalid URL');
+          return new Response(
+            JSON.stringify({ links: [{ rel: 'fields', uri: '/organizations/123/fields' }] }),
+            { status: 200, headers: { 'content-type': 'application/json' } }
+          );
+        };
+        const client = new DeereClient({
+          accessToken: 'test',
+          fetch: fetchFn as unknown as typeof fetch,
+          hateoas: true,
+          maxRetries: 3,
+        });
+
+        await assert.rejects(
+          () => client.get('fields', '/organizations/123/fields'),
+          (err: HateoasError) => {
+            assert.equal(err.name, 'HateoasError');
+            return true;
+          }
+        );
+        assert.deepEqual(calls, [PARENT]);
+      });
+    });
+
+    // What `parentSpec` in the generated map is for. The equipment spec lives
+    // on its own host, but the organization its paths hang under is declared
+    // by the organizations spec, on the platform host. Fetched through the
+    // child's spec, the parent request would go to a host that does not serve
+    // organizations. Every other test here uses specs that share one host, so
+    // none of them can tell the two apart.
+    it('fetches a parent declared by another spec from that spec host, not the child one', async () => {
+      const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
+      const parent = 'https://api.deere.com/platform/organizations/123';
+      const discovered = 'https://equipmentapi.deere.com/isg/organizations/123/equipment';
+      responses.set(parent, { id: '123', links: [{ rel: 'equipment', uri: discovered }] });
+      responses.set(discovered, { values: [] });
+
+      const client = new DeereClient({
+        accessToken: 'test',
+        fetch: mockFetch,
+        hateoas: true,
+        environment: 'api',
+        maxRetries: 0,
+      });
+
+      await client.get('equipment', '/organizations/123/equipment');
+      assert.deepEqual(
+        calls.map((call) => call.url),
+        [parent, discovered]
+      );
+    });
+
     it('fetchUrl bypasses HATEOAS (e.g. from followLink / nextPage)', async () => {
       const { fetch: mockFetch, calls, responses } = mockFetchWithSpy();
       const fullUrl = `${BASE}/organizations/123/fields`;
