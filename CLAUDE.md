@@ -209,6 +209,13 @@ way the request will. `tests/generated-structure.test.ts` pins how every generat
 `${...}` in its `path` is either an `encodePathParam` call on the method's own parameter or the query-string suffix,
 and that `path` is the one thing the client is handed as the path.
 
+The same test pins what follows the path, per client method, because the two kinds differ: `get`, `delete` and
+`getAll` take the options next, while `post`, `put` and `patch` take a body first. A write whose spec declares no
+request body is therefore generated with `undefined` in the body slot (`clientCallArguments` in
+`scripts/lib/sdk-gen-utils.ts`). Leaving the slot out, as the generator once did, put the caller's options there:
+they were sent as the request body and none of them was applied. A read that declares a request body stops the
+generator, since `DeereClient` has no parameter to carry one.
+
 ### No silent environment fallbacks
 
 `environment-resolver.ts` refuses to guess. If a static-server spec doesn't declare a mapping for the requested

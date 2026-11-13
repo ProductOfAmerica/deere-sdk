@@ -32,6 +32,7 @@ import {
   buildMethodJsDoc,
   buildMethodParams,
   buildPathTemplate,
+  clientCallArguments,
   collectionItemType,
   computeReturnType,
   deprecatedJsDocLines,
@@ -136,6 +137,8 @@ interface ParsedOperation {
   deprecationNote?: string;
   /** The method's parameters and return type, for the manifest to pin. */
   signature: string;
+  /** What the method hands the client, in order. See clientCallArguments. */
+  callArguments: string[];
 }
 
 interface PathParam {
@@ -431,6 +434,13 @@ function parseSpec(specPath: string): GeneratedApi | null {
         deprecated: operation.deprecated === true,
         deprecationNote: operation[DEPRECATED_REPLACEMENT_KEY],
         signature: methodSignature(shape),
+        // Worked out here, not when the method is written: it refuses an
+        // operation it has no call for, and that has to stop the run before
+        // the manifest or any class is written.
+        callArguments: clientCallArguments(
+          shape,
+          `${specName}.yaml ${method.toUpperCase()} ${path}`
+        ),
       });
     }
   }
@@ -476,16 +486,14 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     lines.push(`    const path = \`${pathTemplate}\`;`);
   }
 
-  const bodyArg = op.hasRequestBody ? ', data' : '';
-
   // v2.0: every generated method passes `this.spec` as the first arg so
-  // DeereClient can resolve the request URL via API_SERVERS[spec].
+  // DeereClient can resolve the request URL via API_SERVERS[spec]. What comes
+  // after the path differs by client method; see clientCallArguments.
+  const callArguments = op.callArguments.join(', ');
   if (returnType === 'void') {
-    lines.push(`    await this.client.${op.method}(this.spec, path${bodyArg}, options);`);
+    lines.push(`    await this.client.${op.method}(${callArguments});`);
   } else {
-    lines.push(
-      `    return this.client.${op.method}<${returnType}>(this.spec, path${bodyArg}, options);`
-    );
+    lines.push(`    return this.client.${op.method}<${returnType}>(${callArguments});`);
   }
 
   const jsdoc = buildMethodJsDoc(op);

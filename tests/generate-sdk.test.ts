@@ -4,6 +4,7 @@ import {
   buildMethodJsDoc,
   buildMethodParams,
   buildPathTemplate,
+  clientCallArguments,
   collectionItemType,
   computeReturnType,
   DEFAULT_DEPRECATION_NOTE,
@@ -548,5 +549,85 @@ describe('buildMethodParams and methodSignature', () => {
     assert.ok(!/[\r\n]/.test(signature), JSON.stringify(signature));
     assert.ok(signature.includes(schemaTypeRef("Field'] | never\n//")));
     assert.ok(signature.includes("'a\\' | \\'b'"), signature);
+  });
+});
+
+// DeereClient's post, put and patch take a body before the options, and its
+// get and delete do not. The generator once left the body out of a write that
+// declares none, and the caller's options were sent in its place.
+describe('clientCallArguments', () => {
+  type Method = ParamListOp['method'];
+  const operation = (method: Method, hasRequestBody: boolean): ParamListOp => ({
+    method,
+    isCollection: false,
+    pathParams: [{ name: 'id' }],
+    queryParams: [],
+    hasRequestBody,
+    requestBodySchemaRef: hasRequestBody ? 'Thing' : undefined,
+  });
+  const callFor = (method: Method, hasRequestBody: boolean) =>
+    clientCallArguments(operation(method, hasRequestBody), `demo.yaml ${method} /things/{id}`);
+
+  const READS: Method[] = ['get', 'delete'];
+  const WRITES: Method[] = ['post', 'put', 'patch'];
+
+  it('gives a read the options straight after the path', () => {
+    for (const method of READS) {
+      assert.deepStrictEqual(callFor(method, false), ['this.spec', 'path', 'options'], method);
+    }
+  });
+
+  it('gives a write its body, then the options', () => {
+    for (const method of WRITES) {
+      assert.deepStrictEqual(
+        callFor(method, true),
+        ['this.spec', 'path', 'data', 'options'],
+        method
+      );
+    }
+  });
+
+  it('fills the body slot of a write that has no body, so the options stay in theirs', () => {
+    for (const method of WRITES) {
+      assert.deepStrictEqual(
+        callFor(method, false),
+        ['this.spec', 'path', 'undefined', 'options'],
+        method
+      );
+    }
+  });
+
+  it('refuses a read that declares a request body, naming the operation', () => {
+    for (const method of READS) {
+      assert.throws(
+        () => callFor(method, true),
+        (error: Error) => {
+          assert.ok(error.message.startsWith(`demo.yaml ${method} /things/{id}: `), error.message);
+          assert.match(error.message, /declares a request body/);
+          return true;
+        }
+      );
+    }
+  });
+
+  // The call and the parameter list are built apart, so this ties them: the
+  // call names nothing but what the method declares.
+  it('passes only what the method declares, with the options last', () => {
+    for (const method of [...READS, ...WRITES]) {
+      for (const hasRequestBody of [false, true]) {
+        if (hasRequestBody && READS.includes(method)) continue;
+        const declared = buildMethodParams(operation(method, hasRequestBody)).map(
+          (parameter) => parameter.split(/[?:]/)[0]
+        );
+        const [spec, path, ...rest] = callFor(method, hasRequestBody);
+        assert.deepStrictEqual([spec, path], ['this.spec', 'path']);
+        assert.strictEqual(rest.at(-1), 'options');
+        for (const name of rest.filter((argument) => argument !== 'undefined')) {
+          assert.ok(declared.includes(name), `${method}: "${name}" is not a parameter`);
+        }
+        // And a declared body is never left out of the call.
+        assert.strictEqual(rest.includes('data'), declared.includes('data'), method);
+      }
+    }
   });
 });

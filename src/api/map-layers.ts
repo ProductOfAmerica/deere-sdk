@@ -41,7 +41,7 @@ export class MapLayersApi {
    */
   async updateFileResources(id: string, options?: RequestOptions): Promise<void> {
     const path = `/fileResources/${encodePathParam('id', id)}`;
-    await this.client.put(this.spec, path, options);
+    await this.client.put(this.spec, path, undefined, options);
   }
 
   /**

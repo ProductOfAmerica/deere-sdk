@@ -81,6 +81,13 @@ const CLIENT_CALL = /^this\.client\.(get|post|put|patch|delete|getAll)$/;
 const OTHER_CALLS = new Set(['query.set', 'query.toString', 'String']);
 
 /**
+ * The client methods that take a request body between the path and the
+ * options: `post(spec, path, body, options)`. The others take the options
+ * straight after the path. See checkRequest for why the difference is pinned.
+ */
+const CLIENT_METHODS_WITH_A_BODY = new Set(['post', 'put', 'patch']);
+
+/**
  * The local variables a generated body declares, each with the one shape it
  * may have. Callees are matched by their text, so this list is what makes that
  * sound: a body free to declare its own `String` or `query` could make an
@@ -100,11 +107,16 @@ const LOCALS = new Map<string, (initializer: ts.Expression) => boolean>([
   ],
 ]);
 
-/** Names a parameter must not take, for the same reason: a body calls or declares them. */
+/**
+ * Names a parameter must not take, for the same reason: a body calls or
+ * declares them, or, for `undefined`, passes it by that name. A parameter is
+ * the one thing that can rebind `undefined` inside a generated body.
+ */
 const NAMES_A_BODY_RELIES_ON = new Set([
   'String',
   'URLSearchParams',
   'encodePathParam',
+  'undefined',
   ...LOCALS.keys(),
 ]);
 
@@ -178,11 +190,18 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
     ts.isCallExpression(node) && CLIENT_CALL.test(textOf(node.expression));
 
   /**
-   * The request a body ends with: `this.client.<verb>(this.spec, path, ...)`
-   * followed by `data, options` or just `options`, all parameters of the
-   * method. Every position is pinned. The rule about what a path template
-   * holds means nothing if a method can pass one of its own parameters as the
-   * path and skip the template, and the encoder, altogether.
+   * The request a body ends with: `this.client.<verb>(this.spec, path, ...)`.
+   * Every position is pinned. The rule about what a path template holds means
+   * nothing if a method can pass one of its own parameters as the path and
+   * skip the template, and the encoder, altogether.
+   *
+   * What follows the path depends on the client method. get, delete and
+   * getAll take the options next. post, put and patch take a body first, so a
+   * method with no body to send has to say so, with `undefined`. The generator
+   * used to leave that argument out, which put the caller's options where the
+   * body goes: they were sent to John Deere as the request body and none of
+   * them was applied. A method that does take `data` must pass it, so the
+   * same pin catches a body that was dropped.
    */
   const checkRequest = (call: ts.CallExpression): void => {
     const callee = textOf(call.expression);
@@ -194,9 +213,11 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
       path !== undefined && ts.isIdentifier(path) && path.text === 'path' && declared.has('path');
     if (!isTheDeclaredPath) report(path ?? call, `path argument to ${callee}`);
 
+    const clientMethod = callee.slice(callee.lastIndexOf('.') + 1);
+    const body = parameters.has('data') ? 'data' : 'undefined';
+    const expected = CLIENT_METHODS_WITH_A_BODY.has(clientMethod) ? [body, 'options'] : ['options'];
     const tail = rest.map((argument) => (ts.isIdentifier(argument) ? argument.text : '?'));
-    const isTheTail = tail.join() === 'options' || tail.join() === 'data,options';
-    if (!isTheTail || !tail.every((name) => parameters.has(name))) {
+    if (tail.join() !== expected.join() || !parameters.has('options')) {
       report(call, `arguments after the path to ${callee}`);
     }
   };
@@ -483,6 +504,10 @@ describe('the structure checks catch what an injection would have to produce', (
         const path = \`/things\`;
         await this.client.post(this.spec, path, data, options);
       }
+      async touch(thingId: string, options?: RequestOptions): Promise<void> {
+        const path = \`/things/\${encodePathParam('thingId', thingId)}\`;
+        await this.client.put(this.spec, path, undefined, options);
+      }
     `,
       encoderImport
     );
@@ -686,8 +711,39 @@ describe('the structure checks catch what an injection would have to produce', (
       method(`query.set('a', String(await id)); ${request}`),
       /^get: AwaitExpression /,
     ],
-    // After the path come the body, if the method takes one, and the options:
-    // by those names, in that order, and as the method's own parameters.
+    // After the path: a read is handed the options. A write is handed a body
+    // and then the options, the body being the method's `data`, or `undefined`
+    // for a method that has none. The first control is the defect this pin
+    // was tightened for: the options, in the place a write's body goes.
+    'the options handed to a write where its body goes': [
+      method(`const path = \`/a\`; await this.client.put(this.spec, path, options);`),
+      /^get: arguments after the path to this\.client\.put /,
+    ],
+    'a write that leaves out the body it takes': [
+      method(
+        `const path = \`/a\`; await this.client.post(this.spec, path, undefined, options);`,
+        `data: unknown, ${optionsParameter}`
+      ),
+      /^get: arguments after the path to this\.client\.post /,
+    ],
+    'a body handed to a read': [
+      method(
+        `const path = \`/a\`; return this.client.get(this.spec, path, data, options);`,
+        `data: unknown, ${optionsParameter}`
+      ),
+      /^get: arguments after the path to this\.client\.get /,
+    ],
+    'an empty body slot handed to a read': [
+      method(
+        `const path = \`/a\`; return this.client.delete(this.spec, path, undefined, options);`
+      ),
+      /^get: arguments after the path to this\.client\.delete /,
+    ],
+    // The one way a generated body could give `undefined` another meaning.
+    'a parameter named undefined': [
+      method(request, `undefined: any, ${optionsParameter}`),
+      /^get: parameter named undefined, which a body relies on$/,
+    ],
     'a global handed to the client after the path': [
       method(`const path = \`/a\`; return this.client.post(this.spec, path, process, options);`),
       /^get: arguments after the path to this\.client\.post /,

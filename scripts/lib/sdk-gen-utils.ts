@@ -268,6 +268,36 @@ export function methodSignature(op: ParamListOp): string {
 }
 
 /**
+ * The arguments of the client call a generated method ends with, in order.
+ *
+ * DeereClient's get and delete take (spec, path, options). Its post, put and
+ * patch take a body between the path and the options, so a write that has no
+ * body to send passes `undefined` there. The slot used to be left out for such
+ * a method, and the caller's options then landed in the body's place: they
+ * were sent as the request body, and none of them was applied.
+ *
+ * A get or delete that declares a request body has nowhere to put it. That is
+ * refused here, naming the operation, where it used to fail later and less
+ * clearly, when the generated call did not compile. `where` says which
+ * operation, for that message.
+ */
+export function clientCallArguments(op: ParamListOp, where: string): string[] {
+  const takesBody = op.method === 'post' || op.method === 'put' || op.method === 'patch';
+  if (takesBody) {
+    return ['this.spec', 'path', op.hasRequestBody ? 'data' : 'undefined', 'options'];
+  }
+  if (op.hasRequestBody) {
+    throw new Error(
+      `${where}: a ${op.method.toUpperCase()} operation declares a request body, and ` +
+        `DeereClient.${op.method} has no parameter to carry one. If John Deere really ` +
+        `publishes this, the client and the generator both have to learn it before the ` +
+        `method can be emitted.`
+    );
+  }
+  return ['this.spec', 'path', 'options'];
+}
+
+/**
  * Whether a GET addresses a collection (paginated list) rather than one item.
  *
  * A last segment that is a `{param}` is item access. So is a literal last
