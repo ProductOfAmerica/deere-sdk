@@ -221,6 +221,13 @@ Exponential backoff with full jitter; respects `Retry-After` on 429 (capped by `
 client errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError`
 intentionally turns 401/403 into `AuthError` and everything else into `DeereError`.
 
+`retryNonIdempotent` (config, default `true`) decides whether POST and PATCH are retried like the rest. With `false`
+they are retried only on 429: after a 500/502/503/504, a network error or a timeout the request may already have been
+carried out. That a 429 means the request was not handled is how rate limiters behave, not something HTTP promises.
+The rule is an allow-list, `IDEMPOTENT_METHODS`, so a method it does not know (`fetchUrl` passes on whatever the caller
+wrote, compared in upper case) is treated as POST is. The default becomes `false` in 4.0, and a test in
+`tests/retry.test.ts` fails once `package.json` reaches major 4 until the constructor is changed.
+
 Client-side errors (thrown from the resolver before any HTTP) use `CLIENT_ERROR_STATUS = -1` so they can't be confused
 with the timeout error, `status === 0 && statusText === 'Timeout'`.
 

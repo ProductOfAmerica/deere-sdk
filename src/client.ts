@@ -88,6 +88,22 @@ export interface DeereClientConfig {
   /** Maximum number of retry attempts for failed requests. Defaults to 3. Set to 0 to disable retries. */
   maxRetries?: number;
   /**
+   * Whether a POST or PATCH is retried like any other request. Defaults to
+   * `true`; the default becomes `false` in 4.0.
+   *
+   * A POST or PATCH that ends in a server error, a network error or a timeout
+   * may still have been carried out, so sending it again can do the work
+   * twice. With `false`, those two methods are retried only after a 429, on
+   * the understanding that a rate limiter turns a request away before it is
+   * handled (that is how rate limiting works in practice, not something HTTP
+   * promises). GET, PUT and DELETE are retried either way: HTTP defines
+   * repeating them as having the same effect.
+   *
+   * With `false`, a method passed to `fetchUrl` that RFC 9110 does not define
+   * as idempotent is treated as POST and PATCH are.
+   */
+  retryNonIdempotent?: boolean;
+  /**
    * Enable HATEOAS link traversal. When true, the client fetches parent resources
    * and follows HAL links instead of constructing URLs directly.
    * Required for John Deere production API certification.
@@ -204,6 +220,15 @@ function isAuthorizationHeader(name: string): boolean {
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
 /**
+ * The methods HTTP defines as idempotent (RFC 9110, section 9.2.2): sending
+ * one twice has the effect of sending it once. Whether any other method is
+ * sent again after a failure is up to the `retryNonIdempotent` option. That
+ * is POST and PATCH among the five the SDK uses, and it is also any method
+ * this list does not know, since fetchUrl takes whatever the caller writes.
+ */
+const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE', 'PUT', 'DELETE']);
+
+/**
  * The longest delay a timer can be set for. Asked for a longer one, `Infinity`
  * included, Node sets it for 1 ms, which would time out every attempt at once.
  */
@@ -262,6 +287,7 @@ export class DeereClient {
   private readonly defaultHeaders: Record<string, string>;
   private readonly timeout: number;
   private readonly retryConfig: RetryConfig;
+  private readonly retryNonIdempotent: boolean;
   private readonly hateoas: boolean;
   private readonly hateoasDebug: boolean;
   private readonly linkCache = new LinkCache();
@@ -288,6 +314,9 @@ export class DeereClient {
       baseDelay: 1000,
       maxDelay: 30000,
     };
+    // 4.0 makes this default false. tests/retry.test.ts fails at that major
+    // until it is changed here.
+    this.retryNonIdempotent = config.retryNonIdempotent ?? true;
   }
 
   /**
@@ -475,9 +504,15 @@ export class DeereClient {
     const headers = this.buildHeaders(new URL(url), options?.headers);
     const timeout = options?.timeout ?? this.timeout;
     const callerSignal = options?.signal;
+    // Whether this request may be sent again after a failure that could have
+    // left it carried out: a server error, a dropped connection, a timeout.
+    // The method is compared in upper case because fetchUrl passes it on as
+    // the caller wrote it.
+    const repeatable = this.retryNonIdempotent || IDEMPOTENT_METHODS.has(method.toUpperCase());
 
     for (let attempt = 0; ; attempt++) {
       const mayRetry = attempt < this.retryConfig.maxRetries;
+      const mayRepeat = mayRetry && repeatable;
 
       // A listener is never called for a signal that has already aborted, so
       // that case is looked for here, ahead of every attempt.
@@ -534,7 +569,12 @@ export class DeereClient {
           return (await response.text()) as unknown as T;
         }
 
-        if (!mayRetry || !this.isRetryable(response.status)) {
+        // Any request may be sent again after a 429, on the understanding that
+        // a rate limiter turns a request away before it is handled. The other
+        // retryable statuses are server errors, where no such thing is known.
+        const retryIt =
+          response.status === 429 ? mayRetry : mayRepeat && this.isRetryable(response.status);
+        if (!retryIt) {
           // Always throws. Awaited here so that reading the error body is
           // still inside the try, where the caller can cancel it.
           return await this.handleError(response);
@@ -559,8 +599,8 @@ export class DeereClient {
         if (error instanceof DeereError) throw error;
 
         if (timedOut) {
-          if (!mayRetry) throw new DeereError('Request timeout', 0, 'Timeout');
-        } else if (!mayRetry || !this.isNetworkError(error)) {
+          if (!mayRepeat) throw new DeereError('Request timeout', 0, 'Timeout');
+        } else if (!mayRepeat || !this.isNetworkError(error)) {
           throw error;
         }
         retryDelay = this.calculateRetryDelay(attempt);
