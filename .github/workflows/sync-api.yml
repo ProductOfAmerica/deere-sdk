@@ -154,6 +154,20 @@ jobs:
       - name: Refresh routing snapshot
         run: pnpm generate-routing-snapshot
 
+      # The whole suite, on the regenerated tree, before anything is committed.
+      # The steps above prove the tree builds and that no route moved on the
+      # production host. This covers what else the tests pin: which host each
+      # environment of a fixed-host spec reaches, where a HATEOAS parent is
+      # fetched from, whether the README examples still compile against the new
+      # types. It runs after the snapshot refresh so the routing tests see the
+      # snapshot that will be committed.
+      # A failure means upstream changed something a test says a person should
+      # look at, or a test flaked. There is deliberately no retry, which would
+      # hide a failure that only shows up sometimes: re-run the workflow once,
+      # and treat a second failure as real.
+      - name: Run tests
+        run: pnpm test
+
       - name: Check for changes
         id: changes
         run: |
@@ -389,4 +403,6 @@ jobs:
             fi
           else
             echo "Sync failed. Check the failed step's log above for details." >> $GITHUB_STEP_SUMMARY || true
+            echo "" >> $GITHUB_STEP_SUMMARY || true
+            echo "If the failed step is \"Run tests\": nothing was committed or released. Re-run this workflow once. If it fails again the failure is real, and the failing test names what changed upstream." >> $GITHUB_STEP_SUMMARY || true
           fi

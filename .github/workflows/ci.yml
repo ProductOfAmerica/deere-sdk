@@ -168,9 +168,10 @@ jobs:
   # passed the build matrix and only failed the next scheduled sync. fetch-specs
   # is skipped because it is the only stage that needs the network. Keep the
   # stages, their order, the Node version and lint:fix in lockstep with
-  # sync-api.yml, or this job stops modelling what the sync will commit. A
-  # separate job, not a 24.x step in build, because the coverage step leaves
-  # untracked files behind.
+  # sync-api.yml, or this job stops modelling what the sync will commit. The
+  # sync's "Run tests" step needs no mirror here: the build job already runs
+  # the suite on the committed tree. A separate job, not a 24.x step in build,
+  # because the coverage step leaves untracked files behind.
   codegen-drift:
     runs-on: ubuntu-latest
     timeout-minutes: 10
