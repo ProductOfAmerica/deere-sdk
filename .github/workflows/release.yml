@@ -36,6 +36,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Every release passes through here, so this is where the commit being
+      # published is tested. The sync tests the tree it generated, but it
+      # rebases before it pushes, and a tag pushed by hand never went through
+      # the sync at all. A failure stops before the GitHub Release is created,
+      # and the publish job below does not run.
+      - name: Type check tests and scripts
+        run: pnpm typecheck:test
+
+      - name: Run tests
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 

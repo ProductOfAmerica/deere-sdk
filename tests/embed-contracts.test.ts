@@ -20,8 +20,9 @@ import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
+import type { RequestOptions } from '../src/client.js';
 import { Deere } from '../src/deere.js';
-import { DeereError } from '../src/errors.js';
+import { DeereError, HateoasError } from '../src/errors.js';
 import type { components } from '../src/types/generated/field-operations-api.js';
 import { mockJsonResponse, mockWithSpy } from './helpers/mock-fetch.js';
 
@@ -519,6 +520,273 @@ describe('SafeProductsApi — forcing facade (2.1.1)', () => {
     assert.strictEqual(calls.length, 1);
     assert.match(calls[0].url, /embed=documents/);
   });
+});
+
+/**
+ * A fetch that answers every request with `bodyFor(url)` as JSON and records
+ * the URL and headers of each. Unlike mockWithSpy, the body can differ by URL.
+ */
+function recordingFetch(bodyFor: (url: string) => unknown): {
+  fetch: typeof fetch;
+  calls: Array<{ url: string; headers: Record<string, string> }>;
+} {
+  const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+  const fetchFn: typeof fetch = async (input, init) => {
+    const url = String(input);
+    calls.push({ url, headers: init?.headers as Record<string, string> });
+    return new Response(JSON.stringify(bodyFor(url)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  return { fetch: fetchFn, calls };
+}
+
+/**
+ * A fetch that never answers. Like the real one it rejects with its signal's
+ * reason when that aborts. The same as the helper in tests/cancellation.test.ts.
+ */
+function hangingFetch(): { fetch: typeof fetch; callCount: () => number } {
+  let calls = 0;
+  const fetchFn: typeof fetch = (_input, init) => {
+    calls++;
+    return new Promise((_resolve, reject) => {
+      const signal = init?.signal;
+      if (!signal) return;
+      if (signal.aborted) reject(signal.reason);
+      else signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+    });
+  };
+  return { fetch: fetchFn, callCount: () => calls };
+}
+
+function assertIsTimeout(error: unknown): asserts error is DeereError {
+  assert(error instanceof DeereError, `expected the timeout DeereError, got ${String(error)}`);
+  assert.strictEqual(error.status, 0);
+  assert.strictEqual(error.statusText, 'Timeout');
+}
+
+describe('SafeFieldOperationsApi: request options', () => {
+  const FIELD_OPS =
+    'https://sandboxapi.deere.com/platform/organizations/org-id/fields/field-id/fieldOperations';
+  const op = { id: 'op-1', fieldOperationType: 'harvest', measurementTypes: [] };
+  // Good for all three methods: a list page that is also a single operation.
+  const pageOrOp = { ...op, values: [op], links: [] };
+
+  type Call = (deere: Deere, options: RequestOptions) => Promise<unknown>;
+  const methods: Array<[string, Call]> = [
+    [
+      'listAllWithMeasurements',
+      (deere, options) =>
+        deere.safe.fieldOperations.listAllWithMeasurements('org-id', 'field-id', {}, options),
+    ],
+    [
+      'listWithMeasurements',
+      (deere, options) =>
+        deere.safe.fieldOperations.listWithMeasurements('org-id', 'field-id', {}, options),
+    ],
+    [
+      'getWithMeasurements',
+      (deere, options) => deere.safe.fieldOperations.getWithMeasurements('op-1', {}, options),
+    ],
+  ];
+
+  it('listAllWithMeasurements sends the headers to every page', { timeout: 2000 }, async () => {
+    const { fetch, calls } = recordingFetch((url) =>
+      url.includes('page=2')
+        ? { values: [op], links: [] }
+        : { values: [op], links: [{ rel: 'nextPage', uri: `${FIELD_OPS}?page=2` }] }
+    );
+    const deere = new Deere({ accessToken: 'test', environment: 'sandboxapi', fetch });
+
+    const ops = await deere.safe.fieldOperations.listAllWithMeasurements(
+      'org-id',
+      'field-id',
+      {},
+      { headers: { 'X-Trace': 'abc' } }
+    );
+
+    assert.strictEqual(ops.length, 2);
+    assert.strictEqual(calls.length, 2);
+    assert.match(calls[1].url, /page=2/);
+    for (const call of calls) assert.strictEqual(call.headers['X-Trace'], 'abc');
+  });
+
+  for (const [name, call] of methods.slice(1)) {
+    it(`${name} sends the headers`, { timeout: 2000 }, async () => {
+      const { fetch, calls } = recordingFetch(() => pageOrOp);
+      const deere = new Deere({ accessToken: 'test', environment: 'sandboxapi', fetch });
+
+      await call(deere, { headers: { 'X-Trace': 'abc' } });
+
+      assert.strictEqual(calls.length, 1);
+      assert.strictEqual(calls[0].headers['X-Trace'], 'abc');
+    });
+  }
+
+  for (const [name, call] of methods) {
+    it(`${name} rejects with the reason of a signal already aborted, sending nothing`, {
+      timeout: 2000,
+    }, async () => {
+      const { fetch, calls } = recordingFetch(() => pageOrOp);
+      const deere = new Deere({ accessToken: 'test', environment: 'sandboxapi', fetch });
+      const caller = new AbortController();
+      caller.abort();
+
+      await assert.rejects(call(deere, { signal: caller.signal }), (error: unknown) => {
+        assert.strictEqual(error, caller.signal.reason);
+        return true;
+      });
+      assert.strictEqual(calls.length, 0);
+    });
+
+    it(`${name} uses the timeout given for the call`, { timeout: 2000 }, async () => {
+      const { fetch, callCount } = hangingFetch();
+      const deere = new Deere({
+        accessToken: 'test',
+        environment: 'sandboxapi',
+        fetch,
+        timeout: 10_000,
+        maxRetries: 0,
+      });
+
+      await assert.rejects(call(deere, { timeout: 50 }), (error: unknown) => {
+        assertIsTimeout(error);
+        return true;
+      });
+      assert.strictEqual(callCount(), 1);
+    });
+  }
+
+  // In HATEOAS mode a list call first fetches the field it belongs to. That
+  // request is part of the call, so it gets the call's timeout; the headers are
+  // left off it by design (see resolveHateoasUrl in src/client.ts).
+  describe('in HATEOAS mode, the request for the parent field', () => {
+    const PARENT = 'https://sandboxapi.deere.com/platform/organizations/org-id/fields/field-id';
+
+    for (const [name, call] of methods.slice(0, 2)) {
+      it(`${name}: uses the timeout given for the call`, { timeout: 2000 }, async () => {
+        const { fetch, callCount } = hangingFetch();
+        const deere = new Deere({
+          accessToken: 'test',
+          environment: 'sandboxapi',
+          fetch,
+          hateoas: true,
+          timeout: 10_000,
+          maxRetries: 0,
+        });
+
+        await assert.rejects(call(deere, { timeout: 50 }), (error: unknown) => {
+          assert(error instanceof HateoasError, `expected HateoasError, got ${String(error)}`);
+          assertIsTimeout(error.cause);
+          return true;
+        });
+        assert.strictEqual(callCount(), 1);
+      });
+
+      it(`${name}: is not sent the headers given for the call`, { timeout: 2000 }, async () => {
+        const { fetch, calls } = recordingFetch((url) =>
+          url === PARENT
+            ? { links: [{ rel: 'fieldOperations', uri: FIELD_OPS }] }
+            : { values: [op], links: [] }
+        );
+        const deere = new Deere({
+          accessToken: 'test',
+          environment: 'sandboxapi',
+          fetch,
+          hateoas: true,
+          maxRetries: 0,
+        });
+
+        await call(deere, { headers: { 'X-Trace': 'abc' } });
+
+        assert.deepStrictEqual(
+          calls.map((c) => c.url.split('?')[0]),
+          [PARENT, FIELD_OPS]
+        );
+        assert.strictEqual(calls[0].headers['X-Trace'], undefined);
+        assert.strictEqual(calls[1].headers['X-Trace'], 'abc');
+      });
+    }
+  });
+});
+
+// The products and equipment facades took `options` from the start, but no
+// test checked that it reaches the request.
+describe('SafeProductsApi and SafeEquipmentApi: request options', () => {
+  const headers = { 'X-Trace': 'abc' };
+  const cases: Array<[string, 'sandboxapi' | 'api', (deere: Deere) => Promise<unknown>]> = [
+    [
+      'products.listWithEmbed',
+      'sandboxapi',
+      (d) => d.safe.products.listWithEmbed('org-id', { embed: 'documents' }, { headers }),
+    ],
+    [
+      'products.listAllWithEmbed',
+      'sandboxapi',
+      (d) => d.safe.products.listAllWithEmbed('org-id', { embed: 'documents' }, { headers }),
+    ],
+    [
+      'products.getWithEmbed',
+      'sandboxapi',
+      (d) => d.safe.products.getWithEmbed('org-id', 'erid', { embed: 'documents' }, { headers }),
+    ],
+    // The equipment API is served only in `api` and `partnerapi`.
+    [
+      'equipment.getWithEmbed',
+      'api',
+      (d) => d.safe.equipment.getWithEmbed({ embed: 'devices' }, { headers }),
+    ],
+    [
+      'equipment.getEquipmentWithEmbed',
+      'api',
+      (d) => d.safe.equipment.getEquipmentWithEmbed('eq-id', { embed: 'devices' }, { headers }),
+    ],
+    [
+      'equipment.listEquipmentmodelsWithEmbed',
+      'api',
+      (d) => d.safe.equipment.listEquipmentmodelsWithEmbed({ embed: 'make' }, { headers }),
+    ],
+    [
+      'equipment.listEquipmentisgtypesWithEmbed',
+      'api',
+      (d) =>
+        d.safe.equipment.listEquipmentisgtypesWithEmbed({ embed: 'equipmentModels' }, { headers }),
+    ],
+    [
+      'equipment.getEquipmentisgtypesWithEmbed',
+      'api',
+      (d) =>
+        d.safe.equipment.getEquipmentisgtypesWithEmbed(
+          'make-id',
+          { embed: 'equipmentModels' },
+          { headers }
+        ),
+    ],
+    [
+      'equipment.getEquipmentisgtypes2WithEmbed',
+      'api',
+      (d) =>
+        d.safe.equipment.getEquipmentisgtypes2WithEmbed(
+          'make-id',
+          'isg-type-id',
+          { embed: 'equipmentModels' },
+          { headers }
+        ),
+    ],
+  ];
+
+  for (const [name, environment, call] of cases) {
+    it(`${name} sends the headers`, { timeout: 2000 }, async () => {
+      const { fetch, calls } = recordingFetch(() => ({ values: [], links: [] }));
+      const deere = new Deere({ accessToken: 'test', environment, fetch });
+
+      await call(deere);
+
+      assert.strictEqual(calls.length, 1);
+      assert.strictEqual(calls[0].headers['X-Trace'], 'abc');
+    });
+  }
 });
 
 describe('FieldOperationId spec-patch regression (2.1.1)', () => {
