@@ -15,10 +15,9 @@
  * the wrong path or query key; its methods can only build a request and hand
  * it to the client.
  *
- * It runs with the rest of the suite, which CI runs. No release waits for CI:
- * the sync commits and tags, and the release workflow publishes, without
- * running the suite, so as things stand this guards the repository, not a
- * release.
+ * It runs with the rest of the suite: in CI, in the daily sync before it
+ * commits, and in the release workflow before it publishes. So a generated
+ * file that fails it is neither committed by the sync nor released.
  *
  * Files are parsed, not type-checked, with the TypeScript compiler API. That
  * API is what ties this repo to TypeScript 6; see "Testing conventions" in
