@@ -909,6 +909,15 @@ These target dealers rather than farmers. See [developer.deere.com](https://deve
 
 ---
 
+## Versioning
+
+The SDK is regenerated from John Deere's published specs by a daily job. What that job may release without a person looking is limited:
+
+- **Pinned:** which endpoint each method calls, and each method's parameters and return type. A new operation is a minor release. A method that would lose its endpoint, or whose parameters or return type would change, stops the job; the release that follows is numbered for what the change does to your code.
+- **Not pinned:** what a schema type contains. When John Deere adds, drops or retypes a field of a type under `Types.<Api>.components['schemas']`, the regenerated types ship as a patch, even where code that relied on the old shape stops compiling.
+
+---
+
 ## Contributing
 
 Contributions are welcome! Please read the contributing guidelines before submitting a PR.
@@ -920,15 +929,17 @@ git clone https://github.com/ProductOfAmerica/deere-sdk.git
 # Install dependencies
 pnpm install
 
-# Fetch specs and generate SDK
-pnpm generate
-
 # Build
 pnpm build
 
 # Run tests
 pnpm test
+
+# After changing a generator in scripts/: regenerate from the committed specs
+pnpm redact-specs && pnpm fix-specs && pnpm generate-api-servers && pnpm generate-types && pnpm generate-sdk && pnpm lint:fix
 ```
+
+Regenerate with those stages, not with `pnpm generate`. That one starts by fetching John Deere's current specs, and upstream changes are meant to arrive through the daily sync, which classifies them and picks the version. If your change alters a method's parameters or return type, `pnpm generate-sdk` stops and lists the methods; `pnpm accept-signatures` re-pins them once you have checked the list is what you meant.
 
 ### Releasing
 

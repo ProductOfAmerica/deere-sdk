@@ -107,15 +107,15 @@ jobs:
       # now a single exit code was all that stood between a breaking upstream
       # change and an unsupervised npm publish, and the bump logic below treats
       # `breaking` identically to `benign` (patch), so anything that swallowed
-      # that exit code would have shipped a dropped method as a patch release.
+      # that exit code would have shipped a dropped method, or one whose
+      # parameters changed, as a patch release.
       - name: Refuse to release a breaking run
         if: steps.classify.outputs.classification == 'breaking'
         run: |
-          echo "::error::Classification is breaking, so a manifest entry lost its operation" \
-               "upstream. generate-sdk should already have failed this job; reaching this step" \
-               "means that guard was bypassed. Reconcile scripts/api-surface.yaml by hand:" \
-               "repoint the entry's op: for a rename, or delete it to drop the public method," \
-               "which is a major-version decision."
+          echo "::error::Classification is breaking: a manifest entry lost its operation upstream," \
+               "or a method's signature is not the one pinned. generate-sdk should already have" \
+               "failed this job; reaching this step means that guard was bypassed. Reconcile" \
+               "scripts/api-surface.yaml by hand, following the runbook in its header."
           exit 1
 
       - name: Lint fix generated code
@@ -210,7 +210,7 @@ jobs:
           # `breaking` cannot reach here: generate-sdk exits 1 on it, and the
           # "Refuse to release a breaking run" step above fails the job if that
           # is ever bypassed. Without those two, this else-branch would ship a
-          # dropped public method as a patch.
+          # dropped public method, or a changed signature, as a patch.
           # Guarded strictly on the classification value, never on whether
           # scripts/api-surface.yaml itself shows a diff. CLASSIFICATION travels
           # through step env rather than direct expression interpolation.
@@ -376,14 +376,31 @@ jobs:
 
           if [[ "$CLASSIFICATION" == "breaking" ]]; then
             MISSING_OPS=$(jq -r '.missingOperations[] | "- `" + (.spec | gsub("\\r|\\n"; " ")) + "`: " + .method + " " + (.path | gsub("\\r|\\n"; " ")) + " (as `" + (.name | gsub("\\r|\\n"; " ")) + "`)"' sync-report.json 2>/dev/null || echo "")
+            # A signature is shown inside a code span. It is built from escaped
+            # literals, but it is still derived from the specs, so line breaks
+            # and backticks are taken out: neither can end the span or start a
+            # line of the summary.
+            CHANGED_SIGS=$(jq -r 'def clean: gsub("\\r|\\n|`"; " "); (.changedSignatures // [])[] | "- `" + (.spec | clean) + "`: " + .method + " " + (.path | clean) + " (as `" + (.name | clean) + "`)\n  - pinned: `" + ((.pinned // "(none pinned)") | clean) + "`\n  - current: `" + (.current | clean) + "`"' sync-report.json 2>/dev/null || echo "")
 
             echo "### ⚠️ Breaking API changes detected" >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
-            echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
+            echo "Nothing was committed, tagged or published. Each daily run stops here again until this is resolved." >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
-            echo "$MISSING_OPS" >> $GITHUB_STEP_SUMMARY || true
-            echo "" >> $GITHUB_STEP_SUMMARY || true
-            echo "Remediation: upstream renamed a path: edit that entry's op: in scripts/api-surface.yaml to keep the name; endpoint removed upstream: delete the entry, a major-version consideration; see the header of scripts/api-surface.yaml" >> $GITHUB_STEP_SUMMARY || true
+            if [[ -n "$MISSING_OPS" ]]; then
+              echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY || true
+              echo "$MISSING_OPS" >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY || true
+              echo "Remediation: upstream renamed a path: edit that entry's op: in scripts/api-surface.yaml to keep the name; endpoint removed upstream: delete the entry, a major-version consideration; see the header of scripts/api-surface.yaml" >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY || true
+            fi
+            if [[ -n "$CHANGED_SIGS" ]]; then
+              echo "Methods whose signature is not the one pinned in scripts/api-surface.yaml:" >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY || true
+              echo "$CHANGED_SIGS" >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY || true
+              echo "Remediation: the spec is wrong: repair it in scripts/fix-specs.ts with a test, and the next run passes; the change is real: reproduce it on a branch, run pnpm accept-signatures, and release by hand at the level the change calls for; see \"When a signature stops the sync\" in CLAUDE.md" >> $GITHUB_STEP_SUMMARY || true
+            fi
           else
             echo "Sync failed. Check the failed step's log above for details." >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
