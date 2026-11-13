@@ -859,7 +859,7 @@ pnpm test
 
 ### Releasing
 
-**Normal development** – just commit and push as usual. No release happens:
+**Normal development**: just commit and push as usual. No release happens:
 
 ```bash
 git add -A
@@ -870,14 +870,30 @@ git push
 **When ready to release** a new version:
 
 ```bash
-# 1. Update CHANGELOG.md with what changed
+# 1. Update CHANGELOG.md with what changed, and commit it
+#    (npm version refuses to run with uncommitted changes to tracked files)
 
-# 2. Bump version (auto-commits + auto-creates tag)
-npm version patch   # or: minor, major
+# 2. Bump version: runs the checks, then commits and tags
+npm version patch   # or: minor (a major is below)
 
 # 3. Push commit and tag together
 git push --follow-tags
 ```
+
+After writing the new version into `package.json`, `npm version` runs the `version` script (`pnpm typecheck:test && pnpm test`, the checks the release workflow runs) and commits and tags only if it passes. A failure leaves `package.json` bumped and uncommitted, with no commit and no tag. To recover, run `git restore package.json`, commit the fix, and run `npm version` again; until `package.json` is restored, `npm version` refuses to run. The daily sync bumps the version with `--ignore-scripts`, because it has just run the same checks and never bumps a major.
+
+**A major release** can need a change that the tests require at the new major (for example deleting a relocation whose `removeInMajor` is reached). Keep that change out of `main` until the bump, since a daily sync could otherwise release it as a minor or a patch, and commit it together with the bump:
+
+```bash
+# make the change, regenerate, update CHANGELOG.md; leave it all uncommitted
+npm version major --no-git-tag-version   # bumps and runs the checks on this tree, touches no git state
+git add -A
+git commit -m "X.0.0"
+git tag -a vX.0.0 -m "X.0.0"             # must be annotated: --follow-tags pushes annotated tags only
+git push --follow-tags
+```
+
+This commits exactly the tree the checks passed. If they fail, nothing is committed: run `git restore package.json` before running the command again, or it bumps a second time (4.0.0 to 5.0.0).
 
 CI sees the tag → type-checks and tests that commit → creates GitHub Release → publishes to npm. If a test fails, no release is created and nothing is published.
 

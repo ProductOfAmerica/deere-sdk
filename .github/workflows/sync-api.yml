@@ -228,8 +228,13 @@ jobs:
 
       - name: Update package.json version
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
+        # --ignore-scripts skips package.json's `version` script, which reruns
+        # typecheck:test and the suite; the steps above have just passed both
+        # on this tree. The sync only ever bumps a minor or a patch, so the
+        # tests that depend on the major version cannot change their result.
+        # --no-git-tag-version alone would still run the script.
         run: |
-          npm version ${{ steps.version.outputs.new_version }} --no-git-tag-version
+          npm version ${{ steps.version.outputs.new_version }} --no-git-tag-version --ignore-scripts
 
       - name: Update CHANGELOG.md
         if: steps.changes.outputs.has_changes == 'true' || github.event.inputs.force_release == 'true'
