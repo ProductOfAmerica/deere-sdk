@@ -411,8 +411,8 @@ handled, and a generator never builds quotes or a comment around spec text itsel
 `tests/generated-structure.test.ts` is the second line of defence and does not rely on the list of emit sites: it fails
 if a committed generated file contains anything of a kind no generator emits (a class member, a top-level statement, a
 computed value in a table, a default parameter value, or a statement or call in a method body other than the few every
-method is built from). It does not look inside string or template literals. It runs only in CI, which gates no
-release: the sync commits and tags, and the release workflow publishes, without running the suite. When a generator
+method is built from). It does not look inside string or template literals. It runs with the rest of
+the suite: in CI, in the daily sync before it commits, and in the release workflow before it publishes. When a generator
 starts emitting a new shape on purpose (a value import, a call to a helper), that test is where it gets allowed; allow
 the exact import or callee, not the kind.
 
