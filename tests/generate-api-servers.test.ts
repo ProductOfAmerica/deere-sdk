@@ -6,6 +6,13 @@
  * scripts/generate-api-servers.ts regresses its classifier, these tests
  * catch it by asserting specific invariants — NOT byte-level snapshots,
  * which would be too brittle.
+ *
+ * The daily sync runs this suite on the freshly regenerated tree before it
+ * commits. So a test here that writes down a fact about John Deere's specs
+ * stops the sync on the day that fact changes. That is the intent for a fact
+ * a person should look at before it ships (which host an environment reaches,
+ * a new environment name). Anything else should not be written down here: it
+ * either follows from the data or is not worth stopping the sync for.
  */
 
 import assert from 'node:assert';
@@ -20,6 +27,8 @@ import {
 
 describe('api-servers.generated.ts — invariants for the current spec set', () => {
   describe('KNOWN_ENVIRONMENTS', () => {
+    // Written out on purpose, and meant to stop the sync: an environment is a
+    // public type and a hostname requests are sent to.
     it('contains the 9 expected subdomain values', () => {
       const expected: Environment[] = [
         'api',
@@ -32,7 +41,15 @@ describe('api-servers.generated.ts — invariants for the current spec set', () 
         'sandboxapiqa',
         'apidev.tal',
       ];
-      assert.deepStrictEqual([...KNOWN_ENVIRONMENTS], expected);
+      assert.deepStrictEqual(
+        [...KNOWN_ENVIRONMENTS],
+        expected,
+        'The set of environments changed, most likely because John Deere added one to a ' +
+          "spec's servers enum. Before accepting it: decide its tier in ENV_TIER and its place " +
+          'in the canonical order (both in scripts/generate-api-servers.ts), and add it to the ' +
+          "README's environment table and to the `environment` option's doc comment in " +
+          'src/client.ts. Then update the list in this test.'
+      );
     });
 
     it('DEFAULT_ENVIRONMENT is sandboxapi (safe-by-default)', () => {
@@ -55,17 +72,6 @@ describe('api-servers.generated.ts — invariants for the current spec set', () 
           config.kind === 'templated' || config.kind === 'static' || config.kind === 'unavailable',
           `${specName} has invalid kind: ${(config as { kind?: string }).kind}`
         );
-      }
-    });
-
-    it('templated specs declare at least 4 supported envs', () => {
-      for (const [specName, config] of Object.entries(API_SERVERS)) {
-        if (config.kind === 'templated') {
-          assert(
-            config.supportedEnvironments.length >= 4,
-            `${specName} declares only ${config.supportedEnvironments.length} envs`
-          );
-        }
       }
     });
 
@@ -191,12 +197,6 @@ describe('api-servers.generated.ts — invariants for the current spec set', () 
       if (config.kind !== 'templated') throw new Error('expected templated');
       assert.strictEqual(config.urlTemplate, 'https://{environment}.deere.com/platform');
     });
-
-    it('supports the full 9-env union (default injection uses global union)', () => {
-      const config = API_SERVERS.notifications;
-      if (config.kind !== 'templated') throw new Error('expected templated');
-      assert.strictEqual(config.supportedEnvironments.length, 9);
-    });
   });
 
   describe('platform-disguised specs normalized by fix-specs', () => {
@@ -218,28 +218,31 @@ describe('api-servers.generated.ts — invariants for the current spec set', () 
           `${specName} should be templated — check fix-specs.ts normalization pass`
         );
       });
-
-      it(`${specName} supports the full 9-env union`, () => {
-        const config = API_SERVERS[specName];
-        if (config.kind !== 'templated') throw new Error('expected templated');
-        assert.strictEqual(
-          config.supportedEnvironments.length,
-          KNOWN_ENVIRONMENTS.length,
-          `${specName} should declare all 9 envs after normalization, got ${config.supportedEnvironments.length}`
-        );
-      });
     }
   });
 
+  // The length of each templated spec's environment list used to be asserted
+  // here (at least 4, exactly 9 for the normalized specs). Nothing reads those
+  // lists at run time: the resolver substitutes any known environment into a
+  // templated URL without consulting them. So the counts pinned John Deere's
+  // enums for no behaviour, and would have stopped the sync when one changed.
+  // What does matter, that these specs are templated at all, is checked above.
+
   describe('templated URL format', () => {
-    it('every templated spec uses https://{environment}.deere.com/platform', () => {
+    // The token is attached to whatever host these produce, so the shape that
+    // matters is pinned: https, the environment as the leading host label, on
+    // deere.com. The path after it (/platform, /isg) is the routing guard's.
+    const SHAPE = /^https:\/\/\{environment\}\.deere\.com(\/|$)/;
+
+    it('every templated spec and path override is https://{environment}.deere.com/...', () => {
       for (const [specName, config] of Object.entries(API_SERVERS)) {
-        if (config.kind === 'templated') {
-          assert.strictEqual(
-            config.urlTemplate,
-            'https://{environment}.deere.com/platform',
-            `${specName} has unexpected urlTemplate: ${config.urlTemplate}`
-          );
+        if (config.kind !== 'templated') continue;
+        const templates = [
+          config.urlTemplate,
+          ...(config.pathOverrides ?? []).map((override) => override.urlTemplate),
+        ];
+        for (const template of templates) {
+          assert.match(template, SHAPE, `${specName} has unexpected urlTemplate: ${template}`);
         }
       }
     });
