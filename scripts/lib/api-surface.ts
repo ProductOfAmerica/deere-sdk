@@ -626,6 +626,54 @@ export function resolveMethodNames(
   return { names, newEntries, missing, changedSignatures };
 }
 
+/** One spec's outcome of resolveSurface, as buildSyncReport takes it. */
+export interface SpecResolution {
+  specName: string;
+  newEntries: SurfaceEntry[];
+  missing: SurfaceEntry[];
+  changedSignatures: ChangedSignature[];
+  /** The manifest has entries for this spec and no spec file was parsed for it. */
+  absent: boolean;
+}
+
+/**
+ * Resolve every parsed spec against the manifest, and account for the manifest
+ * keys no parsed spec answers.
+ *
+ * Resolving only the specs that were parsed used to leave a manifest key with
+ * no file under specs/fixed unchecked: its entries were never reported
+ * missing, the run was not breaking, and the generator dropped the whole API
+ * class from the SDK. Such a key now gets a result whose `missing` is every
+ * one of its entries, marked `absent` so the run can say why. A key with no
+ * entries has nothing to lose and is passed over.
+ *
+ * `namesBySpec` holds the parsed specs only, since only they get a class.
+ * `perSpec` is sorted by spec name, so neither depends on the order of `specs`.
+ */
+export function resolveSurface(
+  surface: ApiSurface,
+  specs: ReadonlyArray<{ specName: string; operations: SurfaceOp[] }>
+): { namesBySpec: Map<string, Map<string, string>>; perSpec: SpecResolution[] } {
+  const namesBySpec = new Map<string, Map<string, string>>();
+  const perSpec: SpecResolution[] = [];
+  for (const { specName, operations } of specs) {
+    const { names, newEntries, missing, changedSignatures } = resolveMethodNames(
+      specName,
+      operations,
+      surface
+    );
+    namesBySpec.set(specName, names);
+    perSpec.push({ specName, newEntries, missing, changedSignatures, absent: false });
+  }
+  for (const [specName, entries] of Object.entries(surface.specs)) {
+    if (entries.length === 0 || namesBySpec.has(specName)) continue;
+    const { newEntries, missing, changedSignatures } = resolveMethodNames(specName, [], surface);
+    perSpec.push({ specName, newEntries, missing, changedSignatures, absent: true });
+  }
+  perSpec.sort((a, b) => compareStrings(a.specName, b.specName));
+  return { namesBySpec, perSpec };
+}
+
 /**
  * The surface with each changed signature replaced by the current one, and
  * nothing else touched: not a name, not an op, not an entry the changes do not
@@ -682,15 +730,16 @@ export function classifyRun(input: {
  * these two answers are what stands between a breaking upstream change and an
  * unattended release.
  *
- * A missing operation stops every run. Accepting signatures does not reach
- * that far: a method would disappear, which nothing here approves.
+ * A missing operation stops every run, and so does a spec with no file, whose
+ * whole class would disappear. Accepting signatures does not reach that far:
+ * a method would disappear, which nothing here approves.
  */
 export function stopReasons(
-  report: Pick<SyncReport, 'missingOperations' | 'changedSignatures'>,
+  report: Pick<SyncReport, 'missingOperations' | 'changedSignatures' | 'absentSpecs'>,
   options: { acceptSignatures: boolean }
 ): { missing: boolean; signatures: boolean } {
   return {
-    missing: report.missingOperations.length > 0,
+    missing: report.missingOperations.length > 0 || report.absentSpecs.length > 0,
     signatures: report.changedSignatures.length > 0 && !options.acceptSignatures,
   };
 }
@@ -717,6 +766,11 @@ export interface SyncReport {
   newOperations: SyncReportOperation[];
   missingOperations: SyncReportOperation[];
   changedSignatures: SyncReportSignature[];
+  /**
+   * Specs the manifest has entries for and no file under specs/fixed, sorted.
+   * Their entries are in `missingOperations` too; this says why.
+   */
+  absentSpecs: string[];
 }
 
 /**
@@ -750,12 +804,21 @@ export function buildSyncReport(
     newEntries: SurfaceEntry[];
     missing: SurfaceEntry[];
     changedSignatures?: ChangedSignature[];
+    absent?: boolean;
   }>
 ): SyncReport {
   const newOperations: SyncReportOperation[] = [];
   const missingOperations: SyncReportOperation[] = [];
   const changedSignatures: SyncReportSignature[] = [];
-  for (const { specName, newEntries, missing, changedSignatures: changed = [] } of perSpec) {
+  const absentSpecs: string[] = [];
+  for (const {
+    specName,
+    newEntries,
+    missing,
+    changedSignatures: changed = [],
+    absent = false,
+  } of perSpec) {
+    if (absent) absentSpecs.push(specName);
     for (const entry of newEntries) {
       const { method, path } = splitOpDisplay(entry.op);
       newOperations.push({ spec: specName, method, path, name: entry.name });
@@ -779,6 +842,7 @@ export function buildSyncReport(
   newOperations.sort(compareSyncOps);
   missingOperations.sort(compareSyncOps);
   changedSignatures.sort(compareSyncOps);
+  absentSpecs.sort(compareStrings);
   return {
     classification: classifyRun({
       newEntries: newOperations,
@@ -788,5 +852,6 @@ export function buildSyncReport(
     newOperations,
     missingOperations,
     changedSignatures,
+    absentSpecs,
   };
 }
