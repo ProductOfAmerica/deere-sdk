@@ -602,24 +602,28 @@ const all = await client.getAll('fields', '/organizations/123/fields');
 
 There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. Passing a spec name that does not ship your chosen environment throws `UnsupportedEnvironmentError` before any request goes out.
 
-### fetchUrl — Bearer token hostname guard
+### Where the access token is sent
 
-`DeereClient` exposes `fetchUrl(method, url, body?, options?)` and `followLink(url)` for calling absolute URLs (e.g., HAL `next` page links, externally-discovered URLs). Both **suppress the OAuth Bearer token** on any URL whose hostname is not a trusted `*.deere.com` origin. This prevents accidental token leakage if a HATEOAS response, user-supplied URL, or link cache ever includes a third-party host.
+The client attaches the OAuth Bearer token only to an `https` URL on `*.deere.com`. That holds for every request it makes: calls resolved from a spec name, pages followed by `paginate`, links followed in HATEOAS mode, and absolute URLs you pass to `fetchUrl(method, url, body?, options?)` or `followLink(link)`. Any other URL you pass to those two is requested without an `Authorization` header.
 
 ```typescript
-// Bearer token attached (trusted host)
+// Bearer token attached (https on deere.com)
 await client.fetchUrl('GET', 'https://api.deere.com/platform/organizations');
 
-// Bearer token SUPPRESSED (untrusted host) — request still goes out, just without Authorization
+// Bearer token suppressed: the request still goes out, with no Authorization header
 await client.fetchUrl('GET', 'https://example.com/some-webhook');
 
-// You can opt in explicitly by passing your own Authorization header:
+// To send a token elsewhere, pass your own Authorization header for that request
 await client.fetchUrl('GET', 'https://example.com/api', undefined, {
     headers: { Authorization: 'Bearer some-other-token' },
 });
 ```
 
-Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppressed, so you can audit where your HATEOAS graph is pointing.
+- An `Authorization` header in a request's `options.headers` is sent as given, to any host, and replaces the access token for that request. The header name is matched in any letter case.
+- An `Authorization` entry in `defaultHeaders` is ignored.
+- A link the client follows on its own, a HATEOAS link or a `nextPage`, must be an `https` URL on `*.deere.com`. Any other is not followed at all: the call throws (see [Error Types](#error-types)). Following it without the token would still send the request there, with the headers you passed and, for a `POST` or `PUT`, its body.
+
+Enable `hateoasDebug: true` to see a `console.warn` whenever a token is suppressed.
 
 ---
 
@@ -682,7 +686,7 @@ const boundaries = await deere.boundaries.listBoundaries(orgId, fieldId);
 
 ### Strict Mode
 
-HATEOAS mode is strict: if link resolution fails (parent returns no matching link, parent fetch errors), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate.
+HATEOAS mode is strict: if link resolution fails (the parent returns no matching link, the parent fetch errors, or the link is not an `https` URL on `*.deere.com`), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate.
 
 ```typescript
 import {HateoasError} from 'deere-sdk';
@@ -745,7 +749,8 @@ const noRetries = new Deere({
 | `DeereError`                  | Base class. Any HTTP error from John Deere (400/404/422/5xx).     | Only 5xx |
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
-| `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
+| `HateoasError`                | HATEOAS link resolution fails (parent fetch errored, no matching link, or the link is not an `https` URL on `*.deere.com`). | No       |
+| `DeereError` with `status` `-1` and `statusText` `'UntrustedLink'` | `paginate` or `getAll` met a `nextPage` link that is not an `https` URL on `*.deere.com`. The link is not requested. | No       |
 | `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
 | `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
 

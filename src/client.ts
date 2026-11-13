@@ -23,9 +23,9 @@
  *     └─ requestUrl('POST', url, body, options)
  *          └─ fetch(url, ...) with retry + timeout
  *
- * Absolute URLs bypass the resolver via fetchUrl() — used for HATEOAS next-page
- * links and power-user escape hatches. fetchUrl attaches the Bearer token ONLY
- * to *.deere.com hosts; third-party URLs get no Authorization header.
+ * A caller who already holds an absolute URL bypasses the resolver with
+ * fetchUrl() or followLink(). Whichever way a URL arrives, requestUrl()
+ * attaches the Bearer token only when it is an https URL on *.deere.com.
  *
  * URL data lives in src/api-servers.generated.ts, built from OpenAPI specs at
  * build time by scripts/generate-api-servers.ts. Never hand-edit that file.
@@ -70,7 +70,11 @@ export interface DeereClientConfig {
   environment?: Environment;
   /** Custom fetch implementation */
   fetch?: typeof fetch;
-  /** Default headers to include in all requests */
+  /**
+   * Default headers to include in all requests. An `Authorization` entry here
+   * is ignored: the token comes from `accessToken`, or for a single request
+   * from that request's `options.headers`.
+   */
   defaultHeaders?: Record<string, string>;
   /** Timeout in milliseconds. Defaults to 30000 */
   timeout?: number;
@@ -85,20 +89,6 @@ export interface DeereClientConfig {
   hateoas?: boolean;
   /** Log HATEOAS resolution details to console for debugging. @default false */
   hateoasDebug?: boolean;
-}
-
-/**
- * Internal request options — extends the public RequestOptions with fields
- * only the client itself uses. Users cannot accidentally set `_noAuth`
- * through the public API because it's not in RequestOptions.
- */
-interface InternalRequestOptions extends RequestOptions {
-  /**
-   * @internal — when true, the Authorization header is NOT added by
-   * requestUrl. Used by fetchUrl() to suppress the Bearer token when the
-   * target URL is not a trusted *.deere.com host.
-   */
-  _noAuth?: boolean;
 }
 
 export interface RetryConfig {
@@ -135,21 +125,67 @@ export interface Link {
 // environment-resolver.ts. Imported here for internal use (throws, instanceof
 // checks) and re-exported for backward compatibility with any consumer that
 // imports them from 'deere-sdk' main entry.
-import { AuthError, DeereError, HateoasError, RateLimitError } from './errors.js';
+import {
+  AuthError,
+  CLIENT_ERROR_STATUS,
+  DeereError,
+  HateoasError,
+  RateLimitError,
+} from './errors.js';
 
 export { AuthError, DeereError, HateoasError, RateLimitError };
 
 const DEERE_ACCEPT_HEADER = 'application/vnd.deere.axiom.v3+json';
 
 /**
- * Hostnames where fetchUrl() will attach the Bearer token. Any URL whose
- * hostname does NOT match this pattern has Authorization suppressed to
- * prevent accidental token leakage to third-party services.
+ * Hostnames the access token may be sent to. See isTrustedUrl, which is what
+ * callers should use: the hostname alone is not the whole test.
  *
  * Matches: deere.com, api.deere.com, foo.bar.deere.com, etc.
  * Does not match: untrusted.example, deere.com.untrusted.example, localhost.
  */
 const TRUSTED_HOSTS = /^([a-z0-9-]+\.)*deere\.com$/i;
+
+/**
+ * Whether a request to this URL may carry the access token, and whether a
+ * link naming it may be followed on a caller's behalf. https is required as
+ * well as the host: over http the token would cross the network in the clear.
+ */
+function isTrustedUrl(url: URL): boolean {
+  return url.protocol === 'https:' && TRUSTED_HOSTS.test(url.hostname);
+}
+
+/**
+ * Why the client must not follow a link it found in a response body, as a
+ * clause that completes "the link ...", or undefined when it may follow it.
+ *
+ * This is for links the client follows on its own: a HATEOAS rel, a nextPage.
+ * Nobody chose those URLs, so one that leaves https deere.com is refused
+ * outright. Requesting it without the token is not enough: the request still
+ * reaches that host, with the caller's own headers and, for a POST or PUT, the
+ * body, and whatever comes back would be returned as John Deere's data. A URL
+ * the caller passes to fetchUrl() or followLink() is theirs to request.
+ */
+function untrustedLinkProblem(uri: string): string | undefined {
+  let target: URL;
+  try {
+    target = new URL(uri);
+  } catch {
+    return 'is not an absolute URL';
+  }
+  if (isTrustedUrl(target)) return undefined;
+  return `points to '${target.hostname}' (${target.origin}), which is not an https URL on deere.com`;
+}
+
+/**
+ * Header names are case-insensitive on the wire, but they are object keys
+ * here. `Authorization` and `authorization` are separate keys that fetch sends
+ * as a single header with both values joined, so every check on this header
+ * has to ignore case.
+ */
+function isAuthorizationHeader(name: string): boolean {
+  return name.toLowerCase() === 'authorization';
+}
 
 /** HTTP status codes that are safe to retry */
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
@@ -218,10 +254,15 @@ export class DeereClient {
     this.timeout = config.timeout ?? 30000;
     this.hateoas = config.hateoas ?? false;
     this.hateoasDebug = config.hateoasDebug ?? false;
+    // Authorization is left out of the defaults: a header set for every
+    // request would also reach every host the client contacts. See buildHeaders.
+    const configuredHeaders = Object.entries(config.defaultHeaders ?? {}).filter(
+      ([name]) => !isAuthorizationHeader(name)
+    );
     this.defaultHeaders = {
       Accept: DEERE_ACCEPT_HEADER,
       'Content-Type': DEERE_ACCEPT_HEADER,
-      ...config.defaultHeaders,
+      ...Object.fromEntries(configuredHeaders),
     };
     this.retryConfig = {
       maxRetries: config.maxRetries ?? 3,
@@ -310,11 +351,10 @@ export class DeereClient {
    * Fetch an absolute URL directly. Escape hatch for HATEOAS next-page links,
    * HAL link traversal, and power users with pre-resolved URLs.
    *
-   * **Security**: Attaches the Bearer token ONLY when the target hostname
-   * matches a trusted `*.deere.com` origin. Third-party URLs get NO
-   * Authorization header — prevents accidental token leakage to tracking or
-   * proxy services. If you need to send auth to a non-JD host, set
-   * `Authorization` explicitly via `options.headers`.
+   * **Security**: the Bearer token is attached only to an https URL on
+   * `*.deere.com`. Any other URL is still requested, with no Authorization
+   * header. To send auth elsewhere, set `Authorization` in `options.headers`.
+   * The same rule covers every request this client makes; see buildHeaders.
    */
   async fetchUrl<T = unknown>(
     method: string,
@@ -322,25 +362,12 @@ export class DeereClient {
     body?: unknown,
     options?: RequestOptions
   ): Promise<T> {
-    const { hostname } = new URL(url);
-    const isTrusted = TRUSTED_HOSTS.test(hostname);
-    if (!isTrusted && this.hateoasDebug) {
-      console.warn(
-        `[deere-sdk] fetchUrl: '${hostname}' is not a trusted *.deere.com host. ` +
-          `Bearer token suppressed. Set Authorization manually via options.headers ` +
-          `if needed.`
-      );
-    }
-    const internalOpts: InternalRequestOptions = {
-      ...options,
-      _noAuth: !isTrusted,
-    };
-    return this.requestUrl<T>(method, url, body, internalOpts);
+    return this.requestUrl<T>(method, url, body, options);
   }
 
   /**
    * Follow a HAL link from a response. Accepts a Link object or a raw URL
-   * string. Delegates to fetchUrl() so the trusted-host check applies.
+   * string.
    */
   async followLink<T = unknown>(link: Link | string, options?: RequestOptions): Promise<T> {
     const uri = typeof link === 'string' ? link : link.uri;
@@ -361,26 +388,35 @@ export class DeereClient {
     let url: string | undefined = this.hateoas
       ? await this.resolveHateoasUrl(specName, path)
       : resolveRequestUrl(specName, path, this.environment);
-    let isFirstPage = true;
 
     while (url) {
-      // First page uses the normal auth path; subsequent nextPage URLs are
-      // absolute and routed through fetchUrl which applies the trusted-host
-      // check (they're always *.deere.com in practice).
-      const response: PaginatedResponse<T> = isFirstPage
-        ? await this.requestUrl<PaginatedResponse<T>>('GET', url, undefined, options)
-        : await this.fetchUrl<PaginatedResponse<T>>('GET', url, undefined, options);
+      const response: PaginatedResponse<T> = await this.requestUrl<PaginatedResponse<T>>(
+        'GET',
+        url,
+        undefined,
+        options
+      );
 
       if (response.values && response.values.length > 0) {
         yield response.values;
       }
 
-      // Find nextPage link — always absolute in JD's HAL responses.
+      // Find nextPage link. Always absolute in JD's HAL responses.
       const nextPageLink: Link | undefined = response.links?.find(
         (l: Link) => l.rel === 'nextPage'
       );
       url = nextPageLink?.uri;
-      isFirstPage = false;
+
+      // `options` was given for the first page. Every later URL comes from a
+      // response, so it is checked before those headers are sent to it.
+      const problem = url ? untrustedLinkProblem(url) : undefined;
+      if (problem) {
+        throw new DeereError(
+          `Pagination stopped: the nextPage link ${problem}. The link was not followed.`,
+          CLIENT_ERROR_STATUS,
+          'UntrustedLink'
+        );
+      }
     }
   }
 
@@ -416,6 +452,10 @@ export class DeereClient {
   ): Promise<T> {
     const maxAttempts = this.retryConfig.maxRetries + 1; // +1 for initial attempt
     let lastError: Error | undefined;
+    // Parsed before the loop, outside its try. `new URL` throws a TypeError on
+    // an unparseable URL, and inside the try that would be taken for a network
+    // failure and retried with backoff.
+    const headers = this.buildHeaders(new URL(url), options?.headers);
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const timeout = options?.timeout ?? this.timeout;
@@ -423,24 +463,6 @@ export class DeereClient {
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       try {
-        // Build headers: defaultHeaders → auto Bearer → user overrides.
-        // The auto-Bearer is attached ONLY when the internal _noAuth flag
-        // is unset (fetchUrl suppresses for untrusted hosts) AND when the
-        // user hasn't explicitly set Authorization themselves (user opt-in
-        // wins over our default).
-        const userHeaders = options?.headers ?? {};
-        const headers: Record<string, string> = {
-          ...this.defaultHeaders,
-        };
-        if (
-          !(options as InternalRequestOptions | undefined)?._noAuth &&
-          userHeaders.Authorization === undefined
-        ) {
-          headers.Authorization = `Bearer ${this.accessToken}`;
-        }
-        // Apply user headers LAST so they override both defaultHeaders and
-        // the auto-attached Bearer when explicitly set.
-        Object.assign(headers, userHeaders);
         const response = await this.fetchFn(url, {
           method,
           headers,
@@ -530,6 +552,38 @@ export class DeereClient {
 
     // Should not reach here, but just in case
     throw lastError ?? new DeereError('Request failed after retries', 0, 'RetryExhausted');
+  }
+
+  /**
+   * The headers for one request. This is the only place the access token is
+   * attached, so every request is decided by where it is going, whether the
+   * URL came from the resolver, from a link in a response, or from a caller.
+   * Before this lived here, only fetchUrl() checked, and a link discovered in
+   * HATEOAS mode was sent the token whatever host it named.
+   *
+   * An Authorization header in `callerHeaders` is sent as given, to any host:
+   * the caller chose it for this request. It also replaces the token, so the
+   * two never travel together.
+   */
+  private buildHeaders(
+    target: URL,
+    callerHeaders: Record<string, string> = {}
+  ): Record<string, string> {
+    const headers: Record<string, string> = { ...this.defaultHeaders };
+
+    if (!Object.keys(callerHeaders).some(isAuthorizationHeader)) {
+      if (isTrustedUrl(target)) {
+        headers.Authorization = `Bearer ${this.accessToken}`;
+      } else if (this.hateoasDebug) {
+        console.warn(
+          `[deere-sdk] '${target.hostname}' is not a trusted destination (${target.origin}): ` +
+            `the Bearer token is sent only to https URLs on *.deere.com, so it was suppressed. ` +
+            `Pass Authorization in options.headers to send one anyway.`
+        );
+      }
+    }
+
+    return Object.assign(headers, callerHeaders);
   }
 
   /**
@@ -651,6 +705,14 @@ export class DeereClient {
       const cachedLinks = this.linkCache.has(concreteParentPath);
       throw new HateoasError(
         `HATEOAS resolution failed: parent "${concreteParentPath}" has no link with rel "${rel}"${cachedLinks ? '' : ' (parent returned no links)'}`,
+        path
+      );
+    }
+
+    const problem = untrustedLinkProblem(discoveredUrl);
+    if (problem) {
+      throw new HateoasError(
+        `HATEOAS resolution failed: parent "${concreteParentPath}" has a link with rel "${rel}" that ${problem}. The link was not followed.`,
         path
       );
     }
