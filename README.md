@@ -133,7 +133,12 @@ The SDK uses raw John Deere subdomain names as environment values. Pass the subd
 | `sandboxapiqa`   | sandboxapiqa.deere.com     | Sandbox QA                       |
 | `apidev.tal`     | apidev.tal.deere.com       | Internal dev tier (rarely used)  |
 
-Not every spec has servers for every environment. If you pick an environment a given spec doesn't ship (e.g., a production-only spec on `sandboxapi`), calls to that API throw `UnsupportedEnvironmentError` before any request goes out, with the valid values for that spec. The constructor only rejects an environment name that isn't in the table above.
+Not every API is served in every environment, and what the SDK does about it depends on how John Deere hosts the API:
+
+- **A few APIs are served from fixed hosts of their own.** A call in an environment such an API has no host for throws `UnsupportedEnvironmentError` before any request goes out, naming the environments that API does support. With `hateoas: true` some of those calls behave differently; see [Strict Mode](#strict-mode).
+- **Most are served from `https://{environment}.deere.com/...`.** For those the SDK builds the URL for whichever environment you configured and sends the request, including when John Deere's spec for that API does not list the environment. Nothing is checked first, and whether the request is answered is up to John Deere.
+
+The constructor only rejects an environment name that isn't in the table above.
 
 </details>
 
@@ -600,7 +605,7 @@ for await (const items of client.paginate('fields', '/organizations/123/fields')
 const all = await client.getAll('fields', '/organizations/123/fields');
 ```
 
-There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. Passing a spec name that does not ship your chosen environment throws `UnsupportedEnvironmentError` before any request goes out.
+There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. A spec served from fixed hosts throws `UnsupportedEnvironmentError`, before any request goes out, in an environment it has no host for. A spec served from `{environment}.deere.com` is resolved for any environment and never throws it. In HATEOAS mode the spec that gets resolved is the parent resource's, which changes this for some calls; see [Strict Mode](#strict-mode).
 
 ### fetchUrl — Bearer token hostname guard
 
@@ -746,7 +751,7 @@ const noRetries = new Deere({
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
-| `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
+| `UnsupportedEnvironmentError` | A call targets an API served from fixed hosts, and it has none for the configured `environment`. Thrown before any request goes out. An API served from `{environment}.deere.com` never throws it. With `hateoas: true`, see [Strict Mode](#strict-mode). | No       |
 | `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
 
 ```typescript

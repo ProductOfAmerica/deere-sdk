@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { KNOWN_ENVIRONMENTS } from '../src/api-servers.generated.js';
+import { API_SERVERS, KNOWN_ENVIRONMENTS } from '../src/api-servers.generated.js';
 import {
   NoServerConfigError,
   resolveRequestUrl,
@@ -16,6 +16,18 @@ import * as sdk from '../src/index.js';
 function environmentsNamedIn(message: string): string[] {
   const tokens = message.split(/[^a-z.]+/).map((token) => token.replace(/\.+$/, ''));
   return KNOWN_ENVIRONMENTS.filter((env) => tokens.includes(env)).sort();
+}
+
+/** A templated spec and an environment its own list leaves out, if there is such a pair. */
+function templatedSpecWithUnlistedEnvironment() {
+  for (const [spec, config] of Object.entries(API_SERVERS)) {
+    if (config.kind !== 'templated') continue;
+    const environment = KNOWN_ENVIRONMENTS.find(
+      (name) => !config.supportedEnvironments.includes(name)
+    );
+    if (environment) return { spec, environment, urlTemplate: config.urlTemplate };
+  }
+  return undefined;
 }
 
 describe('resolveRequestUrl', () => {
@@ -70,6 +82,24 @@ describe('resolveRequestUrl', () => {
         const url = resolveRequestUrl('files', '/organizations/1/files', env);
         assert.strictEqual(url, `https://${env}.deere.com/platform/organizations/1/files`);
       }
+    });
+
+    // `supportedEnvironments` is what a templated spec's servers block lists.
+    // It is a record and not a gate: an environment it leaves out resolves
+    // like any other, where a spec with fixed hosts would throw. The README
+    // and the generated file's matrix both say so, and this is what makes it
+    // true. The pair is looked up, because which spec lists which environment
+    // is John Deere's to change.
+    it('resolves an environment the spec does not list', (t) => {
+      const found = templatedSpecWithUnlistedEnvironment();
+      if (!found) {
+        t.skip('every templated spec lists every environment');
+        return;
+      }
+      assert.strictEqual(
+        resolveRequestUrl(found.spec, '/x', found.environment),
+        `${found.urlTemplate.replace('{environment}', found.environment)}/x`
+      );
     });
   });
 

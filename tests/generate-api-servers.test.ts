@@ -16,6 +16,7 @@
  */
 
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import {
   API_SERVERS,
@@ -24,6 +25,7 @@ import {
   KNOWN_ENVIRONMENTS,
   type SpecName,
 } from '../src/api-servers.generated.js';
+import { resolveRequestUrl } from '../src/environment-resolver.js';
 
 describe('api-servers.generated.ts — invariants for the current spec set', () => {
   describe('KNOWN_ENVIRONMENTS', () => {
@@ -246,5 +248,65 @@ describe('api-servers.generated.ts — invariants for the current spec set', () 
         }
       }
     });
+  });
+});
+
+// The matrix at the top of the generated file is what a reader goes by to
+// know which environment an API can be called in. It used to mark every
+// environment a spec does not list with "-" and say that meant a throw, which
+// is true of the specs with fixed hosts and of no other. So each cell is held
+// to what the resolver does there. Nothing here names a spec or counts one:
+// the matrix and the table are generated together, and this only checks that
+// they still agree.
+describe('the coverage matrix in the generated header', () => {
+  const source = readFileSync('src/api-servers.generated.ts', 'utf-8');
+  const header = source.slice(0, source.indexOf('*/')).split('\n');
+  const cellsOf = (line: string) => line.replace(/^ \*/, '').trim().split(/\s+/);
+
+  const columns = cellsOf(header.find((line) => /^ \*\s+api\s/.test(line)) ?? '');
+  const rows = new Map<string, string[]>();
+  for (const line of header) {
+    const [name, ...marks] = cellsOf(line);
+    if (Object.hasOwn(API_SERVERS, name) && marks.length === columns.length) {
+      rows.set(name, marks);
+    }
+  }
+
+  it('has a column for every environment and a row for every spec', () => {
+    assert.deepStrictEqual(columns, [...KNOWN_ENVIRONMENTS]);
+    assert.deepStrictEqual([...rows.keys()].sort(), Object.keys(API_SERVERS).sort());
+  });
+
+  it('marks each cell with what a request there does', () => {
+    for (const [name, marks] of rows) {
+      const config = API_SERVERS[name as SpecName];
+      KNOWN_ENVIRONMENTS.forEach((environment, column) => {
+        let resolves = true;
+        try {
+          resolveRequestUrl(name, '/x', environment);
+        } catch {
+          resolves = false;
+        }
+        const listed =
+          config.kind === 'templated'
+            ? config.supportedEnvironments.includes(environment)
+            : config.kind === 'static' && environment in config.urlByEnvironment;
+
+        // X: there is a server and the request goes to it. "-": the call
+        // throws. "~": the spec does not list it and the request goes anyway.
+        const expected = !resolves ? '-' : listed ? 'X' : '~';
+        assert.strictEqual(marks[column], expected, `${name} on ${environment}`);
+      });
+    }
+  });
+
+  it('explains every mark it uses', () => {
+    const text = header.join('\n');
+    const used = new Set([...rows.values()].flat());
+    for (const mark of used) {
+      // Compared as text, not built into a pattern: a mark may be any character.
+      const hasLegendLine = text.split('\n').some((line) => line.startsWith(` *   ${mark}  `));
+      assert.ok(hasLegendLine, `no legend line for "${mark}"`);
+    }
   });
 });
