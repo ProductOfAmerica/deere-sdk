@@ -6,7 +6,8 @@
  * on import. See tests/generate-sdk.test.ts.
  */
 
-import { refName } from './spec-utils.js';
+import { jsDocText, tsStringLiteral } from './emit.js';
+import { refName, stripDocumentationMarkup } from './spec-utils.js';
 
 /** Minimal structural shape of an OpenAPI schema, enough for wrapper detection. */
 export interface SchemaLike {
@@ -130,13 +131,39 @@ export interface ReturnTypeOp {
 }
 
 /**
+ * The TypeScript type of a named schema in the generated `components`. The
+ * name comes from a `$ref` in the spec, so it is written as an escaped literal.
+ */
+export function schemaTypeRef(schemaName: string): string {
+  return `components['schemas'][${tsStringLiteral(schemaName)}]`;
+}
+
+/**
+ * The body of the template literal a generated method builds its path from:
+ * the path key with each `{name}` replaced by a call that encodes the
+ * argument of that name (src/path-pattern.ts). Written between backticks by
+ * the caller.
+ *
+ * The path must already have passed assertPathKey. That is what makes its
+ * literal parts safe inside a template literal and its parameter names usable
+ * as identifiers, each at most once.
+ */
+export function buildPathTemplate(path: string): string {
+  // A function, not a replacement string: in a string, `$` starts a pattern.
+  return path.replace(
+    /\{([^}]+)\}/g,
+    (_match, name: string) => `\${encodePathParam(${tsStringLiteral(name)}, ${name})}`
+  );
+}
+
+/**
  * The element type for a collection GET: the resolved item schema, or `unknown`
  * when no item schema could be resolved. Shared by `computeReturnType` (for the
  * `PaginatedResponse<T>` of the single-page method) and the `listAll` generator
  * (`T[]` / `getAll<T>`), so the two cannot drift.
  */
 export function collectionItemType(op: ReturnTypeOp): string {
-  return op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown';
+  return op.responseSchemaRef ? schemaTypeRef(op.responseSchemaRef) : 'unknown';
 }
 
 /**
@@ -150,9 +177,124 @@ export function collectionItemType(op: ReturnTypeOp): string {
 export function computeReturnType(op: ReturnTypeOp): string {
   if (op.method === 'delete') return 'void';
   if (op.isCollection && op.method === 'get') return `PaginatedResponse<${collectionItemType(op)}>`;
-  if (op.responseSchemaRef) return `components['schemas']['${op.responseSchemaRef}']`;
+  if (op.responseSchemaRef) return schemaTypeRef(op.responseSchemaRef);
   if (op.method === 'post' || op.method === 'put' || op.method === 'patch') return 'void';
   return 'unknown';
+}
+
+/** One query parameter, as far as a method's parameter list needs it. */
+export interface QueryParamLike {
+  /** The member's name in the method's `params` object. */
+  safeName: string;
+  required: boolean;
+  /** The TypeScript type, when the parameter is not an enum. */
+  type: string;
+  /** Spec text. Each value is written as an escaped literal. */
+  enumValues?: readonly unknown[];
+}
+
+/** Operation fields a generated method's parameter list is built from. */
+export interface ParamListOp extends ReturnTypeOp {
+  pathParams: ReadonlyArray<{ name: string }>;
+  queryParams: readonly QueryParamLike[];
+  hasRequestBody: boolean;
+  requestBodySchemaRef?: string;
+}
+
+/** The type of a method's `data` parameter. */
+function bodyParam(op: ParamListOp): string {
+  const type = op.requestBodySchemaRef
+    ? schemaTypeRef(op.requestBodySchemaRef)
+    : 'Record<string, unknown>';
+  return `data: ${type}`;
+}
+
+/**
+ * One member of a method's `params` object type. `sorted` puts an enum's
+ * values in a fixed order: the emitter keeps the order John Deere declares
+ * them in, the signature does not depend on it.
+ */
+function queryParamMember(qp: QueryParamLike, sorted = false): string {
+  let type = qp.type;
+  if (qp.enumValues) {
+    // The markup is stripped because the value is written as source, not HTML.
+    const literals = qp.enumValues.map((v) => tsStringLiteral(stripDocumentationMarkup(String(v))));
+    type = (sorted ? [...literals].sort() : literals).join(' | ');
+  }
+  return `${qp.safeName}${qp.required ? '' : '?'}: ${type}`;
+}
+
+/**
+ * The parameter list of a generated method, one entry per parameter: the path
+ * parameters, then the body, then the query parameters as one `params`
+ * object, then `options`.
+ */
+export function buildMethodParams(op: ParamListOp): string[] {
+  const params = op.pathParams.map((pp) => `${pp.name}: string`);
+  if (op.hasRequestBody) params.push(bodyParam(op));
+  if (op.queryParams.length > 0) {
+    params.push(`params?: { ${op.queryParams.map((qp) => queryParamMember(qp)).join('; ')} }`);
+  }
+  params.push('options?: RequestOptions');
+  return params;
+}
+
+/**
+ * A method's parameters and return type as one line of text, for
+ * scripts/api-surface.yaml to pin. It is put together from the same pieces as
+ * the emitted method, so it changes exactly when what a caller writes against
+ * changes: an argument added, removed or moved, a body or query member whose
+ * type changed, a member that became required, a different return type.
+ *
+ * Three things a caller cannot see are left out on purpose, so that upstream
+ * churn in them does not stop the sync:
+ *   - a path parameter's name (each is a bare `string`; a rename is absorbed,
+ *     as it is for the operation's identity);
+ *   - the order query parameters are declared in;
+ *   - the order an enum's values are declared in.
+ *
+ * What a named schema contains is not part of it either. A field added to or
+ * dropped from `components['schemas'][...]` leaves every signature as it was.
+ */
+export function methodSignature(op: ParamListOp): string {
+  const params = op.pathParams.map(() => 'string');
+  if (op.hasRequestBody) params.push(bodyParam(op));
+  if (op.queryParams.length > 0) {
+    const members = op.queryParams.map((qp) => queryParamMember(qp, true)).sort();
+    params.push(`params?: { ${members.join('; ')} }`);
+  }
+  params.push('options?: RequestOptions');
+  return `(${params.join(', ')}) => ${computeReturnType(op)}`;
+}
+
+/**
+ * The arguments of the client call a generated method ends with, in order.
+ *
+ * DeereClient's get and delete take (spec, path, options). Its post, put and
+ * patch take a body between the path and the options, so a write that has no
+ * body to send passes `undefined` there. The slot used to be left out for such
+ * a method, and the caller's options then landed in the body's place: they
+ * were sent as the request body, and none of them was applied.
+ *
+ * A get or delete that declares a request body has nowhere to put it. That is
+ * refused here, naming the operation, where it used to fail later and less
+ * clearly, when the generated call did not compile. `where` says which
+ * operation, for that message.
+ */
+export function clientCallArguments(op: ParamListOp, where: string): string[] {
+  const takesBody = op.method === 'post' || op.method === 'put' || op.method === 'patch';
+  if (takesBody) {
+    return ['this.spec', 'path', op.hasRequestBody ? 'data' : 'undefined', 'options'];
+  }
+  if (op.hasRequestBody) {
+    throw new Error(
+      `${where}: a ${op.method.toUpperCase()} operation declares a request body, and ` +
+        `DeereClient.${op.method} has no parameter to carry one. If John Deere really ` +
+        `publishes this, the client and the generator both have to learn it before the ` +
+        `method can be emitted.`
+    );
+  }
+  return ['this.spec', 'path', 'options'];
 }
 
 /**
@@ -177,10 +319,12 @@ export function isCollectionEndpoint(
 
 /**
  * Word-wrap `text` into JSDoc lines. The first line starts with `prefix`;
- * continuation lines start with `   * `.
+ * continuation lines start with `   * `. The text cannot close the comment
+ * (see jsDocText); wrapping cannot undo that, since it only ever inserts
+ * whitespace between words.
  */
 export function wrapJsDocText(text: string, prefix: string, maxWidth = 80): string[] {
-  const words = text.replace(/\s+/g, ' ').trim().split(' ');
+  const words = jsDocText(text).replace(/\s+/g, ' ').trim().split(' ');
   const lines: string[] = [];
   let currentLine = prefix;
 
@@ -225,13 +369,13 @@ export function deprecatedJsDocLines(op: JsDocOp): string[] {
 export function buildMethodJsDoc(op: JsDocOp): string[] {
   const jsdoc: string[] = ['  /**'];
   if (op.summary) {
-    jsdoc.push(`   * ${op.summary}`);
+    jsdoc.push(`   * ${jsDocText(op.summary)}`);
   }
   if (op.description && op.description !== op.summary) {
     jsdoc.push(...wrapJsDocText(op.description, '   * @description '));
   }
   jsdoc.push(...deprecatedJsDocLines(op));
-  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${op.path}`);
+  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${jsDocText(op.path)}`);
   jsdoc.push('   */');
   return jsdoc;
 }

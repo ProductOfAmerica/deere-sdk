@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/connection-management.js';
 
 export class ConnectionManagementApi {
@@ -58,7 +59,7 @@ export class ConnectionManagementApi {
    * @generated from DELETE /connections/{connectionId}
    */
   async delete(connectionId: string, options?: RequestOptions): Promise<void> {
-    const path = `/connections/${connectionId}`;
+    const path = `/connections/${encodePathParam('connectionId', connectionId)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -69,7 +70,7 @@ export class ConnectionManagementApi {
    * @generated from DELETE /organizations/{orgId}/connections
    */
   async deleteConnections(orgId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/connections`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/connections`;
     await this.client.delete(this.spec, path, options);
   }
 }

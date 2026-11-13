@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/products.js';
 
 export class ProductsApi {
@@ -94,7 +95,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/chemicals/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/chemicals/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceChemical']>(this.spec, path, options);
   }
 
@@ -115,7 +116,7 @@ export class ProductsApi {
     data: components['schemas']['PostReferenceChemical'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/chemicals/${erid}/associateToOrg/${organizationId}`;
+    const path = `/chemicals/${encodePathParam('erid', erid)}/associateToOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -134,7 +135,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     if (params?.registration !== undefined) query.set('registration', String(params.registration));
     const queryString = query.toString();
-    const path = `/chemicals/${erid}/documents${queryString ? `?${queryString}` : ''}`;
+    const path = `/chemicals/${encodePathParam('erid', erid)}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document_Chemicals']>>(
       this.spec,
       path,
@@ -158,7 +159,7 @@ export class ProductsApi {
     data: components['schemas']['CommonReferenceChemical'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/chemicals/${erid}/setOverridesForOrg/${organizationId}`;
+    const path = `/chemicals/${encodePathParam('erid', erid)}/setOverridesForOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.patch(this.spec, path, data, options);
   }
 
@@ -172,7 +173,7 @@ export class ProductsApi {
     erid: string,
     options?: RequestOptions
   ): Promise<components['schemas']['DocumentWithPdfFile']> {
-    const path = `/documents/${erid}`;
+    const path = `/documents/${encodePathParam('erid', erid)}`;
     return this.client.get<components['schemas']['DocumentWithPdfFile']>(this.spec, path, options);
   }
 
@@ -226,7 +227,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/fertilizers/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/fertilizers/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceFertilizer']>(this.spec, path, options);
   }
 
@@ -247,7 +248,7 @@ export class ProductsApi {
     data: components['schemas']['PostReferenceFertilizer'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/fertilizers/${erid}/associateToOrg/${organizationId}`;
+    const path = `/fertilizers/${encodePathParam('erid', erid)}/associateToOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -266,7 +267,7 @@ export class ProductsApi {
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     if (params?.registration !== undefined) query.set('registration', String(params.registration));
     const queryString = query.toString();
-    const path = `/fertilizers/${erid}/documents${queryString ? `?${queryString}` : ''}`;
+    const path = `/fertilizers/${encodePathParam('erid', erid)}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document']>>(
       this.spec,
       path,
@@ -290,7 +291,7 @@ export class ProductsApi {
     data: components['schemas']['CommonPostReferenceFertilizer'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/fertilizers/${erid}/setOverridesForOrg/${organizationId}`;
+    const path = `/fertilizers/${encodePathParam('erid', erid)}/setOverridesForOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.patch(this.spec, path, data, options);
   }
 
@@ -310,7 +311,7 @@ export class ProductsApi {
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/chemicals${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/chemicals${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Chemical']>>(
       this.spec,
       path,
@@ -343,7 +344,7 @@ export class ProductsApi {
     data: components['schemas']['PostChemical'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/chemicals`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/chemicals`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -362,7 +363,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/chemicals/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/chemicals/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['Chemical']>(this.spec, path, options);
   }
 
@@ -378,7 +379,7 @@ export class ProductsApi {
     data: components['schemas']['PutChemical'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/chemicals/${erid}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/chemicals/${encodePathParam('erid', erid)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -394,7 +395,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/dryBlends${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/dryBlends${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['DryBlend']>>(
       this.spec,
       path,
@@ -421,7 +422,7 @@ export class ProductsApi {
     data: components['schemas']['PostDryBlend'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/dryBlends`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/dryBlends`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -438,7 +439,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/dryBlends/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/dryBlends/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['DryBlend']>(this.spec, path, options);
   }
 
@@ -454,7 +455,7 @@ export class ProductsApi {
     data: components['schemas']['PostDryBlend'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/dryBlends/${erid}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/dryBlends/${encodePathParam('erid', erid)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -474,7 +475,7 @@ export class ProductsApi {
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/fertilizers${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/fertilizers${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Fertilizer_Fertilizers']>>(
       this.spec,
       path,
@@ -507,7 +508,7 @@ export class ProductsApi {
     data: components['schemas']['PostFertilizer'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/fertilizers`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/fertilizers`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -526,7 +527,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/fertilizers/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/fertilizers/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['Fertilizer_Fertilizers']>(
       this.spec,
       path,
@@ -546,7 +547,7 @@ export class ProductsApi {
     data: components['schemas']['PutFertilizer'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/fertilizers/${erid}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/fertilizers/${encodePathParam('erid', erid)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -560,7 +561,7 @@ export class ProductsApi {
     organizationId: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<unknown>> {
-    const path = `/organizations/${organizationId}/productCompanies`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/productCompanies`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
 
@@ -578,7 +579,7 @@ export class ProductsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/tankMixes${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/tankMixes${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['TankMixCollection']>>(
       this.spec,
       path,
@@ -606,7 +607,7 @@ export class ProductsApi {
     data: components['schemas']['TankMix'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/tankMixes`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/tankMixes`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -624,7 +625,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/tankMixes/${id}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/tankMixes/${encodePathParam('id', id)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['TankMixCollection']>(this.spec, path, options);
   }
 
@@ -640,7 +641,7 @@ export class ProductsApi {
     data: components['schemas']['TankMix'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/tankMixes/${id}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/tankMixes/${encodePathParam('id', id)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -662,7 +663,7 @@ export class ProductsApi {
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/varieties${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Variety']>>(
       this.spec,
       path,
@@ -685,7 +686,7 @@ export class ProductsApi {
     if (params?.status !== undefined) query.set('status', String(params.status));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/varieties${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/varieties${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['Variety']>(this.spec, path, options);
   }
 
@@ -710,7 +711,7 @@ export class ProductsApi {
     data: components['schemas']['PostVariety'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/varieties`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/varieties`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -728,7 +729,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/varieties/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/varieties/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['Variety']>(this.spec, path, options);
   }
 
@@ -744,7 +745,7 @@ export class ProductsApi {
     data: components['schemas']['PutVariety'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/varieties/${erid}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/varieties/${encodePathParam('erid', erid)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -797,7 +798,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/varieties/${erid}${queryString ? `?${queryString}` : ''}`;
+    const path = `/varieties/${encodePathParam('erid', erid)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['ReferenceVariety']>(this.spec, path, options);
   }
 
@@ -816,7 +817,7 @@ export class ProductsApi {
     data: components['schemas']['ReferenceProductPointerRequest'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/varieties/${erid}/associateToOrg/${organizationId}`;
+    const path = `/varieties/${encodePathParam('erid', erid)}/associateToOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -834,7 +835,7 @@ export class ProductsApi {
     const query = new URLSearchParams();
     if (params?.countryCode !== undefined) query.set('countryCode', String(params.countryCode));
     const queryString = query.toString();
-    const path = `/varieties/${erid}/documents${queryString ? `?${queryString}` : ''}`;
+    const path = `/varieties/${encodePathParam('erid', erid)}/documents${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Document']>>(
       this.spec,
       path,
@@ -857,7 +858,7 @@ export class ProductsApi {
     data: components['schemas']['CommonProductPointerRequest'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/varieties/${erid}/setOverridesForOrg/${organizationId}`;
+    const path = `/varieties/${encodePathParam('erid', erid)}/setOverridesForOrg/${encodePathParam('organizationId', organizationId)}`;
     await this.client.patch(this.spec, path, data, options);
   }
 }

@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/machine-engine-hours.js';
 
 export class MachineEngineHoursApi {
@@ -36,7 +37,7 @@ export class MachineEngineHoursApi {
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/engineHours${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['EngineHours']>>(
       this.spec,
       path,
@@ -57,7 +58,7 @@ export class MachineEngineHoursApi {
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/engineHours${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/engineHours${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['EngineHours']>(this.spec, path, options);
   }
 }

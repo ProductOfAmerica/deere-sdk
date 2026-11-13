@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/harvest-id.js';
 
 export class HarvestIdApi {
@@ -33,7 +34,7 @@ export class HarvestIdApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['HIDCottonModule']>>(
       this.spec,
       path,
@@ -54,7 +55,7 @@ export class HarvestIdApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/harvestIdentificationModules${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['HIDCottonModule']>(this.spec, path, options);
   }
 
@@ -73,7 +74,7 @@ export class HarvestIdApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/harvestIdentificationModules/${serialNumber}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/harvestIdentificationModules/${encodePathParam('serialNumber', serialNumber)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['HIDCottonModule']>(this.spec, path, options);
   }
 }

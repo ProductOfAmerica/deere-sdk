@@ -52,6 +52,10 @@ export {
 export { createDeere, Deere } from './deere.js';
 // URL-resolver errors, thrown per call before any HTTP request
 export { NoServerConfigError, UnsupportedEnvironmentError } from './environment-resolver.js';
+// For callers who build a path for the low-level client themselves. The
+// generated methods already pass every path parameter through it, and
+// encodeURIComponent alone is not a substitute: it leaves ".." as it is.
+export { encodePathParam } from './path-pattern.js';
 
 // Safe facades that force query params the raw API leaves optional.
 // See scripts/embed-contracts.yaml and src/safe/ for context.

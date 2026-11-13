@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/farms.js';
 
 export class FarmsApi {
@@ -32,7 +33,7 @@ export class FarmsApi {
     id: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['FieldResponse2']>> {
-    const path = `/organizations/${orgID}/farms/${id}/fields`;
+    const path = `/organizations/${encodePathParam('orgID', orgID)}/farms/${encodePathParam('id', id)}/fields`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse2']>>(
       this.spec,
       path,
@@ -54,7 +55,7 @@ export class FarmsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetFarm']>>(
       this.spec,
       path,
@@ -74,7 +75,7 @@ export class FarmsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/farms${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['GetFarm']>(this.spec, path, options);
   }
 
@@ -88,7 +89,7 @@ export class FarmsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/farms`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -106,7 +107,7 @@ export class FarmsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/farms/${farmId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms/${encodePathParam('farmId', farmId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['GetFarm']>(this.spec, path, options);
   }
 
@@ -121,7 +122,7 @@ export class FarmsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/farms/${farmId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms/${encodePathParam('farmId', farmId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -131,7 +132,7 @@ export class FarmsApi {
    * @generated from DELETE /organizations/{orgId}/farms/{farmId}
    */
   async delete(orgId: string, farmId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/farms/${farmId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms/${encodePathParam('farmId', farmId)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -145,7 +146,7 @@ export class FarmsApi {
     farmId: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['Clients']>> {
-    const path = `/organizations/${orgId}/farms/${farmId}/clients`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/farms/${encodePathParam('farmId', farmId)}/clients`;
     return this.client.get<PaginatedResponse<components['schemas']['Clients']>>(
       this.spec,
       path,
