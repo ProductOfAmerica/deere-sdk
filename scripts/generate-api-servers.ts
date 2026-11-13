@@ -23,8 +23,13 @@
  *
  * Applies a conservative env-to-tier classifier for static specs: envs we
  * can't confidently map are OMITTED from the partial map, not defaulted.
- * At runtime, calling an unmapped env throws UnsupportedEnvironmentError
- * before any HTTP call.
+ * At runtime, calling a static spec on an unmapped env throws
+ * UnsupportedEnvironmentError before any HTTP call.
+ *
+ * A templated spec is different. Its environment list is emitted as
+ * `supportedEnvironments` and nothing enforces it: the resolver puts whatever
+ * environment the client has into the template. The matrix at the top of the
+ * generated file marks the two cases apart (coverageMark).
  *
  * Usage: pnpm generate-api-servers
  */
@@ -162,7 +167,9 @@ const ENV_TIER: Record<string, Tier | undefined> = {
   // as before, preserving the trust-boundary rule.
   sandboxapi: 'sandbox',
   // DELIBERATELY undefined: apidev.tal has no corresponding tier in any
-  // current spec. Users on this env hit UnsupportedEnvironmentError.
+  // current spec, so no static spec is mapped to it and each of them throws
+  // UnsupportedEnvironmentError there. This table does not reach templated
+  // specs, which resolve apidev.tal like any other environment.
   'apidev.tal': undefined,
 };
 
@@ -392,9 +399,10 @@ function collectEnvironmentUnion(classified: ClassifiedSpec[]): string[] {
       for (const env of Object.keys(config.urlByEnvironment)) seen.add(env);
     }
   }
-  // Also include the unmapped-by-design envs so the Environment type still
-  // covers them — the resolver then throws UnsupportedEnvironmentError when
-  // a user picks one on an API whose spec omits them.
+  // Also include every name the tier table knows, mapped to a tier or not, so
+  // the Environment type covers them. On a name no static spec is mapped to,
+  // a static spec throws UnsupportedEnvironmentError and a templated spec
+  // resolves as usual.
   for (const env of Object.keys(ENV_TIER)) seen.add(env);
 
   // Production-first ordering for cosmetics and stability.
@@ -425,6 +433,30 @@ function collectEnvironmentUnion(classified: ClassifiedSpec[]): string[] {
 // Coverage matrix (for the generated-file header comment)
 // ============================================================================
 
+/**
+ * What one cell of the matrix says. An environment a spec has no server for
+ * gets one of two marks, because the two cases do different things at run
+ * time and one mark for both claimed a throw that a templated spec never
+ * makes (see resolveRequestUrl in src/environment-resolver.ts):
+ *
+ *   '-'  a static or unavailable spec: resolving a URL for it throws, before
+ *        any request.
+ *   '~'  a templated spec that does not list it: the environment is put into
+ *        the URL template all the same, and the request is sent.
+ *
+ * tests/generate-api-servers.test.ts holds every cell of the committed matrix
+ * to what resolveRequestUrl does there.
+ */
+function coverageMark(config: SpecConfig, env: string): 'X' | '-' | '~' {
+  if (config.kind === 'templated') {
+    return config.supportedEnvironments.includes(env) ? 'X' : '~';
+  }
+  if (config.kind === 'static') {
+    return config.urlByEnvironment[env] ? 'X' : '-';
+  }
+  return '-';
+}
+
 function buildCoverageMatrix(classified: ClassifiedSpec[], envs: string[]): string {
   const specNameWidth = Math.max(...classified.map((c) => c.specName.length), 20);
   const envWidths = envs.map((e) => Math.max(e.length, 3));
@@ -434,20 +466,19 @@ function buildCoverageMatrix(classified: ClassifiedSpec[], envs: string[]): stri
 
   const rows = classified.map((c) => {
     const name = c.specName.padEnd(specNameWidth);
-    const cells = envs.map((e, i) => {
-      let mark = '-';
-      if (c.config.kind === 'templated') {
-        mark = c.config.supportedEnvironments.includes(e) ? 'X' : '-';
-      } else if (c.config.kind === 'static') {
-        mark = c.config.urlByEnvironment[e] ? 'X' : '-';
-      }
-      return mark.padEnd(envWidths[i]);
-    });
+    const cells = envs.map((e, i) => coverageMark(c.config, e).padEnd(envWidths[i]));
     return ` ${name}  ${cells.join('  ')}`;
   });
 
   return [
-    ' * Env coverage matrix (X = supported, - = throws UnsupportedEnvironmentError):',
+    ' * Env coverage matrix:',
+    ' *',
+    ' *   X  the spec has a server for the environment.',
+    ' *   -  it has none and no template to build one from (its hosts are fixed,',
+    ' *      or it has no usable servers block): resolving a URL for it throws',
+    ' *      UnsupportedEnvironmentError or NoServerConfigError, before any request.',
+    ' *   ~  the spec does not list the environment, and its host is a template:',
+    ' *      the URL is built from the environment anyway and the request is sent.',
     ' *',
     ` *${header}`,
     ...rows.map((r) => ` *${r}`),
@@ -478,9 +509,23 @@ function emitFile(classified: ClassifiedSpec[], envs: string[]): string {
  *
 ${coverageMatrix}
  *
- * A dash (-) means the env is NOT supported for that spec. Calling a method
- * on that API with that env throws UnsupportedEnvironmentError at request
- * time, before any HTTP call — no silent cross-tier routing.
+ * Only a spec without a template can refuse an environment. For those, a "-"
+ * is a throw when a URL is resolved for the spec, before any HTTP call: there
+ * is no silent routing to another tier's host.
+ *
+ * A templated spec refuses nothing. \`supportedEnvironments\` records what its
+ * servers block lists, and the resolver does not consult it, so a "~" is a
+ * request to a host the spec does not name. Whether John Deere serves that
+ * host is not established here. What limits the name is the same for every
+ * spec: the \`Environment\` type at compile time and the client's constructor
+ * at run time, and both admit every name in the header row.
+ *
+ * Each row is about resolving a URL for that spec. In HATEOAS mode, for a
+ * path that has a parent resource, the client resolves only the parent and
+ * takes the child's URL from a link in the response. The row that applies is
+ * then the one of the spec the parent belongs to, which may or may not be
+ * the child's own. A path with no parent is resolved through its own row,
+ * as it is without HATEOAS.
  */
 
 // ============================================================================
@@ -491,9 +536,10 @@ export type SpecName =
 ${specNameUnion};
 
 // ============================================================================
-// Environment — union of every subdomain seen across templated specs, plus
-// the conservatively-unmapped envs so the type covers them (the resolver
-// throws UnsupportedEnvironmentError on unmapped envs per spec).
+// Environment: every name a templated spec lists or a static spec is mapped
+// to, plus every name the generator's tier table knows. A static spec throws
+// UnsupportedEnvironmentError for one it has no host for; a templated spec
+// accepts any of them (see the matrix above).
 // ============================================================================
 
 export type Environment =
@@ -527,7 +573,11 @@ export interface PathServerOverride {
   pattern: string;
   /** URL template with \`{environment}\` placeholder. */
   urlTemplate: string;
-  /** Envs declared in this path item's servers.variables.environment.enum. */
+  /**
+   * The environments this path item's servers block lists. Written by
+   * fix-specs from scripts/routing-overrides.yaml, as the union of what the
+   * templated specs declare. Recorded, not enforced: see the templated config.
+   */
   supportedEnvironments: readonly Environment[];
 }
 
@@ -536,7 +586,17 @@ export type SpecServerConfig =
       kind: 'templated';
       /** URL template with \`{environment}\` placeholder. */
       urlTemplate: string;
-      /** Envs declared in the spec's servers.variables.environment.enum. */
+      /**
+       * The environments the spec's servers block lists
+       * (servers.variables.environment.enum in specs/fixed). John Deere
+       * declares the list for a spec whose own servers block is a template.
+       * For one that hard-codes platform hosts, or that declares no servers
+       * and is given a block by scripts/routing-overrides.yaml, fix-specs
+       * writes it: the union of the lists the others declare.
+       *
+       * Recorded, not enforced. The resolver substitutes whatever environment
+       * the client was built with, in the list or not.
+       */
       supportedEnvironments: readonly Environment[];
       /**
        * Paths that override the template above. Absent for most specs, where

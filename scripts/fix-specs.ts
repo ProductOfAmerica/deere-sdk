@@ -275,13 +275,16 @@ function removeInvalidFields(spec: Record<string, unknown>): void {
 // baseUrl ignored the spec's servers list entirely, so this worked by
 // coincidence. In v2.0 with spec-driven URL resolution, leaving these
 // hardcoded would break sandbox users: generate-api-servers would see
-// `https://api.deere.com/platform` and map only the `api` env, throwing
-// UnsupportedEnvironmentError for every other env.
+// `https://api.deere.com/platform`, classify the spec as static, and map only
+// the production environments to it, throwing UnsupportedEnvironmentError for
+// every other.
 //
 // Fix: detect specs whose server list is entirely made of static JD platform
 // URLs and rewrite them to the templated form with the global enum union.
 // After this pass runs, generate-api-servers sees a uniform templated shape
-// and every env routes correctly.
+// and a URL is built for every environment. The union is this script's, not
+// a statement by John Deere about these specs: whether each of them is served
+// in each environment has not been measured.
 
 interface OpenAPIServer {
   url: string;

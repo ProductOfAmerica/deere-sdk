@@ -256,6 +256,19 @@ environment, it throws `UnsupportedEnvironmentError` *before* any HTTP call. Tre
 silently falling back could delete real customer data. Env mapping lives in `generate-api-servers.ts`; widen it there,
 not at the call site.
 
+A templated spec is the other case, and it is deliberate. Its `supportedEnvironments` records what the spec's servers
+block lists and is not enforced: the resolver substitutes whatever environment the client has, listed or not. That is
+no fallback (the request goes to the environment that was asked for), and enforcing the list would refuse requests on
+weak grounds. For a spec whose servers block `fix-specs` writes, the list is not John Deere's statement at all but the
+union of what the other specs declare, and nothing measured shows that an unlisted environment fails. The matrix at
+the top of `src/api-servers.generated.ts` keeps the two apart: `-` is a throw, `~` is an environment the spec does not
+list where the request is sent anyway. `tests/generate-api-servers.test.ts` holds each cell to what the resolver does,
+so a change to either side has to change both.
+
+All of this is about `resolveRequestUrl` for the spec named. In HATEOAS mode a path with a parent never has its own
+spec resolved, only the parent's (next section), so a static child under a templated parent is not refused there.
+The README's Strict Mode section spells out the three cases.
+
 V1 friendly env names (`sandbox`, `production`, …) are rejected at construction time with a migration hint (see
 `V1_LEGACY_ENV_NAMES` in `client.ts`).
 
