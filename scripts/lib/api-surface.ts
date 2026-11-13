@@ -351,9 +351,9 @@ function paramNames(path: string): string[] {
  * to the `Item` noun, so the result is never just the verb).
  * Tiebreak chain, first free wins: prepend preceding non-param segments
  * nearest-first up to the whole path, then append `By<LastParam>` to the
- * full-path candidate. If every candidate is taken, throw (a human picks a
- * name; there is deliberately no numeric-counter fallback, which was the
- * legacy bug).
+ * full-path candidate. `listAll` is passed over wherever it comes up. If every
+ * candidate is taken, throw (a human picks a name; there is deliberately no
+ * numeric-counter fallback, which was the legacy bug).
  */
 export function proposeName(op: SurfaceOp, takenNames: ReadonlySet<string>): string {
   const verb = verbFor(op);
@@ -379,10 +379,17 @@ export function proposeName(op: SurfaceOp, takenNames: ReadonlySet<string>): str
   }
 
   for (const candidate of candidates) {
+    // Never proposed, taken or not. It is the twin the generator derives from
+    // `list`, and validateName refuses it, so a manifest written with one would
+    // stop every later run at load. A collection GET ending in `/all` reaches
+    // it; no other candidate can be a reserved name, since each starts with a
+    // verb.
+    if (candidate === 'listAll') continue;
     if (!takenNames.has(candidate)) return candidate;
   }
   fail(
-    `no available name for ${opKey(op.method, op.path)}; tried ${candidates.join(', ')}. ` +
+    `no available name for ${opKey(op.method, op.path)}; tried ${candidates.join(', ')}` +
+      `${candidates.includes('listAll') ? ' ("listAll" is reserved for the twin derived from "list")' : ''}. ` +
       `A human must add an entry for it to scripts/api-surface.yaml with a chosen name.`
   );
 }

@@ -472,6 +472,43 @@ describe('proposeName', () => {
       }
     );
   });
+
+  // listAll is never an entry's name. It is the twin the generator derives
+  // from `list`, and the loader refuses a manifest that names one, so a
+  // proposal of it was written out and then stopped every later run at load.
+  it('never proposes listAll, even when nothing has taken it', () => {
+    const nested: SurfaceOp = {
+      operationId: '',
+      method: 'get',
+      path: '/things/all',
+      isCollection: true,
+    };
+    assert.strictEqual(proposeName(nested, new Set()), 'listThingsAll');
+
+    // With no other segment to prepend there is nothing left to propose, and
+    // a person has to name it.
+    const lone: SurfaceOp = { operationId: '', method: 'get', path: '/all', isCollection: true };
+    assert.throws(
+      () => proposeName(lone, new Set()),
+      (err: Error) => {
+        assert.match(err.message, /GET \/all/);
+        assert.match(err.message, /listAll/);
+        return true;
+      }
+    );
+  });
+
+  it('proposes a name the loader accepts for a collection whose last segment is "all"', () => {
+    const ops: SurfaceOp[] = [
+      { operationId: '', method: 'get', path: '/things/all', isCollection: true },
+    ];
+    const { newEntries } = resolveMethodNames('spec', ops, { version: 1, specs: {} });
+    const written = serializeApiSurface({ version: 1, specs: { spec: newEntries } });
+
+    assert.deepStrictEqual(loadYaml(written).specs.spec, [
+      { op: 'GET /things/all', name: 'listThingsAll' },
+    ]);
+  });
 });
 
 // ---------------------------------------------------------------------------
