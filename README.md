@@ -577,7 +577,7 @@ import {DeereClient, type PaginatedResponse} from 'deere-sdk';
 const client = new DeereClient({
     accessToken: 'your-token',
     environment: 'sandboxapi',
-    timeout: 30000,   // Request timeout in ms (default: 30000)
+    timeout: 30000,   // Per-attempt timeout in ms (default: 30000)
     maxRetries: 3,    // Retry attempts (default: 3, set to 0 to disable)
 });
 
@@ -686,7 +686,7 @@ const boundaries = await deere.boundaries.listBoundaries(orgId, fieldId);
 
 ### Strict Mode
 
-HATEOAS mode is strict: if link resolution fails (the parent returns no matching link, the parent fetch errors, or the link is not an `https` URL on `*.deere.com`), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate.
+HATEOAS mode is strict: if link resolution fails (the parent returns no matching link, the parent fetch errors, or the link is not an `https` URL on `*.deere.com`), a `HateoasError` is thrown immediately. This ensures certification compliance issues surface during development, not at John Deere's certification gate. The one exception is a call you have cancelled: it rejects with your signal's reason, as described under [Timeouts and Cancellation](#timeouts-and-cancellation).
 
 ```typescript
 import {HateoasError} from 'deere-sdk';
@@ -723,6 +723,7 @@ The SDK automatically retries failed requests with exponential backoff and jitte
 | Timeouts                   | Yes      | Request took too long         |
 | `401`, `403` Auth errors   | No       | Refresh your token            |
 | `400`, `404`, `422`        | No       | Fix your request              |
+| Cancelled by your `signal` | No       | See below                     |
 
 **Default behavior:** 3 retries with exponential backoff (delays of ~1s, ~2s, ~4s with jitter).
 
@@ -742,6 +743,39 @@ const noRetries = new Deere({
 });
 ```
 
+### Timeouts and Cancellation
+
+Every generated method takes `options` as its last argument, and so do `get`, `post`, `put`, `patch`, `delete`, `paginate`, `getAll`, `fetchUrl` and `followLink` on `DeereClient`. Two of the options end a call early:
+
+```typescript
+import {Deere, DeereError} from 'deere-sdk';
+
+const deere = new Deere({accessToken: 'your-token'});
+const controller = new AbortController();
+// Call controller.abort() from anywhere to cancel, e.g. when the user leaves the page.
+
+try {
+    const fields = await deere.fields.listAll('org-id', undefined, {
+        signal: controller.signal,
+        timeout: 10000, // for this call; the client's `timeout` is the default
+    });
+    console.log(fields.length);
+} catch (error) {
+    if (controller.signal.aborted) {
+        // Cancelled. `error` is controller.signal.reason, an AbortError by default.
+    } else if (error instanceof DeereError && error.statusText === 'Timeout') {
+        // The last attempt got no response in time.
+    } else {
+        throw error;
+    }
+}
+```
+
+- **`timeout`** is how long each attempt may wait for a response to start. An attempt that times out is retried like any other transient failure. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. Reading a response body is not limited by the timeout, and `Infinity` turns it off.
+- **`signal`** cancels the call. The call rejects with the signal's `reason`: an `AbortError` by default, or whatever you passed to `abort()`. That is what `fetch` does, so the error is not a `DeereError`. A cancelled call is never retried, a wait before a retry ends at once, and `paginate`, `getAll` and HATEOAS mode request nothing further.
+- The two apply together. Passing a `signal` does not switch the timeout off.
+- A custom `fetch` must honour the `signal` it is handed. If it does not, neither a timeout nor a cancellation can interrupt a request already in flight.
+
 ### Error Types
 
 | Error                         | When it's thrown                                                  | Retried? |
@@ -749,6 +783,8 @@ const noRetries = new Deere({
 | `DeereError`                  | Base class. Any HTTP error from John Deere (400/404/422/5xx).     | Only 5xx |
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
+| `DeereError` with `status` `0` and `statusText` `'Timeout'` | The last attempt got no response within `timeout`. | Yes      |
+| The `reason` of your `signal` (an `AbortError` by default) | You aborted the `signal` you passed in `options`. Not a `DeereError`. See [Timeouts and Cancellation](#timeouts-and-cancellation). | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored, no matching link, or the link is not an `https` URL on `*.deere.com`). | No       |
 | `DeereError` with `status` `-1` and `statusText` `'UntrustedLink'` | `paginate` or `getAll` met a `nextPage` link that is not an `https` URL on `*.deere.com`. The link is not requested. | No       |
 | `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |

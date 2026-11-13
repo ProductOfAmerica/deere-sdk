@@ -489,37 +489,25 @@ describe('DeereClient', () => {
       );
     });
 
-    it('respects custom signal option', async () => {
+    it('makes no request when the signal given has already aborted', async () => {
       const controller = new AbortController();
-      const client = new DeereClient({
-        accessToken: 'test',
-        fetch: async (_url, init) => {
-          // Check if already aborted
-          if (init?.signal?.aborted) {
-            const error = new Error('The operation was aborted');
-            error.name = 'AbortError';
-            throw error;
-          }
-          return new Response(JSON.stringify({ data: 'test' }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          });
-        },
-        maxRetries: 0,
-      });
+      const { fetch, calls } = mockWithSpy({ data: 'test' });
+      const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 0 });
 
-      // Abort before making request
       controller.abort();
 
       await assert.rejects(
         () => client.get('organizations', '/test', { signal: controller.signal }),
         (error: Error) => {
-          // AbortError gets wrapped in DeereError with 'Request timeout' message
-          assert(error instanceof DeereError);
-          assert.strictEqual(error.message, 'Request timeout');
+          // The signal's own reason, as fetch rejects with. This used to be
+          // reported as a DeereError saying 'Request timeout'.
+          assert.strictEqual(error, controller.signal.reason);
+          assert.strictEqual(error.name, 'AbortError');
+          assert(!(error instanceof DeereError));
           return true;
         }
       );
+      assert.strictEqual(calls.length, 0);
     });
 
     it('uses all environment URLs correctly (v2 raw subdomains)', async () => {

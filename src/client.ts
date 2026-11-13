@@ -68,7 +68,10 @@ export interface DeereClientConfig {
    * 'partner' → 'partnerapi', 'cert' → 'apicert', 'qa' → 'apiqa.tal'.
    */
   environment?: Environment;
-  /** Custom fetch implementation */
+  /**
+   * Custom fetch implementation. It must honour `init.signal`: that signal is
+   * how a timeout or a cancellation interrupts a request in flight.
+   */
   fetch?: typeof fetch;
   /**
    * Default headers to include in all requests. An `Authorization` entry here
@@ -76,7 +79,11 @@ export interface DeereClientConfig {
    * from that request's `options.headers`.
    */
   defaultHeaders?: Record<string, string>;
-  /** Timeout in milliseconds. Defaults to 30000 */
+  /**
+   * How long each attempt may wait for a response to start, in milliseconds.
+   * Defaults to 30000. Reading the response body is not limited by it.
+   * `Infinity` turns it off.
+   */
   timeout?: number;
   /** Maximum number of retry attempts for failed requests. Defaults to 3. Set to 0 to disable retries. */
   maxRetries?: number;
@@ -103,9 +110,15 @@ export interface RetryConfig {
 export interface RequestOptions {
   /** Additional headers for this request */
   headers?: Record<string, string>;
-  /** AbortSignal for request cancellation */
+  /**
+   * Cancels the call. Once it aborts, the call rejects with the signal's
+   * `reason` (an `AbortError`, unless `abort()` was given something else),
+   * as `fetch` does. A cancelled request is not retried, a wait before a
+   * retry ends at once, and no further page or link is requested. The
+   * timeout applies whether or not a signal is given.
+   */
   signal?: AbortSignal;
-  /** Override timeout for this request */
+  /** The client's `timeout`, for this call only. `Infinity` turns it off. */
   timeout?: number;
 }
 
@@ -189,6 +202,12 @@ function isAuthorizationHeader(name: string): boolean {
 
 /** HTTP status codes that are safe to retry */
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
+
+/**
+ * The longest delay a timer can be set for. Asked for a longer one, `Infinity`
+ * included, Node sets it for 1 ms, which would time out every attempt at once.
+ */
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
 
 import { HATEOAS_MAP } from './hateoas-map.js';
 import { pathSegments, segmentsMatchPattern } from './path-pattern.js';
@@ -386,7 +405,7 @@ export class DeereClient {
   ): AsyncGenerator<T[], void, unknown> {
     // First page: resolve via the spec (templated or static lookup).
     let url: string | undefined = this.hateoas
-      ? await this.resolveHateoasUrl(specName, path)
+      ? await this.resolveHateoasUrl(specName, path, options)
       : resolveRequestUrl(specName, path, this.environment);
 
     while (url) {
@@ -439,7 +458,7 @@ export class DeereClient {
     options?: RequestOptions
   ): Promise<T> {
     const url = this.hateoas
-      ? await this.resolveHateoasUrl(specName, path)
+      ? await this.resolveHateoasUrl(specName, path, options)
       : resolveRequestUrl(specName, path, this.environment);
     return this.requestUrl<T>(method, url, body, options);
   }
@@ -450,108 +469,108 @@ export class DeereClient {
     body?: unknown,
     options?: RequestOptions
   ): Promise<T> {
-    const maxAttempts = this.retryConfig.maxRetries + 1; // +1 for initial attempt
-    let lastError: Error | undefined;
     // Parsed before the loop, outside its try. `new URL` throws a TypeError on
     // an unparseable URL, and inside the try that would be taken for a network
     // failure and retried with backoff.
     const headers = this.buildHeaders(new URL(url), options?.headers);
+    const timeout = options?.timeout ?? this.timeout;
+    const callerSignal = options?.signal;
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const timeout = options?.timeout ?? this.timeout;
+    for (let attempt = 0; ; attempt++) {
+      const mayRetry = attempt < this.retryConfig.maxRetries;
+
+      // A listener is never called for a signal that has already aborted, so
+      // that case is looked for here, ahead of every attempt.
+      callerSignal?.throwIfAborted();
+
+      // fetch is given this attempt's own signal and no other. Two things abort
+      // it, the timeout and the caller, and `timedOut` records which: the two
+      // are handled differently and the error fetch rejects with does not say.
+      // Passing the caller's signal straight to fetch, as this once did, left
+      // such a request with no timeout at all, and had a cancellation retried
+      // and then reported as a timeout.
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      let timedOut = false;
+      // A timeout longer than a timer can hold gets no timer, so `Infinity`
+      // means what it says: no timeout.
+      const timeoutId =
+        timeout > MAX_TIMER_DELAY
+          ? undefined
+          : setTimeout(() => {
+              timedOut = true;
+              controller.abort();
+            }, timeout);
+      const onCallerAbort = () => controller.abort(callerSignal?.reason);
+      callerSignal?.addEventListener('abort', onCallerAbort, { once: true });
 
+      let retryDelay: number;
       try {
         const response = await this.fetchFn(url, {
           method,
           headers,
           body: body ? JSON.stringify(body) : undefined,
-          signal: options?.signal ?? controller.signal,
+          signal: controller.signal,
         });
 
+        // The timeout is for the wait until a response starts. Reading the
+        // body is not limited by it, though the caller can still cancel that.
         clearTimeout(timeoutId);
 
-        if (!response.ok) {
-          // Check if this is a retryable status code
-          if (this.isRetryable(response.status) && attempt < maxAttempts - 1) {
-            // Extract retry-after for rate limits
-            const retryAfter =
-              response.status === 429
-                ? Number.parseInt(response.headers.get('retry-after') ?? '', 10)
-                : undefined;
-
-            const delay = this.calculateRetryDelay(
-              attempt,
-              Number.isNaN(retryAfter as number) ? undefined : retryAfter
-            );
-            await this.sleep(delay);
-            continue;
+        if (response.ok) {
+          // Handle empty responses
+          const contentLength = response.headers.get('content-length');
+          if (contentLength === '0' || response.status === 204) {
+            return undefined as T;
           }
 
-          // Not retryable or out of retries - throw the error
-          await this.handleError(response);
+          const contentType = response.headers.get('content-type');
+          if (
+            contentType?.includes('application/json') ||
+            contentType?.includes('application/vnd.deere')
+          ) {
+            return (await response.json()) as T;
+          }
+
+          return (await response.text()) as unknown as T;
         }
 
-        // Handle empty responses
-        const contentLength = response.headers.get('content-length');
-        if (contentLength === '0' || response.status === 204) {
-          return undefined as T;
+        if (!mayRetry || !this.isRetryable(response.status)) {
+          // Always throws. Awaited here so that reading the error body is
+          // still inside the try, where the caller can cancel it.
+          return await this.handleError(response);
         }
 
-        const contentType = response.headers.get('content-type');
-        if (
-          contentType?.includes('application/json') ||
-          contentType?.includes('application/vnd.deere')
-        ) {
-          return (await response.json()) as T;
-        }
-
-        return (await response.text()) as unknown as T;
+        // Extract retry-after for rate limits
+        const retryAfter =
+          response.status === 429
+            ? Number.parseInt(response.headers.get('retry-after') ?? '', 10)
+            : undefined;
+        retryDelay = this.calculateRetryDelay(
+          attempt,
+          Number.isNaN(retryAfter as number) ? undefined : retryAfter
+        );
       } catch (error) {
-        clearTimeout(timeoutId);
+        // The caller cancelled. Whatever was thrown, they get the reason they
+        // aborted with, as fetch gives it, and nothing is tried again.
+        if (callerSignal?.aborted) throw callerSignal.reason;
 
-        // Don't retry DeereErrors (they've already been processed)
-        // except for timeout errors which are retryable
-        if (error instanceof DeereError) {
-          // Timeout errors are retryable
-          if (error.status === 0 && error.statusText === 'Timeout') {
-            if (attempt < maxAttempts - 1) {
-              const delay = this.calculateRetryDelay(attempt);
-              await this.sleep(delay);
-              lastError = error;
-              continue;
-            }
-          }
+        // An error response, already turned into the error to report. Checked
+        // before the network rule below, which goes by the message's wording.
+        if (error instanceof DeereError) throw error;
+
+        if (timedOut) {
+          if (!mayRetry) throw new DeereError('Request timeout', 0, 'Timeout');
+        } else if (!mayRetry || !this.isNetworkError(error)) {
           throw error;
         }
-
-        // Handle abort (timeout)
-        if (error instanceof Error && error.name === 'AbortError') {
-          const timeoutError = new DeereError('Request timeout', 0, 'Timeout');
-          if (attempt < maxAttempts - 1) {
-            const delay = this.calculateRetryDelay(attempt);
-            await this.sleep(delay);
-            lastError = timeoutError;
-            continue;
-          }
-          throw timeoutError;
-        }
-
-        // Network errors are retryable
-        if (this.isNetworkError(error) && attempt < maxAttempts - 1) {
-          const delay = this.calculateRetryDelay(attempt);
-          await this.sleep(delay);
-          lastError = error instanceof Error ? error : new Error(String(error));
-          continue;
-        }
-
-        throw error;
+        retryDelay = this.calculateRetryDelay(attempt);
+      } finally {
+        clearTimeout(timeoutId);
+        callerSignal?.removeEventListener('abort', onCallerAbort);
       }
-    }
 
-    // Should not reach here, but just in case
-    throw lastError ?? new DeereError('Request failed after retries', 0, 'RetryExhausted');
+      await this.sleep(retryDelay, callerSignal);
+    }
   }
 
   /**
@@ -657,9 +676,20 @@ export class DeereClient {
    * endpoints whose parent `/organizations/{orgId}` lives on the platform
    * host, not equipmentapi.deere.com/isg).
    *
-   * Throws HateoasError if resolution fails.
+   * `options` are the ones given for the call being resolved. Its signal and
+   * timeout govern the parent fetch as well, which is part of that call. Its
+   * headers do not: they were chosen for the request the caller asked for,
+   * and an Authorization among them would replace the client's token on a
+   * request the caller never saw.
+   *
+   * Throws HateoasError if resolution fails. If the caller has cancelled, it
+   * throws their abort reason, unwrapped, in place of that.
    */
-  private async resolveHateoasUrl(specName: SpecName, path: string): Promise<string> {
+  private async resolveHateoasUrl(
+    specName: SpecName,
+    path: string,
+    options?: RequestOptions
+  ): Promise<string> {
     // Strip query params for matching, reattach after
     const [basePath, queryString] = path.split('?', 2);
     const match = this.matchHateoasPattern(basePath);
@@ -686,13 +716,22 @@ export class DeereClient {
           concreteParentPath,
           this.environment
         );
-        const parentResponse = await this.requestUrl<{ links?: Link[] }>('GET', parentUrl);
+        const parentResponse = await this.requestUrl<{ links?: Link[] }>(
+          'GET',
+          parentUrl,
+          undefined,
+          { signal: options?.signal, timeout: options?.timeout }
+        );
 
         if (parentResponse?.links) {
           this.linkCache.set(concreteParentPath, parentResponse.links);
           discoveredUrl = this.linkCache.findRel(concreteParentPath, rel);
         }
       } catch (error) {
+        // A cancellation is not a failure to resolve the link. The reason is
+        // thrown, not `error`: the lookup above can fail before any request,
+        // and a caller who cancelled is owed their reason then as well.
+        if (options?.signal?.aborted) throw options.signal.reason;
         throw new HateoasError(
           `HATEOAS resolution failed: could not fetch parent resource "${concreteParentPath}"`,
           path,
@@ -764,10 +803,27 @@ export class DeereClient {
   }
 
   /**
-   * Sleep for a specified number of milliseconds
+   * Wait before a retry. Rejects with the signal's reason as soon as it
+   * aborts, so that cancelling a request does not mean sitting out a backoff
+   * of up to `maxDelay` first.
    */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private sleep(ms: number, signal?: AbortSignal): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // As in requestUrl: no listener is called for a signal already aborted.
+      if (signal?.aborted) {
+        reject(signal.reason);
+        return;
+      }
+      const onAbort = () => {
+        clearTimeout(timer);
+        reject(signal?.reason);
+      };
+      const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve();
+      }, ms);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
   }
 
   private async handleError(response: Response): Promise<never> {
