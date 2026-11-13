@@ -101,7 +101,26 @@ const LOCALS = new Map<string, (initializer: ts.Expression) => boolean>([
 ]);
 
 /** Names a parameter must not take, for the same reason: a body calls or declares them. */
-const NAMES_A_BODY_RELIES_ON = new Set(['String', 'URLSearchParams', ...LOCALS.keys()]);
+const NAMES_A_BODY_RELIES_ON = new Set([
+  'String',
+  'URLSearchParams',
+  'encodePathParam',
+  ...LOCALS.keys(),
+]);
+
+/**
+ * The one import of a value a generated wrapper has, compared as text so that
+ * no second binding and no other module can come in under the same allowance.
+ */
+const ENCODER_IMPORT = "import{encodePathParam}from'../path-pattern.js';";
+
+/**
+ * The one thing a path template holds besides encoded parameters: the query
+ * string, when the method has query parameters. As the generator writes it,
+ * with whitespace removed.
+ */
+// biome-ignore lint/suspicious/noTemplateCurlyInString: generated source, compared as text
+const QUERY_SUFFIX = "queryString?`?${queryString}`:''";
 
 /**
  * Problems in one generated method body. Every generated body is built from
@@ -136,12 +155,56 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
       } else {
         declared.add(name);
         check(initializer);
+        // Not about injection: this is the generator's own obligation. A value
+        // placed in the path any other way could change which resource is
+        // addressed, so the two things a path is built from are listed, and a
+        // parameter reaching it through `String(id)` or a conditional is
+        // reported like any other.
+        if (name === 'path' && ts.isTemplateExpression(initializer)) {
+          for (const span of initializer.templateSpans) {
+            const isEncoded =
+              ts.isCallExpression(span.expression) &&
+              textOf(span.expression.expression) === 'encodePathParam';
+            if (!isEncoded && textOf(span.expression) !== QUERY_SUFFIX) {
+              report(span.expression, 'value written into the path without encodePathParam');
+            }
+          }
+        }
       }
     }
   };
 
-  // Statements appear directly in the body, never nested in a block of their own.
-  const checkStatement = (node: ts.Statement): void => {
+  const isClientCall = (node: ts.Node): node is ts.CallExpression =>
+    ts.isCallExpression(node) && CLIENT_CALL.test(textOf(node.expression));
+
+  /**
+   * The request a body ends with: `this.client.<verb>(this.spec, path, ...)`
+   * followed by `data, options` or just `options`, all parameters of the
+   * method. Every position is pinned. The rule about what a path template
+   * holds means nothing if a method can pass one of its own parameters as the
+   * path and skip the template, and the encoder, altogether.
+   */
+  const checkRequest = (call: ts.CallExpression): void => {
+    const callee = textOf(call.expression);
+    const [spec, path, ...rest] = call.arguments;
+    if (!spec || textOf(spec) !== 'this.spec') {
+      report(spec ?? call, `first argument to ${callee}`);
+    }
+    const isTheDeclaredPath =
+      path !== undefined && ts.isIdentifier(path) && path.text === 'path' && declared.has('path');
+    if (!isTheDeclaredPath) report(path ?? call, `path argument to ${callee}`);
+
+    const tail = rest.map((argument) => (ts.isIdentifier(argument) ? argument.text : '?'));
+    const isTheTail = tail.join() === 'options' || tail.join() === 'data,options';
+    if (!isTheTail || !tail.every((name) => parameters.has(name))) {
+      report(call, `arguments after the path to ${callee}`);
+    }
+  };
+
+  // Statements appear directly in the body, never nested in a block of their
+  // own. The request is the last of them and the only one: a second call on
+  // the client, anywhere, would be a request the method was not generated for.
+  const checkStatement = (node: ts.Statement, isLast: boolean): void => {
     if (ts.isVariableStatement(node)) {
       checkDeclarations(node.declarationList);
     } else if (ts.isIfStatement(node)) {
@@ -149,12 +212,16 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
       if (ts.isExpressionStatement(node.thenStatement)) check(node.thenStatement.expression);
       else report(node.thenStatement, 'if with a block');
       if (node.elseStatement) report(node.elseStatement, 'else branch');
-    } else if (ts.isExpressionStatement(node)) {
-      // `await` appears in one place, in front of a statement that is the
-      // request. Anywhere else it is reported: it calls `then` on its operand.
-      check(ts.isAwaitExpression(node.expression) ? node.expression.expression : node.expression);
-    } else if (ts.isReturnStatement(node)) {
-      if (node.expression) check(node.expression);
+    } else if (ts.isExpressionStatement(node) || ts.isReturnStatement(node)) {
+      // `await` appears in one place, in front of the request when nothing is
+      // returned. Anywhere else it is reported: it calls `then` on its operand.
+      const expression =
+        ts.isExpressionStatement(node) && ts.isAwaitExpression(node.expression)
+          ? node.expression.expression
+          : node.expression;
+      if (!expression) return;
+      if (isClientCall(expression) && isLast) checkRequest(expression);
+      else check(expression);
     } else {
       report(node);
     }
@@ -164,19 +231,20 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
     if (ts.isCallExpression(node)) {
       const callee = textOf(node.expression);
       if (CLIENT_CALL.test(callee)) {
-        // The client is handed `this.spec`, the path, and the method's own
-        // parameters. A literal here would be a request the spec did not
-        // shape, and any other name would be something reached from outside.
-        for (const argument of node.arguments) {
-          const isOwn =
-            ts.isIdentifier(argument) &&
-            (argument.text === 'path' || parameters.has(argument.text));
-          if (!isOwn && textOf(argument) !== 'this.spec') {
-            report(argument, `argument to ${callee}`);
-          }
-        }
+        report(node, 'call on the client that is not what the last statement returns or awaits');
       } else if (OTHER_CALLS.has(callee)) {
         node.arguments.forEach(check);
+      } else if (callee === 'encodePathParam') {
+        // encodePathParam('orgId', orgId): the parameter's name as a literal,
+        // for the error message, then that same parameter of this method.
+        const [label, value] = node.arguments;
+        const isItsOwnParameter =
+          node.arguments.length === 2 &&
+          ts.isStringLiteral(label) &&
+          ts.isIdentifier(value) &&
+          value.text === label.text &&
+          parameters.has(value.text);
+        if (!isItsOwnParameter) report(node, 'encodePathParam call');
       } else {
         report(node, `call to ${callee}`);
       }
@@ -206,7 +274,9 @@ function bodyProblems(method: string, body: ts.Block, parameters: ReadonlySet<st
     }
   };
 
-  body.statements.forEach(checkStatement);
+  body.statements.forEach((statement, index) => {
+    checkStatement(statement, index === body.statements.length - 1);
+  });
   return problems;
 }
 
@@ -234,7 +304,7 @@ function apiFileProblems(source: string): string[] {
   const classes: ts.ClassDeclaration[] = [];
 
   for (const statement of parse(source).statements) {
-    if (isTypeOnlyImport(statement)) continue;
+    if (isTypeOnlyImport(statement) || textOf(statement) === ENCODER_IMPORT) continue;
     if (ts.isExportDeclaration(statement) && statement.isTypeOnly) continue;
     if (ts.isClassDeclaration(statement)) {
       classes.push(statement);
@@ -393,13 +463,16 @@ describe('the structure checks catch what an injection would have to produce', (
   const method = (body: string, parameters = 'id: string, options?: RequestOptions') =>
     wrapper(`async get(${parameters}): Promise<unknown> { ${body} }`);
 
+  const encoderImport = "import { encodePathParam } from '../path-pattern.js';";
+
   it('accepts wrappers shaped like the generated ones', () => {
-    const withQuery = wrapper(`
+    const withQuery = wrapper(
+      `
       async list(orgId: string, params?: { count?: number }, options?: RequestOptions): Promise<X> {
         const query = new URLSearchParams();
         if (params?.count !== undefined) query.set('count', String(params.count));
         const queryString = query.toString();
-        const path = \`/organizations/\${orgId}/things\${queryString ? \`?\${queryString}\` : ''}\`;
+        const path = \`/organizations/\${encodePathParam('orgId', orgId)}/things\${queryString ? \`?\${queryString}\` : ''}\`;
         return this.client.get<PaginatedResponse<components['schemas']['Thing']>>(
           this.spec,
           path,
@@ -410,11 +483,17 @@ describe('the structure checks catch what an injection would have to produce', (
         const path = \`/things\`;
         await this.client.post(this.spec, path, data, options);
       }
-    `);
+    `,
+      encoderImport
+    );
     assert.deepStrictEqual(apiFileProblems(withQuery), []);
   });
 
-  const request = 'return this.client.get(this.spec, id);';
+  // What a well-formed body ends with. `call` alone is for a control that
+  // declares its own `path`.
+  const call = 'return this.client.get(this.spec, path, options);';
+  const request = `const path = \`/a\`; ${call}`;
+  const optionsParameter = 'options?: RequestOptions';
 
   // Each control is reported, and for the reason it is named for: every
   // problem found has to match its pattern. A control that some other check
@@ -456,6 +535,16 @@ describe('the structure checks catch what an injection would have to produce', (
       wrapper('', "import { x } from 'elsewhere';"),
       /^top-level ImportDeclaration \(import\{x\}from'elsewhere';\)$/,
     ],
+    // The encoder's import is allowed as that exact statement, so neither a
+    // second binding nor another module can come in under it.
+    'the encoder imported along with something else': [
+      wrapper('', "import { encodePathParam, other } from '../path-pattern.js';"),
+      /^top-level ImportDeclaration \(import\{encodePathParam,other\}/,
+    ],
+    'the encoder imported from another module': [
+      wrapper('', "import { encodePathParam } from 'elsewhere';"),
+      /^top-level ImportDeclaration \(import\{encodePathParam\}from'elsewhere';\)$/,
+    ],
     'a second class': [`${wrapper('')}\nclass ExtraApi {}`, /^2 classes, expected 1$/],
     'a class that takes over a name the bodies call': [
       wrapper('').replace('DemoApi', 'String'),
@@ -479,9 +568,39 @@ describe('the structure checks catch what an injection would have to produce', (
       method("return this.client.fetchUrl('GET', id);"),
       /^get: call to this\.client\.fetchUrl /,
     ],
-    'a literal handed to the client': [
-      method("return this.client.delete(this.spec, '/organizations/1');"),
-      /^get: argument to this\.client\.delete /,
+    'a literal handed to the client as the path': [
+      method("return this.client.delete(this.spec, '/organizations/1', options);"),
+      /^get: path argument to this\.client\.delete /,
+    ],
+    // Well-formed in every other respect, and it would send the caller's
+    // value as the whole path, past the template and the encoder.
+    'a parameter handed to the client as the path': [
+      method('return this.client.get(this.spec, id, options);'),
+      /^get: path argument to this\.client\.get \(id\)$/,
+    ],
+    'a path the body never declared': [
+      method(call),
+      /^get: path argument to this\.client\.get \(path\)$/,
+    ],
+    'something other than the spec as the first argument': [
+      method(`const path = \`/a\`; return this.client.get(id, path, options);`),
+      /^get: first argument to this\.client\.get \(id\)$/,
+    ],
+    // The request is the last statement and there is one. Each of these is a
+    // well-formed request in every respect but where it stands.
+    'a second request ahead of the last one': [
+      method(`const path = \`/a\`; await this.client.delete(this.spec, path, options); ${call}`),
+      /^get: call on the client that is not what the last statement returns or awaits /,
+    ],
+    'a request made only when a condition holds': [
+      method(
+        `const path = \`/a\`; if (id !== undefined) this.client.delete(this.spec, path, options); ${call}`
+      ),
+      /^get: call on the client that is not what the last statement returns or awaits /,
+    ],
+    'a request wrapped in another call': [
+      method(`const path = \`/a\`; return String(this.client.get(this.spec, path, options));`),
+      /^get: call on the client that is not what the last statement returns or awaits /,
     ],
     'a function written in a body': [
       method(`query.set('a', String(() => id)); ${request}`),
@@ -496,7 +615,7 @@ describe('the structure checks catch what an injection would have to produce', (
       /^get: TaggedTemplateExpression /,
     ],
     'an element access': [
-      method(`const path = \`/a/\${globalThis['x']}\`; ${request}`),
+      method(`query.set('a', String(globalThis['x'])); ${request}`),
       /^get: ElementAccessExpression /,
     ],
     'a loop': [method(`for (;;) {} ${request}`), /^get: ForStatement /],
@@ -510,6 +629,37 @@ describe('the structure checks catch what an injection would have to produce', (
       /^get: else branch /,
     ],
 
+    // The generator's own obligation: every value placed in a path goes
+    // through the encoder, called on the parameter it is named for.
+    'a value written into the path without the encoder': [
+      method(`const path = \`/a/\${id}\`; ${call}`),
+      /^get: value written into the path without encodePathParam \(id\)$/,
+    ],
+    // Each of these is made only of things a body may otherwise contain, so
+    // nothing but the rule about what a path holds can be what reports them.
+    'a value that reaches the path through String()': [
+      method(`const path = \`/a/\${String(id)}\`; ${call}`),
+      /^get: value written into the path without encodePathParam \(String\(id\)\)$/,
+    ],
+    'a value that reaches the path through a property': [
+      method(`const path = \`/a/\${options.x}\`; ${call}`),
+      /^get: value written into the path without encodePathParam \(options\.x\)$/,
+    ],
+    'a value that reaches the path inside the query suffix': [
+      method(
+        `const queryString = query.toString(); const path = \`/a\${queryString ? \`?\${queryString}/\${id}\` : ''}\`; ${call}`
+      ),
+      /^get: value written into the path without encodePathParam \(queryString\?/,
+    ],
+    'the encoder called on something that is not the parameter it names': [
+      method(`const path = \`/a/\${encodePathParam('id', options)}\`; ${call}`),
+      /^get: encodePathParam call /,
+    ],
+    'the encoder called on something that is not a parameter at all': [
+      method(`const path = \`/a/\${encodePathParam('globalThis', globalThis)}\`; ${call}`),
+      /^get: encodePathParam call /,
+    ],
+
     // Callees are matched by name, so a body must not be able to rebind one.
     'a local that takes over a name the body calls': [
       method(`const String = globalThis.eval; String(id); ${request}`),
@@ -520,7 +670,7 @@ describe('the structure checks catch what an injection would have to produce', (
       /^get: declaration \(query=globalThis\.Reflect\)$/,
     ],
     'a known local declared twice': [
-      method(`const path = \`/a\`; const path = \`/b\`; ${request}`),
+      method(`const path = \`/a\`; const path = \`/b\`; ${call}`),
       /^get: second declaration /,
     ],
     'a known local declared with let': [
@@ -533,19 +683,33 @@ describe('the structure checks catch what an injection would have to produce', (
       /^get: declaration \(query=newURLSearchParams\(\)\)$/,
     ],
     'an await anywhere but in front of the request': [
-      method(`const path = \`/a/\${await id}\`; ${request}`),
+      method(`query.set('a', String(await id)); ${request}`),
       /^get: AwaitExpression /,
     ],
-    'something other than its own parameters handed to the client': [
-      method('return this.client.post(this.spec, id, process, options);'),
-      /^get: argument to this\.client\.post \(process\)$/,
+    // After the path come the body, if the method takes one, and the options:
+    // by those names, in that order, and as the method's own parameters.
+    'a global handed to the client after the path': [
+      method(`const path = \`/a\`; return this.client.post(this.spec, path, process, options);`),
+      /^get: arguments after the path to this\.client\.post /,
+    ],
+    'a body the method does not take handed to the client': [
+      method(`const path = \`/a\`; return this.client.post(this.spec, path, data, options);`),
+      /^get: arguments after the path to this\.client\.post /,
+    ],
+    'a path parameter handed to the client as the options': [
+      method(`const path = \`/a\`; return this.client.get(this.spec, path, id);`),
+      /^get: arguments after the path to this\.client\.get /,
+    ],
+    'a request that leaves the options out': [
+      method(`const path = \`/a\`; return this.client.get(this.spec, path);`),
+      /^get: arguments after the path to this\.client\.get /,
     ],
     'a parameter that takes over a name the body calls': [
-      method(request, 'id: string, String: any'),
+      method(request, `id: string, String: any, ${optionsParameter}`),
       /^get: parameter named String, which a body relies on$/,
     ],
     'a default value on a method parameter': [
-      method(request, 'id: string = globalThis.x()'),
+      method(request, `id: string = globalThis.x(), ${optionsParameter}`),
       /^get: default value on parameter id$/,
     ],
     'a destructured method parameter': [
@@ -553,7 +717,7 @@ describe('the structure checks catch what an injection would have to produce', (
       /^get: destructured parameter /,
     ],
     'a decorator on a parameter': [
-      method(request, '@dec id: string'),
+      method(request, `@dec id: string, ${optionsParameter}`),
       /^get: decorator on a parameter$/,
     ],
   };

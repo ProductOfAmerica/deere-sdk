@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/organizations.js';
 
 export class OrganizationsApi {
@@ -66,7 +67,7 @@ export class OrganizationsApi {
     orgId: string,
     options?: RequestOptions
   ): Promise<components['schemas']['OrganizationView']> {
-    const path = `/organizations/${orgId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}`;
     return this.client.get<components['schemas']['OrganizationView']>(this.spec, path, options);
   }
 
@@ -84,7 +85,7 @@ export class OrganizationsApi {
     userName: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['OrganizationViewGet']>> {
-    const path = `/users/${userName}/organizations`;
+    const path = `/users/${encodePathParam('userName', userName)}/organizations`;
     return this.client.get<PaginatedResponse<components['schemas']['OrganizationViewGet']>>(
       this.spec,
       path,

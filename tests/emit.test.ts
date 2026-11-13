@@ -168,6 +168,14 @@ describe('assertPathKey', () => {
     assert.throws(() => assertPathKey('/a/{class}', 'demo.yaml'), /reserved word/);
   });
 
+  it('refuses a parameter named twice, which no method signature can express', () => {
+    assert.throws(
+      () => assertPathKey('/a/{id}/b/{id}', 'demo.yaml'),
+      /names the parameter \{id\} twice/
+    );
+    assert.doesNotThrow(() => assertPathKey('/a/{id}/b/{otherId}', 'demo.yaml'));
+  });
+
   it('refuses a segment that mixes a parameter with other text', () => {
     assert.throws(() => assertPathKey('/a/{id}.json', 'demo.yaml'), /segment/);
     assert.throws(() => assertPathKey('/a/x{id}', 'demo.yaml'), /segment/);

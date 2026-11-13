@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/machine-locations.js';
 
 export class MachineLocationsApi {
@@ -36,7 +37,7 @@ export class MachineLocationsApi {
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     if (params?.lastKnown !== undefined) query.set('lastKnown', String(params.lastKnown));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/breadcrumbs${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/breadcrumbs${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Breadcrumb']>>(
       this.spec,
       path,
@@ -62,7 +63,7 @@ export class MachineLocationsApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/machines/${principalId}/locationHistory${queryString ? `?${queryString}` : ''}`;
+    const path = `/machines/${encodePathParam('principalId', principalId)}/locationHistory${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['ReportedLocation']>>(
       this.spec,
       path,

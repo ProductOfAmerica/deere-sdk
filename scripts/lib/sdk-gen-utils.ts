@@ -139,6 +139,24 @@ export function schemaTypeRef(schemaName: string): string {
 }
 
 /**
+ * The body of the template literal a generated method builds its path from:
+ * the path key with each `{name}` replaced by a call that encodes the
+ * argument of that name (src/path-pattern.ts). Written between backticks by
+ * the caller.
+ *
+ * The path must already have passed assertPathKey. That is what makes its
+ * literal parts safe inside a template literal and its parameter names usable
+ * as identifiers, each at most once.
+ */
+export function buildPathTemplate(path: string): string {
+  // A function, not a replacement string: in a string, `$` starts a pattern.
+  return path.replace(
+    /\{([^}]+)\}/g,
+    (_match, name: string) => `\${encodePathParam(${tsStringLiteral(name)}, ${name})}`
+  );
+}
+
+/**
  * The element type for a collection GET: the resolved item schema, or `unknown`
  * when no item schema could be resolved. Shared by `computeReturnType` (for the
  * `PaginatedResponse<T>` of the single-page method) and the `listAll` generator

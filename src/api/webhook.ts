@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/webhook.js';
 
 export class WebhookApi {
@@ -98,7 +99,7 @@ export class WebhookApi {
     id: string,
     options?: RequestOptions
   ): Promise<components['schemas']['CreatedSubscriptionValues']> {
-    const path = `/eventSubscriptions/${id}`;
+    const path = `/eventSubscriptions/${encodePathParam('id', id)}`;
     return this.client.get<components['schemas']['CreatedSubscriptionValues']>(
       this.spec,
       path,
@@ -113,7 +114,7 @@ export class WebhookApi {
    * @generated from PUT /eventSubscriptions/{id}
    */
   async update(id: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
-    const path = `/eventSubscriptions/${id}`;
+    const path = `/eventSubscriptions/${encodePathParam('id', id)}`;
     await this.client.put(this.spec, path, data, options);
   }
 }

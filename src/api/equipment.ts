@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/equipment.js';
 
 export class EquipmentApi {
@@ -88,7 +89,7 @@ export class EquipmentApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/equipment/${id}${queryString ? `?${queryString}` : ''}`;
+    const path = `/equipment/${encodePathParam('id', id)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['equipment']>(this.spec, path, options);
   }
 
@@ -102,7 +103,7 @@ export class EquipmentApi {
    * @generated from PUT /equipment/{id}
    */
   async update(id: string, data: Record<string, unknown>, options?: RequestOptions): Promise<void> {
-    const path = `/equipment/${id}`;
+    const path = `/equipment/${encodePathParam('id', id)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -116,7 +117,7 @@ export class EquipmentApi {
    * @generated from DELETE /equipment/{id}
    */
   async delete(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/equipment/${id}`;
+    const path = `/equipment/${encodePathParam('id', id)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -182,7 +183,7 @@ export class EquipmentApi {
     equipmentMakeId: string,
     options?: RequestOptions
   ): Promise<components['schemas']['equipment-make']> {
-    const path = `/equipmentMakes/${equipmentMakeId}`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}`;
     return this.client.get<components['schemas']['equipment-make']>(this.spec, path, options);
   }
 
@@ -204,7 +205,7 @@ export class EquipmentApi {
     if (params?.deprecated !== undefined) query.set('deprecated', String(params.deprecated));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}/equipmentISGTypes${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-isg-type']>>(
       this.spec,
       path,
@@ -227,7 +228,7 @@ export class EquipmentApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}/equipmentISGTypes/${encodePathParam('equipmentISGTypeId', equipmentISGTypeId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['equipment-isg-type']>(this.spec, path, options);
   }
 
@@ -248,7 +249,7 @@ export class EquipmentApi {
     if (params?.organizationIds !== undefined)
       query.set('organizationIds', String(params.organizationIds));
     const queryString = query.toString();
-    const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels${queryString ? `?${queryString}` : ''}`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}/equipmentISGTypes/${encodePathParam('equipmentISGTypeId', equipmentISGTypeId)}/equipmentModels${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-model']>>(
       this.spec,
       path,
@@ -268,7 +269,7 @@ export class EquipmentApi {
     equipmentModelId: string,
     options?: RequestOptions
   ): Promise<components['schemas']['equipment-model']> {
-    const path = `/equipmentMakes/${equipmentMakeId}/equipmentISGTypes/${equipmentISGTypeId}/equipmentModels/${equipmentModelId}`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}/equipmentISGTypes/${encodePathParam('equipmentISGTypeId', equipmentISGTypeId)}/equipmentModels/${encodePathParam('equipmentModelId', equipmentModelId)}`;
     return this.client.get<components['schemas']['equipment-model']>(this.spec, path, options);
   }
 
@@ -283,7 +284,7 @@ export class EquipmentApi {
     equipmentMakeId: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['equipment-type']>> {
-    const path = `/equipmentMakes/${equipmentMakeId}/equipmentTypes`;
+    const path = `/equipmentMakes/${encodePathParam('equipmentMakeId', equipmentMakeId)}/equipmentTypes`;
     return this.client.get<PaginatedResponse<components['schemas']['equipment-type']>>(
       this.spec,
       path,
@@ -375,7 +376,7 @@ export class EquipmentApi {
     data: components['schemas']['createEquipment'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${organizationId}/equipment`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/equipment`;
     await this.client.post(this.spec, path, data, options);
   }
 }

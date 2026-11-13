@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/notifications.js';
 
 export class NotificationsApi {
@@ -40,7 +41,7 @@ export class NotificationsApi {
    * @generated from DELETE /notificationEvents/{sourceEvent}
    */
   async delete(sourceEvent: string, options?: RequestOptions): Promise<void> {
-    const path = `/notificationEvents/${sourceEvent}`;
+    const path = `/notificationEvents/${encodePathParam('sourceEvent', sourceEvent)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -53,7 +54,7 @@ export class NotificationsApi {
     sourceEvent: string,
     options?: RequestOptions
   ): Promise<components['schemas']['GetResponse']> {
-    const path = `/notifications/${sourceEvent}`;
+    const path = `/notifications/${encodePathParam('sourceEvent', sourceEvent)}`;
     return this.client.get<components['schemas']['GetResponse']>(this.spec, path, options);
   }
 
@@ -96,7 +97,7 @@ export class NotificationsApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/notifications/events${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/notifications/events${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetResponse']>>(
       this.spec,
       path,
@@ -131,7 +132,7 @@ export class NotificationsApi {
     if (params?.startDate !== undefined) query.set('startDate', String(params.startDate));
     if (params?.endDate !== undefined) query.set('endDate', String(params.endDate));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/notifications/events${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/notifications/events${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['GetResponse']>(this.spec, path, options);
   }
 }

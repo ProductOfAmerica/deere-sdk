@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/fields.js';
 
 export class FieldsApi {
@@ -30,7 +31,7 @@ export class FieldsApi {
     id: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
-    const path = `/organizations/${orgID}/fields/${id}/clients`;
+    const path = `/organizations/${encodePathParam('orgID', orgID)}/fields/${encodePathParam('id', id)}/clients`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
@@ -60,7 +61,7 @@ export class FieldsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
@@ -89,7 +90,7 @@ export class FieldsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['FieldResponse']>(this.spec, path, options);
   }
 
@@ -113,7 +114,7 @@ export class FieldsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/fields`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -130,7 +131,7 @@ export class FieldsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['FieldResponse']>(this.spec, path, options);
   }
 
@@ -147,7 +148,7 @@ export class FieldsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/fields/${fieldId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -156,7 +157,7 @@ export class FieldsApi {
    * @generated from DELETE /organizations/{orgId}/fields/{fieldId}
    */
   async delete(orgId: string, fieldId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/fields/${fieldId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -175,7 +176,7 @@ export class FieldsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/farms${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetFarm']>>(
       this.spec,
       path,

@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/users.js';
 
 export class UsersApi {
@@ -50,7 +51,7 @@ export class UsersApi {
     userName: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['OrganizationViewGet']>> {
-    const path = `/users/${userName}/organizations`;
+    const path = `/users/${encodePathParam('userName', userName)}/organizations`;
     return this.client.get<PaginatedResponse<components['schemas']['OrganizationViewGet']>>(
       this.spec,
       path,
@@ -76,7 +77,7 @@ export class UsersApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/users/${username}${queryString ? `?${queryString}` : ''}`;
+    const path = `/users/${encodePathParam('username', username)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['UsersValue']>(this.spec, path, options);
   }
 }

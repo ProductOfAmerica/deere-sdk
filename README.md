@@ -600,6 +600,17 @@ for await (const items of client.paginate('fields', '/organizations/123/fields')
 const all = await client.getAll('fields', '/organizations/123/fields');
 ```
 
+The generated methods (`deere.fields.get(orgId, fieldId)`) percent-encode every path parameter, so an id is always exactly one segment of the path, whatever characters it contains, or the call is refused before any request goes out. The low-level client sends the path you give it as written. If you build a path from a value you did not choose, pass the value through `encodePathParam`, the function the generated methods use:
+
+```typescript
+import {encodePathParam} from 'deere-sdk';
+
+const orgId = '123';
+const fields = await client.get('fields', `/organizations/${encodePathParam('orgId', orgId)}/fields`);
+```
+
+`encodeURIComponent` on its own is not enough: it leaves `.` and `..` as they are, and a URL treats those as navigation. `encodePathParam` refuses them, along with an empty value, and names the parameter in the error.
+
 There is no `baseUrl` option. Each spec declares its own host, so the URL is resolved per call from the spec name and the environment. Passing a spec name that does not ship your chosen environment throws `UnsupportedEnvironmentError` before any request goes out.
 
 ### fetchUrl — Bearer token hostname guard
@@ -748,6 +759,7 @@ const noRetries = new Deere({
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored or no matching link). | No       |
 | `UnsupportedEnvironmentError` | A call targets a spec with no server for the configured `environment`. Thrown before any request goes out. | No       |
 | `NoServerConfigError`         | A call targets a spec with no usable `servers` block. Thrown before any request goes out. | No       |
+| `DeereError` with `status` `-1` and `statusText` `'InvalidPathParameter'` | A path parameter, given to a generated method or to `encodePathParam`, cannot be one path segment: it is not a string, a finite number, a bigint or a boolean, or it is an empty string, `.`, `..` or malformed text. Thrown before any request goes out. | No       |
 
 ```typescript
 import {

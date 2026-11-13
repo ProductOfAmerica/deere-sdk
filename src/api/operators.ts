@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/operators.js';
 
 export class OperatorsApi {
@@ -34,7 +35,7 @@ export class OperatorsApi {
     if (params?.lastModifiedTime !== undefined)
       query.set('lastModifiedTime', String(params.lastModifiedTime));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['GetResponseDetails']>>(
       this.spec,
       path,
@@ -56,7 +57,7 @@ export class OperatorsApi {
     if (params?.lastModifiedTime !== undefined)
       query.set('lastModifiedTime', String(params.lastModifiedTime));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/operators${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['GetResponseDetails']>(
       this.spec,
       path,
@@ -75,7 +76,7 @@ export class OperatorsApi {
     data: components['schemas']['PostOperator'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/operators`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -86,7 +87,7 @@ export class OperatorsApi {
    * @generated from DELETE /organizations/{orgId}/operators
    */
   async delete(orgId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/operators`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -106,7 +107,7 @@ export class OperatorsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/operators/${id}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators/${encodePathParam('id', id)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['GetResponseOperatorDetails']>(
       this.spec,
       path,
@@ -127,7 +128,7 @@ export class OperatorsApi {
     data: components['schemas']['PutOperator'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/operators/${id}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators/${encodePathParam('id', id)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -138,7 +139,7 @@ export class OperatorsApi {
    * @generated from DELETE /organizations/{orgId}/operators/{id}
    */
   async deleteOperators(orgId: string, id: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/operators/${id}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/operators/${encodePathParam('id', id)}`;
     await this.client.delete(this.spec, path, options);
   }
 }

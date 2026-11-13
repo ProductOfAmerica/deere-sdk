@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/map-layers.js';
 
 export class MapLayersApi {
@@ -26,7 +27,7 @@ export class MapLayersApi {
    * @generated from GET /fileResources/{id}
    */
   async getFileResources(id: string, options?: RequestOptions): Promise<unknown> {
-    const path = `/fileResources/${id}`;
+    const path = `/fileResources/${encodePathParam('id', id)}`;
     return this.client.get<unknown>(this.spec, path, options);
   }
 
@@ -39,7 +40,7 @@ export class MapLayersApi {
    * @generated from PUT /fileResources/{id}
    */
   async updateFileResources(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/fileResources/${id}`;
+    const path = `/fileResources/${encodePathParam('id', id)}`;
     await this.client.put(this.spec, path, options);
   }
 
@@ -49,7 +50,7 @@ export class MapLayersApi {
    * @generated from DELETE /fileResources/{id}
    */
   async deleteFileResources(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/fileResources/${id}`;
+    const path = `/fileResources/${encodePathParam('id', id)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -62,7 +63,7 @@ export class MapLayersApi {
     id: string,
     options?: RequestOptions
   ): Promise<components['schemas']['PostContributedMapLayerSummary']> {
-    const path = `/mapLayerSummaries/${id}`;
+    const path = `/mapLayerSummaries/${encodePathParam('id', id)}`;
     return this.client.get<components['schemas']['PostContributedMapLayerSummary']>(
       this.spec,
       path,
@@ -77,7 +78,7 @@ export class MapLayersApi {
    * @generated from DELETE /mapLayerSummaries/{id}
    */
   async delete(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/mapLayerSummaries/${id}`;
+    const path = `/mapLayerSummaries/${encodePathParam('id', id)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -96,7 +97,7 @@ export class MapLayersApi {
     if (params?.includePartialLayers !== undefined)
       query.set('includePartialLayers', String(params.includePartialLayers));
     const queryString = query.toString();
-    const path = `/mapLayerSummaries/${id}/mapLayers${queryString ? `?${queryString}` : ''}`;
+    const path = `/mapLayerSummaries/${encodePathParam('id', id)}/mapLayers${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
 
@@ -110,7 +111,7 @@ export class MapLayersApi {
     data: components['schemas']['PostResponse_MapLayers'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/mapLayerSummaries/${id}/mapLayers`;
+    const path = `/mapLayerSummaries/${encodePathParam('id', id)}/mapLayers`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -123,7 +124,7 @@ export class MapLayersApi {
     id: string,
     options?: RequestOptions
   ): Promise<components['schemas']['GetResponseDetails']> {
-    const path = `/mapLayers/${id}`;
+    const path = `/mapLayers/${encodePathParam('id', id)}`;
     return this.client.get<components['schemas']['GetResponseDetails']>(this.spec, path, options);
   }
 
@@ -133,7 +134,7 @@ export class MapLayersApi {
    * @generated from DELETE /mapLayers/{id}
    */
   async deleteMapLayers(id: string, options?: RequestOptions): Promise<void> {
-    const path = `/mapLayers/${id}`;
+    const path = `/mapLayers/${encodePathParam('id', id)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -147,7 +148,7 @@ export class MapLayersApi {
     id: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<unknown>> {
-    const path = `/mapLayers/${id}/fileResources`;
+    const path = `/mapLayers/${encodePathParam('id', id)}/fileResources`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
 
@@ -161,7 +162,7 @@ export class MapLayersApi {
     data: components['schemas']['RequestDetails'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/mapLayers/${id}/fileResources`;
+    const path = `/mapLayers/${encodePathParam('id', id)}/fileResources`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -171,7 +172,7 @@ export class MapLayersApi {
    * @generated from GET /mapLayers/{mapLayerId}
    */
   async getMapLayersByMapLayerId(mapLayerId: string, options?: RequestOptions): Promise<unknown> {
-    const path = `/mapLayers/${mapLayerId}`;
+    const path = `/mapLayers/${encodePathParam('mapLayerId', mapLayerId)}`;
     return this.client.get<unknown>(this.spec, path, options);
   }
 
@@ -192,7 +193,7 @@ export class MapLayersApi {
       query.set('includePartialSummaries', String(params.includePartialSummaries));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('id', id)}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
   /**
@@ -210,7 +211,7 @@ export class MapLayersApi {
       query.set('includePartialSummaries', String(params.includePartialSummaries));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('id', id)}/mapLayerSummaries${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<unknown>(this.spec, path, options);
   }
 
@@ -225,7 +226,7 @@ export class MapLayersApi {
     data: components['schemas']['PostRequest'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/fields/${id}/mapLayerSummaries`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('id', id)}/mapLayerSummaries`;
     await this.client.post(this.spec, path, data, options);
   }
 }

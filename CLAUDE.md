@@ -151,6 +151,23 @@ A templated spec can carry `pathOverrides` for paths Deere serves from a differe
 (`/notifications/{sourceEvent}` is on `/isg` while the rest of its spec is on `/platform`). They come from
 `scripts/routing-overrides.yaml` with measured evidence, never from a guess.
 
+### Path parameters are encoded by the generated methods
+
+Every generated method fills each `{param}` of its path through `encodePathParam` (`src/path-pattern.ts`), the one
+value a generated class imports from hand-written code. It percent-encodes the argument into exactly one segment,
+leaving `@` and `:` as they are, and refuses what cannot be a segment (anything but a string, finite number, bigint
+or boolean; the empty string; `.` and `..`; malformed text) with a `DeereError` using `CLIENT_ERROR_STATUS` and
+statusText `'InvalidPathParameter'`. Before it existed an argument was written into the path as it came, and one
+containing `/` or `..` addressed a different resource.
+
+Routing depends on this, not only safety: `pathOverrides` and the HATEOAS map recognise a request path by its segment
+count, so a parameter that spilled into two segments also lost its override or its parent. `DeereClient.get(spec,
+path)` takes the path as written and encodes nothing. The package root exports `encodePathParam` for callers who
+build such a path, because `encodeURIComponent` leaves `..` alone; `warmLinkCache` paths must carry values the same
+way the request will. `tests/generated-structure.test.ts` pins how every generated method builds its request: each
+`${...}` in its `path` is either an `encodePathParam` call on the method's own parameter or the query-string suffix,
+and that `path` is the one thing the client is handed as the path.
+
 ### No silent environment fallbacks
 
 `environment-resolver.ts` refuses to guess. If a static-server spec doesn't declare a mapping for the requested
