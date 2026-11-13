@@ -7,7 +7,7 @@
  */
 
 import { jsDocText, tsStringLiteral } from './emit.js';
-import { refName } from './spec-utils.js';
+import { refName, stripDocumentationMarkup } from './spec-utils.js';
 
 /** Minimal structural shape of an OpenAPI schema, enough for wrapper detection. */
 export interface SchemaLike {
@@ -180,6 +180,91 @@ export function computeReturnType(op: ReturnTypeOp): string {
   if (op.responseSchemaRef) return schemaTypeRef(op.responseSchemaRef);
   if (op.method === 'post' || op.method === 'put' || op.method === 'patch') return 'void';
   return 'unknown';
+}
+
+/** One query parameter, as far as a method's parameter list needs it. */
+export interface QueryParamLike {
+  /** The member's name in the method's `params` object. */
+  safeName: string;
+  required: boolean;
+  /** The TypeScript type, when the parameter is not an enum. */
+  type: string;
+  /** Spec text. Each value is written as an escaped literal. */
+  enumValues?: readonly unknown[];
+}
+
+/** Operation fields a generated method's parameter list is built from. */
+export interface ParamListOp extends ReturnTypeOp {
+  pathParams: ReadonlyArray<{ name: string }>;
+  queryParams: readonly QueryParamLike[];
+  hasRequestBody: boolean;
+  requestBodySchemaRef?: string;
+}
+
+/** The type of a method's `data` parameter. */
+function bodyParam(op: ParamListOp): string {
+  const type = op.requestBodySchemaRef
+    ? schemaTypeRef(op.requestBodySchemaRef)
+    : 'Record<string, unknown>';
+  return `data: ${type}`;
+}
+
+/**
+ * One member of a method's `params` object type. `sorted` puts an enum's
+ * values in a fixed order: the emitter keeps the order John Deere declares
+ * them in, the signature does not depend on it.
+ */
+function queryParamMember(qp: QueryParamLike, sorted = false): string {
+  let type = qp.type;
+  if (qp.enumValues) {
+    // The markup is stripped because the value is written as source, not HTML.
+    const literals = qp.enumValues.map((v) => tsStringLiteral(stripDocumentationMarkup(String(v))));
+    type = (sorted ? [...literals].sort() : literals).join(' | ');
+  }
+  return `${qp.safeName}${qp.required ? '' : '?'}: ${type}`;
+}
+
+/**
+ * The parameter list of a generated method, one entry per parameter: the path
+ * parameters, then the body, then the query parameters as one `params`
+ * object, then `options`.
+ */
+export function buildMethodParams(op: ParamListOp): string[] {
+  const params = op.pathParams.map((pp) => `${pp.name}: string`);
+  if (op.hasRequestBody) params.push(bodyParam(op));
+  if (op.queryParams.length > 0) {
+    params.push(`params?: { ${op.queryParams.map((qp) => queryParamMember(qp)).join('; ')} }`);
+  }
+  params.push('options?: RequestOptions');
+  return params;
+}
+
+/**
+ * A method's parameters and return type as one line of text, for
+ * scripts/api-surface.yaml to pin. It is put together from the same pieces as
+ * the emitted method, so it changes exactly when what a caller writes against
+ * changes: an argument added, removed or moved, a body or query member whose
+ * type changed, a member that became required, a different return type.
+ *
+ * Three things a caller cannot see are left out on purpose, so that upstream
+ * churn in them does not stop the sync:
+ *   - a path parameter's name (each is a bare `string`; a rename is absorbed,
+ *     as it is for the operation's identity);
+ *   - the order query parameters are declared in;
+ *   - the order an enum's values are declared in.
+ *
+ * What a named schema contains is not part of it either. A field added to or
+ * dropped from `components['schemas'][...]` leaves every signature as it was.
+ */
+export function methodSignature(op: ParamListOp): string {
+  const params = op.pathParams.map(() => 'string');
+  if (op.hasRequestBody) params.push(bodyParam(op));
+  if (op.queryParams.length > 0) {
+    const members = op.queryParams.map((qp) => queryParamMember(qp, true)).sort();
+    params.push(`params?: { ${members.join('; ')} }`);
+  }
+  params.push('options?: RequestOptions');
+  return `(${params.join(', ')}) => ${computeReturnType(op)}`;
 }
 
 /**

@@ -8,30 +8,36 @@
  * 3. Index file exporting everything
  *
  * Usage: pnpm generate-sdk
+ *        pnpm accept-signatures   (the same run, re-pinning method signatures
+ *                                  in scripts/api-surface.yaml on the way)
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 import {
+  acceptSignatures,
   buildSyncReport,
+  type ChangedSignature,
   displayOp,
   loadApiSurface,
   normalizePathPattern,
   resolveMethodNames,
   type SurfaceEntry,
   serializeApiSurface,
+  stopReasons,
 } from './lib/api-surface.js';
 import { assertPathKey, jsDocText, tsStringLiteral } from './lib/emit.js';
 import {
   buildMethodJsDoc,
+  buildMethodParams,
   buildPathTemplate,
   collectionItemType,
   computeReturnType,
   deprecatedJsDocLines,
   isCollectionEndpoint,
+  methodSignature,
   resolveContentSchemaRef,
-  schemaTypeRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
 import { DEPRECATED_REPLACEMENT_KEY } from './lib/spec-relocations.js';
@@ -44,6 +50,8 @@ import { refName, stripDocumentationMarkup, toCamelCase, toPascalCase } from './
 const SPECS_DIR = join(process.cwd(), 'specs', 'fixed');
 const OUTPUT_DIR = join(process.cwd(), 'src', 'api');
 const SRC_DIR = join(process.cwd(), 'src');
+/** Passed by `pnpm accept-signatures`. See its use in main(). */
+const ACCEPT_SIGNATURES_FLAG = '--accept-signatures';
 
 // ============================================================================
 // Types
@@ -126,6 +134,8 @@ interface ParsedOperation {
   isCollection: boolean;
   deprecated: boolean;
   deprecationNote?: string;
+  /** The method's parameters and return type, for the manifest to pin. */
+  signature: string;
 }
 
 interface PathParam {
@@ -403,20 +413,24 @@ function parseSpec(specPath: string): GeneratedApi | null {
         responseSchemaRef = resolveResponseSchema(response200, spec, isCollection);
       }
 
-      operations.push({
-        operationId: operation.operationId || `${method}${path.replace(/[^a-zA-Z]/g, '')}`,
+      const shape = {
         method,
-        path,
-        summary: operation.summary,
-        description: operation.description,
         pathParams,
         queryParams,
         hasRequestBody,
         requestBodySchemaRef,
         responseSchemaRef,
         isCollection,
+      };
+      operations.push({
+        ...shape,
+        operationId: operation.operationId || `${method}${path.replace(/[^a-zA-Z]/g, '')}`,
+        path,
+        summary: operation.summary,
+        description: operation.description,
         deprecated: operation.deprecated === true,
         deprecationNote: operation[DEPRECATED_REPLACEMENT_KEY],
+        signature: methodSignature(shape),
       });
     }
   }
@@ -435,35 +449,9 @@ function parseSpec(specPath: string): GeneratedApi | null {
 // ============================================================================
 
 function generateMethod(op: ParsedOperation, methodName: string): string {
-  const params: string[] = [];
-
-  for (const pp of op.pathParams) {
-    params.push(`${pp.name}: string`);
-  }
-
-  if (op.hasRequestBody) {
-    if (op.requestBodySchemaRef) {
-      params.push(`data: ${schemaTypeRef(op.requestBodySchemaRef)}`);
-    } else {
-      params.push('data: Record<string, unknown>');
-    }
-  }
-
-  if (op.queryParams.length > 0) {
-    const queryParamTypes = op.queryParams
-      .map((qp) => {
-        const optional = qp.required ? '' : '?';
-        let type = qp.type;
-        if (qp.enumValues) {
-          type = qp.enumValues.map((v) => tsStringLiteral(cleanParamName(String(v)))).join(' | ');
-        }
-        return `${qp.safeName}${optional}: ${type}`;
-      })
-      .join('; ');
-    params.push(`params?: { ${queryParamTypes} }`);
-  }
-
-  params.push('options?: RequestOptions');
+  // The parameter list comes from the helper the pinned signature is built
+  // from too (methodSignature), so the two cannot describe different methods.
+  const params = buildMethodParams(op);
 
   // Return-type decision lives in the unit-tested sdk-gen-utils helper. A
   // collection GET whose item schema can't be resolved degrades to
@@ -963,31 +951,50 @@ async function main() {
   // manifest. loadApiSurface hard-fails when the manifest is absent: the
   // generator never auto-seeds, because seeding from freshly fetched specs is
   // the exact incident this pipeline exists to prevent.
-  const surface = loadApiSurface();
+  let surface = loadApiSurface();
+
+  // `pnpm accept-signatures`. Without it, a method whose signature is not the
+  // one the manifest pins stops the run below; with it, the manifest is
+  // re-pinned to what the specs say now. Nothing else re-pins a signature.
+  const acceptingSignatures = process.argv.includes(ACCEPT_SIGNATURES_FLAG);
 
   const namesBySpec = new Map<string, Map<string, string>>();
-  const perSpec: Array<{ specName: string; newEntries: SurfaceEntry[]; missing: SurfaceEntry[] }> =
-    [];
+  const perSpec: Array<{
+    specName: string;
+    newEntries: SurfaceEntry[];
+    missing: SurfaceEntry[];
+    changedSignatures: ChangedSignature[];
+  }> = [];
   for (const api of apis) {
-    const { names, newEntries, missing } = resolveMethodNames(
+    const { names, newEntries, missing, changedSignatures } = resolveMethodNames(
       api.specName,
       api.operations,
       surface
     );
     namesBySpec.set(api.specName, names);
-    perSpec.push({ specName: api.specName, newEntries, missing });
+    perSpec.push({ specName: api.specName, newEntries, missing, changedSignatures });
   }
 
   // The workflow's classify step reads sync-report.json unconditionally, so
-  // write it on EVERY run, before any generated file or the manifest.
+  // write it on EVERY run, before any generated file or the manifest. It
+  // describes the manifest as it was loaded, also on a run that goes on to
+  // accept the signatures it lists.
   const report = buildSyncReport(perSpec);
   const reportPath = join(process.cwd(), 'sync-report.json');
   writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`Sync classification: ${report.classification} (wrote ${reportPath})\n`);
 
-  if (report.classification === 'breaking') {
+  // The decision is stopReasons' (scripts/lib/api-surface.ts), where it is
+  // tested. What follows only reports it. Earlier stages have already run by
+  // now, so "no class was written" is as far as either message can go: the
+  // types and the server table may have been regenerated.
+  const { missing: stoppedByMissing, signatures: stoppedBySignatures } = stopReasons(report, {
+    acceptSignatures: acceptingSignatures,
+  });
+
+  if (stoppedByMissing) {
     console.error(
-      'BREAKING: manifest operations are missing upstream. Nothing was generated, ' +
+      'BREAKING: manifest operations are missing upstream. No API class was written, ' +
         'and the manifest was left untouched.\n'
     );
     const remediation =
@@ -999,11 +1006,53 @@ async function main() {
       console.error(`    bound method name: ${op.name}`);
       console.error(`    remediation: ${remediation}`);
     }
+  }
+
+  if (stoppedBySignatures) {
+    console.error(
+      `${stoppedByMissing ? '\n' : ''}BREAKING: method signatures are not the ones pinned in ` +
+        'scripts/api-surface.yaml. No API class was written, and the manifest was left untouched.\n'
+    );
+    for (const change of report.changedSignatures) {
+      console.error(`  ${change.spec}: ${change.method} ${change.path}`);
+      console.error(`    method name: ${change.name}`);
+      console.error(`    pinned:  ${change.pinned ?? '(none pinned)'}`);
+      console.error(`    current: ${change.current}`);
+    }
+    console.error(
+      '\n  What to do, whichever applies:\n' +
+        '    The spec is wrong (it documents a parameter or a type the API does not have):\n' +
+        '      repair it in scripts/fix-specs.ts, with a test. The signature then matches again.\n' +
+        '    The change is real: run `pnpm accept-signatures`, review the diff of\n' +
+        '      scripts/api-surface.yaml, commit it with the regenerated output, and release by\n' +
+        '      hand at the level the change calls for.\n' +
+        '    You changed the generator: run `pnpm accept-signatures` and commit the manifest\n' +
+        '      with the regenerated output.'
+    );
+  }
+
+  if (stoppedByMissing || stoppedBySignatures) {
     process.exit(1);
   }
 
-  // Additive: fold newly discovered operations into the manifest and persist
-  // it, so their proposed names become pinned identity from now on. A
+  // What this run writes into the manifest, if anything. The flag is asked
+  // again here, though a plain run with a changed signature has already
+  // exited: re-pinning must not come to depend on that exit alone.
+  const accepted = acceptingSignatures ? perSpec.filter((r) => r.changedSignatures.length > 0) : [];
+  if (accepted.length > 0) {
+    console.log('Accepting changed signatures; updating scripts/api-surface.yaml:');
+    for (const { specName, changedSignatures } of accepted) {
+      for (const change of changedSignatures) {
+        console.log(`  ${specName}: ${change.op} (${change.name})`);
+        console.log(`    was: ${change.pinned ?? '(none pinned)'}`);
+        console.log(`    now: ${change.current}`);
+      }
+    }
+    surface = acceptSignatures(surface, accepted);
+  }
+
+  // Additive: fold newly discovered operations into the manifest, so their
+  // proposed names, and their signatures, become pinned from now on. A
   // brand-new spec file gets its key created here.
   const additive = perSpec.filter((r) => r.newEntries.length > 0);
   if (additive.length > 0) {
@@ -1014,6 +1063,9 @@ async function main() {
         console.log(`  ${specName}: ${entry.op} -> ${entry.name}`);
       }
     }
+  }
+
+  if (accepted.length > 0 || additive.length > 0) {
     const surfacePath = join(process.cwd(), 'scripts', 'api-surface.yaml');
     writeFileSync(surfacePath, serializeApiSurface(surface));
     console.log(`  Wrote ${surfacePath}\n`);

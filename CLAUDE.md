@@ -19,6 +19,7 @@ pnpm test                 # node --test tests/*.test.ts
 pnpm test:coverage        # same + experimental coverage
 pnpm test:fuzz            # fuzz.test.ts alone (pnpm test already includes it)
 pnpm test:routing-guard   # hermetic routing guard only, no network
+pnpm accept-signatures    # generate-sdk, re-pinning method signatures in the manifest on the way (see below)
 pnpm probe-routes         # LIVE: unauthenticated GETs against Deere's gateway; never part of a build
 ```
 
@@ -70,13 +71,53 @@ Editing the `name:` values is how you approve an upstream change: repoint an ent
 major-version decision). A manifest entry with no matching operation fails the sync with per-entry diagnostics
 rather than silently dropping the method.
 
+Each entry also pins its method's **signature**: the parameters and return type as one line of text, built by
+`methodSignature` (`scripts/lib/sdk-gen-utils.ts`) from the same pieces as the emitted method. Before this, a
+parameter John Deere added, removed or retyped was published in the next patch release with nobody having looked.
+A path parameter appears as a bare `string`, and query members and enum values are sorted, so a rename or a reorder
+upstream changes no signature. What a named schema contains is not pinned: a field added to or dropped from a
+`components['schemas']` type still ships as a patch. `listAll` is covered through its `list`. A signature is written
+for a new operation and by `pnpm accept-signatures`, never by hand.
+
 Every run is classified into `sync-report.json` (gitignored) for the workflow:
 
-- **benign**: no new and no missing operations. Patch release if specs or generated output changed, else none.
-- **additive**: new operations, none missing. Minor release; `generate-sdk` rewrites the manifest, folding the
-  new entries in with their proposed names.
-- **breaking**: a manifest entry lost its operation. The sync fails and surfaces the missing operations; a human
-  reconciles the manifest before any release.
+- **benign**: no new operation, none missing, no signature changed. Patch release if specs or generated output
+  changed, else none.
+- **additive**: new operations, nothing missing or changed. Minor release; `generate-sdk` rewrites the manifest,
+  folding the new entries in with their proposed names and their signatures.
+- **breaking**: a manifest entry lost its operation, or a method's signature is not the one pinned (an entry with
+  no signature counts). `generate-sdk` exits before it writes a class or the manifest, and the sync fails there
+  and surfaces them; a human reconciles before any release.
+
+**When a signature stops the sync.** Nothing was committed, tagged or published, and each daily run stops again
+until it is resolved. The job summary lists each method with its pinned and its current signature.
+
+1. Reproduce it on a branch: `pnpm fetch-specs`, then the offline stages. This is the one place outside the sync
+   where `fetch-specs` belongs, because here the person is the classifier. `generate-sdk` stops with the same list;
+   if Deere has changed again since, go by the local output.
+2. To see what the change does to the code, run `pnpm accept-signatures && pnpm lint:fix` and read the diff of
+   `src/api` and of the manifest.
+3. Then one of:
+   - **Repair**, when the spec documents something the API does not do. Restore the manifest
+     (`git restore scripts/api-surface.yaml`), add a guarded fix to `scripts/fix-specs.ts` with its test (skip when
+     the defect is absent, throw when it is reworded), and rerun the offline stages until `generate-sdk` passes.
+     Commit only the fix and its test, not the fetched specs or the regenerated output: the fix is a no-op on the
+     committed specs, so `codegen-drift` passes, and the next sync releases as usual.
+   - **Accept**, when the change is real. Keep the re-pinned manifest, run the routing guard and
+     `pnpm generate-routing-snapshot`, and commit what the sync would have: `specs/raw`, `specs/fixed`, the
+     regenerated `src`, the manifest and the snapshot. Choose the version by what the change does to callers. It
+     is a major if code written against the old signature can stop compiling or starts doing something else: an
+     argument removed, inserted or made required (a method's first query parameter counts, because it inserts
+     `params` ahead of `options`), a query member removed or made required, an enum value removed, a parameter
+     or body type changed to anything but a wider one, a return type the old one's callers cannot use as they
+     did. It is a minor if it only adds or widens: a new optional member in a `params` the method already had,
+     a new enum value, a wider parameter or body type, a return type that was `unknown` or `void` and now has a
+     name. Before a major, check `removeInMajor` in `scripts/lib/spec-relocations.ts`. Release by hand.
+
+A generator change that alters signatures stops the offline chain the same way. Run `pnpm accept-signatures`, commit
+the manifest with the regenerated output, and release by hand so the change does not go out inside the next sync
+patch. `pnpm accept-signatures` is the only thing that rewrites a pinned signature, and it never accepts a missing
+operation.
 
 CI's `sync-api.yml` runs the pipeline daily, reads the classification, and bumps accordingly: additive cuts a
 minor, benign spec churn a patch; a breaking run does not release. Before committing, the sync runs the routing
@@ -267,8 +308,9 @@ Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.t
 `src/index.ts`, and `src/safe/**` (the `deere.safe.*` facades).
 
 `scripts/api-surface.yaml` sits between the two: `generate-sdk` rewrites it wholesale on additive runs, so only its
-`name:` values are meant to be hand-edited (the rename/removal approval point described above) and per-entry hand
-comments do not survive. `scripts/canonicalize-specs.ts` is a rerunnable, idempotent one-off that renormalizes
+`op:` and `name:` values are meant to be hand-edited (the rename/removal approval point described above) and per-entry
+hand comments do not survive. Its `signature:` values are machine-written: `pnpm accept-signatures` is how one
+changes. `scripts/canonicalize-specs.ts` is a rerunnable, idempotent one-off that renormalizes
 committed `specs/raw/*.yaml` to the key order `fetch-specs` now emits, so live fetches diff cleanly against them.
 
 ## Testing conventions
@@ -297,7 +339,8 @@ then the routing guard and `pnpm generate-routing-snapshot`, and fails if anythi
 `sync-api.yml`'s stages. A failure means a dependency bump altered codegen output, a generator, registry or manifest
 change was committed without its regenerated output, a generated file was hand-edited, or a biome safe fix touched a
 hand-written file. Reproduce it with the same offline commands and commit the result; when a dependency bump is the
-cause, decide whether the new output is acceptable before regenerating.
+cause, decide whether the new output is acceptable before regenerating. A failure at its "Generate SDK" step that
+lists signatures means a change altered a method's signature without re-pinning it: `pnpm accept-signatures`.
 
 ## Code intelligence (`typescript-lsp`)
 
