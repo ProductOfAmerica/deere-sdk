@@ -165,6 +165,16 @@ describe('retry behavior', () => {
       assert.strictEqual(attempts, 1);
     });
 
+    // Below zero means no retries too. It used to mean no request at all: the
+    // call rejected with 'RetryExhausted' and nothing had been sent.
+    it('still makes the request when maxRetries is below zero', async () => {
+      const { fetch, getAttempts } = mockFailThenSucceed(0, 503, { data: 'success' });
+      const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: -1 });
+
+      assert.deepStrictEqual(await client.get('organizations', '/test'), { data: 'success' });
+      assert.strictEqual(getAttempts(), 1);
+    });
+
     it('respects maxRetries: 1 (one retry)', async () => {
       const { fetch, getAttempts } = mockFailThenSucceed(5, 503, { data: 'success' });
       const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 1 });

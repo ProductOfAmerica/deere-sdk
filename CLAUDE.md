@@ -216,13 +216,33 @@ leave deere.com fails there instead of producing unexplained 401s.
 
 ### Retry policy
 
-`requestUrl` retries on `{429, 500, 502, 503, 504}`, abort/timeout, and `TypeError`/"fetch" network errors. Exponential
-backoff with full jitter; respects `Retry-After` on 429 (capped by `maxDelay`). Auth errors (401/403) and client
-errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError` intentionally
-turns 401/403 into `AuthError` and everything else into `DeereError`.
+`requestUrl` retries on `{429, 500, 502, 503, 504}`, its own timeout, and `TypeError`/"fetch" network errors.
+Exponential backoff with full jitter; respects `Retry-After` on 429 (capped by `maxDelay`). Auth errors (401/403) and
+client errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError`
+intentionally turns 401/403 into `AuthError` and everything else into `DeereError`.
 
 Client-side errors (thrown from the resolver before any HTTP) use `CLIENT_ERROR_STATUS = -1` so they can't be confused
-with the `status === 0 && statusText === 'Timeout'` sentinel that's the only retryable locally-thrown case.
+with the timeout error, `status === 0 && statusText === 'Timeout'`.
+
+### Timeout and cancellation
+
+Each attempt gets its own `AbortController`, and fetch is handed that signal and no other. Two things abort it: the
+timeout, and the caller's `options.signal` through a listener that the attempt's `finally` removes. A local `timedOut`
+flag says which. The error fetch rejects with does not, so never classify by `error.name === 'AbortError'`: doing that
+is what once had a cancellation retried and reported as a timeout.
+
+- A timeout is retried, and ends as `DeereError('Request timeout', 0, 'Timeout')`. It runs until the response starts;
+  body reads are not limited by it. A `timeout` above what a timer can hold (`Infinity` is the documented way to turn
+  it off) arms no timer, because Node would set that timer for 1 ms.
+- A caller abort is never retried and rejects with `signal.reason` as it is, not a `DeereError`. `sleep` takes the
+  signal, so a backoff ends at once. `resolveHateoasUrl` throws the reason too, where any other failure of the parent
+  lookup or fetch becomes a `HateoasError`.
+- A listener is never called for a signal that has already aborted, so `requestUrl` checks before every attempt and
+  `sleep` checks before it waits.
+- The HATEOAS parent fetch is given the call's `signal` and `timeout`, never its `headers`: an Authorization among
+  them would replace the client's token on a request the caller never saw.
+- The fetch is not raced against the signal. A custom `fetch` that ignores `init.signal` runs its attempt to the end;
+  the client then sends nothing further.
 
 ### Error hierarchy
 
