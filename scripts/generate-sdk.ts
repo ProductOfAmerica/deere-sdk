@@ -22,6 +22,7 @@ import {
   type SurfaceEntry,
   serializeApiSurface,
 } from './lib/api-surface.js';
+import { assertPathKey, jsDocText, tsStringLiteral } from './lib/emit.js';
 import {
   buildMethodJsDoc,
   collectionItemType,
@@ -29,6 +30,7 @@ import {
   deprecatedJsDocLines,
   isCollectionEndpoint,
   resolveContentSchemaRef,
+  schemaTypeRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
 import { DEPRECATED_REPLACEMENT_KEY } from './lib/spec-relocations.js';
@@ -197,7 +199,7 @@ function getSchemaType(schema: SchemaObject | undefined): string {
   }
 
   if (schema.type === 'string' && schema.enum) {
-    return schema.enum.map((e) => `'${cleanParamName(String(e))}'`).join(' | ');
+    return schema.enum.map((e) => tsStringLiteral(cleanParamName(String(e)))).join(' | ');
   }
 
   switch (schema.type) {
@@ -311,6 +313,11 @@ function parseSpec(specPath: string): GeneratedApi | null {
   const operations: ParsedOperation[] = [];
 
   for (const [path, pathItem] of Object.entries(spec.paths)) {
+    // Everything emitted from this path relies on the check: its parameter
+    // names become identifiers, and the path itself is written unescaped into
+    // a template literal in generateMethod.
+    assertPathKey(path, `${specName}.yaml`);
+
     const methods: Array<'get' | 'post' | 'put' | 'patch' | 'delete'> = [
       'get',
       'post',
@@ -435,7 +442,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
 
   if (op.hasRequestBody) {
     if (op.requestBodySchemaRef) {
-      params.push(`data: components['schemas']['${op.requestBodySchemaRef}']`);
+      params.push(`data: ${schemaTypeRef(op.requestBodySchemaRef)}`);
     } else {
       params.push('data: Record<string, unknown>');
     }
@@ -447,7 +454,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
         const optional = qp.required ? '' : '?';
         let type = qp.type;
         if (qp.enumValues) {
-          type = qp.enumValues.map((v) => `'${cleanParamName(String(v))}'`).join(' | ');
+          type = qp.enumValues.map((v) => tsStringLiteral(cleanParamName(String(v)))).join(' | ');
         }
         return `${qp.safeName}${optional}: ${type}`;
       })
@@ -474,7 +481,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     for (const qp of op.queryParams) {
       const cleanName = cleanParamName(qp.name);
       lines.push(
-        `    if (params?.${qp.safeName} !== undefined) query.set('${cleanName}', String(params.${qp.safeName}));`
+        `    if (params?.${qp.safeName} !== undefined) query.set(${tsStringLiteral(cleanName)}, String(params.${qp.safeName}));`
       );
     }
     lines.push('    const queryString = query.toString();');
@@ -509,7 +516,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
       '  /**',
       '   * Get all items (follows pagination automatically)',
       ...deprecatedJsDocLines(op),
-      `   * @generated from ${op.method.toUpperCase()} ${op.path}`,
+      `   * @generated from ${op.method.toUpperCase()} ${jsDocText(op.path)}`,
       '   */',
     ].join('\n');
     listAllMethod = `
@@ -593,7 +600,7 @@ export class ${api.className} {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
    * resolve request URLs via API_SERVERS. Typed against SpecName so typos
    * are caught at compile time. */
-  private readonly spec: SpecName = '${api.specName}';
+  private readonly spec: SpecName = ${tsStringLiteral(api.specName)};
 
   constructor(private readonly client: DeereClient) {}
 
@@ -827,7 +834,7 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(
       ([path, entry]) =>
-        `  '${path}': { parentPath: '${entry.parentPath}', rel: '${entry.rel}', parentSpec: '${entry.parentSpec}' },`
+        `  ${tsStringLiteral(path)}: { parentPath: ${tsStringLiteral(entry.parentPath)}, rel: ${tsStringLiteral(entry.rel)}, parentSpec: ${tsStringLiteral(entry.parentSpec)} },`
     )
     .join('\n');
 

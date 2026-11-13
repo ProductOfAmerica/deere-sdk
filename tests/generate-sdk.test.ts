@@ -10,6 +10,7 @@ import {
   type ReturnTypeOp,
   resolveContentSchemaRef,
   type SchemaLike,
+  schemaTypeRef,
   unwrapCollectionItemRef,
   usesPaginatedResponse,
 } from '../scripts/lib/sdk-gen-utils.js';
@@ -263,5 +264,59 @@ describe('buildMethodJsDoc', () => {
 
   it('has no @deprecated lines helper output for a live operation', () => {
     assert.deepStrictEqual(deprecatedJsDocLines(base), []);
+  });
+
+  // Every field below is text from the spec. Whichever one carries it, a
+  // comment terminator must not end the block before its own last line: what
+  // followed would be a member of the generated class.
+  describe('text that tries to end the comment', () => {
+    const marker = '__jsDocTestMarker';
+    const payloads = {
+      'with spaces': `ok */ static { globalThis.${marker} = true; } /*`,
+      // No spaces, so the word wrapper has nowhere to break it.
+      'as one unbroken word': `ok*/static{globalThis.${marker}=true}/*`,
+    };
+    const fields = ['summary', 'description', 'deprecationNote', 'path'] as const;
+
+    for (const field of fields) {
+      for (const [shape, payload] of Object.entries(payloads)) {
+        it(`in the ${field}, ${shape}, stays inside the comment`, () => {
+          const lines = buildMethodJsDoc({ ...base, deprecated: true, [field]: payload });
+
+          assert.strictEqual(lines.at(-1), '   */');
+          assert.ok(!lines.slice(0, -1).join('\n').includes('*/'), lines.join('\n'));
+
+          // And as the generator uses it: in front of a method, in a class.
+          try {
+            new Function(`return class Demo {\n${lines.join('\n')}\n  async get() {}\n};`)();
+            assert.strictEqual(marker in globalThis, false);
+          } finally {
+            delete (globalThis as Record<string, unknown>)[marker];
+          }
+        });
+      }
+    }
+  });
+});
+
+describe('schemaTypeRef', () => {
+  it('indexes components by the schema name', () => {
+    assert.strictEqual(schemaTypeRef('FieldOperation'), "components['schemas']['FieldOperation']");
+  });
+
+  it('keeps a name that tries to leave its quotes inside them', () => {
+    const name = "T'] = (evil(), null) as components['schemas']['T";
+    assert.strictEqual(
+      schemaTypeRef(name),
+      "components['schemas']['T\\'] = (evil(), null) as components[\\'schemas\\'][\\'T']"
+    );
+    assert.strictEqual(
+      computeReturnType({ method: 'get', isCollection: false, responseSchemaRef: name }),
+      schemaTypeRef(name)
+    );
+    assert.strictEqual(
+      collectionItemType({ method: 'get', isCollection: true, responseSchemaRef: name }),
+      schemaTypeRef(name)
+    );
   });
 });

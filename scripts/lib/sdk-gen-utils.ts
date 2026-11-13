@@ -6,6 +6,7 @@
  * on import. See tests/generate-sdk.test.ts.
  */
 
+import { jsDocText, tsStringLiteral } from './emit.js';
 import { refName } from './spec-utils.js';
 
 /** Minimal structural shape of an OpenAPI schema, enough for wrapper detection. */
@@ -130,13 +131,21 @@ export interface ReturnTypeOp {
 }
 
 /**
+ * The TypeScript type of a named schema in the generated `components`. The
+ * name comes from a `$ref` in the spec, so it is written as an escaped literal.
+ */
+export function schemaTypeRef(schemaName: string): string {
+  return `components['schemas'][${tsStringLiteral(schemaName)}]`;
+}
+
+/**
  * The element type for a collection GET: the resolved item schema, or `unknown`
  * when no item schema could be resolved. Shared by `computeReturnType` (for the
  * `PaginatedResponse<T>` of the single-page method) and the `listAll` generator
  * (`T[]` / `getAll<T>`), so the two cannot drift.
  */
 export function collectionItemType(op: ReturnTypeOp): string {
-  return op.responseSchemaRef ? `components['schemas']['${op.responseSchemaRef}']` : 'unknown';
+  return op.responseSchemaRef ? schemaTypeRef(op.responseSchemaRef) : 'unknown';
 }
 
 /**
@@ -150,7 +159,7 @@ export function collectionItemType(op: ReturnTypeOp): string {
 export function computeReturnType(op: ReturnTypeOp): string {
   if (op.method === 'delete') return 'void';
   if (op.isCollection && op.method === 'get') return `PaginatedResponse<${collectionItemType(op)}>`;
-  if (op.responseSchemaRef) return `components['schemas']['${op.responseSchemaRef}']`;
+  if (op.responseSchemaRef) return schemaTypeRef(op.responseSchemaRef);
   if (op.method === 'post' || op.method === 'put' || op.method === 'patch') return 'void';
   return 'unknown';
 }
@@ -177,10 +186,12 @@ export function isCollectionEndpoint(
 
 /**
  * Word-wrap `text` into JSDoc lines. The first line starts with `prefix`;
- * continuation lines start with `   * `.
+ * continuation lines start with `   * `. The text cannot close the comment
+ * (see jsDocText); wrapping cannot undo that, since it only ever inserts
+ * whitespace between words.
  */
 export function wrapJsDocText(text: string, prefix: string, maxWidth = 80): string[] {
-  const words = text.replace(/\s+/g, ' ').trim().split(' ');
+  const words = jsDocText(text).replace(/\s+/g, ' ').trim().split(' ');
   const lines: string[] = [];
   let currentLine = prefix;
 
@@ -225,13 +236,13 @@ export function deprecatedJsDocLines(op: JsDocOp): string[] {
 export function buildMethodJsDoc(op: JsDocOp): string[] {
   const jsdoc: string[] = ['  /**'];
   if (op.summary) {
-    jsdoc.push(`   * ${op.summary}`);
+    jsdoc.push(`   * ${jsDocText(op.summary)}`);
   }
   if (op.description && op.description !== op.summary) {
     jsdoc.push(...wrapJsDocText(op.description, '   * @description '));
   }
   jsdoc.push(...deprecatedJsDocLines(op));
-  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${op.path}`);
+  jsdoc.push(`   * @generated from ${op.method.toUpperCase()} ${jsDocText(op.path)}`);
   jsdoc.push('   */');
   return jsdoc;
 }
