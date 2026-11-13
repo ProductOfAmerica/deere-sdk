@@ -82,7 +82,8 @@ export interface DeereClientConfig {
   /**
    * How long each attempt may wait for a response to start, in milliseconds.
    * Defaults to 30000. Reading the response body is not limited by it.
-   * `Infinity` turns it off.
+   * `Infinity` turns it off. The constructor throws for 0, a negative number,
+   * NaN, or anything other than a number or a numeric string.
    */
   timeout?: number;
   /** Maximum number of retry attempts for failed requests. Defaults to 3. Set to 0 to disable retries. */
@@ -134,7 +135,11 @@ export interface RequestOptions {
    * timeout applies whether or not a signal is given.
    */
   signal?: AbortSignal;
-  /** The client's `timeout`, for this call only. `Infinity` turns it off. */
+  /**
+   * The client's `timeout`, for this call only. `Infinity` turns it off. A
+   * value the constructor would refuse makes the call reject, before anything
+   * is sent, with a `DeereError` whose `statusText` is `'InvalidTimeout'`.
+   */
   timeout?: number;
 }
 
@@ -234,6 +239,45 @@ const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE', 'PUT', 'D
  */
 const MAX_TIMER_DELAY = 2 ** 31 - 1;
 
+const TIMEOUT_RULE =
+  'A timeout is a number of milliseconds greater than 0, and Infinity turns it off.';
+
+/**
+ * Whether a timeout is a duration a timer can be armed with. Handed 0, a
+ * negative number, NaN or something that is not a number, Node arms the timer
+ * for 1 ms, which timed out every request not answered within the same turn
+ * of the event loop. A numeric string is accepted and kept as it is, because
+ * a timer already reads `'30000'` as 30 seconds and JavaScript callers rely
+ * on that.
+ */
+function isDuration(value: unknown): boolean {
+  return (typeof value === 'number' || typeof value === 'string') && Number(value) > 0;
+}
+
+/**
+ * A rejected timeout, for an error message. Anything but a number or a string
+ * is named by its type, not converted: an object's own toString can throw.
+ */
+function describeTimeout(value: unknown): string {
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return JSON.stringify(value);
+  return `of type ${typeof value}`;
+}
+
+/**
+ * Refuses a per-call timeout that is not a duration, before anything is sent.
+ * `null` and `undefined` mean the client's own timeout.
+ */
+function checkCallTimeout(options: RequestOptions | undefined): void {
+  const timeout = options?.timeout;
+  if (timeout == null || isDuration(timeout)) return;
+  throw new DeereError(
+    `Invalid options.timeout ${describeTimeout(timeout)}. ${TIMEOUT_RULE} No request was sent.`,
+    CLIENT_ERROR_STATUS,
+    'InvalidTimeout'
+  );
+}
+
 import { HATEOAS_MAP } from './hateoas-map.js';
 import { pathSegments, segmentsMatchPattern } from './path-pattern.js';
 
@@ -297,6 +341,9 @@ export class DeereClient {
     this.environment = this.validateEnvironment(config.environment);
     this.fetchFn = config.fetch ?? fetch;
     this.timeout = config.timeout ?? 30000;
+    if (!isDuration(this.timeout)) {
+      throw new Error(`Invalid timeout ${describeTimeout(this.timeout)}. ${TIMEOUT_RULE}`);
+    }
     this.hateoas = config.hateoas ?? false;
     this.hateoasDebug = config.hateoasDebug ?? false;
     // Authorization is left out of the defaults: a header set for every
@@ -432,6 +479,8 @@ export class DeereClient {
     path: string,
     options?: RequestOptions
   ): AsyncGenerator<T[], void, unknown> {
+    // Ahead of HATEOAS resolution, which would wrap the error in HateoasError.
+    checkCallTimeout(options);
     // First page: resolve via the spec (templated or static lookup).
     let url: string | undefined = this.hateoas
       ? await this.resolveHateoasUrl(specName, path, options)
@@ -486,6 +535,8 @@ export class DeereClient {
     body?: unknown,
     options?: RequestOptions
   ): Promise<T> {
+    // Ahead of HATEOAS resolution, which would wrap the error in HateoasError.
+    checkCallTimeout(options);
     const url = this.hateoas
       ? await this.resolveHateoasUrl(specName, path, options)
       : resolveRequestUrl(specName, path, this.environment);
@@ -502,6 +553,9 @@ export class DeereClient {
     // an unparseable URL, and inside the try that would be taken for a network
     // failure and retried with backoff.
     const headers = this.buildHeaders(new URL(url), options?.headers);
+    // Here for fetchUrl and followLink, which come straight to requestUrl, and
+    // outside the loop like the parse: a bad value is not a failure to retry.
+    checkCallTimeout(options);
     const timeout = options?.timeout ?? this.timeout;
     const callerSignal = options?.signal;
     // Whether this request may be sent again after a failure that could have
