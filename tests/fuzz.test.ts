@@ -135,7 +135,7 @@ describe('Fuzz Tests', () => {
 
     it('handles arbitrary timeout values', () => {
       fc.assert(
-        fc.property(fc.integer({ min: 0, max: 600000 }), (timeout) => {
+        fc.property(fc.integer({ min: 1, max: 600000 }), (timeout) => {
           const client = new DeereClient({
             accessToken: 'test-token',
             timeout,
@@ -144,6 +144,21 @@ describe('Fuzz Tests', () => {
           });
           assert(client instanceof DeereClient);
         }),
+        { numRuns: 100 }
+      );
+    });
+
+    it('refuses a timeout of 0, below 0, or NaN at construction', () => {
+      fc.assert(
+        fc.property(
+          fc.oneof(fc.double({ max: 0 }), fc.integer({ max: 0 }), fc.constant(Number.NaN)),
+          (timeout) => {
+            assert.throws(
+              () => new DeereClient({ accessToken: 'test-token', timeout }),
+              /Invalid timeout/
+            );
+          }
+        ),
         { numRuns: 100 }
       );
     });

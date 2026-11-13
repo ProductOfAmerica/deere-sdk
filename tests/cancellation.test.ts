@@ -504,3 +504,168 @@ describe('in HATEOAS mode, the request for the parent resource', () => {
     assert.strictEqual(calls[1].headers.Authorization, 'Bearer the-callers-own');
   });
 });
+
+/**
+ * A fetch that answers every request with a page carrying a HATEOAS link for
+ * `/organizations/123/fields` and counts the requests.
+ */
+function countingFetch(): { fetch: typeof fetch; callCount: () => number } {
+  let calls = 0;
+  const fetchFn: typeof fetch = async () => {
+    calls++;
+    const body = {
+      values: [{ id: calls }],
+      links: [{ rel: 'fields', uri: `${BASE}/organizations/123/fields` }],
+    };
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+  return { fetch: fetchFn, callCount: () => calls };
+}
+
+// Node arms a timer for 1 ms when handed 0, a negative number, NaN or anything
+// that is not a number, so such a timeout used to time out every request that
+// did not answer within the same turn of the event loop.
+describe('a timeout that is not a duration', () => {
+  const refused: Array<[string, unknown]> = [
+    ['0', 0],
+    ['-1', -1],
+    ['-Infinity', Number.NEGATIVE_INFINITY],
+    ['NaN', Number.NaN],
+    ["''", ''],
+    ["'abc'", 'abc'],
+    ["'0'", '0'],
+    ['true', true],
+    ['{}', {}],
+    ['[]', []],
+  ];
+  const accepted: Array<[string, unknown]> = [
+    ['1', 1],
+    ['30000', 30_000],
+    ['Infinity', Number.POSITIVE_INFINITY],
+    ['2 ** 40, above what a timer can hold', 2 ** 40],
+    ["'30000'", '30000'],
+    ['null', null],
+    ['undefined', undefined],
+  ];
+
+  function isInvalidTimeout(error: unknown): boolean {
+    assert(error instanceof DeereError, `expected a DeereError, got ${String(error)}`);
+    assert(!(error instanceof HateoasError), 'the check comes before HATEOAS resolution');
+    assert.strictEqual(error.status, -1);
+    assert.strictEqual(error.statusText, 'InvalidTimeout');
+    assert.match(error.message, /Infinity/);
+    return true;
+  }
+
+  for (const [label, value] of refused) {
+    it(`is refused by the constructor: ${label}`, () => {
+      assert.throws(
+        () => new DeereClient({ accessToken: 'test', timeout: value as number }),
+        (error: unknown) => {
+          assert(error instanceof Error);
+          assert(!(error instanceof DeereError), 'a configuration error, as for the environment');
+          assert.match(error.message, /timeout/);
+          assert.match(error.message, /Infinity/);
+          return true;
+        }
+      );
+    });
+
+    it(`is refused for a call, before any request: ${label}`, { timeout: 2000 }, async () => {
+      const { fetch, callCount } = countingFetch();
+      const client = new DeereClient({ accessToken: 'test', fetch, maxRetries: 2 });
+
+      await assert.rejects(
+        client.get('organizations', '/organizations', { timeout: value as number }),
+        isInvalidTimeout
+      );
+      assert.strictEqual(callCount(), 0);
+    });
+  }
+
+  for (const [label, value] of accepted) {
+    it(`is accepted by the constructor and for a call: ${label}`, { timeout: 2000 }, async () => {
+      const { fetch, callCount } = countingFetch();
+      const client = new DeereClient({ accessToken: 'test', fetch, timeout: value as number });
+
+      await client.get('organizations', '/organizations');
+      await client.get('organizations', '/organizations', { timeout: value as number });
+      assert.strictEqual(callCount(), 2);
+    });
+  }
+
+  // Neither message may turn the value into a string: an object's toString
+  // can throw, or say nothing useful.
+  it('is described by its type when it is neither a number nor a string', async () => {
+    const hostile = {
+      toString() {
+        throw new Error('toString was called');
+      },
+    };
+    assert.throws(
+      () => new DeereClient({ accessToken: 'test', timeout: hostile as unknown as number }),
+      /object/
+    );
+    const client = new DeereClient({ accessToken: 'test', fetch: countingFetch().fetch });
+    await assert.rejects(
+      client.get('organizations', '/organizations', { timeout: hostile as unknown as number }),
+      /object/
+    );
+  });
+
+  const methods: Array<
+    [string, boolean, (client: DeereClient, timeout: number) => Promise<unknown>]
+  > = [
+    ['get', false, (c, timeout) => c.get('organizations', '/organizations', { timeout })],
+    ['post', false, (c, timeout) => c.post('organizations', '/organizations', {}, { timeout })],
+    [
+      'the first next() of paginate',
+      false,
+      (c, timeout) => c.paginate('organizations', '/organizations', { timeout }).next(),
+    ],
+    ['getAll', false, (c, timeout) => c.getAll('organizations', '/organizations', { timeout })],
+    [
+      'fetchUrl',
+      false,
+      (c, timeout) => c.fetchUrl('GET', `${BASE}/organizations`, undefined, { timeout }),
+    ],
+    ['followLink', false, (c, timeout) => c.followLink(`${BASE}/organizations`, { timeout })],
+    [
+      'get in HATEOAS mode',
+      true,
+      (c, timeout) => c.get('fields', '/organizations/123/fields', { timeout }),
+    ],
+    [
+      'getAll in HATEOAS mode',
+      true,
+      (c, timeout) => c.getAll('fields', '/organizations/123/fields', { timeout }),
+    ],
+  ];
+
+  for (const [name, hateoas, call] of methods) {
+    it(`rejects ${name} with no request sent and no retry`, { timeout: 2000 }, async () => {
+      const { fetch, callCount } = countingFetch();
+      const client = new DeereClient({ accessToken: 'test', fetch, hateoas, maxRetries: 2 });
+
+      await assert.rejects(call(client, 0), isInvalidTimeout);
+      assert.strictEqual(callCount(), 0);
+    });
+  }
+
+  it('given as null for a call, leaves the client its own', { timeout: 2000 }, async () => {
+    const { fetch, callCount } = hangingFetch();
+    const client = new DeereClient({ accessToken: 'test', fetch, timeout: 50, maxRetries: 0 });
+
+    await assert.rejects(
+      client.get('organizations', '/organizations', { timeout: null as unknown as number }),
+      (error: unknown) => {
+        assertIsTimeout(error);
+        return true;
+      }
+    );
+    assert.strictEqual(callCount(), 1);
+  });
+});

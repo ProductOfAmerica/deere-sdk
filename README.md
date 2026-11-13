@@ -788,7 +788,7 @@ try {
 }
 ```
 
-- **`timeout`** is how long each attempt may wait for a response to start. An attempt that times out is retried like any other transient failure. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. Reading a response body is not limited by the timeout, and `Infinity` turns it off.
+- **`timeout`** is how long each attempt may wait for a response to start. An attempt that times out is retried like any other transient failure. If the last attempt is one that timed out, the call rejects with a `DeereError` whose `status` is `0` and `statusText` is `'Timeout'`. In HATEOAS mode, when it was the request for the parent resource that timed out, that error arrives as the `cause` of a `HateoasError`. Reading a response body is not limited by the timeout, and `Infinity` turns it off. A timeout must be a number of milliseconds greater than `0`: the constructor throws for `0`, a negative number, `NaN` or anything that is not a number, and a call given such a value in `options` rejects before sending anything (see [Error Types](#error-types)). A numeric string such as `'30000'` is accepted.
 - **`signal`** cancels the call. The call rejects with the signal's `reason`: an `AbortError` by default, or whatever you passed to `abort()`. That is what `fetch` does, so the error is not a `DeereError`. A cancelled call is never retried, a wait before a retry ends at once, and `paginate`, `getAll` and HATEOAS mode request nothing further.
 - The two apply together. Passing a `signal` does not switch the timeout off.
 - A custom `fetch` must honour the `signal` it is handed. If it does not, neither a timeout nor a cancellation can interrupt a request already in flight.
@@ -801,6 +801,7 @@ try {
 | `RateLimitError`              | HTTP 429. Only reaches your catch after all retries are exhausted. | Yes      |
 | `AuthError`                   | HTTP 401/403. Refresh your OAuth token.                            | No       |
 | `DeereError` with `status` `0` and `statusText` `'Timeout'` | The last attempt got no response within `timeout`. | Yes      |
+| `DeereError` with `status` `-1` and `statusText` `'InvalidTimeout'` | The `timeout` in a call's `options` is not a number of milliseconds greater than `0`. Thrown before any request goes out. | No       |
 | The `reason` of your `signal` (an `AbortError` by default) | You aborted the `signal` you passed in `options`. Not a `DeereError`. See [Timeouts and Cancellation](#timeouts-and-cancellation). | No       |
 | `HateoasError`                | HATEOAS link resolution fails (parent fetch errored, no matching link, or the link is not an `https` URL on `*.deere.com`). | No       |
 | `DeereError` with `status` `-1` and `statusText` `'UntrustedLink'` | `paginate` or `getAll` met a `nextPage` link that is not an `https` URL on `*.deere.com`. The link is not requested. | No       |

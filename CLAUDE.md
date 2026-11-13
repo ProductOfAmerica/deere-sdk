@@ -228,6 +228,12 @@ is what once had a cancellation retried and reported as a timeout.
 - A timeout is retried, and ends as `DeereError('Request timeout', 0, 'Timeout')`. It runs until the response starts;
   body reads are not limited by it. A `timeout` above what a timer can hold (`Infinity` is the documented way to turn
   it off) arms no timer, because Node would set that timer for 1 ms.
+- A timeout that is not a duration is refused, because Node arms a timer for 1 ms when handed 0, a negative number,
+  NaN or a non-number. Accepted: a number or string whose `Number()` is above 0, kept as given (a numeric string worked
+  before and still does); `null` and `undefined` mean the default. The constructor throws a plain `Error`, like
+  `validateEnvironment`. A per-call value rejects with `DeereError(..., CLIENT_ERROR_STATUS, 'InvalidTimeout')` from
+  `checkCallTimeout`, called at the top of `request()` and `paginate()` (ahead of HATEOAS resolution, so the error is
+  not wrapped in `HateoasError`) and in `requestUrl()` outside the retry loop (for `fetchUrl` and `followLink`).
 - A caller abort is never retried and rejects with `signal.reason` as it is, not a `DeereError`. `sleep` takes the
   signal, so a backoff ends at once. `resolveHateoasUrl` throws the reason too, where any other failure of the parent
   lookup or fetch becomes a `HateoasError`.
