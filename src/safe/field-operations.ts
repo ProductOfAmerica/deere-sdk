@@ -28,7 +28,7 @@
  */
 
 import type { FieldOperationsApi } from '../api/field-operations-api.js';
-import type { PaginatedResponse } from '../client.js';
+import type { PaginatedResponse, RequestOptions } from '../client.js';
 import { DeereError } from '../errors.js';
 import type { components } from '../types/generated/field-operations-api.js';
 
@@ -127,12 +127,15 @@ export class SafeFieldOperationsApi {
   async listAllWithMeasurements(
     orgId: string,
     fieldId: string,
-    params?: SafeListAllParams
+    params?: SafeListAllParams,
+    options?: RequestOptions
   ): Promise<FieldOperationWithMeasurements[]> {
-    const result = await this.raw.listAll(orgId, fieldId, {
-      ...params,
-      embed: 'measurementTypes',
-    });
+    const result = await this.raw.listAll(
+      orgId,
+      fieldId,
+      { ...params, embed: 'measurementTypes' },
+      options
+    );
     for (const op of result) {
       assertMeasurementsPresent(op, 'listAllWithMeasurements');
     }
@@ -154,12 +157,15 @@ export class SafeFieldOperationsApi {
   async listWithMeasurements(
     orgId: string,
     fieldId: string,
-    params?: SafeListParams
+    params?: SafeListParams,
+    options?: RequestOptions
   ): Promise<PaginatedResponse<FieldOperationWithMeasurements>> {
-    const result = await this.raw.list(orgId, fieldId, {
-      ...params,
-      embed: 'measurementTypes',
-    });
+    const result = await this.raw.list(
+      orgId,
+      fieldId,
+      { ...params, embed: 'measurementTypes' },
+      options
+    );
     for (const op of result.values ?? []) {
       assertMeasurementsPresent(op, 'listWithMeasurements');
     }
@@ -179,12 +185,14 @@ export class SafeFieldOperationsApi {
    */
   async getWithMeasurements(
     operationId: string,
-    params?: SafeGetParams
+    params?: SafeGetParams,
+    options?: RequestOptions
   ): Promise<FieldOperationIdWithMeasurements> {
-    const result = await this.raw.get(operationId, {
-      ...params,
-      embed: 'measurementTypes',
-    });
+    const result = await this.raw.get(
+      operationId,
+      { ...params, embed: 'measurementTypes' },
+      options
+    );
     assertMeasurementsPresent(result, 'getWithMeasurements');
     return result as FieldOperationIdWithMeasurements;
   }

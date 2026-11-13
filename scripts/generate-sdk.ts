@@ -8,26 +8,34 @@
  * 3. Index file exporting everything
  *
  * Usage: pnpm generate-sdk
+ *        pnpm accept-signatures   (the same run, re-pinning method signatures
+ *                                  in scripts/api-surface.yaml on the way)
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import * as yaml from 'yaml';
 import {
+  acceptSignatures,
   buildSyncReport,
   displayOp,
   loadApiSurface,
   normalizePathPattern,
-  resolveMethodNames,
-  type SurfaceEntry,
+  resolveSurface,
   serializeApiSurface,
+  stopReasons,
 } from './lib/api-surface.js';
+import { assertPathKey, jsDocText, tsStringLiteral } from './lib/emit.js';
 import {
   buildMethodJsDoc,
+  buildMethodParams,
+  buildPathTemplate,
+  clientCallArguments,
   collectionItemType,
   computeReturnType,
   deprecatedJsDocLines,
   isCollectionEndpoint,
+  methodSignature,
   resolveContentSchemaRef,
   usesPaginatedResponse,
 } from './lib/sdk-gen-utils.js';
@@ -41,6 +49,8 @@ import { refName, stripDocumentationMarkup, toCamelCase, toPascalCase } from './
 const SPECS_DIR = join(process.cwd(), 'specs', 'fixed');
 const OUTPUT_DIR = join(process.cwd(), 'src', 'api');
 const SRC_DIR = join(process.cwd(), 'src');
+/** Passed by `pnpm accept-signatures`. See its use in main(). */
+const ACCEPT_SIGNATURES_FLAG = '--accept-signatures';
 
 // ============================================================================
 // Types
@@ -123,6 +133,10 @@ interface ParsedOperation {
   isCollection: boolean;
   deprecated: boolean;
   deprecationNote?: string;
+  /** The method's parameters and return type, for the manifest to pin. */
+  signature: string;
+  /** What the method hands the client, in order. See clientCallArguments. */
+  callArguments: string[];
 }
 
 interface PathParam {
@@ -197,7 +211,7 @@ function getSchemaType(schema: SchemaObject | undefined): string {
   }
 
   if (schema.type === 'string' && schema.enum) {
-    return schema.enum.map((e) => `'${cleanParamName(String(e))}'`).join(' | ');
+    return schema.enum.map((e) => tsStringLiteral(cleanParamName(String(e)))).join(' | ');
   }
 
   switch (schema.type) {
@@ -311,6 +325,11 @@ function parseSpec(specPath: string): GeneratedApi | null {
   const operations: ParsedOperation[] = [];
 
   for (const [path, pathItem] of Object.entries(spec.paths)) {
+    // Everything emitted from this path relies on the check: its parameter
+    // names become identifiers, and the path itself is written unescaped into
+    // a template literal in generateMethod.
+    assertPathKey(path, `${specName}.yaml`);
+
     const methods: Array<'get' | 'post' | 'put' | 'patch' | 'delete'> = [
       'get',
       'post',
@@ -395,20 +414,31 @@ function parseSpec(specPath: string): GeneratedApi | null {
         responseSchemaRef = resolveResponseSchema(response200, spec, isCollection);
       }
 
-      operations.push({
-        operationId: operation.operationId || `${method}${path.replace(/[^a-zA-Z]/g, '')}`,
+      const shape = {
         method,
-        path,
-        summary: operation.summary,
-        description: operation.description,
         pathParams,
         queryParams,
         hasRequestBody,
         requestBodySchemaRef,
         responseSchemaRef,
         isCollection,
+      };
+      operations.push({
+        ...shape,
+        operationId: operation.operationId || `${method}${path.replace(/[^a-zA-Z]/g, '')}`,
+        path,
+        summary: operation.summary,
+        description: operation.description,
         deprecated: operation.deprecated === true,
         deprecationNote: operation[DEPRECATED_REPLACEMENT_KEY],
+        signature: methodSignature(shape),
+        // Worked out here, not when the method is written: it refuses an
+        // operation it has no call for, and that has to stop the run before
+        // the manifest or any class is written.
+        callArguments: clientCallArguments(
+          shape,
+          `${specName}.yaml ${method.toUpperCase()} ${path}`
+        ),
       });
     }
   }
@@ -427,45 +457,16 @@ function parseSpec(specPath: string): GeneratedApi | null {
 // ============================================================================
 
 function generateMethod(op: ParsedOperation, methodName: string): string {
-  const params: string[] = [];
-
-  for (const pp of op.pathParams) {
-    params.push(`${pp.name}: string`);
-  }
-
-  if (op.hasRequestBody) {
-    if (op.requestBodySchemaRef) {
-      params.push(`data: components['schemas']['${op.requestBodySchemaRef}']`);
-    } else {
-      params.push('data: Record<string, unknown>');
-    }
-  }
-
-  if (op.queryParams.length > 0) {
-    const queryParamTypes = op.queryParams
-      .map((qp) => {
-        const optional = qp.required ? '' : '?';
-        let type = qp.type;
-        if (qp.enumValues) {
-          type = qp.enumValues.map((v) => `'${cleanParamName(String(v))}'`).join(' | ');
-        }
-        return `${qp.safeName}${optional}: ${type}`;
-      })
-      .join('; ');
-    params.push(`params?: { ${queryParamTypes} }`);
-  }
-
-  params.push('options?: RequestOptions');
+  // The parameter list comes from the helper the pinned signature is built
+  // from too (methodSignature), so the two cannot describe different methods.
+  const params = buildMethodParams(op);
 
   // Return-type decision lives in the unit-tested sdk-gen-utils helper. A
   // collection GET whose item schema can't be resolved degrades to
   // PaginatedResponse<unknown>, not bare unknown.
   const returnType = computeReturnType(op);
 
-  let pathTemplate = op.path;
-  for (const pp of op.pathParams) {
-    pathTemplate = pathTemplate.replace(`{${pp.name}}`, `\${${pp.name}}`);
-  }
+  const pathTemplate = buildPathTemplate(op.path);
 
   const lines: string[] = [];
 
@@ -474,7 +475,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     for (const qp of op.queryParams) {
       const cleanName = cleanParamName(qp.name);
       lines.push(
-        `    if (params?.${qp.safeName} !== undefined) query.set('${cleanName}', String(params.${qp.safeName}));`
+        `    if (params?.${qp.safeName} !== undefined) query.set(${tsStringLiteral(cleanName)}, String(params.${qp.safeName}));`
       );
     }
     lines.push('    const queryString = query.toString();');
@@ -483,16 +484,14 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
     lines.push(`    const path = \`${pathTemplate}\`;`);
   }
 
-  const bodyArg = op.hasRequestBody ? ', data' : '';
-
   // v2.0: every generated method passes `this.spec` as the first arg so
-  // DeereClient can resolve the request URL via API_SERVERS[spec].
+  // DeereClient can resolve the request URL via API_SERVERS[spec]. What comes
+  // after the path differs by client method; see clientCallArguments.
+  const callArguments = op.callArguments.join(', ');
   if (returnType === 'void') {
-    lines.push(`    await this.client.${op.method}(this.spec, path${bodyArg}, options);`);
+    lines.push(`    await this.client.${op.method}(${callArguments});`);
   } else {
-    lines.push(
-      `    return this.client.${op.method}<${returnType}>(this.spec, path${bodyArg}, options);`
-    );
+    lines.push(`    return this.client.${op.method}<${returnType}>(${callArguments});`);
   }
 
   const jsdoc = buildMethodJsDoc(op);
@@ -509,7 +508,7 @@ function generateMethod(op: ParsedOperation, methodName: string): string {
       '  /**',
       '   * Get all items (follows pagination automatically)',
       ...deprecatedJsDocLines(op),
-      `   * @generated from ${op.method.toUpperCase()} ${op.path}`,
+      `   * @generated from ${op.method.toUpperCase()} ${jsDocText(op.path)}`,
       '   */',
     ].join('\n');
     listAllMethod = `
@@ -576,6 +575,12 @@ function generateApiClass(api: GeneratedApi, names: Map<string, string>): string
     `import type { ${clientImports.join(', ')} } from '../client.js';`,
     `import type { SpecName } from '../api-servers.generated.js';`,
   ];
+  // The one value import a generated class has: every `{param}` in a path is
+  // filled in through it. Skipped for a class with none, where it would be an
+  // unused import.
+  if (api.operations.some((op) => op.pathParams.length > 0)) {
+    imports.push(`import { encodePathParam } from '../path-pattern.js';`);
+  }
   if (usesComponents) {
     imports.push(`import type { components } from '../types/generated/${api.typesImportPath}.js';`);
   }
@@ -593,7 +598,7 @@ export class ${api.className} {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
    * resolve request URLs via API_SERVERS. Typed against SpecName so typos
    * are caught at compile time. */
-  private readonly spec: SpecName = '${api.specName}';
+  private readonly spec: SpecName = ${tsStringLiteral(api.specName)};
 
   constructor(private readonly client: DeereClient) {}
 
@@ -827,7 +832,7 @@ function generateHateoasMap(apis: GeneratedApi[]): string {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(
       ([path, entry]) =>
-        `  '${path}': { parentPath: '${entry.parentPath}', rel: '${entry.rel}', parentSpec: '${entry.parentSpec}' },`
+        `  ${tsStringLiteral(path)}: { parentPath: ${tsStringLiteral(entry.parentPath)}, rel: ${tsStringLiteral(entry.rel)}, parentSpec: ${tsStringLiteral(entry.parentSpec)} },`
     )
     .join('\n');
 
@@ -952,47 +957,112 @@ async function main() {
   // manifest. loadApiSurface hard-fails when the manifest is absent: the
   // generator never auto-seeds, because seeding from freshly fetched specs is
   // the exact incident this pipeline exists to prevent.
-  const surface = loadApiSurface();
+  let surface = loadApiSurface();
 
-  const namesBySpec = new Map<string, Map<string, string>>();
-  const perSpec: Array<{ specName: string; newEntries: SurfaceEntry[]; missing: SurfaceEntry[] }> =
-    [];
-  for (const api of apis) {
-    const { names, newEntries, missing } = resolveMethodNames(
-      api.specName,
-      api.operations,
-      surface
-    );
-    namesBySpec.set(api.specName, names);
-    perSpec.push({ specName: api.specName, newEntries, missing });
-  }
+  // `pnpm accept-signatures`. Without it, a method whose signature is not the
+  // one the manifest pins stops the run below; with it, the manifest is
+  // re-pinned to what the specs say now. Nothing else re-pins a signature.
+  const acceptingSignatures = process.argv.includes(ACCEPT_SIGNATURES_FLAG);
+
+  const { namesBySpec, perSpec } = resolveSurface(surface, apis);
 
   // The workflow's classify step reads sync-report.json unconditionally, so
-  // write it on EVERY run, before any generated file or the manifest.
+  // write it on EVERY run, before any generated file or the manifest. It
+  // describes the manifest as it was loaded, also on a run that goes on to
+  // accept the signatures it lists.
   const report = buildSyncReport(perSpec);
   const reportPath = join(process.cwd(), 'sync-report.json');
   writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`Sync classification: ${report.classification} (wrote ${reportPath})\n`);
 
-  if (report.classification === 'breaking') {
+  // The decision is stopReasons' (scripts/lib/api-surface.ts), where it is
+  // tested. What follows only reports it. Earlier stages have already run by
+  // now, so "no class was written" is as far as either message can go: the
+  // types and the server table may have been regenerated.
+  const { missing: stoppedByMissing, signatures: stoppedBySignatures } = stopReasons(report, {
+    acceptSignatures: acceptingSignatures,
+  });
+
+  if (stoppedByMissing) {
     console.error(
-      'BREAKING: manifest operations are missing upstream. Nothing was generated, ' +
+      'BREAKING: manifest operations are missing upstream. No API class was written, ' +
         'and the manifest was left untouched.\n'
     );
+    const absent = new Set(report.absentSpecs);
+    if (absent.size > 0) {
+      console.error(
+        'scripts/api-surface.yaml has entries for these specs and specs/fixed has no file ' +
+          `for them, so every one of their operations is missing: ${report.absentSpecs.join(', ')}\n`
+      );
+    }
     const remediation =
       "upstream renamed the path: edit this entry's op: in scripts/api-surface.yaml " +
       'to the new path to keep the name; endpoint removed upstream: delete the entry, ' +
       'understanding the public method disappears, a major-version consideration';
+    // Editing the entry is the wrong fix when the whole spec file is gone.
+    const absentRemediation = (spec: string) =>
+      `the spec file is gone, not the operation: restore specs/raw/${spec}.yaml and rerun ` +
+      'the offline stages, which write specs/fixed from it; or remove the API, a ' +
+      `major-version decision: delete specs/raw/${spec}.yaml (left in place, it brings the ` +
+      `spec back under new method names), specs/fixed/${spec}.yaml, src/api/${spec}.ts, ` +
+      `src/types/generated/${spec}.ts, the "${spec}" key in scripts/api-surface.yaml and its ` +
+      'entry in scripts/spec-registry.yaml, run the offline stages and then ' +
+      'pnpm generate-routing-snapshot, and lower the spec-count floor in ' +
+      'tests/generate-api-servers.test.ts (see "The api-surface manifest" in CLAUDE.md)';
     for (const op of report.missingOperations) {
       console.error(`  ${op.spec}: ${op.method} ${op.path}`);
       console.error(`    bound method name: ${op.name}`);
-      console.error(`    remediation: ${remediation}`);
+      console.error(
+        `    remediation: ${absent.has(op.spec) ? absentRemediation(op.spec) : remediation}`
+      );
     }
+  }
+
+  if (stoppedBySignatures) {
+    console.error(
+      `${stoppedByMissing ? '\n' : ''}BREAKING: method signatures are not the ones pinned in ` +
+        'scripts/api-surface.yaml. No API class was written, and the manifest was left untouched.\n'
+    );
+    for (const change of report.changedSignatures) {
+      console.error(`  ${change.spec}: ${change.method} ${change.path}`);
+      console.error(`    method name: ${change.name}`);
+      console.error(`    pinned:  ${change.pinned ?? '(none pinned)'}`);
+      console.error(`    current: ${change.current}`);
+    }
+    console.error(
+      '\n  What to do, whichever applies:\n' +
+        '    The spec is wrong (it documents a parameter or a type the API does not have):\n' +
+        '      repair it in scripts/fix-specs.ts, with a test. The signature then matches again.\n' +
+        '    The change is real: run `pnpm accept-signatures`, review the diff of\n' +
+        '      scripts/api-surface.yaml, commit it with the regenerated output, and release by\n' +
+        '      hand at the level the change calls for.\n' +
+        '    You changed the generator: run `pnpm accept-signatures` and commit the manifest\n' +
+        '      with the regenerated output.'
+    );
+  }
+
+  if (stoppedByMissing || stoppedBySignatures) {
     process.exit(1);
   }
 
-  // Additive: fold newly discovered operations into the manifest and persist
-  // it, so their proposed names become pinned identity from now on. A
+  // What this run writes into the manifest, if anything. The flag is asked
+  // again here, though a plain run with a changed signature has already
+  // exited: re-pinning must not come to depend on that exit alone.
+  const accepted = acceptingSignatures ? perSpec.filter((r) => r.changedSignatures.length > 0) : [];
+  if (accepted.length > 0) {
+    console.log('Accepting changed signatures; updating scripts/api-surface.yaml:');
+    for (const { specName, changedSignatures } of accepted) {
+      for (const change of changedSignatures) {
+        console.log(`  ${specName}: ${change.op} (${change.name})`);
+        console.log(`    was: ${change.pinned ?? '(none pinned)'}`);
+        console.log(`    now: ${change.current}`);
+      }
+    }
+    surface = acceptSignatures(surface, accepted);
+  }
+
+  // Additive: fold newly discovered operations into the manifest, so their
+  // proposed names, and their signatures, become pinned from now on. A
   // brand-new spec file gets its key created here.
   const additive = perSpec.filter((r) => r.newEntries.length > 0);
   if (additive.length > 0) {
@@ -1003,6 +1073,9 @@ async function main() {
         console.log(`  ${specName}: ${entry.op} -> ${entry.name}`);
       }
     }
+  }
+
+  if (accepted.length > 0 || additive.length > 0) {
     const surfacePath = join(process.cwd(), 'scripts', 'api-surface.yaml');
     writeFileSync(surfacePath, serializeApiSurface(surface));
     console.log(`  Wrote ${surfacePath}\n`);

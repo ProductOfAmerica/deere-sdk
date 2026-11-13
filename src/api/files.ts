@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/files.js';
 
 export class FilesApi {
@@ -58,7 +59,7 @@ export class FilesApi {
     const query = new URLSearchParams();
     if (params?.source !== undefined) query.set('source', String(params.source));
     const queryString = query.toString();
-    const path = `/fileTransfers/${id}${queryString ? `?${queryString}` : ''}`;
+    const path = `/fileTransfers/${encodePathParam('id', id)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['FileTransfersValue']>(this.spec, path, options);
   }
 
@@ -125,7 +126,7 @@ export class FilesApi {
     fileId: string,
     options?: RequestOptions
   ): Promise<components['schemas']['ValueFileIdGet']> {
-    const path = `/files/${fileId}`;
+    const path = `/files/${encodePathParam('fileId', fileId)}`;
     return this.client.get<components['schemas']['ValueFileIdGet']>(this.spec, path, options);
   }
 
@@ -140,7 +141,7 @@ export class FilesApi {
     data: components['schemas']['EditableFileDetails'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/files/${fileId}`;
+    const path = `/files/${encodePathParam('fileId', fileId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -160,7 +161,7 @@ export class FilesApi {
     const query = new URLSearchParams();
     if (params?.source !== undefined) query.set('source', String(params.source));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fileTransfers${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fileTransfers${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FileTransfersValue']>>(
       this.spec,
       path,
@@ -184,7 +185,7 @@ export class FilesApi {
     data: components['schemas']['FileTransfersPost'],
     options?: RequestOptions
   ): Promise<components['schemas']['PostFileTransfersResponse']> {
-    const path = `/organizations/${orgId}/fileTransfers`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fileTransfers`;
     return this.client.post<components['schemas']['PostFileTransfersResponse']>(
       this.spec,
       path,
@@ -226,7 +227,7 @@ export class FilesApi {
     if (params?.archived !== undefined) query.set('archived', String(params.archived));
     if (params?.status !== undefined) query.set('status', String(params.status));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/files${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/files${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FilesGet']>>(
       this.spec,
       path,
@@ -247,7 +248,7 @@ export class FilesApi {
     data: components['schemas']['PostableFileDetails'],
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/files`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/files`;
     await this.client.post(this.spec, path, data, options);
   }
 }

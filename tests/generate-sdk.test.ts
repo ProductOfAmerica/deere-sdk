@@ -2,14 +2,20 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import {
   buildMethodJsDoc,
+  buildMethodParams,
+  buildPathTemplate,
+  clientCallArguments,
   collectionItemType,
   computeReturnType,
   DEFAULT_DEPRECATION_NOTE,
   deprecatedJsDocLines,
   isCollectionEndpoint,
+  methodSignature,
+  type ParamListOp,
   type ReturnTypeOp,
   resolveContentSchemaRef,
   type SchemaLike,
+  schemaTypeRef,
   unwrapCollectionItemRef,
   usesPaginatedResponse,
 } from '../scripts/lib/sdk-gen-utils.js';
@@ -263,5 +269,365 @@ describe('buildMethodJsDoc', () => {
 
   it('has no @deprecated lines helper output for a live operation', () => {
     assert.deepStrictEqual(deprecatedJsDocLines(base), []);
+  });
+
+  // Every field below is text from the spec. Whichever one carries it, a
+  // comment terminator must not end the block before its own last line: what
+  // followed would be a member of the generated class.
+  describe('text that tries to end the comment', () => {
+    const marker = '__jsDocTestMarker';
+    const payloads = {
+      'with spaces': `ok */ static { globalThis.${marker} = true; } /*`,
+      // No spaces, so the word wrapper has nowhere to break it.
+      'as one unbroken word': `ok*/static{globalThis.${marker}=true}/*`,
+    };
+    const fields = ['summary', 'description', 'deprecationNote', 'path'] as const;
+
+    for (const field of fields) {
+      for (const [shape, payload] of Object.entries(payloads)) {
+        it(`in the ${field}, ${shape}, stays inside the comment`, () => {
+          const lines = buildMethodJsDoc({ ...base, deprecated: true, [field]: payload });
+
+          assert.strictEqual(lines.at(-1), '   */');
+          assert.ok(!lines.slice(0, -1).join('\n').includes('*/'), lines.join('\n'));
+
+          // And as the generator uses it: in front of a method, in a class.
+          try {
+            new Function(`return class Demo {\n${lines.join('\n')}\n  async get() {}\n};`)();
+            assert.strictEqual(marker in globalThis, false);
+          } finally {
+            delete (globalThis as Record<string, unknown>)[marker];
+          }
+        });
+      }
+    }
+  });
+});
+
+describe('buildPathTemplate', () => {
+  it('leaves a path with no parameters as it is', () => {
+    assert.strictEqual(buildPathTemplate('/organizations'), '/organizations');
+    assert.strictEqual(buildPathTemplate('/users/@currentUser'), '/users/@currentUser');
+  });
+
+  it('passes each parameter through the encoder, under its own name', () => {
+    assert.strictEqual(
+      buildPathTemplate('/notificationEvents/{sourceEvent}'),
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the emitted template body, as text
+      "/notificationEvents/${encodePathParam('sourceEvent', sourceEvent)}"
+    );
+  });
+
+  it('keeps several parameters in the order the path has them', () => {
+    assert.strictEqual(
+      buildPathTemplate('/organizations/{orgId}/fields/{fieldId}/boundaries'),
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the emitted template body, as text
+      "/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/boundaries"
+    );
+  });
+});
+
+describe('schemaTypeRef', () => {
+  it('indexes components by the schema name', () => {
+    assert.strictEqual(schemaTypeRef('FieldOperation'), "components['schemas']['FieldOperation']");
+  });
+
+  it('keeps a name that tries to leave its quotes inside them', () => {
+    const name = "T'] = (evil(), null) as components['schemas']['T";
+    assert.strictEqual(
+      schemaTypeRef(name),
+      "components['schemas']['T\\'] = (evil(), null) as components[\\'schemas\\'][\\'T']"
+    );
+    assert.strictEqual(
+      computeReturnType({ method: 'get', isCollection: false, responseSchemaRef: name }),
+      schemaTypeRef(name)
+    );
+    assert.strictEqual(
+      collectionItemType({ method: 'get', isCollection: true, responseSchemaRef: name }),
+      schemaTypeRef(name)
+    );
+  });
+});
+
+describe('buildMethodParams and methodSignature', () => {
+  // GET /organizations/{orgId}/fields, more or less.
+  const list: ParamListOp = {
+    method: 'get',
+    isCollection: true,
+    responseSchemaRef: 'Field',
+    pathParams: [{ name: 'orgId' }],
+    queryParams: [
+      {
+        safeName: 'recordFilter',
+        required: false,
+        type: 'string',
+        enumValues: ['AVAILABLE', 'ARCHIVED', 'ALL'],
+      },
+      { safeName: 'embed', required: false, type: 'string[]' },
+    ],
+    hasRequestBody: false,
+  };
+
+  it('lists the path parameters, then the body, then params, then options', () => {
+    assert.deepStrictEqual(
+      buildMethodParams({
+        ...list,
+        method: 'post',
+        isCollection: false,
+        pathParams: [{ name: 'orgId' }, { name: 'fieldId' }],
+        hasRequestBody: true,
+        requestBodySchemaRef: 'PostField',
+      }),
+      [
+        'orgId: string',
+        'fieldId: string',
+        "data: components['schemas']['PostField']",
+        // As John Deere declares them: the emitted method keeps their order.
+        "params?: { recordFilter?: 'AVAILABLE' | 'ARCHIVED' | 'ALL'; embed?: string[] }",
+        'options?: RequestOptions',
+      ]
+    );
+  });
+
+  it('types a body with no named schema as a record, and marks only optional members', () => {
+    assert.deepStrictEqual(
+      buildMethodParams({
+        ...list,
+        hasRequestBody: true,
+        queryParams: [{ safeName: 'count', required: true, type: 'number' }],
+      }),
+      [
+        'orgId: string',
+        'data: Record<string, unknown>',
+        'params?: { count: number }',
+        'options?: RequestOptions',
+      ]
+    );
+    assert.deepStrictEqual(buildMethodParams({ ...list, pathParams: [], queryParams: [] }), [
+      'options?: RequestOptions',
+    ]);
+  });
+
+  it('writes the signature on one line, path parameters as bare strings', () => {
+    assert.strictEqual(
+      methodSignature(list),
+      "(string, params?: { embed?: string[]; recordFilter?: 'ALL' | 'ARCHIVED' | 'AVAILABLE' }, " +
+        "options?: RequestOptions) => PaginatedResponse<components['schemas']['Field']>"
+    );
+    assert.strictEqual(
+      methodSignature({ ...list, method: 'delete', pathParams: [], queryParams: [] }),
+      '(options?: RequestOptions) => void'
+    );
+  });
+
+  // It is built from the pieces the emitted method is built from. Where
+  // nothing needs sorting, an enum included, the two are the same text.
+  it('uses the very strings the emitted parameter list has', () => {
+    const op: ParamListOp = {
+      ...list,
+      method: 'put',
+      isCollection: false,
+      hasRequestBody: true,
+      requestBodySchemaRef: 'PutField',
+      queryParams: [
+        { safeName: 'a', required: true, type: 'boolean' },
+        { safeName: 'b', required: false, type: 'number' },
+        { safeName: 'c', required: false, type: 'string', enumValues: ['X', 'Y'] },
+      ],
+    };
+    const afterThePath = buildMethodParams(op).slice(op.pathParams.length);
+    assert.strictEqual(
+      methodSignature(op),
+      `(string, ${afterThePath.join(', ')}) => ${computeReturnType(op)}`
+    );
+  });
+
+  // John Deere's enum values sometimes carry documentation markup. The value
+  // is written as source, so the markup goes, and it goes from both.
+  it('strips markup from an enum value, in the emitted list and the signature alike', () => {
+    const op: ParamListOp = {
+      ...list,
+      queryParams: [
+        { safeName: 'mode', required: false, type: 'string', enumValues: ['<b>ALL</b>', 'NONE'] },
+      ],
+    };
+    assert.deepStrictEqual(buildMethodParams(op).slice(1), [
+      "params?: { mode?: 'ALL' | 'NONE' }",
+      'options?: RequestOptions',
+    ]);
+    assert.ok(methodSignature(op).includes("params?: { mode?: 'ALL' | 'NONE' }"));
+  });
+
+  // Three things a caller cannot see. Upstream churn in them must not stop
+  // the sync.
+  it('is the same whatever a path parameter is called', () => {
+    assert.strictEqual(
+      methodSignature({ ...list, pathParams: [{ name: 'organizationId' }] }),
+      methodSignature(list)
+    );
+  });
+
+  it('is the same whatever order the query parameters are declared in', () => {
+    assert.strictEqual(
+      methodSignature({ ...list, queryParams: [...list.queryParams].reverse() }),
+      methodSignature(list)
+    );
+  });
+
+  it('is the same whatever order an enum declares its values in', () => {
+    const [recordFilter, embed] = list.queryParams;
+    const reordered = { ...recordFilter, enumValues: ['ALL', 'AVAILABLE', 'ARCHIVED'] };
+    assert.strictEqual(
+      methodSignature({ ...list, queryParams: [reordered, embed] }),
+      methodSignature(list)
+    );
+  });
+
+  // Everything a caller can see. Each of these is a different method to call,
+  // so no two of them, the original included, may share a signature.
+  it('differs for every change a caller would have to adapt to', () => {
+    const [recordFilter, embed] = list.queryParams;
+    const withBody = { ...list, hasRequestBody: true, requestBodySchemaRef: 'PostField' };
+    const variants: Record<string, ParamListOp> = {
+      'the original': list,
+      'a path parameter added': { ...list, pathParams: [{ name: 'orgId' }, { name: 'fieldId' }] },
+      'a path parameter removed': { ...list, pathParams: [] },
+      'a body added': withBody,
+      'a body of another type': { ...withBody, requestBodySchemaRef: 'PutField' },
+      'a body with no named type': { ...withBody, requestBodySchemaRef: undefined },
+      'a query parameter added': {
+        ...list,
+        queryParams: [...list.queryParams, { safeName: 'count', required: false, type: 'number' }],
+      },
+      'a query parameter removed': { ...list, queryParams: [recordFilter] },
+      'no query parameters left': { ...list, queryParams: [] },
+      'a query parameter that became required': {
+        ...list,
+        queryParams: [recordFilter, { ...embed, required: true }],
+      },
+      'a query parameter of another type': {
+        ...list,
+        queryParams: [recordFilter, { ...embed, type: 'string' }],
+      },
+      'an enum value added': {
+        ...list,
+        queryParams: [
+          { ...recordFilter, enumValues: ['AVAILABLE', 'ARCHIVED', 'ALL', 'NEW'] },
+          embed,
+        ],
+      },
+      'an enum that became any string': {
+        ...list,
+        queryParams: [{ ...recordFilter, enumValues: undefined }, embed],
+      },
+      'another return type': { ...list, responseSchemaRef: 'FieldResponse' },
+      'a return type that is no longer known': { ...list, responseSchemaRef: undefined },
+      'a collection that became one item': { ...list, isCollection: false },
+    };
+
+    const names = Object.keys(variants);
+    const bySignature = new Map<string, string>();
+    for (const name of names) {
+      const signature = methodSignature(variants[name]);
+      const twin = bySignature.get(signature);
+      assert.strictEqual(twin, undefined, `"${name}" has the signature of "${twin}"`);
+      bySignature.set(signature, name);
+    }
+    assert.strictEqual(bySignature.size, names.length);
+  });
+
+  // The text is compared, stored in YAML and printed in a job summary, so
+  // whatever the spec says has to stay inside its quotes and on one line.
+  it('keeps spec text inside its quotes and on one line', () => {
+    const signature = methodSignature({
+      ...list,
+      responseSchemaRef: "Field'] | never\n//",
+      queryParams: [
+        { safeName: 'mode', required: false, type: 'string', enumValues: ["a' | 'b", 'c\r\nd'] },
+      ],
+    });
+    assert.ok(!/[\r\n]/.test(signature), JSON.stringify(signature));
+    assert.ok(signature.includes(schemaTypeRef("Field'] | never\n//")));
+    assert.ok(signature.includes("'a\\' | \\'b'"), signature);
+  });
+});
+
+// DeereClient's post, put and patch take a body before the options, and its
+// get and delete do not. The generator once left the body out of a write that
+// declares none, and the caller's options were sent in its place.
+describe('clientCallArguments', () => {
+  type Method = ParamListOp['method'];
+  const operation = (method: Method, hasRequestBody: boolean): ParamListOp => ({
+    method,
+    isCollection: false,
+    pathParams: [{ name: 'id' }],
+    queryParams: [],
+    hasRequestBody,
+    requestBodySchemaRef: hasRequestBody ? 'Thing' : undefined,
+  });
+  const callFor = (method: Method, hasRequestBody: boolean) =>
+    clientCallArguments(operation(method, hasRequestBody), `demo.yaml ${method} /things/{id}`);
+
+  const READS: Method[] = ['get', 'delete'];
+  const WRITES: Method[] = ['post', 'put', 'patch'];
+
+  it('gives a read the options straight after the path', () => {
+    for (const method of READS) {
+      assert.deepStrictEqual(callFor(method, false), ['this.spec', 'path', 'options'], method);
+    }
+  });
+
+  it('gives a write its body, then the options', () => {
+    for (const method of WRITES) {
+      assert.deepStrictEqual(
+        callFor(method, true),
+        ['this.spec', 'path', 'data', 'options'],
+        method
+      );
+    }
+  });
+
+  it('fills the body slot of a write that has no body, so the options stay in theirs', () => {
+    for (const method of WRITES) {
+      assert.deepStrictEqual(
+        callFor(method, false),
+        ['this.spec', 'path', 'undefined', 'options'],
+        method
+      );
+    }
+  });
+
+  it('refuses a read that declares a request body, naming the operation', () => {
+    for (const method of READS) {
+      assert.throws(
+        () => callFor(method, true),
+        (error: Error) => {
+          assert.ok(error.message.startsWith(`demo.yaml ${method} /things/{id}: `), error.message);
+          assert.match(error.message, /declares a request body/);
+          return true;
+        }
+      );
+    }
+  });
+
+  // The call and the parameter list are built apart, so this ties them: the
+  // call names nothing but what the method declares.
+  it('passes only what the method declares, with the options last', () => {
+    for (const method of [...READS, ...WRITES]) {
+      for (const hasRequestBody of [false, true]) {
+        if (hasRequestBody && READS.includes(method)) continue;
+        const declared = buildMethodParams(operation(method, hasRequestBody)).map(
+          (parameter) => parameter.split(/[?:]/)[0]
+        );
+        const [spec, path, ...rest] = callFor(method, hasRequestBody);
+        assert.deepStrictEqual([spec, path], ['this.spec', 'path']);
+        assert.strictEqual(rest.at(-1), 'options');
+        for (const name of rest.filter((argument) => argument !== 'undefined')) {
+          assert.ok(declared.includes(name), `${method}: "${name}" is not a parameter`);
+        }
+        // And a declared body is never left out of the call.
+        assert.strictEqual(rest.includes('data'), declared.includes('data'), method);
+      }
+    }
   });
 });

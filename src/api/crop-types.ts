@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/crop-types.js';
 
 export class CropTypesApi {
@@ -61,7 +62,7 @@ export class CropTypesApi {
     id: string,
     options?: RequestOptions
   ): Promise<components['schemas']['CropType3']> {
-    const path = `/cropTypes/${id}`;
+    const path = `/cropTypes/${encodePathParam('id', id)}`;
     return this.client.get<components['schemas']['CropType3']>(this.spec, path, options);
   }
 
@@ -71,7 +72,7 @@ export class CropTypesApi {
    * @generated from GET /cropTypes/{name}
    */
   async get(name: string, options?: RequestOptions): Promise<components['schemas']['CropType2']> {
-    const path = `/cropTypes/${name}`;
+    const path = `/cropTypes/${encodePathParam('name', name)}`;
     return this.client.get<components['schemas']['CropType2']>(this.spec, path, options);
   }
 
@@ -89,7 +90,7 @@ export class CropTypesApi {
     const query = new URLSearchParams();
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${organizationId}/cropTypes${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('organizationId', organizationId)}/cropTypes${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['CropType4']>>(
       this.spec,
       path,

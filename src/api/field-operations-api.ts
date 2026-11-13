@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/field-operations-api.js';
 
 export class FieldOperationsApi {
@@ -32,7 +33,7 @@ export class FieldOperationsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/fieldOperations/${operationId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/fieldOperations/${encodePathParam('operationId', operationId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['FieldOperationId']>(this.spec, path, options);
   }
 
@@ -65,7 +66,7 @@ export class FieldOperationsApi {
     operationId: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<unknown>> {
-    const path = `/fieldOperations/${operationId}/measurementTypes`;
+    const path = `/fieldOperations/${encodePathParam('operationId', operationId)}/measurementTypes`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
 
@@ -103,7 +104,7 @@ export class FieldOperationsApi {
     measurementType: string,
     options?: RequestOptions
   ): Promise<components['schemas']['FieldOperationMeasurementType']> {
-    const path = `/fieldOperations/${operationId}/measurementTypes/${measurementType}`;
+    const path = `/fieldOperations/${encodePathParam('operationId', operationId)}/measurementTypes/${encodePathParam('measurementType', measurementType)}`;
     return this.client.get<components['schemas']['FieldOperationMeasurementType']>(
       this.spec,
       path,
@@ -148,7 +149,7 @@ export class FieldOperationsApi {
     if (params?.shapeType !== undefined) query.set('shapeType', String(params.shapeType));
     if (params?.resolution !== undefined) query.set('resolution', String(params.resolution));
     const queryString = query.toString();
-    const path = `/fieldOps/${operationId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/fieldOps/${encodePathParam('operationId', operationId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<unknown>(this.spec, path, options);
   }
 
@@ -186,7 +187,7 @@ export class FieldOperationsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/fieldOperations${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldOperation']>>(
       this.spec,
       path,
@@ -219,7 +220,7 @@ export class FieldOperationsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.workPlanIds !== undefined) query.set('workPlanIds', String(params.workPlanIds));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/fieldOperations${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/fieldOperations${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['FieldOperation']>(this.spec, path, options);
   }
 }

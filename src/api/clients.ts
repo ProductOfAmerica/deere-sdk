@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/clients.js';
 
 export class ClientsApi {
@@ -31,7 +32,7 @@ export class ClientsApi {
     id: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['FieldResponse']>> {
-    const path = `/organizations/${orgID}/clients/${id}/fields`;
+    const path = `/organizations/${encodePathParam('orgID', orgID)}/clients/${encodePathParam('id', id)}/fields`;
     return this.client.get<PaginatedResponse<components['schemas']['FieldResponse']>>(
       this.spec,
       path,
@@ -53,7 +54,7 @@ export class ClientsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/clients${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['Client']>>(
       this.spec,
       path,
@@ -73,7 +74,7 @@ export class ClientsApi {
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/clients${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<components['schemas']['Client']>(this.spec, path, options);
   }
 
@@ -90,7 +91,7 @@ export class ClientsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/clients`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -111,7 +112,7 @@ export class ClientsApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/clients/${clientId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients/${encodePathParam('clientId', clientId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<components['schemas']['Client']>(this.spec, path, options);
   }
 
@@ -128,7 +129,7 @@ export class ClientsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/clients/${clientId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients/${encodePathParam('clientId', clientId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 
@@ -140,7 +141,7 @@ export class ClientsApi {
    * @generated from DELETE /organizations/{orgId}/clients/{clientId}
    */
   async delete(orgId: string, clientId: string, options?: RequestOptions): Promise<void> {
-    const path = `/organizations/${orgId}/clients/${clientId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients/${encodePathParam('clientId', clientId)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -161,7 +162,7 @@ export class ClientsApi {
     const query = new URLSearchParams();
     if (params?.name !== undefined) query.set('name', String(params.name));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/clients/${id}/farms${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/clients/${encodePathParam('id', id)}/farms${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<components['schemas']['FarmResponse']>>(
       this.spec,
       path,

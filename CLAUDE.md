@@ -19,6 +19,7 @@ pnpm test                 # node --test tests/*.test.ts (CI, the daily sync and 
 pnpm test:coverage        # same + experimental coverage
 pnpm test:fuzz            # fuzz.test.ts alone (pnpm test already includes it)
 pnpm test:routing-guard   # hermetic routing guard only, no network
+pnpm accept-signatures    # generate-sdk, re-pinning method signatures in the manifest on the way (see below)
 pnpm probe-routes         # LIVE: unauthenticated GETs against Deere's gateway; never part of a build
 ```
 
@@ -70,13 +71,71 @@ Editing the `name:` values is how you approve an upstream change: repoint an ent
 major-version decision). A manifest entry with no matching operation fails the sync with per-entry diagnostics
 rather than silently dropping the method.
 
+A manifest key with entries and no file under `specs/fixed` fails the same way, with every one of its entries
+missing and the spec named in `absentSpecs` (`resolveSurface` in `scripts/lib/api-surface.ts`). It used to be
+skipped, and the generator dropped the whole class. No pipeline stage deletes a spec file, so every way here is a
+file deleted by hand (the raw file of a frozen spec is one). `fix-specs` applies a relocation while it processes the
+`into` spec's raw file, so a relocation into a spec with no file is skipped without a word; that spec's manifest key
+is then what reports it. Editing entries is the wrong fix here. Either:
+
+- restore the spec: its file under `specs/raw`, then the offline stages, which write `specs/fixed` from it; or
+- remove the API, a major-version decision. Delete `specs/raw/<spec>.yaml`, `specs/fixed/<spec>.yaml`,
+  `src/api/<spec>.ts` and `src/types/generated/<spec>.ts`, the spec's key in this manifest and its entry in
+  `scripts/spec-registry.yaml`; run the offline stages, then `pnpm generate-routing-snapshot`, which drops its
+  rows; and lower the spec-count floor in `tests/generate-api-servers.test.ts`. The raw file matters most:
+  `fix-specs` processes every file under `specs/raw` without consulting the registry, so while it is there the
+  spec comes back, and with its key gone the run is additive and re-adds every method under a newly proposed name.
+  Nothing else deletes these files, and `tsc` fails on a stale wrapper once `generate-api-servers` has dropped the
+  spec from `SpecName`. The API table in README.md lists the class too, and no check catches that row.
+
+Each entry also pins its method's **signature**: the parameters and return type as one line of text, built by
+`methodSignature` (`scripts/lib/sdk-gen-utils.ts`) from the same pieces as the emitted method. Before this, a
+parameter John Deere added, removed or retyped was published in the next patch release with nobody having looked.
+A path parameter appears as a bare `string`, and query members and enum values are sorted, so a rename or a reorder
+upstream changes no signature. What a named schema contains is not pinned: a field added to or dropped from a
+`components['schemas']` type still ships as a patch. `listAll` is covered through its `list`. A signature is written
+for a new operation and by `pnpm accept-signatures`, never by hand.
+
 Every run is classified into `sync-report.json` (gitignored) for the workflow:
 
-- **benign**: no new and no missing operations. Patch release if specs or generated output changed, else none.
-- **additive**: new operations, none missing. Minor release; `generate-sdk` rewrites the manifest, folding the
-  new entries in with their proposed names.
-- **breaking**: a manifest entry lost its operation. The sync fails and surfaces the missing operations; a human
-  reconciles the manifest before any release.
+- **benign**: no new operation, none missing, no signature changed. Patch release if specs or generated output
+  changed, else none.
+- **additive**: new operations, nothing missing or changed. Minor release; `generate-sdk` rewrites the manifest,
+  folding the new entries in with their proposed names and their signatures.
+- **breaking**: a manifest entry lost its operation (including every entry of a spec whose file is gone, listed in
+  `absentSpecs`), or a method's signature is not the one pinned (an entry with no signature counts). `generate-sdk`
+  exits before it writes a class or the manifest, and the sync fails there
+  and surfaces them; a human reconciles before any release.
+
+**When a signature stops the sync.** Nothing was committed, tagged or published, and each daily run stops again
+until it is resolved. The job summary lists each method with its pinned and its current signature.
+
+1. Reproduce it on a branch: `pnpm fetch-specs`, then the offline stages. This is the one place outside the sync
+   where `fetch-specs` belongs, because here the person is the classifier. `generate-sdk` stops with the same list;
+   if Deere has changed again since, go by the local output.
+2. To see what the change does to the code, run `pnpm accept-signatures && pnpm lint:fix` and read the diff of
+   `src/api` and of the manifest.
+3. Then one of:
+   - **Repair**, when the spec documents something the API does not do. Restore the manifest
+     (`git restore scripts/api-surface.yaml`), add a guarded fix to `scripts/fix-specs.ts` with its test (skip when
+     the defect is absent, throw when it is reworded), and rerun the offline stages until `generate-sdk` passes.
+     Commit only the fix and its test, not the fetched specs or the regenerated output: the fix is a no-op on the
+     committed specs, so `codegen-drift` passes, and the next sync releases as usual.
+   - **Accept**, when the change is real. Keep the re-pinned manifest, run the routing guard and
+     `pnpm generate-routing-snapshot`, and commit what the sync would have: `specs/raw`, `specs/fixed`, the
+     regenerated `src`, the manifest and the snapshot. Choose the version by what the change does to callers. It
+     is a major if code written against the old signature can stop compiling or starts doing something else: an
+     argument removed, inserted or made required (a method's first query parameter counts, because it inserts
+     `params` ahead of `options`), a query member removed or made required, an enum value removed, a parameter
+     or body type changed to anything but a wider one, a return type the old one's callers cannot use as they
+     did. It is a minor if it only adds or widens: a new optional member in a `params` the method already had,
+     a new enum value, a wider parameter or body type, a return type that was `unknown` or `void` and now has a
+     name. Before a major, check `removeInMajor` in `scripts/lib/spec-relocations.ts`. Release by hand.
+
+A generator change that alters signatures stops the offline chain the same way. Run `pnpm accept-signatures`, commit
+the manifest with the regenerated output, and release by hand so the change does not go out inside the next sync
+patch. `pnpm accept-signatures` is the only thing that rewrites a pinned signature, and it never accepts a missing
+operation.
 
 CI's `sync-api.yml` runs the pipeline daily, reads the classification, and bumps accordingly: additive cuts a
 minor, benign spec churn a patch; a breaking run does not release. Before committing, the sync runs the routing
@@ -129,7 +188,8 @@ No generator rewrites these, so their comments survive. Each file's header is th
   slug whose documents declare mixed server families will merge.
 - `embed-contracts.yaml`: response fields Deere returns but its spec omits (e.g. `?embed=measurementTypes`), patched
   into `specs/fixed` before type generation. Each entry needs a hand-written wrapper in `src/safe/` that forces the
-  query param, plus a field in `SafeFacades` (`src/safe/index.ts`). Consumers reach it through
+  query param and takes `options?: RequestOptions` last, forwarding it to the raw method (without it a caller cannot
+  pass a signal, timeout or headers), plus a field in `SafeFacades` (`src/safe/index.ts`). Consumers reach it through
   `deere.safe.<resource>`; the generator needs no change.
 
 ## Architecture
@@ -164,6 +224,30 @@ v1's "route everything through one baseUrl" approach 404'd equipment endpoints s
 A templated spec can carry `pathOverrides` for paths Deere serves from a different base than the spec declares
 (`/notifications/{sourceEvent}` is on `/isg` while the rest of its spec is on `/platform`). They come from
 `scripts/routing-overrides.yaml` with measured evidence, never from a guess.
+
+### Path parameters are encoded by the generated methods
+
+Every generated method fills each `{param}` of its path through `encodePathParam` (`src/path-pattern.ts`), the one
+value a generated class imports from hand-written code. It percent-encodes the argument into exactly one segment,
+leaving `@` and `:` as they are, and refuses what cannot be a segment (anything but a string, finite number, bigint
+or boolean; the empty string; `.` and `..`; malformed text) with a `DeereError` using `CLIENT_ERROR_STATUS` and
+statusText `'InvalidPathParameter'`. Before it existed an argument was written into the path as it came, and one
+containing `/` or `..` addressed a different resource.
+
+Routing depends on this, not only safety: `pathOverrides` and the HATEOAS map recognise a request path by its segment
+count, so a parameter that spilled into two segments also lost its override or its parent. `DeereClient.get(spec,
+path)` takes the path as written and encodes nothing. The package root exports `encodePathParam` for callers who
+build such a path, because `encodeURIComponent` leaves `..` alone; `warmLinkCache` paths must carry values the same
+way the request will. `tests/generated-structure.test.ts` pins how every generated method builds its request: each
+`${...}` in its `path` is either an `encodePathParam` call on the method's own parameter or the query-string suffix,
+and that `path` is the one thing the client is handed as the path.
+
+The same test pins what follows the path, per client method, because the two kinds differ: `get`, `delete` and
+`getAll` take the options next, while `post`, `put` and `patch` take a body first. A write whose spec declares no
+request body is therefore generated with `undefined` in the body slot (`clientCallArguments` in
+`scripts/lib/sdk-gen-utils.ts`). Leaving the slot out, as the generator once did, put the caller's options there:
+they were sent as the request body and none of them was applied. A read that declares a request body stops the
+generator, since `DeereClient` has no parameter to carry one.
 
 ### No silent environment fallbacks
 
@@ -202,23 +286,82 @@ subdomain. Fetching the parent through the child's spec would hit the wrong host
 `HATEOAS_MAP` is regenerated by `generate-sdk.ts`. To add a new cross-spec relationship, edit the generator, not the
 output file.
 
-### Bearer-token hostname guard in `fetchUrl`
+### Bearer-token guard in `requestUrl`
 
-`DeereClient.fetchUrl` (and `followLink`) is the one entry point for absolute URLs. It attaches the
-`Authorization: Bearer …` header **only** to hosts matching `TRUSTED_HOSTS = /^([a-z0-9-]+\.)*deere\.com$/i`.
-Third-party URLs (e.g. a HAL link that somehow points off-domain, or a user-supplied webhook URL) get no Authorization
-header. This is a deliberate token-leakage safeguard. If you touch `requestUrl`'s header-building logic, preserve the
-`_noAuth` path and the rule "user-supplied `options.headers.Authorization` always wins."
+`DeereClient.requestUrl` is the one place the `Authorization: Bearer …` header is attached (`buildHeaders`), and every
+request passes through it: resolver-built URLs, `fetchUrl` and `followLink`, pagination, and links discovered in HATEOAS
+mode. The token goes **only** to an https URL whose host matches `TRUSTED_HOSTS = /^([a-z0-9-]+\.)*deere\.com$/i`
+(`isTrustedUrl`). Any other URL is requested with no Authorization header.
+
+The check used to live in `fetchUrl`, with an internal `_noAuth` option that told `requestUrl` to skip the token. Every
+other caller got the token by default, so a link discovered in HATEOAS mode was sent it whatever host it named. Do not
+reintroduce a per-caller opt-out: the decision belongs where the request is made. Rules to preserve when touching
+`buildHeaders`:
+
+- A caller's `options.headers` Authorization always wins: it is sent as given, to any host, and replaces the token.
+- The header name is compared without regard to case. Two keys differing only in case are sent as one header carrying
+  both values.
+- `defaultHeaders` cannot set Authorization; the constructor drops it, since it would reach every host contacted.
+
+Links the client follows on its own are held to the same test, through `untrustedLinkProblem`. `resolveHateoasUrl`
+refuses a discovered link that fails it with `HateoasError`, and `paginate` refuses a `nextPage` link with a `DeereError`
+(`CLIENT_ERROR_STATUS`, statusText `'UntrustedLink'`). They are refused, not followed without the token, because the
+request would still be sent there with the caller's `options.headers` and, for a POST, its body. A URL the caller
+passes to `fetchUrl` or `followLink` is different: it is requested as asked, without the token when it is not trusted.
+`tests/fetch-url-security.test.ts` checks that every URL the resolver can build is trusted, so a spec whose servers
+leave deere.com fails there instead of producing unexplained 401s.
 
 ### Retry policy
 
-`requestUrl` retries on `{429, 500, 502, 503, 504}`, abort/timeout, and `TypeError`/"fetch" network errors. Exponential
-backoff with full jitter; respects `Retry-After` on 429 (capped by `maxDelay`). Auth errors (401/403) and client
-errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError` intentionally
-turns 401/403 into `AuthError` and everything else into `DeereError`.
+`requestUrl` retries on `{429, 500, 502, 503, 504}`, its own timeout, and `TypeError`/"fetch" network errors.
+Exponential backoff with full jitter; respects `Retry-After` on 429 (capped by `maxDelay`). Auth errors (401/403) and
+client errors (400/404/422) never retry. `maxRetries: 0` disables. Do not add retries for 4xx: `handleError`
+intentionally turns 401/403 into `AuthError` and everything else into `DeereError`.
+
+`retryNonIdempotent` (config, default `true`) decides whether POST and PATCH are retried like the rest. With `false`
+they are retried only on 429: after a 500/502/503/504, a network error or a timeout the request may already have been
+carried out. That a 429 means the request was not handled is how rate limiters behave, not something HTTP promises.
+The rule is an allow-list, `IDEMPOTENT_METHODS`, so a method it does not know (`fetchUrl` passes on whatever the caller
+wrote, compared in upper case) is treated as POST is. The default becomes `false` in 4.0, and a test in
+`tests/retry.test.ts` fails once `package.json` reaches major 4 until the constructor is changed.
+
+Whatever `retryNonIdempotent` says, an attempt that got a success status (`succeeded` in `requestUrl`) is sent again
+after a timeout or network error during its body read only when the method is in `IDEMPOTENT_METHODS`: the server has
+carried the request out, so a second POST would do the work twice. Before the timeout covered the body, a dropped
+connection mid-body was enough to resend a POST.
 
 Client-side errors (thrown from the resolver before any HTTP) use `CLIENT_ERROR_STATUS = -1` so they can't be confused
-with the `status === 0 && statusText === 'Timeout'` sentinel that's the only retryable locally-thrown case.
+with the timeout error, `status === 0 && statusText === 'Timeout'`.
+
+### Timeout and cancellation
+
+Each attempt gets its own `AbortController`, and fetch is handed that signal and no other. Two things abort it: the
+timeout, and the caller's `options.signal` through a listener that the attempt's `finally` removes. A local `timedOut`
+flag says which. The error fetch rejects with does not, so never classify by `error.name === 'AbortError'`: doing that
+is what once had a cancellation retried and reported as a timeout.
+
+- A timeout is retried, and ends as `DeereError('Request timeout', 0, 'Timeout')`. It covers the whole attempt, the
+  body read included (an error body too): the timer is cleared only in the attempt's `finally`. A body that outlasts it
+  is retried for an idempotent method and never for a POST or PATCH that got a success status (see "Retry policy").
+  One that fires while `handleError` reads an error body surfaces as that HTTP error, without its body, because the
+  `DeereError` check comes first in the catch. A body that ignores the abort and completes anyway is returned. A
+  `timeout` above what a timer can hold (`Infinity` is the documented way to turn
+  it off) arms no timer, because Node would set that timer for 1 ms.
+- A timeout that is not a duration is refused, because Node arms a timer for 1 ms when handed 0, a negative number,
+  NaN or a non-number. Accepted: a number or string whose `Number()` is above 0, kept as given (a numeric string worked
+  before and still does); `null` and `undefined` mean the default. The constructor throws a plain `Error`, like
+  `validateEnvironment`. A per-call value rejects with `DeereError(..., CLIENT_ERROR_STATUS, 'InvalidTimeout')` from
+  `checkCallTimeout`, called at the top of `request()` and `paginate()` (ahead of HATEOAS resolution, so the error is
+  not wrapped in `HateoasError`) and in `requestUrl()` outside the retry loop (for `fetchUrl` and `followLink`).
+- A caller abort is never retried and rejects with `signal.reason` as it is, not a `DeereError`. `sleep` takes the
+  signal, so a backoff ends at once. `resolveHateoasUrl` throws the reason too, where any other failure of the parent
+  lookup or fetch becomes a `HateoasError`.
+- A listener is never called for a signal that has already aborted, so `requestUrl` checks before every attempt and
+  `sleep` checks before it waits.
+- The HATEOAS parent fetch is given the call's `signal` and `timeout`, never its `headers`: an Authorization among
+  them would replace the client's token on a request the caller never saw.
+- The fetch is not raced against the signal. A custom `fetch` that ignores `init.signal` runs its attempt to the end;
+  the client then sends nothing further.
 
 ### Error hierarchy
 
@@ -246,12 +389,40 @@ pnpm lint:fix`), and commit the regenerated output in the same change. Not `pnpm
 bump. Spec host logic lives in `scripts/generate-api-servers.ts`, generated method shape in
 `scripts/generate-sdk.ts`, and spec-level patches in `scripts/fix-specs.ts`.
 
+### Spec text is untrusted where it is emitted
+
+The specs come from John Deere's portal and the sync publishes what the generators write without a person reading it,
+so text from a spec must never be able to end the literal, comment or identifier it is written into. A summary
+containing a comment terminator used to become a class member that ran when the generated module loaded; a run that
+only changes a description classifies as benign and is released. `scripts/lib/emit.ts` is the one place this is
+handled, and a generator never builds quotes or a comment around spec text itself:
+
+- Text that stays data is escaped: `tsStringLiteral` for anything quoted (parameter names, enum values, schema names,
+  URLs, map keys) and `jsDocText` for anything placed in a comment.
+- Text that becomes syntax is checked and the run stops when it does not fit: `assertPathKey` for path keys (which are
+  written unescaped into a template literal and supply parameter identifiers), `assertEnvironmentName` for environment
+  names (substituted into a hostname at run time). A failure means upstream published a new shape; widen the grammar
+  there once a person has looked.
+- `generate-api-servers` classifies a spec as `unavailable` when its server URL is not a plain https base on deere.com
+  (no credentials, query or fragment, and `{environment}` named exactly once in a template), and refuses a path-level
+  one outright. The resolver appends the request path to that string, so anything else would send requests to another
+  host, to the wrong path, or not at all.
+
+`tests/generated-structure.test.ts` is the second line of defence and does not rely on the list of emit sites: it fails
+if a committed generated file contains anything of a kind no generator emits (a class member, a top-level statement, a
+computed value in a table, a default parameter value, or a statement or call in a method body other than the few every
+method is built from). It does not look inside string or template literals. It runs only in CI, which gates no
+release: the sync commits and tags, and the release workflow publishes, without running the suite. When a generator
+starts emitting a new shape on purpose (a value import, a call to a helper), that test is where it gets allowed; allow
+the exact import or callee, not the kind.
+
 Hand-written core: `src/client.ts`, `src/environment-resolver.ts`, `src/errors.ts`, `src/path-pattern.ts`,
 `src/index.ts`, and `src/safe/**` (the `deere.safe.*` facades).
 
 `scripts/api-surface.yaml` sits between the two: `generate-sdk` rewrites it wholesale on additive runs, so only its
-`name:` values are meant to be hand-edited (the rename/removal approval point described above) and per-entry hand
-comments do not survive. `scripts/canonicalize-specs.ts` is a rerunnable, idempotent one-off that renormalizes
+`op:` and `name:` values are meant to be hand-edited (the rename/removal approval point described above) and per-entry
+hand comments do not survive. Its `signature:` values are machine-written: `pnpm accept-signatures` is how one
+changes. `scripts/canonicalize-specs.ts` is a rerunnable, idempotent one-off that renormalizes
 committed `specs/raw/*.yaml` to the key order `fetch-specs` now emits, so live fetches diff cleanly against them.
 
 ## Testing conventions
@@ -271,15 +442,17 @@ TypeScript is pinned to 6.x (`^6.0.3`). openapi-typescript 7.x, which `generate-
 TypeScript JS API (`ts.factory`) at runtime, and the TypeScript 7 package no longer exposes it: the 7.0.2 bump (#39)
 broke type generation for every spec while lint, typecheck, build and tests stayed green. Dependabot ignores
 `typescript` >=7. Lift the pin once an openapi-typescript release stops importing TypeScript at runtime
-(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. `readme-examples.test.ts` uses the
-same API, confined to its `typecheckBlocks` function, and needs porting at the same time.
+(openapi-ts/openapi-typescript#2841), whether that ships as a major or a minor. Two tests use the same API and need
+porting at the same time: `readme-examples.test.ts`, confined to its `typecheckBlocks` function, and
+`generated-structure.test.ts`, which only parses.
 
 CI's `codegen-drift` job reruns the offline stages listed under "Generated-code boundary" on the committed specs,
 then the routing guard and `pnpm generate-routing-snapshot`, and fails if anything changes; keep it in lockstep with
 `sync-api.yml`'s stages. A failure means a dependency bump altered codegen output, a generator, registry or manifest
 change was committed without its regenerated output, a generated file was hand-edited, or a biome safe fix touched a
 hand-written file. Reproduce it with the same offline commands and commit the result; when a dependency bump is the
-cause, decide whether the new output is acceptable before regenerating.
+cause, decide whether the new output is acceptable before regenerating. A failure at its "Generate SDK" step that
+lists signatures means a change altered a method's signature without re-pinning it: `pnpm accept-signatures`.
 
 ## Code intelligence (`typescript-lsp`)
 
@@ -293,12 +466,44 @@ finishes loading.
 
 ## Releases
 
-Ordinary commits and pushes release nothing. To release, update `CHANGELOG.md`, then:
+Ordinary commits and pushes release nothing. To release, commit the `CHANGELOG.md` entry, then:
 
 ```bash
-npm version patch         # or minor, major; auto-commits and creates the tag
+npm version patch         # or minor; runs the checks, then commits and tags
 git push --follow-tags    # pushes the commit and the tag together
 ```
+
+What follows about npm's behaviour was measured on npm 11.19.1 (Node 24.22.2, Windows) on 2026-11-12, not on the
+npm bundled with the Node 22 that `.nvmrc` names. `npm version` refuses a working tree with uncommitted changes to
+tracked files ("Git working directory not clean") before it runs anything, which is why the changelog is committed first; untracked files do not count. It then writes
+the new version into `package.json` and runs the `version` script, `pnpm typecheck:test && pnpm test`: the checks
+`release.yml` runs before it builds (`tests/release-gate.test.ts` fails if the two drift apart). Only when the script
+passes does it commit `package.json` as `X.Y.Z` and create the annotated tag `vX.Y.Z`. A failure exits non-zero and
+leaves `package.json` bumped and modified, with no commit and no tag. Running `npm version` again as it stands is
+refused, since `package.json` is now dirty, so: `git restore package.json`, commit the fix, run `npm version` again.
+
+The daily sync bumps with `npm version <x.y.z> --no-git-tag-version --ignore-scripts`. `--no-git-tag-version` alone
+still runs the script; `--ignore-scripts` skips it because the sync has just run both checks on the same tree, and it
+only ever bumps a minor or a patch, so no test that depends on the major can change its result.
+
+**Major releases.** Some tests require a change once `package.json` reaches a given major (a relocation's
+`removeInMajor` in `tests/spec-relocations.test.ts`), so `npm version major` on an unchanged tree fails. Do not commit
+that change to `main` ahead of the bump: until the tag exists, a daily sync can release it as a minor or a patch. Make
+the change, regenerate (including `pnpm generate-routing-snapshot`), write the changelog entry, leave all of it
+uncommitted, and let npm bump and check without touching git:
+
+```bash
+npm version major --no-git-tag-version   # bumps, runs the version script on this tree; no clean-tree check
+git add -A
+git commit -m "X.0.0"
+git tag -a vX.0.0 -m "X.0.0"             # annotated, as npm makes it: --follow-tags pushes annotated tags only
+git push --follow-tags
+```
+
+The commit is then exactly the tree the script passed. If the script fails, nothing is committed and `package.json`
+stays bumped: run `git restore package.json` before running the command again, because with
+`--no-git-tag-version` nothing refuses the dirty tree and a second run bumps from the bumped version (4.0.0 became
+5.0.0).
 
 CI sees the tag → type-checks and tests that commit → creates GitHub Release → publishes to npm. A test failure
 stops before the release is created; fix it with a new commit and a new tag.

@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 import type { components } from '../types/generated/partnerships.js';
 
 export class PartnershipsApi {
@@ -77,7 +78,7 @@ export class PartnershipsApi {
     token: string,
     options?: RequestOptions
   ): Promise<components['schemas']['PartnershipsId']> {
-    const path = `/partnerships/${token}`;
+    const path = `/partnerships/${encodePathParam('token', token)}`;
     return this.client.get<components['schemas']['PartnershipsId']>(this.spec, path, options);
   }
 
@@ -87,7 +88,7 @@ export class PartnershipsApi {
    * @generated from DELETE /partnerships/{token}
    */
   async delete(token: string, options?: RequestOptions): Promise<void> {
-    const path = `/partnerships/${token}`;
+    const path = `/partnerships/${encodePathParam('token', token)}`;
     await this.client.delete(this.spec, path, options);
   }
 
@@ -103,7 +104,7 @@ export class PartnershipsApi {
     token: string,
     options?: RequestOptions
   ): Promise<PaginatedResponse<components['schemas']['PermissionValue']>> {
-    const path = `/partnerships/${token}/permissions`;
+    const path = `/partnerships/${encodePathParam('token', token)}/permissions`;
     return this.client.get<PaginatedResponse<components['schemas']['PermissionValue']>>(
       this.spec,
       path,
@@ -123,7 +124,7 @@ export class PartnershipsApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<components['schemas']['PermissionsPost']> {
-    const path = `/partnerships/${token}/permissions`;
+    const path = `/partnerships/${encodePathParam('token', token)}/permissions`;
     return this.client.post<components['schemas']['PermissionsPost']>(
       this.spec,
       path,

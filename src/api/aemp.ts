@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 
 export class AempApi {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
@@ -28,7 +29,7 @@ export class AempApi {
    * @generated from GET /Fleet/{pageNumber}
    */
   async get(pageNumber: string, options?: RequestOptions): Promise<unknown> {
-    const path = `/Fleet/${pageNumber}`;
+    const path = `/Fleet/${encodePathParam('pageNumber', pageNumber)}`;
     return this.client.get<unknown>(this.spec, path, options);
   }
 }

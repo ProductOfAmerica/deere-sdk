@@ -7,6 +7,7 @@
 
 import type { SpecName } from '../api-servers.generated.js';
 import type { DeereClient, PaginatedResponse, RequestOptions } from '../client.js';
+import { encodePathParam } from '../path-pattern.js';
 
 export class GuidanceLinesApi {
   /** The OpenAPI spec this class is generated from. Used by DeereClient to
@@ -33,7 +34,7 @@ export class GuidanceLinesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/guidanceLines${queryString ? `?${queryString}` : ''}`;
     return this.client.get<PaginatedResponse<unknown>>(this.spec, path, options);
   }
   /**
@@ -51,7 +52,7 @@ export class GuidanceLinesApi {
     if (params?.recordFilter !== undefined) query.set('recordFilter', String(params.recordFilter));
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/guidanceLines${queryString ? `?${queryString}` : ''}`;
     return this.client.getAll<unknown>(this.spec, path, options);
   }
 
@@ -68,7 +69,7 @@ export class GuidanceLinesApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/guidanceLines`;
     await this.client.post(this.spec, path, data, options);
   }
 
@@ -88,7 +89,7 @@ export class GuidanceLinesApi {
     const query = new URLSearchParams();
     if (params?.embed !== undefined) query.set('embed', String(params.embed));
     const queryString = query.toString();
-    const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}${queryString ? `?${queryString}` : ''}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/guidanceLines/${encodePathParam('guidanceLineId', guidanceLineId)}${queryString ? `?${queryString}` : ''}`;
     return this.client.get<unknown>(this.spec, path, options);
   }
 
@@ -104,7 +105,7 @@ export class GuidanceLinesApi {
     data: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<void> {
-    const path = `/organizations/${orgId}/fields/${fieldId}/guidanceLines/${guidanceLineId}`;
+    const path = `/organizations/${encodePathParam('orgId', orgId)}/fields/${encodePathParam('fieldId', fieldId)}/guidanceLines/${encodePathParam('guidanceLineId', guidanceLineId)}`;
     await this.client.put(this.spec, path, data, options);
   }
 }
