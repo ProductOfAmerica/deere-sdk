@@ -574,6 +574,9 @@ components:
           - "icon"
           - "offsets"
           - "capabilities"
+          - "capabilities.Connectivity"
+        x-retained-enum-values:
+          - "capabilities"
     EmbedForList:
       name: "embed"
       in: "query"

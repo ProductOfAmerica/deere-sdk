@@ -587,7 +587,7 @@ components:
           - "pairingDetails"
           - "icon"
           - "offsets"
-          - "capabilities"
+          - "capabilities.Connectivity"
     EmbedForList:
       name: "embed"
       in: "query"

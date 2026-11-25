@@ -22,6 +22,7 @@ import {
 } from './lib/routing-overrides.js';
 import { redactSpecContent } from './lib/spec-redactor.js';
 import { applyRelocations, RELOCATIONS } from './lib/spec-relocations.js';
+import { retainEnumValues } from './lib/spec-retained-enums.js';
 import {
   fixProseEnums,
   isDocumentationKey,
@@ -753,6 +754,14 @@ function fixSpec(
   const fixedProseEnums = fixProseEnums(spec, specName);
   if (fixedProseEnums > 0) {
     console.log(`  Fixed ${fixedProseEnums} prose enum value(s)`);
+  }
+
+  // Put back enum values John Deere stopped listing that the published types
+  // keep until a planned major (scripts/lib/spec-retained-enums.ts). After the
+  // prose fixes, so it sees each enum in its final shape.
+  const retainedEnumValues = retainEnumValues(spec, specName);
+  if (retainedEnumValues > 0) {
+    console.log(`  Kept ${retainedEnumValues} enum value(s) John Deere no longer lists`);
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs

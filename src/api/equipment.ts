@@ -82,7 +82,14 @@ export class EquipmentApi {
   async getEquipment(
     id: string,
     params?: {
-      embed?: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
+      embed?:
+        | 'devices'
+        | 'equipment'
+        | 'pairingDetails'
+        | 'icon'
+        | 'offsets'
+        | 'capabilities'
+        | 'capabilities.Connectivity';
     },
     options?: RequestOptions
   ): Promise<components['schemas']['equipment']> {
