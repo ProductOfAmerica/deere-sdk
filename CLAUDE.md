@@ -16,7 +16,8 @@ pnpm typecheck:test       # src + scripts + tests (CI and the daily sync run it 
 pnpm lint                 # biome check
 pnpm lint:fix             # biome check --write (run before committing)
 pnpm test                 # node --test tests/*.test.ts (CI, the daily sync and release.yml run it)
-pnpm test:coverage        # same + experimental coverage
+pnpm test:coverage        # same + experimental coverage; leaves out src/types/generated (type-only, nothing runs)
+                          # and tests/*.test.ts (naming any exclude drops Node's default test-file exclusion)
 pnpm test:fuzz            # fuzz.test.ts alone (pnpm test already includes it)
 pnpm test:routing-guard   # hermetic routing guard only, no network
 pnpm accept-signatures    # generate-sdk, re-pinning method signatures in the manifest on the way (see below)
