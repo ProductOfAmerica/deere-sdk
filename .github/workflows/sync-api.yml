@@ -393,7 +393,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY || true
             echo "Nothing was committed, tagged or published. Each daily run stops here again until this is resolved." >> $GITHUB_STEP_SUMMARY || true
             echo "" >> $GITHUB_STEP_SUMMARY || true
-            if [[ -n "$ABSENT_SPECS" ]]; then printf '%s\n\n' "Specs with entries in scripts/api-surface.yaml and no file under specs/fixed: $ABSENT_SPECS. All their operations are listed as missing below. For those, do not edit the entries: restore the spec, or remove the API (a major-version decision); see \"The api-surface manifest\" in CLAUDE.md." >> $GITHUB_STEP_SUMMARY || true; fi
+            if [[ -n "$ABSENT_SPECS" ]]; then printf '%s\n\n' "Specs with entries in scripts/api-surface.yaml and no file under specs/fixed: $ABSENT_SPECS. All their operations are listed as missing below. For those, do not edit the entries: restore the spec, or remove the API (a major-version decision); see \"The api-surface manifest\" in .claude/rules/codegen.md." >> $GITHUB_STEP_SUMMARY || true; fi
             if [[ -n "$MISSING_OPS" ]]; then
               echo "Manifest operations missing upstream:" >> $GITHUB_STEP_SUMMARY || true
               echo "" >> $GITHUB_STEP_SUMMARY || true
@@ -407,7 +407,7 @@ jobs:
               echo "" >> $GITHUB_STEP_SUMMARY || true
               echo "$CHANGED_SIGS" >> $GITHUB_STEP_SUMMARY || true
               echo "" >> $GITHUB_STEP_SUMMARY || true
-              echo "Remediation: the spec is wrong: repair it in scripts/fix-specs.ts with a test, and the next run passes; the change is real: reproduce it on a branch, run pnpm accept-signatures, and release by hand at the level the change calls for; an enum value was replaced and nobody can measure which one the API accepts: keep the old one in scripts/lib/spec-retained-enums.ts and accept the widened signature; see \"When a signature stops the sync\" in CLAUDE.md" >> $GITHUB_STEP_SUMMARY || true
+              echo "Remediation: the spec is wrong: repair it in scripts/fix-specs.ts with a test, and the next run passes; the change is real: reproduce it on a branch, run pnpm accept-signatures, and release by hand at the level the change calls for; an enum value was replaced and nobody can measure which one the API accepts: keep the old one in scripts/lib/spec-retained-enums.ts and accept the widened signature; see \"When a signature stops the sync\" in .claude/rules/codegen.md" >> $GITHUB_STEP_SUMMARY || true
             fi
           else
             echo "Sync failed. Check the failed step's log above for details." >> $GITHUB_STEP_SUMMARY || true

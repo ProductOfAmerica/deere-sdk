@@ -611,7 +611,7 @@ describe('retry behavior', () => {
       major < 4 ? 2 : 1,
       `package.json is at major ${major}. From 4.0 a POST or PATCH is not retried unless the caller ` +
         `asks: make false the default of retryNonIdempotent in the DeereClient constructor, and ` +
-        `update its JSDoc, the retry sections of README.md and CLAUDE.md, and the CHANGELOG.`
+        `update its JSDoc, the retry sections of README.md and .claude/rules/client.md, and the CHANGELOG.`
     );
   });
 });

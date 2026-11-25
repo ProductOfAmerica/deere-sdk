@@ -453,7 +453,7 @@ export function proposeName(op: SurfaceOp, takenNames: ReadonlySet<string>): str
       `A human must name it. The operation is in John Deere's current specs, not the committed ` +
       `ones, so work on a branch: run "pnpm fetch-specs" and the offline stages, add an entry for ` +
       `it to scripts/api-surface.yaml with a chosen name, and run "pnpm accept-signatures" to pin ` +
-      `the entry's signature. CLAUDE.md, "When a signature stops the sync", has the rest.`
+      `the entry's signature. .claude/rules/codegen.md, "When a signature stops the sync", has the rest.`
   );
 }
 
