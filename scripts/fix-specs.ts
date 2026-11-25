@@ -28,6 +28,7 @@ import {
   isRecord,
   refName,
   restoreEquipmentItemRefs,
+  retainEnumValues,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -753,6 +754,14 @@ function fixSpec(
   const fixedProseEnums = fixProseEnums(spec, specName);
   if (fixedProseEnums > 0) {
     console.log(`  Fixed ${fixedProseEnums} prose enum value(s)`);
+  }
+
+  // Put back enum values John Deere stopped listing that the published types
+  // keep until a planned major (RETAINED_ENUM_VALUES in spec-utils). After the
+  // prose fixes, so it sees each enum in its final shape.
+  const retainedEnumValues = retainEnumValues(spec, specName);
+  if (retainedEnumValues > 0) {
+    console.log(`  Kept ${retainedEnumValues} enum value(s) John Deere no longer lists`);
   }
 
   // Repair jammed-together server URLs (aemp.yaml has multiple URLs

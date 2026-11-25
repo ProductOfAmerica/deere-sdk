@@ -152,7 +152,7 @@ specs:
       signature: "(params?: { archived?: boolean; capableOf?: '!Connectivity' | 'Connectivity'; categories?: 'Implement' | 'Machine'; embed?: 'devices' | 'equipment' | 'icon' | 'pairingDetails'; ids?: number[]; itemLimit?: number; organizationIds?: number[]; organizationRoleType?: 'Controlling' | 'NonControlling'; pageOffset?: number; principalIds?: number[]; serialNumbers?: string[] }, options?: RequestOptions) => PaginatedResponse<components['schemas']['equipmentForList']>"
     - op: GET /equipment/{id}
       name: getEquipment
-      signature: "(string, params?: { embed?: 'capabilities' | 'devices' | 'equipment' | 'icon' | 'offsets' | 'pairingDetails' }, options?: RequestOptions) => components['schemas']['equipment']"
+      signature: "(string, params?: { embed?: 'capabilities' | 'capabilities.Connectivity' | 'devices' | 'equipment' | 'icon' | 'offsets' | 'pairingDetails' }, options?: RequestOptions) => components['schemas']['equipment']"
     - op: GET /equipmentISGTypes
       name: listEquipmentisgtypes
       signature: "(params?: { category?: 'implement' | 'machine'; deprecated?: 'all' | 'false' | 'true'; embed?: 'equipmentModels' | 'recordMetadata' }, options?: RequestOptions) => PaginatedResponse<components['schemas']['equipment-isg-type']>"

@@ -1946,7 +1946,14 @@ export interface components {
     /** @description Deprecated value should be false */
     Deprecated: boolean;
     /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
-    Embed: 'devices' | 'equipment' | 'pairingDetails' | 'icon' | 'offsets' | 'capabilities';
+    Embed:
+      | 'devices'
+      | 'equipment'
+      | 'pairingDetails'
+      | 'icon'
+      | 'offsets'
+      | 'capabilities'
+      | 'capabilities.Connectivity';
     /** @description embed 'pairingDetails' is only supported along with 'devices' or 'equipment' embeds */
     EmbedForList: 'devices' | 'equipment' | 'icon' | 'pairingDetails';
     /**

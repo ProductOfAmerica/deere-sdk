@@ -3,7 +3,7 @@
  *
  * John Deere's equipment API has six methods that accept an optional `embed`
  * query parameter. JD documents narrow enum values for each (`devices`,
- * `equipment`, `icon`, `pairingDetails`, `offsets`, `capabilities`, `make`,
+ * `equipment`, `icon`, `pairingDetails`, `offsets`, `capabilities.Connectivity`, `make`,
  * `type`, `isgType`, `equipmentModels`, `recordMetadata`) and the description
  * on the parameter explicitly notes that `pairingDetails` "is only supported
  * along with 'devices' or 'equipment' embeds" — strong signal that JD's API
@@ -90,7 +90,10 @@ export class SafeEquipmentApi {
   /**
    * Get a single equipment by ID, with a required `embed` parameter.
    * Wraps `deere.equipment.getEquipment`. Embed values: `devices`,
-   * `equipment`, `pairingDetails`, `icon`, `offsets`, `capabilities`.
+   * `equipment`, `pairingDetails`, `icon`, `offsets`,
+   * `capabilities.Connectivity`, and `capabilities`, which John Deere's
+   * document stopped listing on 2026-11-24 and 4.0 removes. Which of the last
+   * two the API accepts has not been measured.
    */
   async getEquipmentWithEmbed(
     id: string,
