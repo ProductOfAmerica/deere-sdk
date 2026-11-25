@@ -23,6 +23,7 @@
 
 import { isDeepStrictEqual } from 'node:util';
 import { opKey } from './api-surface.js';
+import { OPERATION_METHODS } from './contract-continuity.js';
 import { isRecord } from './spec-utils.js';
 
 export interface RetainedEnumValue {
@@ -65,9 +66,6 @@ export const RETAINED_ENUM_VALUES: readonly RetainedEnumValue[] = [
   },
 ];
 
-/** The methods generate-sdk emits (scripts/generate-sdk.ts); no other operation reaches a caller. */
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
-
 /** Each operation that references the parameter itself or through its path item. */
 function referrers(spec: Record<string, unknown>, parameter: string): string[] {
   const ref = `#/components/parameters/${parameter}`;
@@ -76,7 +74,8 @@ function referrers(spec: Record<string, unknown>, parameter: string): string[] {
   const found: string[] = [];
   for (const [path, item] of Object.entries(isRecord(spec.paths) ? spec.paths : {})) {
     if (!isRecord(item)) continue;
-    for (const method of HTTP_METHODS) {
+    // Only methods generate-sdk emits: no other operation reaches a caller.
+    for (const method of OPERATION_METHODS) {
       const op = item[method];
       if (isRecord(op) && (refers(item.parameters) || refers(op.parameters))) {
         found.push(`${method.toUpperCase()} ${path}`);
@@ -125,7 +124,8 @@ export function retainEnumValues(
     if (!isDeepStrictEqual(using.map(identity).sort(), entry.operations.map(identity).sort())) {
       throw mismatch(
         `is referenced by ${using.length > 0 ? using.join(', ') : 'no operation'} (when Deere ` +
-          `renamed or moved an operation, repoint it here and in the manifest entry's op:)`
+          `renamed an operation's path, repoint it in this entry's operations and in the ` +
+          `manifest entry's op:)`
       );
     }
     if (!values.includes(entry.replacement)) throw mismatch(`lists ${JSON.stringify(values)}`);

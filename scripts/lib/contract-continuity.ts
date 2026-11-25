@@ -38,7 +38,7 @@ import { isRecord } from './spec-utils.js';
  * nothing else). Everything else under a path item, `parameters` above all, is
  * not an operation and must not be counted as one.
  */
-const OPERATION_METHODS = new Set<string>([
+export const OPERATION_METHODS = new Set<string>([
   'get',
   'post',
   'put',

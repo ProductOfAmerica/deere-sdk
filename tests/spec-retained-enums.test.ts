@@ -112,6 +112,24 @@ describe('retainEnumValues', () => {
     );
   });
 
+  // generate-sdk emits no method for head, options or trace, so an operation
+  // with one of those reaches no caller and must not stop the sync.
+  it('counts only operations whose method generate-sdk emits', () => {
+    const paths = {
+      '/equipment/{id}': {
+        parameters: [EMBED],
+        get: {},
+        head: {},
+        options: { parameters: [EMBED] },
+        trace: {},
+      },
+    };
+    assert.strictEqual(
+      retainEnumValues(doc(['capabilities.Connectivity'], paths), 'equipment', [KEEP]),
+      1
+    );
+  });
+
   // A method John Deere adds would otherwise get the value too, and the sync
   // releases a new method without anyone reading it.
   it('throws when an operation the entry does not list references the parameter', () => {
