@@ -130,17 +130,20 @@ until it is resolved. The job summary lists each method with its pinned and its 
      or body type changed to anything but a wider one, a return type the old one's callers cannot use as they
      did. It is a minor if it only adds or widens: a new optional member in a `params` the method already had,
      a new enum value, a wider parameter or body type, a return type that was `unknown` or `void` and now has a
-     name. Before a major, check `removeInMajor` in `scripts/lib/spec-relocations.ts` and in
-     `RETAINED_ENUM_VALUES` (`scripts/lib/spec-utils.ts`). Release by hand, with the CHANGELOG entry and the
-     version in the same change: the sync bumps from `package.json`, so one that runs before the tag can only
-     release on top of the new version, never put the change in a patch of the old one.
+     name. Before a major, check `removeInMajor` in `scripts/lib/spec-relocations.ts` and
+     `scripts/lib/spec-retained-enums.ts`. Release by hand, with the version and the CHANGELOG entry in the same
+     change ("Releasing through a pull request" under Releases): the sync bumps from `package.json`, so a sync
+     that runs before the tag can only release on top of the new version, never ship the change in a patch of
+     the old one.
    - **Keep**, when Deere replaced an enum value and nobody can measure which of the two the API accepts:
      dropping the old one would be a major made on no evidence. Restore the manifest, register the old value in
-     `RETAINED_ENUM_VALUES` (`scripts/lib/spec-utils.ts`) with what was and was not observed, and rerun the
-     offline stages: `fix-specs` puts the value back beside its replacement, stamped `x-retained-enum-values`,
-     and throws once the entry stops matching Deere's document. `generate-sdk` then lists only the widened
-     signature; accept it and continue as for **Accept**. It is a minor. Each entry names `removeInMajor`, and a
-     test in `tests/fix-specs.test.ts` fails once `package.json` reaches that major.
+     `scripts/lib/spec-retained-enums.ts` with the operations it is kept for and what was and was not observed,
+     and rerun the offline stages. `fix-specs` puts the value back beside its replacement, stamped
+     `x-retained-enum-values`. It skips an entry whose value Deere lists again, and throws when the parameter is
+     gone, when operations other than those listed reference it, or when the enum lists neither value.
+     `generate-sdk` then lists only the widened signature; accept it and continue as for **Accept**. It is a
+     minor. Each entry names `removeInMajor`, and `tests/spec-retained-enums.test.ts` fails once `package.json`
+     reaches that major.
 
 A generator change that alters signatures stops the offline chain the same way. Run `pnpm accept-signatures`, commit
 the manifest with the regenerated output, and release by hand so the change does not go out inside the next sync
@@ -496,9 +499,22 @@ The daily sync bumps with `npm version <x.y.z> --no-git-tag-version --ignore-scr
 still runs the script; `--ignore-scripts` skips it because the sync has just run both checks on the same tree, and it
 only ever bumps a minor or a patch, so no test that depends on the major can change its result.
 
+**Releasing through a pull request.** When the version has to travel with a change (**Accept** and **Keep** under
+"When a signature stops the sync"), bump on the branch instead: `npm version <minor|patch> --no-git-tag-version`
+writes the version and runs the `version` script on the tree without touching git; commit it with the CHANGELOG
+entry. Once the pull request is merged, tag its squash commit the same day:
+
+```bash
+git tag -a vX.Y.Z <squash-commit> -m "X.Y.Z"
+git push origin vX.Y.Z
+```
+
+If a daily sync released a later version from `main` before the tag, do not tag X.Y.Z: its changes went out in that
+release.
+
 **Major releases.** Some tests require a change once `package.json` reaches a given major (a relocation's
-`removeInMajor` in `tests/spec-relocations.test.ts`, a retained enum value's in `tests/fix-specs.test.ts`), so
-`npm version major` on an unchanged tree fails. Do not commit
+`removeInMajor` in `tests/spec-relocations.test.ts`, a retained enum value's in `tests/spec-retained-enums.test.ts`),
+so `npm version major` on an unchanged tree fails. Do not commit
 that change to `main` ahead of the bump: until the tag exists, a daily sync can release it as a minor or a patch. Make
 the change, regenerate (including `pnpm generate-routing-snapshot`), write the changelog entry, leave all of it
 uncommitted, and let npm bump and check without touching git:

@@ -92,8 +92,8 @@ export class SafeEquipmentApi {
    * Wraps `deere.equipment.getEquipment`. Embed values: `devices`,
    * `equipment`, `pairingDetails`, `icon`, `offsets`,
    * `capabilities.Connectivity`, and `capabilities`, which John Deere's
-   * document stopped listing on 2026-11-24 and 4.0 removes. Which of the last
-   * two the API accepts has not been measured.
+   * document no longer lists (first seen 2026-11-24) and 4.0 removes. Which
+   * of the last two the API accepts has not been measured.
    */
   async getEquipmentWithEmbed(
     id: string,

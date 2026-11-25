@@ -8,18 +8,11 @@ import {
   isDocumentationKey,
   PROSE_ENUM_FIXES,
   type ProseEnumFix,
-  RETAINED_ENUM_VALUES,
-  RETAINED_ENUM_VALUES_KEY,
-  type RetainedEnumValue,
   restoreEquipmentItemRefs,
-  retainEnumValues,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
 } from '../scripts/lib/spec-utils.js';
-
-const fixedSpec = (spec: string): unknown =>
-  yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
 
 describe('fix-specs utilities', () => {
   describe('isDocumentationKey', () => {
@@ -442,6 +435,9 @@ describe('fix-specs utilities', () => {
     });
 
     describe('against the committed specs', () => {
+      const fixedSpec = (spec: string): unknown =>
+        yaml.parse(readFileSync(join(process.cwd(), 'specs', 'fixed', `${spec}.yaml`), 'utf8'));
+
       /** Every enum in a document, with the path of the schema that owns it. */
       function* enums(node: unknown, path: string[] = []): Generator<[string, unknown[]]> {
         if (Array.isArray(node)) {
@@ -474,115 +470,6 @@ describe('fix-specs utilities', () => {
           assert.deepStrictEqual(left, []);
         }
       });
-    });
-  });
-
-  describe('retainEnumValues', () => {
-    const KEEP: RetainedEnumValue = {
-      spec: 'equipment',
-      at: ['components', 'parameters', 'Embed', 'schema'],
-      value: 'capabilities',
-      replacement: 'capabilities.Connectivity',
-      observed: '2026-11-24',
-      evidence: 'test fixture',
-      removeInMajor: 4,
-    };
-    const embedSpec = (values: unknown[]) => ({
-      components: { parameters: { Embed: { schema: { type: 'string', enum: values } } } },
-    });
-
-    it('puts the value back just before its replacement and stamps the schema', () => {
-      const spec = embedSpec(['devices', 'capabilities.Connectivity', 'icon']);
-      assert.strictEqual(retainEnumValues(spec, 'equipment', [KEEP]), 1);
-      assert.deepStrictEqual(spec.components.parameters.Embed.schema, {
-        type: 'string',
-        enum: ['devices', 'capabilities', 'capabilities.Connectivity', 'icon'],
-        [RETAINED_ENUM_VALUES_KEY]: ['capabilities'],
-      });
-    });
-
-    it('adds to the stamp an earlier entry left on the same schema', () => {
-      const spec = embedSpec(['offsets', 'capabilities.Connectivity']);
-      const earlier: RetainedEnumValue = { ...KEEP, value: 'icon', replacement: 'offsets' };
-      assert.strictEqual(retainEnumValues(spec, 'equipment', [earlier, KEEP]), 2);
-      assert.deepStrictEqual(spec.components.parameters.Embed.schema, {
-        type: 'string',
-        enum: ['icon', 'offsets', 'capabilities', 'capabilities.Connectivity'],
-        [RETAINED_ENUM_VALUES_KEY]: ['icon', 'capabilities'],
-      });
-    });
-
-    // Listing the value again makes the entry inert. Stopping the sync over
-    // that would block an upstream improvement.
-    it('no-ops once John Deere lists the value again, with or without the replacement', () => {
-      for (const values of [
-        ['capabilities', 'capabilities.Connectivity'],
-        ['devices', 'capabilities'],
-      ]) {
-        const spec = embedSpec([...values]);
-        assert.strictEqual(retainEnumValues(spec, 'equipment', [KEEP]), 0);
-        assert.deepStrictEqual(spec.components.parameters.Embed.schema, {
-          type: 'string',
-          enum: values,
-        });
-      }
-    });
-
-    it('no-ops for another spec that has the same location and values', () => {
-      const spec = embedSpec(['capabilities.Connectivity']);
-      assert.strictEqual(retainEnumValues(spec, 'fields', [KEEP]), 0);
-      assert.deepStrictEqual(spec.components.parameters.Embed.schema.enum, [
-        'capabilities.Connectivity',
-      ]);
-    });
-
-    it('throws, naming the enum it found, when neither value is listed', () => {
-      const spec = embedSpec(['devices', 'capabilities.connectivity']);
-      assert.throws(
-        () => retainEnumValues(spec, 'equipment', [KEEP]),
-        /lists \["devices","capabilities\.connectivity"\]\. .*keeps "capabilities" beside "capabilities\.Connectivity"/
-      );
-    });
-
-    it('throws when the location or its enum is gone', () => {
-      assert.throws(() => retainEnumValues({}, 'equipment', [KEEP]), /has no enum/);
-      const noEnum = { components: { parameters: { Embed: { schema: { type: 'string' } } } } };
-      assert.throws(() => retainEnumValues(noEnum, 'equipment', [KEEP]), /has no enum/);
-    });
-
-    describe('the committed registry', () => {
-      const pkgMajor = Number(
-        (JSON.parse(readFileSync('package.json', 'utf-8')) as { version: string }).version.split(
-          '.'
-        )[0]
-      );
-
-      for (const entry of RETAINED_ENUM_VALUES) {
-        const label = `${entry.spec} ${entry.at.join('/')} "${entry.value}"`;
-
-        // codegen-drift only proves that regenerating reproduces what is
-        // committed, so it would not notice fix-specs no longer calling the
-        // transform. It checks the value and not the stamp: once John Deere
-        // lists the value again the entry is skipped and stamps nothing, and
-        // that must not fail the sync. Whether the entry is still needed is
-        // deliberately not tested, for the reason given for fixProseEnums above.
-        it(`${label}: is in specs/fixed`, () => {
-          let node = fixedSpec(entry.spec);
-          for (const key of entry.at) node = (node as Record<string, unknown> | undefined)?.[key];
-          const values = (node as { enum?: unknown[] } | undefined)?.enum ?? [];
-          assert.ok(values.includes(entry.value), JSON.stringify(values));
-        });
-
-        it(`${label}: is deleted before major ${entry.removeInMajor} ships`, () => {
-          assert.ok(
-            pkgMajor < entry.removeInMajor,
-            `package.json is at major ${pkgMajor}: delete this RETAINED_ENUM_VALUES entry as part ` +
-              `of the major release. That drops "${entry.value}" from the generated types: run the ` +
-              `offline stages, then pnpm accept-signatures, and update the doc comments and README ` +
-              `examples that name the value (search src/safe and README.md).`
-          );
-        });
-      }
     });
   });
 });

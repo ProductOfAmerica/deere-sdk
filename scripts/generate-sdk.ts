@@ -1036,6 +1036,8 @@ async function main() {
         '    The change is real: run `pnpm accept-signatures`, review the diff of\n' +
         '      scripts/api-surface.yaml, commit it with the regenerated output, and release by\n' +
         '      hand at the level the change calls for.\n' +
+        '    An enum value was replaced and nobody can measure which one the API accepts: keep\n' +
+        '      the old one in scripts/lib/spec-retained-enums.ts, then accept the widened signature.\n' +
         '    You changed the generator: run `pnpm accept-signatures` and commit the manifest\n' +
         '      with the regenerated output.'
     );

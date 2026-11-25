@@ -22,13 +22,13 @@ import {
 } from './lib/routing-overrides.js';
 import { redactSpecContent } from './lib/spec-redactor.js';
 import { applyRelocations, RELOCATIONS } from './lib/spec-relocations.js';
+import { retainEnumValues } from './lib/spec-retained-enums.js';
 import {
   fixProseEnums,
   isDocumentationKey,
   isRecord,
   refName,
   restoreEquipmentItemRefs,
-  retainEnumValues,
   sanitizePropertyKey,
   stripDocumentationMarkup,
   stripTypeDiscriminators,
@@ -757,7 +757,7 @@ function fixSpec(
   }
 
   // Put back enum values John Deere stopped listing that the published types
-  // keep until a planned major (RETAINED_ENUM_VALUES in spec-utils). After the
+  // keep until a planned major (scripts/lib/spec-retained-enums.ts). After the
   // prose fixes, so it sees each enum in its final shape.
   const retainedEnumValues = retainEnumValues(spec, specName);
   if (retainedEnumValues > 0) {

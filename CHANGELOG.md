@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.0] - 2026-11-25
 
 ### Added
-- `deere.equipment.getEquipment(id, { embed: 'capabilities.Connectivity' })`, and the same value in `deere.safe.equipment.getEquipmentWithEmbed`. Since 2026-11-24, John Deere's Equipment API document lists `capabilities.Connectivity` where it listed `capabilities`.
+- `deere.equipment.getEquipment(id, { embed: 'capabilities.Connectivity' })`, and the same value in `deere.safe.equipment.getEquipmentWithEmbed`. John Deere's Equipment API document now lists `capabilities.Connectivity` where it listed `capabilities` (first seen 2026-11-24).
 
 ### Deprecated
 - `embed: 'capabilities'` on the same two methods. John Deere's document no longer lists it, and whether the API still accepts it has not been measured, so it stays accepted until 4.0, which removes it. Prefer `'capabilities.Connectivity'`.

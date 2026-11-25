@@ -37,6 +37,9 @@
 #     the change is real, run "pnpm accept-signatures", review the diff of
 #     this file, and release by hand at the level the change calls for. The
 #     same script re-pins signatures after a change to the generator itself.
+#   An enum value was replaced and nobody can measure which one the API
+#     accepts: keep the old one in scripts/lib/spec-retained-enums.ts, then
+#     accept the widened signature.
 #
 # Proposed names for NEW operations preserve interior camel humps (for example
 # "listMeasurementTypes", not "listMeasurementtypes"), unlike the historical
