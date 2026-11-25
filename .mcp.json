@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "webstorm": {
+      "url": "http://127.0.0.1:64894/stream",
+      "type": "http",
+      "headers": {
+        "IJ_MCP_LAUNCH_ORIGIN": "${IJ_MCP_LAUNCH_ORIGIN:-}"
+      }
+    }
+  }
+}
