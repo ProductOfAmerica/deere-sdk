@@ -73,6 +73,17 @@ describe('retainEnumValues', () => {
     }
   });
 
+  // The skip comes before the referrer check: a value Deere lists itself is
+  // Deere's claim for every operation, so a new one using the parameter must
+  // not stop the sync either.
+  it('no-ops on a value listed again even when an unlisted operation references it', () => {
+    const spec = doc(['capabilities', 'capabilities.Connectivity'], {
+      '/equipment/{id}': { get: { parameters: [EMBED] } },
+      '/equipment/{id}/devices': { get: { parameters: [EMBED] } },
+    });
+    assert.strictEqual(retainEnumValues(spec, 'equipment', [KEEP]), 0);
+  });
+
   it('no-ops for another spec with the same parameter', () => {
     const spec = doc(['capabilities.Connectivity']);
     assert.strictEqual(retainEnumValues(spec, 'fields', [KEEP]), 0);
@@ -92,7 +103,7 @@ describe('retainEnumValues', () => {
     const paths = { '/equipment/{id}': { parameters: [EMBED], get: {}, put: {} } };
     assert.throws(
       () => retainEnumValues(doc(['capabilities.Connectivity'], paths), 'equipment', [KEEP]),
-      /is referenced by GET \/equipment\/\{id\}, PUT \/equipment\/\{id\}\./
+      /is referenced by GET \/equipment\/\{id\}, PUT \/equipment\/\{id\} \(/
     );
     const both = { ...KEEP, operations: ['GET /equipment/{id}', 'PUT /equipment/{id}'] };
     assert.strictEqual(
@@ -110,7 +121,7 @@ describe('retainEnumValues', () => {
     });
     assert.throws(
       () => retainEnumValues(spec, 'equipment', [KEEP]),
-      /is referenced by GET \/equipment\/\{id\}, GET \/equipment\/\{id\}\/devices\. .*for GET \/equipment\/\{id\}\./
+      /is referenced by GET \/equipment\/\{id\}, GET \/equipment\/\{id\}\/devices \(.*manifest entry's op:\)\. .*for GET \/equipment\/\{id\}\./
     );
   });
 

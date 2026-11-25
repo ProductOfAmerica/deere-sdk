@@ -65,7 +65,8 @@ export const RETAINED_ENUM_VALUES: readonly RetainedEnumValue[] = [
   },
 ];
 
-const HTTP_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
+/** The methods generate-sdk emits (scripts/generate-sdk.ts); no other operation reaches a caller. */
+const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
 /** Each operation that references the parameter itself or through its path item. */
 function referrers(spec: Record<string, unknown>, parameter: string): string[] {
@@ -122,7 +123,10 @@ export function retainEnumValues(
 
     const using = referrers(spec, entry.parameter);
     if (!isDeepStrictEqual(using.map(identity).sort(), entry.operations.map(identity).sort())) {
-      throw mismatch(`is referenced by ${using.length > 0 ? using.join(', ') : 'no operation'}`);
+      throw mismatch(
+        `is referenced by ${using.length > 0 ? using.join(', ') : 'no operation'} (when Deere ` +
+          `renamed or moved an operation, repoint it here and in the manifest entry's op:)`
+      );
     }
     if (!values.includes(entry.replacement)) throw mismatch(`lists ${JSON.stringify(values)}`);
 

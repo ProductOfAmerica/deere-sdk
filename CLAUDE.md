@@ -140,7 +140,7 @@ until it is resolved. The job summary lists each method with its pinned and its 
      `scripts/lib/spec-retained-enums.ts` with the operations it is kept for and what was and was not observed,
      and rerun the offline stages. `fix-specs` puts the value back beside its replacement, stamped
      `x-retained-enum-values`. It skips an entry whose value Deere lists again, and throws when the parameter is
-     gone, when operations other than those listed reference it, or when the enum lists neither value.
+     gone, when the operations that reference it are not the ones listed, or when the enum lists neither value.
      `generate-sdk` then lists only the widened signature; accept it and continue as for **Accept**. It is a
      minor. Each entry names `removeInMajor`, and `tests/spec-retained-enums.test.ts` fails once `package.json`
      reaches that major.
@@ -500,9 +500,10 @@ still runs the script; `--ignore-scripts` skips it because the sync has just run
 only ever bumps a minor or a patch, so no test that depends on the major can change its result.
 
 **Releasing through a pull request.** When the version has to travel with a change (**Accept** and **Keep** under
-"When a signature stops the sync"), bump on the branch instead: `npm version <minor|patch> --no-git-tag-version`
-writes the version and runs the `version` script on the tree without touching git; commit it with the CHANGELOG
-entry. Once the pull request is merged, tag its squash commit the same day:
+"When a signature stops the sync"), bump on the branch instead: `npm version <major|minor|patch>
+--no-git-tag-version` writes the version and runs the `version` script on the tree without touching git; commit it
+with the CHANGELOG entry. If the script fails, run `git restore package.json` before running it again, or the second
+run bumps from the bumped version. Once the pull request is merged, tag its squash commit the same day:
 
 ```bash
 git tag -a vX.Y.Z <squash-commit> -m "X.Y.Z"
