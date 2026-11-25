@@ -1008,7 +1008,7 @@ async function main() {
       `src/types/generated/${spec}.ts, the "${spec}" key in scripts/api-surface.yaml and its ` +
       'entry in scripts/spec-registry.yaml, run the offline stages and then ' +
       'pnpm generate-routing-snapshot, and lower the spec-count floor in ' +
-      'tests/generate-api-servers.test.ts (see "The api-surface manifest" in CLAUDE.md)';
+      'tests/generate-api-servers.test.ts (see "The api-surface manifest" in .claude/rules/codegen.md)';
     for (const op of report.missingOperations) {
       console.error(`  ${op.spec}: ${op.method} ${op.path}`);
       console.error(`    bound method name: ${op.name}`);

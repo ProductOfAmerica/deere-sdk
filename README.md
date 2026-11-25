@@ -971,7 +971,7 @@ git push --follow-tags
 
 After writing the new version into `package.json`, `npm version` runs the `version` script (`pnpm typecheck:test && pnpm test`, the checks the release workflow runs) and commits and tags only if it passes. A failure leaves `package.json` bumped and uncommitted, with no commit and no tag. To recover, run `git restore package.json`, commit the fix, and run `npm version` again; until `package.json` is restored, `npm version` refuses to run. The daily sync bumps the version with `--ignore-scripts`, because it has just run the same checks and never bumps a major.
 
-**Releasing through a pull request**, when the version has to travel with a change (see "When a signature stops the sync" in CLAUDE.md): bump on the branch with `npm version minor --no-git-tag-version` (or `patch`, or `major`), which runs the same checks without touching git, and commit it with the CHANGELOG entry. If the checks fail, run `git restore package.json` before running it again, or it bumps a second time. After the merge, tag the squash commit the same day:
+**Releasing through a pull request**, when the version has to travel with a change (see "When a signature stops the sync" in .claude/rules/codegen.md): bump on the branch with `npm version minor --no-git-tag-version` (or `patch`, or `major`), which runs the same checks without touching git, and commit it with the CHANGELOG entry. If the checks fail, run `git restore package.json` before running it again, or it bumps a second time. After the merge, tag the squash commit the same day:
 
 ```bash
 git tag -a vX.Y.Z <squash-commit> -m "X.Y.Z"
