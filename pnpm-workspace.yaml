@@ -1,6 +1,8 @@
-onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - esbuild
+# allowBuilds, not onlyBuiltDependencies: pnpm 11 and 12 ignore the old key and stop
+# on ERR_PNPM_IGNORED_BUILDS; pnpm 10.26+ (CI) reads this one too.
+allowBuilds:
+  '@biomejs/biome': true
+  esbuild: true
 
 # One day, in minutes: the default in pnpm 11 and 12, which Dependabot runs. Without
 # it a local pnpm 10 relock can lock a release Dependabot's pnpm rejects. For a
